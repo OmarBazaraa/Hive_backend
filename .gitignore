@@ -1,0 +1,13 @@
+# JetBrains files
+.idea/*
+*.iml
+out/*
+
+# Visual Studio Code files
+.vscode/*
+
+# Mac files
+.DS_Store
+
+# Other files
+*.exe
