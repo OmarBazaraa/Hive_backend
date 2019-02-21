@@ -37,12 +37,12 @@ public class Agent {
     // Public Member Functions
     //
 
-    public Agent(int id) {
+    public Agent(int id, int row, int col) {
         this.mId = id;
+        this.mRow = row;
+        this.mCol = col;
 
         this.mPriority = 0;
-        this.mRow = -1;
-        this.mCol = -1;
 
         this.mCapacity = Constants.AGENT_DEFAULT_CAPACITY;
         this.mChargeMaxCap = Constants.AGENT_DEFAULT_CHARGE_CAPACITY;

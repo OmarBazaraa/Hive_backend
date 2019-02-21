@@ -8,6 +8,7 @@ public class Rack {
     // Member Variables
     //
 
+    private int mId;
     private int mRow, mCol;
     private int mItemId;
     private int mItemsCount;
@@ -17,11 +18,12 @@ public class Rack {
     // Public Member Functions
     //
 
-    public Rack(int r, int c) {
-        this.mRow = r;
-        this.mCol = c;
-        this.mItemsCount = 0;
-        this.mItemId = -1;
+    public Rack(int id, int row, int col, int itemId, int itemCount) {
+        this.mId = id;
+        this.mRow = row;
+        this.mCol = col;
+        this.mItemId = itemId;
+        this.mItemsCount = itemCount;
     }
 
     // ===============================================================================================
