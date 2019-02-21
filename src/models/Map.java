@@ -1,8 +1,6 @@
 package models;
 
-import utils.Constants;
 
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.Scanner;
 
@@ -11,33 +9,43 @@ public class Map {
     //
     // Constants & Enums
     //
+
+    // Cell types
     public enum CellType {
         EMPTY,
         EMPTY_CORNER,
         EMPTY_TUNNEL,
         OBSTACLE,
-        ITEM,
+        RACK,
         AGENT,
         UNKNOWN
     }
+
+    // Cell shapes
+    public static final String CELL_SHAPE_EMPTY = ". ";
+    public static final String CELL_SHAPE_OBSTACLE = "#";
+    public static final String CELL_SHAPE_RACK = "$";
+    public static final String CELL_SHAPE_AGENT = "@Xx";
 
     // ===============================================================================================
     //
     // Member Variables
     //
 
-    private int rows;
-    private int cols;
-    private int agentsCount;
-    private int itemsCount;
-    private CellType[][] grid;
+    private int mRows;
+    private int mCols;
+    private int mAgentsCount;
+    private int mBoundedAgentsCount;
+    private int mRacksCount;
+    private CellType[][] mGrid;
+    private Agent[][] mAgents;
 
     // ===============================================================================================
     //
     // Static Functions
     //
 
-    public static Map createMapFromFile(String fileName) throws FileNotFoundException {
+    public static Map createMapFromFile(String fileName) throws Exception {
         Map ret = new Map();
         ret.readFromFile(fileName);
         return ret;
@@ -49,55 +57,63 @@ public class Map {
     //
 
     public Map() {
-        this.rows = 0;
-        this.cols = 0;
-        this.agentsCount = 0;
-        this.itemsCount = 0;
+        this.mRows = 0;
+        this.mCols = 0;
+        this.mAgentsCount = 0;
+        this.mRacksCount = 0;
     }
 
     public Map(int rows, int cols) {
-        this.rows = rows;
-        this.cols = cols;
-        this.agentsCount = 0;
-        this.itemsCount = 0;
+        this.mRows = rows;
+        this.mCols = cols;
+        this.mAgentsCount = 0;
+        this.mRacksCount = 0;
     }
 
-    public void readFromFile(String fileName) throws FileNotFoundException {
+    public void readFromFile(String fileName) throws Exception {
         // Open the map file
         Scanner reader = new Scanner(new FileReader(fileName));
 
         // Read map dimensions
-        rows = reader.nextInt();
-        cols = reader.nextInt();
+        mRows = reader.nextInt();
+        mCols = reader.nextInt();
 
         // Allocate map
-        grid = new CellType[rows + 2][cols + 2];
+        mGrid = new CellType[mRows + 2][mCols + 2];
 
-        // Read the grid
-        for (int i = 1; i <= rows; ++i) {
+        // Read the mGrid
+        for (int i = 1; i <= mRows; ++i) {
+            if (!reader.hasNext()) {
+                throw new Exception("Map grid height mis-match");
+            }
+
             String row = reader.next();
 
-            for (int j = 1; j <= cols; ++j) {
-                grid[i][j] = toGridCell(row.charAt(j));
+            if (row.length() != mCols) {
+                throw new Exception("Map grid width mis-match");
+            }
 
-                switch (grid[i][j]) {
-                    case ITEM:
-                        itemsCount++;
+            for (int j = 1; j <= mCols; ++j) {
+                mGrid[i][j] = toGridCellType(row.charAt(j));
+
+                switch (mGrid[i][j]) {
+                    case RACK:
+                        mRacksCount++;
                         break;
                     case AGENT:
-                        agentsCount++;
+                        mAgentsCount++;
                         break;
                 }
             }
         }
 
         // Read map items specs
-        for (int i = 0; i < itemsCount; ++i) {
+        for (int i = 0; i < mRacksCount; ++i) {
             // TODO
         }
 
         // Read map agents specs
-        for (int i = 0; i < agentsCount; ++i) {
+        for (int i = 0; i < mAgentsCount; ++i) {
             // TODO
         }
 
@@ -105,17 +121,47 @@ public class Map {
         reader.close();
     }
 
+    public void bindAgent(Agent agent) {
+
+    }
+
+    public void bindRack(Rack rack) {
+
+    }
+
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+
+        for (int i = 1; i <= mRows; ++i) {
+            for (int j = 1; j <= mCols; ++j) {
+                builder.append(toGridCellShape(mGrid[i][j]));
+            }
+
+            builder.append('\n');
+        }
+
+        return builder.toString();
+    }
+
     // ===============================================================================================
     //
     // Public Getters & Setters
     //
 
-    public int getItemsCount() {
-        return this.itemsCount;
+    public CellType get(int row, int col) {
+        if (1 <= row && row <= mRows && 1 <= col && col <= mCols) {
+            return mGrid[row][col];
+        }
+
+        return CellType.UNKNOWN;
+    }
+
+    public int getRacksCount() {
+        return this.mRacksCount;
     }
 
     public int getAgentsCount() {
-        return this.agentsCount;
+        return this.mAgentsCount;
     }
 
     // ===============================================================================================
@@ -123,23 +169,37 @@ public class Map {
     // Helper Private Member Functions
     //
 
-    private CellType toGridCell(char cell) {
-        if (Constants.STR_CELL_EMPTY.indexOf(cell) != -1) {
+    private CellType toGridCellType(char cell) {
+        if (CELL_SHAPE_EMPTY.indexOf(cell) != -1) {
             return CellType.EMPTY;
         }
-
-        if (Constants.STR_CELL_OBSTACLE.indexOf(cell) != -1) {
+        if (CELL_SHAPE_OBSTACLE.indexOf(cell) != -1) {
             return CellType.OBSTACLE;
         }
-
-        if (Constants.STR_CELL_ITEM.indexOf(cell) != -1) {
-            return CellType.ITEM;
+        if (CELL_SHAPE_RACK.indexOf(cell) != -1) {
+            return CellType.RACK;
         }
-
-        if (Constants.STR_CELL_AGENT.indexOf(cell) != -1) {
+        if (CELL_SHAPE_AGENT.indexOf(cell) != -1) {
             return CellType.AGENT;
         }
 
         return CellType.UNKNOWN;
+    }
+
+    private char toGridCellShape(CellType type) {
+        switch (type) {
+            case EMPTY:
+            case EMPTY_CORNER:
+            case EMPTY_TUNNEL:
+                return CELL_SHAPE_EMPTY.charAt(0);
+            case OBSTACLE:
+                return CELL_SHAPE_OBSTACLE.charAt(0);
+            case RACK:
+                return CELL_SHAPE_RACK.charAt(0);
+            case AGENT:
+                return CELL_SHAPE_AGENT.charAt(0);
+            default:
+                return '?';
+        }
     }
 }
