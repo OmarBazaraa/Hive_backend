@@ -3,6 +3,8 @@ package models;
 import utils.Constants;
 import utils.Position;
 
+import java.util.Scanner;
+
 public class Agent {
 
     //
@@ -34,8 +36,23 @@ public class Agent {
 
     // ===============================================================================================
     //
+    // Static Functions
+    //
+
+    public static Agent create(Scanner reader) {
+        Agent ret = new Agent();
+        ret.setup(reader);
+        return ret;
+    }
+
+    // ===============================================================================================
+    //
     // Public Member Functions
     //
+
+    public Agent() {
+
+    }
 
     public Agent(int id, int row, int col) {
         this.mId = id;
@@ -49,6 +66,12 @@ public class Agent {
         this.mChargeLevel = 0;
 
         this.mStatus = Status.OUT_OF_SERVICE;
+    }
+
+    public void setup(Scanner reader) {
+        mId = reader.nextInt();
+        mRow = reader.nextInt();
+        mCol = reader.nextInt();
     }
 
     // ===============================================================================================

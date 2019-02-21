@@ -2,6 +2,8 @@ package models;
 
 import utils.Position;
 
+import java.util.Scanner;
+
 
 public class Grid {
 
@@ -53,9 +55,9 @@ public class Grid {
     // Static Functions
     //
 
-    public static Grid createGrid(char[][] grid) {
+    public static Grid create(Scanner reader) throws Exception {
         Grid ret = new Grid();
-        ret.setup(grid);
+        ret.setup(reader);
         return ret;
     }
 
@@ -71,30 +73,69 @@ public class Grid {
         this.mRacksCount = 0;
     }
 
-    public Grid(int rows, int cols) {
-        this.mRows = rows;
-        this.mCols = cols;
-        this.mAgentsCount = 0;
-        this.mRacksCount = 0;
+    public Grid(char[][] grid) throws Exception {
+        this.setup(grid);
     }
 
-    public void setup(char[][] grid) {
-        // Read map dimensions
+    public void setup(char[][] grid) throws Exception {
+        // Get grid dimensions
         mRows = grid.length;
         mCols = grid[0].length;
 
-        // Allocate map
+        // Clear counts
+        mAgentsCount = 0;
+        mRacksCount = 0;
+
+        // Allocate grid
         mGrid = new Cell[mRows + 2][mCols + 2];
 
-        // Read the mGrid
+        // Read grid cells
         for (int i = 1; i <= mRows; ++i) {
             for (int j = 1; j <= mCols; ++j) {
                 mGrid[i][j] = toGridCell(grid[i - 1][j - 1]);
+
+                if (mGrid[i][j].type == CellType.UNKNOWN) {
+                    throw new Exception("Unknown grid cell type!");
+                }
             }
         }
     }
 
-    public boolean bindAgent(Agent agent) {
+    public void setup(Scanner reader) throws Exception {
+        // Read grid dimensions
+        mRows = reader.nextInt();
+        mCols = reader.nextInt();
+
+        // Clear counts
+        mAgentsCount = 0;
+        mRacksCount = 0;
+
+        // Allocate grid
+        mGrid = new Cell[mRows + 2][mCols + 2];
+
+        // Read grid cells
+        for (int i = 1; i <= mRows; ++i) {
+            if (!reader.hasNext()) {
+                throw new Exception("Grid dimensions mis-match!");
+            }
+
+            String row = reader.next();
+
+            if (row.length() != mCols) {
+                throw new Exception("Grid dimensions mis-match!");
+            }
+
+            for (int j = 1; j <= mCols; ++j) {
+                mGrid[i][j] = toGridCell(row.charAt(j));
+
+                if (mGrid[i][j].type == CellType.UNKNOWN) {
+                    throw new Exception("Unknown grid cell type!");
+                }
+            }
+        }
+    }
+
+    public boolean bind(Agent agent) {
         Position p = agent.getPosition();
 
         int r = p.r, c = p.c;
@@ -112,7 +153,7 @@ public class Grid {
         return true;
     }
 
-    public boolean bindRack(Rack rack) {
+    public boolean bind(Rack rack) {
         Position p = rack.getPosition();
 
         int r = p.r, c = p.c;

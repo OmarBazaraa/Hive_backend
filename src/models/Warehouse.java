@@ -30,26 +30,7 @@ public class Warehouse {
     }
 
     private void setupMap(Scanner reader) throws Exception {
-        int rows = reader.nextInt();
-        int cols = reader.nextInt();
-
-        char[][] grid = new char[rows][cols];
-
-        for (int i = 0; i < rows; ++i) {
-            if (!reader.hasNext()) {
-                throw new Exception("Grid dimensions mis-match!");
-            }
-
-            String row = reader.next();
-
-            if (row.length() != cols) {
-                throw new Exception("Grid dimensions mis-match!");
-            }
-
-            grid[i] = row.toCharArray();
-        }
-
-        map = Grid.createGrid(reader);
+        map = Grid.create(reader);
     }
 
     private void setupAgents(Scanner reader) throws Exception {
@@ -58,13 +39,9 @@ public class Warehouse {
         int cnt = reader.nextInt();
 
         while (cnt-- > 0) {
-            int id = reader.nextInt();
-            int r = reader.nextInt();
-            int c = reader.nextInt();
-
-            Agent agent = new Agent(id, r, c);
-            agents.put(id, agent);
-            map.bindAgent(agent);
+            Agent agent = Agent.create(reader);
+            agents.put(agent.getId(), agent);
+            map.bind(agent);
         }
     }
 
@@ -75,23 +52,20 @@ public class Warehouse {
         int cnt = reader.nextInt();
 
         while (cnt-- > 0) {
-            int id = reader.nextInt();
-            int r = reader.nextInt();
-            int c = reader.nextInt();
-            int itemId = reader.nextInt();
-            int itemCount = reader.nextInt();
+            Rack rack = Rack.create(reader);
+            racks.put(rack.getId(), rack);
+            map.bind(rack);
+            setupItem(rack.getItemId(), rack);
+        }
+    }
 
-            Rack rack = new Rack(id, r, c, itemId, itemCount);
-
-            racks.put(id, rack);
-
-            if (!items.containsKey(itemId)) {
-                items.put(itemId, new ArrayList<>());
-            }
-
+    private void setupItem(int itemId, Rack rack) {
+        if (items.containsKey(itemId)) {
             items.get(itemId).add(rack);
-
-            map.bindRack(rack);
+        } else {
+            List<Rack> list = new ArrayList<>();
+            list.add(rack);
+            items.put(itemId, list);
         }
     }
 }
