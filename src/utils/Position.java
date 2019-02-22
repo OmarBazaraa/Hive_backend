@@ -1,6 +1,6 @@
 package utils;
 
-public class Position implements Comparable<Integer> {
+public class Position implements Comparable<Position> {
 
     public int r, c;
 
@@ -19,7 +19,11 @@ public class Position implements Comparable<Integer> {
     }
 
     @Override
-    public int compareTo(Integer o) {
-        return 0;
+    public int compareTo(Position rhs) {
+        if (r == rhs.r) {
+            return c - rhs.c;
+        } else {
+            return r - rhs.r;
+        }
     }
 }
