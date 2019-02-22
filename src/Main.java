@@ -1,5 +1,4 @@
-import models.Instruction;
-import models.Order;
+import models.Task;
 import models.Warehouse;
 
 import java.io.FileReader;
@@ -39,15 +38,18 @@ public class Main {
 
         // Read orders
         reader = new Scanner(new FileReader(ordersFilename));
-        List<Instruction> orders = new ArrayList<>();
+        List<Task> orders = new ArrayList<>();
 
         while (reader.hasNext()) {
             int time = reader.nextInt();
             int agentId = reader.nextInt();
             int rackId = reader.nextInt();
 
-
+            warehouse.addTask(agentId, rackId);
         }
 
+        while (warehouse.isActive()) {
+            warehouse.run();
+        }
     }
 }

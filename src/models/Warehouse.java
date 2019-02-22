@@ -1,7 +1,7 @@
 package models;
 
 import algorithms.Planner;
-import utils.Pair;
+import utils.Position;
 
 import java.util.*;
 
@@ -12,11 +12,13 @@ public class Warehouse {
     //
 
     private Grid map;
+
     private Map<Integer, Agent> agents;
+
     private Map<Integer, Rack> racks;
     private Map<Integer, List<Rack>> items;
 
-    private Queue<Instruction> pendingOrders;
+    private Queue<Task> pendingOrders;
 
     private Planner planner;
 
@@ -45,15 +47,33 @@ public class Warehouse {
         setupAgents(reader);
         setupRacks(reader);
 
-        planner = new Planner(map, agents);
+        planner = new Planner(map);
     }
 
-    public void addOrder(int agentId, int rackId) {
+    public void run() {
+        planner.plan();
+        planner.step();
+    }
+
+    public void addTask(int agentId, int rackId) {
+        Task task = new Task();
+
+        task.agent = agents.get(agentId);
+        task.rack = racks.get(rackId);
+
+        planner.addTask(task);
+    }
+
+    public void addOrder(Order order) {
 
     }
 
-    public void addOrderBulk(List<Pair> orders) {
+    public void addOrderBulk(List<Position> orders) {
 
+    }
+
+    public boolean isActive() {
+        return planner.isActive();
     }
 
     public void print() {

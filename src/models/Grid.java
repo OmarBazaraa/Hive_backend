@@ -1,6 +1,7 @@
 package models;
 
-import utils.Pair;
+import utils.Constants.*;
+import utils.Position;
 
 import java.util.Scanner;
 
@@ -10,15 +11,6 @@ public class Grid {
     //
     // Constants & Enums & Classes
     //
-
-    // Cell types
-    public enum CellType {
-        EMPTY,
-        OBSTACLE,
-        RACK,
-        AGENT,
-        UNKNOWN
-    }
 
     // Grid cell class
     public static class Cell {
@@ -136,7 +128,7 @@ public class Grid {
     }
 
     public boolean bind(Agent agent) {
-        Pair p = agent.getPosition();
+        Position p = agent.getPosition();
 
         int r = p.r, c = p.c;
 
@@ -154,7 +146,7 @@ public class Grid {
     }
 
     public boolean bind(Rack rack) {
-        Pair p = rack.getPosition();
+        Position p = rack.getPosition();
 
         int r = p.r, c = p.c;
 
@@ -194,6 +186,14 @@ public class Grid {
         return valid(row, col) ? mGrid[row][col] : null;
     }
 
+    public int getRows() {
+        return this.mRows;
+    }
+
+    public int getCols() {
+        return this.mCols;
+    }
+
     public int getRacksCount() {
         return this.mRacksCount;
     }
@@ -207,7 +207,7 @@ public class Grid {
     // Helper Private Member Functions
     //
 
-    private boolean valid(int r, int c) {
+    public boolean valid(int r, int c) {
         return 1 <= r && r <= mRows && 1 <= c && c <= mCols;
     }
 

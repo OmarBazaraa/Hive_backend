@@ -1,6 +1,5 @@
 package models;
 
-import utils.Constants;
 import utils.Constants.*;
 
 import java.util.List;
@@ -14,5 +13,5 @@ public class Order {
 
     OrderType type;
 
-    List<Instruction> subInstructions;
+    List<Task> subTasks;
 }

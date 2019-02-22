@@ -1,38 +1,27 @@
 package models;
 
 import utils.Constants;
-import utils.Pair;
+import utils.Constants.*;
+import utils.Position;
 
 import java.util.Scanner;
 
 public class Agent {
 
     //
-    // Constants & Enums
-    //
-
-    // Agent status
-    enum Status {
-        READY,
-        ACTIVE,
-        CHARGING,
-        OUT_OF_SERVICE
-    }
-
-    // ===============================================================================================
-    //
     // Member Variables
     //
 
-    private int mId;
-    private int mPriority;
-    private int mRow, mCol;
+    private int id;
+    private int priority;
+    private int row, col;
+    private AgentStatus status;
+    private Task task;
 
-    private int mCapacity;
-    private int mChargeMaxCap;
-    private int mChargeLevel;
-
-    private Status mStatus;
+    // Skip for now
+    private int capacity;
+    private int chargeMaxCap;
+    private int chargeLevel;
 
     // ===============================================================================================
     //
@@ -55,23 +44,31 @@ public class Agent {
     }
 
     public Agent(int id, int row, int col) {
-        this.mId = id;
-        this.mRow = row;
-        this.mCol = col;
+        this.id = id;
+        this.row = row;
+        this.col = col;
+        this.priority = 0;
+        this.status = AgentStatus.READY;
 
-        this.mPriority = 0;
-
-        this.mCapacity = Constants.AGENT_DEFAULT_CAPACITY;
-        this.mChargeMaxCap = Constants.AGENT_DEFAULT_CHARGE_CAPACITY;
-        this.mChargeLevel = 0;
-
-        this.mStatus = Status.OUT_OF_SERVICE;
+        // Skip for now
+        this.capacity = Constants.AGENT_DEFAULT_CAPACITY;
+        this.chargeMaxCap = Constants.AGENT_DEFAULT_CHARGE_CAPACITY;
+        this.chargeLevel = 0;
     }
 
     public void setup(Scanner reader) {
-        mId = reader.nextInt();
-        mRow = reader.nextInt();
-        mCol = reader.nextInt();
+        id = reader.nextInt();
+        row = reader.nextInt();
+        col = reader.nextInt();
+    }
+
+    public void assignTask(Task task) {
+        this.task = task;
+        this.status = AgentStatus.ASSIGNED_TASK;
+    }
+
+    public void move(Direction dir) {
+
     }
 
     // ===============================================================================================
@@ -80,26 +77,38 @@ public class Agent {
     //
 
     public int getId() {
-        return this.mId;
+        return this.id;
+    }
+
+    public Position getPosition() {
+        return new Position(this.row, this.col);
+    }
+
+    public Position getTargetPosition() {
+        return (task != null ? task.rack.getPosition() : null);
     }
 
     public int getPriority() {
-        return this.mPriority;
+        return this.priority;
     }
 
-    public Pair getPosition() {
-        return new Pair(this.mRow, this.mCol);
+    public void setPriority(int priority) {
+        this.priority = priority;
     }
 
-    public int getCapacity() {
-        return this.mCapacity;
+    public AgentStatus getStatus() {
+        return this.status;
     }
 
-    public int getChargeLevel() {
-        return this.mChargeLevel;
+    public void setStatus(AgentStatus status) {
+        this.status = status;
     }
 
-    public Status getStatus() {
-        return this.mStatus;
+    public Task getTask() {
+        return this.task;
+    }
+
+    public void setTask(Task task) {
+        this.task = task;
     }
 }
