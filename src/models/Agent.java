@@ -1,7 +1,7 @@
 package models;
 
 import utils.Constants;
-import utils.Position;
+import utils.Pair;
 
 import java.util.Scanner;
 
@@ -87,8 +87,8 @@ public class Agent {
         return this.mPriority;
     }
 
-    public Position getPosition() {
-        return new Position(this.mRow, this.mCol);
+    public Pair getPosition() {
+        return new Pair(this.mRow, this.mCol);
     }
 
     public int getCapacity() {

@@ -1,6 +1,6 @@
 package models;
 
-import utils.Position;
+import utils.Pair;
 
 import java.util.Scanner;
 
@@ -60,8 +60,8 @@ public class Rack {
         return this.mId;
     }
 
-    public Position getPosition() {
-        return new Position(this.mRow, this.mCol);
+    public Pair getPosition() {
+        return new Pair(this.mRow, this.mCol);
     }
 
     public int getItemId() {

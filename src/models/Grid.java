@@ -1,6 +1,6 @@
 package models;
 
-import utils.Position;
+import utils.Pair;
 
 import java.util.Scanner;
 
@@ -126,7 +126,7 @@ public class Grid {
             }
 
             for (int j = 1; j <= mCols; ++j) {
-                mGrid[i][j] = toGridCell(row.charAt(j));
+                mGrid[i][j] = toGridCell(row.charAt(j - 1));
 
                 if (mGrid[i][j].type == CellType.UNKNOWN) {
                     throw new Exception("Unknown grid cell type!");
@@ -136,7 +136,7 @@ public class Grid {
     }
 
     public boolean bind(Agent agent) {
-        Position p = agent.getPosition();
+        Pair p = agent.getPosition();
 
         int r = p.r, c = p.c;
 
@@ -154,7 +154,7 @@ public class Grid {
     }
 
     public boolean bind(Rack rack) {
-        Position p = rack.getPosition();
+        Pair p = rack.getPosition();
 
         int r = p.r, c = p.c;
 

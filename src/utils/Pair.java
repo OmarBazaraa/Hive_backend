@@ -1,10 +1,10 @@
 package utils;
 
-public class Position {
+public class Pair {
 
     public int r, c;
 
-    public Position(int r, int c) {
+    public Pair(int r, int c) {
         this.r = r;
         this.c = c;
     }

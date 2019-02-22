@@ -1,39 +1,75 @@
 package models;
 
-import java.io.FileReader;
+import algorithms.Planner;
+import utils.Pair;
+
 import java.util.*;
-import java.util.Map;
 
 public class Warehouse {
+
+    //
+    // Member Variables
+    //
 
     private Grid map;
     private Map<Integer, Agent> agents;
     private Map<Integer, Rack> racks;
     private Map<Integer, List<Rack>> items;
 
+    private Queue<Instruction> pendingOrders;
+
+    private Planner planner;
+
+    // ===============================================================================================
+    //
+    // Static Functions
+    //
+
+    public static Warehouse create(Scanner reader) throws Exception {
+        Warehouse ret = new Warehouse();
+        ret.setup(reader);
+        return ret;
+    }
+
+    // ===============================================================================================
+    //
+    // Public Member Functions
+    //
 
     public Warehouse() {
 
     }
 
-    public void setup(String fileName) throws Exception {
-        // Open the map file
-        Scanner reader = new Scanner(new FileReader(fileName));
-
-        // Setup the map, agents, racks, and items
+    public void setup(Scanner reader) throws Exception {
         setupMap(reader);
         setupAgents(reader);
-        setupRack(reader);
+        setupRacks(reader);
 
-        // Close the reader object
-        reader.close();
+        planner = new Planner(map, agents);
     }
+
+    public void addOrder(int agentId, int rackId) {
+
+    }
+
+    public void addOrderBulk(List<Pair> orders) {
+
+    }
+
+    public void print() {
+        System.out.println(map);
+    }
+
+    // ===============================================================================================
+    //
+    // Helper Private Member Functions
+    //
 
     private void setupMap(Scanner reader) throws Exception {
         map = Grid.create(reader);
     }
 
-    private void setupAgents(Scanner reader) throws Exception {
+    private void setupAgents(Scanner reader) {
         agents = new HashMap<>();
 
         int cnt = reader.nextInt();
@@ -45,7 +81,7 @@ public class Warehouse {
         }
     }
 
-    private void setupRack(Scanner reader) throws Exception {
+    private void setupRacks(Scanner reader) {
         racks = new HashMap<>();
         items = new HashMap<>();
 
