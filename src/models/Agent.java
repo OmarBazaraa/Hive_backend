@@ -6,7 +6,7 @@ import utils.Position;
 
 import java.util.Scanner;
 
-public class Agent {
+public class Agent implements Comparable<Agent> {
 
     //
     // Member Variables
@@ -17,6 +17,7 @@ public class Agent {
     private int row, col;
     private AgentStatus status;
     private Task task;
+    private Path path;
 
     // Skip for now
     private int capacity;
@@ -47,7 +48,7 @@ public class Agent {
         this.id = id;
         this.row = row;
         this.col = col;
-        this.priority = 0;
+        this.priority = id; // TODO to be set dynamically
         this.status = AgentStatus.READY;
 
         // Skip for now
@@ -65,6 +66,10 @@ public class Agent {
     public void assignTask(Task task) {
         this.task = task;
         this.status = AgentStatus.ASSIGNED_TASK;
+    }
+
+    public void assignPath(Path path) {
+        this.path = path;
     }
 
     public void move(Direction dir) {
@@ -110,5 +115,15 @@ public class Agent {
 
     public void setTask(Task task) {
         this.task = task;
+    }
+
+
+    @Override
+    public int compareTo(Agent rhs) {
+        int cmp = (priority - rhs.priority);
+        if (cmp == 0) {
+            return id - rhs.id;
+        }
+        return cmp;
     }
 }

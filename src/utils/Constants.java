@@ -18,7 +18,8 @@ public class Constants {
         UP,
         RIGHT,
         DOWN,
-        LEFT
+        LEFT,
+        STILL
     }
 
     /**

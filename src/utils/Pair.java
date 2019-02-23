@@ -21,6 +21,14 @@ public class Pair<T extends Comparable<T>, U extends Comparable<U>> implements C
     }
 
     @Override
+    public int hashCode() {
+        int hash = 17;
+        hash = hash * 31 + x.hashCode();
+        hash = hash * 31 + y.hashCode();
+        return hash;
+    }
+
+    @Override
     public int compareTo(Pair<T, U> rhs) {
         int cmp = x.compareTo(rhs.x);
         if (cmp == 0) {

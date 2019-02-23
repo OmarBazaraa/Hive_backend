@@ -1,6 +1,7 @@
 package models;
 
 import utils.Constants.*;
+import utils.Pair;
 import utils.Position;
 
 import java.util.Scanner;
@@ -132,7 +133,7 @@ public class Grid {
 
         int r = p.r, c = p.c;
 
-        if (!valid(r, c) || mGrid[r][c].type != CellType.AGENT) {
+        if (!isValid(r, c) || mGrid[r][c].type != CellType.AGENT) {
             return false;
         }
 
@@ -150,7 +151,7 @@ public class Grid {
 
         int r = p.r, c = p.c;
 
-        if (!valid(r, c) || mGrid[r][c].type != CellType.RACK) {
+        if (!isValid(r, c) || mGrid[r][c].type != CellType.RACK) {
             return false;
         }
 
@@ -183,7 +184,11 @@ public class Grid {
     //
 
     public Cell get(int row, int col) {
-        return valid(row, col) ? mGrid[row][col] : null;
+        return isValid(row, col) ? mGrid[row][col] : null;
+    }
+
+    public Pair<Integer, Integer> getDimensions() {
+        return new Pair<>(mRows, mCols);
     }
 
     public int getRows() {
@@ -192,6 +197,20 @@ public class Grid {
 
     public int getCols() {
         return this.mCols;
+    }
+
+    public int getCellId(int row, int col) {
+        return isValid(row, col) ? (row - 1) * mCols + col - 1 : -1;
+    }
+
+    public Position getCoord(int id) {
+        int row = id / mCols + 1;
+        int col = id % mCols + 1;
+        return new Position(row, col);
+    }
+
+    public int getCellsCount() {
+        return mRows * mCols;
     }
 
     public int getRacksCount() {
@@ -204,10 +223,49 @@ public class Grid {
 
     // ===============================================================================================
     //
-    // Helper Private Member Functions
+    // Helper Member Functions
     //
 
-    public boolean valid(int r, int c) {
+    public int nextId(int id, Direction dir) {
+        switch (dir) {
+            case UP:
+                return id - mCols;
+            case RIGHT:
+                return id + 1;
+            case DOWN:
+                return id + mCols;
+            case LEFT:
+                return id - 1;
+        }
+
+        return id;
+    }
+
+    public int previousId(int id, Direction dir) {
+        switch (dir) {
+            case UP:
+                return id + mCols;
+            case RIGHT:
+                return id - 1;
+            case DOWN:
+                return id - mCols;
+            case LEFT:
+                return id + 1;
+        }
+
+        return id;
+    }
+
+    public boolean isFree(int id) {
+        Position pos = getCoord(id);
+        return isValid(pos.r, pos.c) && mGrid[pos.r][pos.c].type == CellType.EMPTY;
+    }
+
+    public boolean isValid(int id) {
+        return 0 <= id && id < mRows * mCols;
+    }
+
+    public boolean isValid(int r, int c) {
         return 1 <= r && r <= mRows && 1 <= c && c <= mCols;
     }
 
