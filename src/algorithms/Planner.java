@@ -2,11 +2,10 @@ package algorithms;
 
 import models.Agent;
 import models.Grid;
+import models.Path;
 import models.Task;
 import utils.Constants.*;
 import utils.Pair;
-import utils.Position;
-import utils.Utility;
 
 import java.util.*;
 
@@ -17,7 +16,7 @@ public class Planner {
     private Queue<Agent> activeAgents;
     private Queue<Agent> solvedAgents;
 
-    private Map<Pair<Integer, Integer>, Map<Integer, Queue<Direction>>> alternatePaths;
+    private Map<Pair<Integer, Integer>, Map<Integer, List<Direction>>> alternatePaths;
 
     public Planner(Grid map) {
         this.map = map;
@@ -40,7 +39,16 @@ public class Planner {
         for (int i = 0; i < size; ++i) {
             Agent agent = pendingAgents.poll();
 
+            List<Direction> path = findPath(agent);
 
+            if (path != null) {
+                Path p = new Path();
+                p.mainPath = path;
+                agent.assignPath(p);
+                activeAgents.add(agent);
+            } else {
+                pendingAgents.add(agent);
+            }
         }
     }
 
@@ -53,18 +61,20 @@ public class Planner {
     }
 
 
-    private Queue<Direction> constructPath(int src, int dst, Direction[] par) {
-        Queue<Direction> ret = new LinkedList<>();
+    private List<Direction> constructPath(int src, int dst, Direction[] par) {
+        List<Direction> ret = new ArrayList<>();
 
         while (dst != src) {
             ret.add(par[dst]);
             dst = map.previousId(dst, par[dst]);
         }
 
+        Collections.reverse(ret);
+
         return ret;
     }
 
-    private Queue<Direction> computeAlternatePath(int src, int dst, int skip) {
+    private List<Direction> computeAlternatePath(int src, int dst, int skip) {
         Queue<Integer> q = new LinkedList<>();
 
         int size = map.getCellsCount();
@@ -81,7 +91,11 @@ public class Planner {
             for (Direction dir : Direction.values()) {
                 int nxt = map.nextId(cur, dir);
 
-                if (nxt == skip || !map.isFree(nxt)) {
+                if (!map.isFree(nxt)) {
+                    continue;
+                }
+
+                if (vis[nxt] || nxt == skip) {
                     continue;
                 }
 
@@ -102,7 +116,7 @@ public class Planner {
         return constructPath(src, dst, par);
     }
 
-    private Queue<Direction> getAlternatePath(int src, int dst, int skip) {
+    private List<Direction> getAlternatePath(int src, int dst, int skip) {
         if (src > dst) {
             int t = dst;
             dst = src;
@@ -111,7 +125,7 @@ public class Planner {
 
         Pair<Integer, Integer> pair = new Pair<>(src, dst);
 
-        Map<Integer, Queue<Direction>> paths = alternatePaths.get(pair);
+        Map<Integer, List<Direction>> paths = alternatePaths.get(pair);
 
         if (paths == null) {
             paths = new HashMap<>();
@@ -125,40 +139,56 @@ public class Planner {
         return paths.get(skip);
     }
 
-    private void findPath(Agent agent) {
-        Position src = agent.getPosition();
-        Position dst = agent.getTargetPosition();
+    private List<Direction> findPath(Agent agent) {
+        int src = map.getCellId(agent.getPosition());
+        int dst = map.getCellId(agent.getTargetPosition());
 
-        Queue<Position> q = new LinkedList<>();
+        int size = map.getCellsCount();
 
-        q.add(src);
+        boolean vis[] = new boolean[size];
+        Direction par[] = new Direction[size];
 
-        int rows = map.getRows();
-        int cols = map.getCols();
+        Queue<Pair<Integer, Direction>> q = new LinkedList<>();
+        q.add(new Pair<>(src, Direction.STILL));
+        vis[src] = true;
 
-        boolean vis[][] = new boolean[rows + 2][cols + 2];
-
-        vis[src.r][src.c] = true;
 
         while (!q.isEmpty()) {
-            Position cur = q.poll();
+            Pair<Integer, Direction> p = q.poll();
+            Direction prvDir = p.y;
+            int cur = p.x;
+            int prv = map.previousId(cur, prvDir);
 
-            if (cur.equals(dst)) {
-                // found the path
-            }
 
             for (Direction dir : Direction.values()) {
-                Position nxt = Utility.nextPosition(cur, dir);
+                int nxt = map.nextId(cur, dir);
 
-                if (map.isValid(nxt.r, nxt.c)) {
-                    Grid.Cell cell = map.get(nxt.r, nxt.c);
-
-                    if (cell.type == CellType.EMPTY && !vis[nxt.r][nxt.c]) {
-                        vis[nxt.r][nxt.c] = true;
-                        q.add(nxt);
-                    }
+                if (nxt == dst) {
+                    vis[nxt] = true;
+                    par[nxt] = dir;
+                    return constructPath(src, cur, par);
                 }
+
+                if (!map.isFree(nxt)) {
+                    continue;
+                }
+
+                if (vis[nxt]) {
+                    continue;
+                }
+
+                List<Direction> alterPath = getAlternatePath(prv, nxt, cur);
+
+                if (alterPath == null) {
+                    continue;
+                }
+
+                vis[nxt] = true;
+                par[nxt] = dir;
+                q.add(new Pair<>(nxt, dir));
             }
         }
+
+        return null;
     }
 }

@@ -199,6 +199,10 @@ public class Grid {
         return this.mCols;
     }
 
+    public int getCellId(Position pos) {
+        return getCellId(pos.r, pos.c);
+    }
+
     public int getCellId(int row, int col) {
         return isValid(row, col) ? (row - 1) * mCols + col - 1 : -1;
     }

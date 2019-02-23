@@ -8,12 +8,16 @@ import java.util.Queue;
 
 public class Path {
 
-    int curIdx;
-    Position pos;
-    Queue<Direction> mainPath;
-    List<Queue<Direction>> alternatePaths;
+    public int curIdx;
+    public Position pos;
+    public List<Direction> mainPath;
+    public List<List<Direction>> alternatePaths;
 
-    public Path(Queue<Direction> mainPath, List<Queue<Direction>> alternatePaths) {
+    public Path() {
+
+    }
+
+    public Path(List<Direction> mainPath, List<List<Direction>> alternatePaths) {
         this.mainPath = mainPath;
         this.alternatePaths = alternatePaths;
     }
