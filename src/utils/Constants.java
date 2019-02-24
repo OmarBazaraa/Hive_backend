@@ -31,6 +31,7 @@ public class Constants {
         GATE,
         RACK,
         AGENT,
+        CHARGE_SPOT,
         UNKNOWN
     }
 
