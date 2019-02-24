@@ -1,4 +1,4 @@
-package models;
+package models.components;
 
 import utils.Constants.*;
 

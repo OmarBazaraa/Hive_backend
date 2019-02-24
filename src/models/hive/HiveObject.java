@@ -1,8 +1,12 @@
-package models;
+package models.hive;
 
 import utils.Position;
 
 
+/**
+ * This {@code HiveObject} class is the base class of all the basic terminal Hive System's components
+ * such as {@code Agent}, {@code Rack}, {@code Gate}, {@code ChargingSpot}, ..etc.
+ */
 public class HiveObject {
 
     //

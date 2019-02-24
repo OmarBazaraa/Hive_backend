@@ -1,4 +1,4 @@
-import models.Task;
+import models.components.Task;
 import models.Warehouse;
 
 import java.io.FileReader;
@@ -15,7 +15,7 @@ public class Main {
         System.out.println("+---------------------+");
         System.out.println();
 
-        // Get warehouse config and orders filename from arguments
+        // Get warehouse config and components filename from arguments
         String configFilename = args[0];
         String ordersFilename = args[1];
 
@@ -34,7 +34,7 @@ public class Main {
         reader.close();
         warehouse.print();
 
-        // Read orders
+        // Read components
         reader = new Scanner(new FileReader(ordersFilename));
         List<Task> orders = new ArrayList<>();
 

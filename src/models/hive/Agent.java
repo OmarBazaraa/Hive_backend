@@ -1,13 +1,13 @@
-package models;
+package models.hive;
 
+import models.components.Task;
 import utils.Constants.*;
-import utils.Position;
 
 
 /**
  * This {@code Agent} class is a model for robot agent in our Hive System.
  */
-public class Agent extends HiveObject implements Comparable<Agent> {
+public class Agent extends SrcHiveObject implements Comparable<Agent> {
 
     //
     // Member Variables
@@ -54,15 +54,6 @@ public class Agent extends HiveObject implements Comparable<Agent> {
         this.priority = id; // TODO to be set dynamically
     }
 
-    // TODO
-    public void move(Direction dir) {
-
-    }
-    // TODO
-    public Position getTargetPosition() {
-        return (task != null ? task.rack.getPosition() : null);
-    }
-
     /**
      * Returns the priority of this agent.
      *
@@ -103,7 +94,7 @@ public class Agent extends HiveObject implements Comparable<Agent> {
      * Returns the assigned task of this agent.
      *
      * @return a {@code Task} object representing the assigned task of this agent;
-     *         {@code null} if no current assigned task.
+     * {@code null} if no current assigned task.
      */
     public Task getTask() {
         return this.task;
@@ -125,7 +116,7 @@ public class Agent extends HiveObject implements Comparable<Agent> {
      * @param rhs the reference object with which to compare.
      *
      * @return a negative integer, zero, or a positive integer as this object
-     *         is less than, equal to, or greater than the specified object.
+     * is less than, equal to, or greater than the specified object.
      */
     @Override
     public int compareTo(Agent rhs) {

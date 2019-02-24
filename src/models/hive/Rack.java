@@ -1,10 +1,10 @@
-package models;
+package models.hive;
 
 
 /**
  * This {@code Rack} class is a model for rack of items in our Hive System.
  */
-public class Rack extends HiveObject {
+public class Rack extends DstHiveObject {
 
     //
     // Member Variables

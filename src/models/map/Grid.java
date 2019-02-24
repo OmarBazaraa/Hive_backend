@@ -1,4 +1,4 @@
-package models;
+package models.map;
 
 import utils.Constants;
 import utils.Constants.*;

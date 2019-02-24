@@ -1,4 +1,7 @@
-package models;
+package models.components;
+
+import models.hive.Agent;
+import models.hive.Rack;
 
 public class Task {
 

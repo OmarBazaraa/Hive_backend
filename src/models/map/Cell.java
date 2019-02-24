@@ -1,5 +1,6 @@
-package models;
+package models.map;
 
+import models.hive.HiveObject;
 import utils.Constants;
 import utils.Constants.*;
 
