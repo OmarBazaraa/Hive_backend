@@ -91,9 +91,10 @@ public class Cell {
     }
 
     /**
-     * Returns a string representation of this grid cell object.
+     * Returns a string representation of object.
+     * In general, the toString method returns a string that "textually represents" this object.
      *
-     * @return a string representation of this grid cell object.
+     * @return a string representation of object.
      */
     @Override
     public String toString() {

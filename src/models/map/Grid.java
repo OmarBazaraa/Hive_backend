@@ -215,6 +215,7 @@ public class Grid {
 
     /**
      * Calculates the next cell position if moving in the given direction.
+     * (i.e. position(current) + dir = position(next)).
      *
      * @param row the current cell row position.
      * @param col the current cell column position.
@@ -231,6 +232,7 @@ public class Grid {
 
     /**
      * Calculates the next cell position if moving in the given direction.
+     * (i.e. position(current) + dir = position(next)).
      *
      * @param pos the current cell position.
      * @param dir the direction to move along.
@@ -243,6 +245,7 @@ public class Grid {
 
     /**
      * Calculates the next cell id if moving in the given direction.
+     * (i.e. position(current) + dir = position(next)).
      *
      * @param id  the current cell id.
      * @param dir the direction to move along.
@@ -257,7 +260,8 @@ public class Grid {
     }
 
     /**
-     * Calculates the previous cell position if moving in the given direction.
+     * Calculates the previous cell position if moving in the given direction in reverse manner.
+     * (i.e. position(previous) + dir = position(current)).
      *
      * @param row the current cell row position.
      * @param col the current cell column position.
@@ -273,7 +277,8 @@ public class Grid {
     }
 
     /**
-     * Calculates the previous cell position if moving in the given direction.
+     * Calculates the previous cell position if moving in the given direction in reverse manner.
+     * (i.e. position(previous) + dir = position(current)).
      *
      * @param pos the current cell position.
      * @param dir the direction to move along.
@@ -285,7 +290,8 @@ public class Grid {
     }
 
     /**
-     * Calculates the previous cell id if moving in the given direction.
+     * Calculates the previous cell id if moving in the given direction in reverse manner.
+     * (i.e. position(previous) + dir = position(current)).
      *
      * @param id  the current cell id.
      * @param dir the direction to move along.
@@ -300,9 +306,10 @@ public class Grid {
     }
 
     /**
-     * Returns a string representation of this grid.
+     * Returns a string representation of object.
+     * In general, the toString method returns a string that "textually represents" this object.
      *
-     * @return a string representation of this grid.
+     * @return a string representation of object.
      */
     @Override
     public String toString() {

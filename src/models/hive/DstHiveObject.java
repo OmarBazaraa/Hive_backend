@@ -1,5 +1,9 @@
 package models.hive;
 
+import algorithms.Planner;
+import models.map.Grid;
+import models.map.GuideCell;
+
 
 /**
  * This {@code DstHiveObject} class is the base class of all the destination terminal Hive System's components
@@ -8,6 +12,17 @@ package models.hive;
  * Destination Hive object's are by default static object with fixed position in the Hive's map.
  */
 public class DstHiveObject extends HiveObject {
+
+    //
+    // Member Variables
+    //
+
+    protected GuideCell[][] guideMap;
+
+    // ===============================================================================================
+    //
+    // Member Methods
+    //
 
     /**
      * Constructs a new destination Hive object.
@@ -27,5 +42,14 @@ public class DstHiveObject extends HiveObject {
      */
     public DstHiveObject(int id, int row, int col) {
         super(id, row, col);
+    }
+
+    /**
+     * Computes the guide map of this {@code DstHiveObject}
+     *
+     * @param map the grid map of our Hive System.
+     */
+    public void computeGuideMap(Grid map) {
+        guideMap = Planner.bfs(map, getPosition());
     }
 }
