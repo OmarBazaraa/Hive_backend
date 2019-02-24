@@ -13,13 +13,19 @@ public class Agent extends SrcHiveObject implements Comparable<Agent> {
     // Member Variables
     //
 
-    // The priority of this agent among other agents
+    /**
+     * The priority of this agent among other agents.
+     */
     private int priority;
 
-    // The status of this agent
+    /**
+     * The current status of this agent.
+     */
     private AgentStatus status = AgentStatus.READY;
 
-    // The assigned task of this agent
+    /**
+     * The assigned task of this agent.
+     */
     private Task task;
 
     // Skip for now
@@ -107,7 +113,7 @@ public class Agent extends SrcHiveObject implements Comparable<Agent> {
      */
     public void setTask(Task task) {
         this.task = task;
-        this.status = AgentStatus.ASSIGNED_TASK;
+        this.status = AgentStatus.ACTIVE;
     }
 
     /**

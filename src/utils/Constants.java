@@ -13,12 +13,15 @@ public class Constants {
     public static final char CELL_SHAPE_GATE = 'G';
     public static final char CELL_SHAPE_RACK = '$';
     public static final char CELL_SHAPE_AGENT = '@';
-    public static final char CELL_SHAPE_CHARGE_SPOT = 'C';
-    public static final char CELL_SHAPE_UNKOWN = '?';
+    public static final char CELL_SHAPE_CHARGING_STATION = 'C';
+    public static final char CELL_SHAPE_UNKNOWN = '?';
 
     // Agent default configurations
     public static final int AGENT_DEFAULT_CAPACITY = 100;
     public static final int AGENT_DEFAULT_CHARGE_CAPACITY = 100;
+
+    // Rack default configurations
+    public static final int RACK_DEFAULT_STORE_CAPACITY = 100;
 
     // Direction arrays in the same order as {@code Direction} enum below
     public static final int DIR_ROW[] = { -1, 0, 1, 0, 0 };
@@ -44,7 +47,7 @@ public class Constants {
         GATE,
         RACK,
         AGENT,
-        CHARGE_SPOT,
+        CHARGING_STATION,
         UNKNOWN
     }
 
@@ -53,7 +56,6 @@ public class Constants {
      */
     public enum AgentStatus {
         READY,
-        ASSIGNED_TASK,
         ACTIVE,
         CHARGING,
         OUT_OF_SERVICE

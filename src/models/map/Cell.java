@@ -57,10 +57,10 @@ public class Cell {
                 return Constants.CELL_SHAPE_RACK;
             case AGENT:
                 return Constants.CELL_SHAPE_AGENT;
-            case CHARGE_SPOT:
-                return Constants.CELL_SHAPE_CHARGE_SPOT;
+            case CHARGING_STATION:
+                return Constants.CELL_SHAPE_CHARGING_STATION;
             default:
-                return Constants.CELL_SHAPE_UNKOWN;
+                return Constants.CELL_SHAPE_UNKNOWN;
         }
     }
 
@@ -83,8 +83,8 @@ public class Cell {
                 return CellType.RACK;
             case Constants.CELL_SHAPE_AGENT:
                 return CellType.AGENT;
-            case Constants.CELL_SHAPE_CHARGE_SPOT:
-                return CellType.CHARGE_SPOT;
+            case Constants.CELL_SHAPE_CHARGING_STATION:
+                return CellType.CHARGING_STATION;
             default:
                 return CellType.UNKNOWN;
         }

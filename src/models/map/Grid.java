@@ -2,8 +2,6 @@ package models.map;
 
 import utils.Constants;
 import utils.Constants.*;
-import utils.Dimensions;
-import utils.Position;
 
 
 /**

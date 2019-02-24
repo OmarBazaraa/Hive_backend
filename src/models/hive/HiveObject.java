@@ -1,11 +1,11 @@
 package models.hive;
 
-import utils.Position;
+import models.map.Position;
 
 
 /**
  * This {@code HiveObject} class is the base class of all the basic terminal Hive System's components
- * such as {@code Agent}, {@code Rack}, {@code Gate}, {@code ChargingSpot}, ..etc.
+ * such as {@code Agent}, {@code Rack}, {@code Gate}, {@code ChargingStation}, ..etc.
  */
 public class HiveObject {
 
@@ -13,7 +13,14 @@ public class HiveObject {
     // Member Variables
     //
 
+    /**
+     * The id of this Hive object.
+     */
     protected int id;
+
+    /**
+     * The position of an object in terms of row, column pairs.
+     */
     protected int row, col;
 
     // ===============================================================================================

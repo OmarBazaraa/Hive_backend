@@ -6,6 +6,8 @@ import utils.Constants.*;
 /**
  * This {@code GuideCell} class represents a cell in the guide map associated with
  * a target {@code DstHiveObject}.
+ * <p>
+ * A guide cell guides the agent towards its associated target.
  */
 public class GuideCell {
 
@@ -95,6 +97,6 @@ public class GuideCell {
      */
     @Override
     public String toString() {
-        return ("Dis: " + distance + ", Dir: " + direction);
+        return ("Guide Cell: { Dis: " + distance + ", Dir: " + direction + " }");
     }
 }

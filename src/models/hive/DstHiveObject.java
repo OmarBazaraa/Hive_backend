@@ -7,7 +7,7 @@ import models.map.GuideCell;
 
 /**
  * This {@code DstHiveObject} class is the base class of all the destination terminal Hive System's components
- * such as {@code Rack}, {@code Gate}, {@code ChargingSpot}, ..etc.
+ * such as {@code Rack}, {@code Gate}, {@code ChargingStation}, ..etc.
  * <p>
  * Destination Hive object's are by default static object with fixed position in the Hive's map.
  */
@@ -17,6 +17,9 @@ public class DstHiveObject extends HiveObject {
     // Member Variables
     //
 
+    /**
+     * The guide map of this {@code DstHiveObject}.
+     */
     protected GuideCell[][] guideMap;
 
     // ===============================================================================================
