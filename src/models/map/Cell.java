@@ -32,12 +32,13 @@ public class Cell {
     }
 
     /**
-     * Checks whether this cell is empty or occupied.
+     * Checks whether this cell is empty or not.
+     * A cell is considered empty if it's currently empty or it's occupied by an agent.
      *
      * @return {@code true} if this cell is empty, {@code false} otherwise.
      */
     public boolean isEmpty() {
-        return type == CellType.EMPTY;
+        return type == CellType.EMPTY || type == CellType.AGENT;
     }
 
     /**

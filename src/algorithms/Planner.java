@@ -42,6 +42,11 @@ public class Planner {
                 // Get previous position
                 Position prv = map.previous(cur, dir);
 
+                // Continue if occupied cell
+                if (!map.isEmpty(prv)) {
+                    continue;
+                }
+
                 // Continue if already visited
                 if (ret[prv.row][prv.col].isReachable()) {
                     continue;
