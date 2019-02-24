@@ -1,307 +1,320 @@
 package models;
 
+import utils.Constants;
 import utils.Constants.*;
-import utils.Pair;
+import utils.Dimensions;
 import utils.Position;
 
-import java.util.Scanner;
 
-
+/**
+ * This {@code Grid} class represents the map grid of our Hive System's warehouse.
+ */
 public class Grid {
 
-    //
-    // Constants & Enums & Classes
-    //
-
-    // Grid cell class
-    public static class Cell {
-        public CellType type;
-        public Agent agent;
-        public Rack rack;
-
-        public Cell(CellType type) {
-            this.type = type;
-            this.agent = null;
-            this.rack = null;
-        }
-    }
-
-    // Cell shapes
-    public static final char CELL_SHAPE_EMPTY = '.';
-    public static final char CELL_SHAPE_OBSTACLE = '#';
-    public static final char CELL_SHAPE_RACK = '$';
-    public static final char CELL_SHAPE_AGENT = '@';
-
-    // ===============================================================================================
     //
     // Member Variables
     //
 
-    private int mRows;
-    private int mCols;
-    private int mAgentsCount;
-    private int mRacksCount;
-    private Cell[][] mGrid;
+    private int rows;
+    private int cols;
+    private int size;
+    private Cell[][] grid;
 
     // ===============================================================================================
     //
-    // Static Functions
+    // Member Methods
     //
 
-    public static Grid create(Scanner reader) throws Exception {
-        Grid ret = new Grid();
-        ret.setup(reader);
-        return ret;
+    /**
+     * Constructs a new Hive map grid.
+     *
+     * @param grid the grid configurations.
+     */
+    public Grid(Cell[][] grid) {
+        this.rows = grid.length;
+        this.cols = grid[0].length;
+        this.size = rows * cols;
+        this.grid = grid;
     }
 
-    // ===============================================================================================
-    //
-    // Public Member Functions
-    //
-
-    public Grid() {
-        this.mRows = 0;
-        this.mCols = 0;
-        this.mAgentsCount = 0;
-        this.mRacksCount = 0;
+    /**
+     * Returns the number of rows in this grid.
+     *
+     * @return an integer representing the number of rows in this grid.
+     */
+    public int getRows() {
+        return this.rows;
     }
 
-    public Grid(char[][] grid) throws Exception {
-        this.setup(grid);
+    /**
+     * Returns the number of columns in this grid.
+     *
+     * @return an integer representing the number of columns in this grid.
+     */
+    public int getCols() {
+        return this.cols;
     }
 
-    public void setup(char[][] grid) throws Exception {
-        // Get grid dimensions
-        mRows = grid.length;
-        mCols = grid[0].length;
-
-        // Clear counts
-        mAgentsCount = 0;
-        mRacksCount = 0;
-
-        // Allocate grid
-        mGrid = new Cell[mRows + 2][mCols + 2];
-
-        // Read grid cells
-        for (int i = 1; i <= mRows; ++i) {
-            for (int j = 1; j <= mCols; ++j) {
-                mGrid[i][j] = toGridCell(grid[i - 1][j - 1]);
-
-                if (mGrid[i][j].type == CellType.UNKNOWN) {
-                    throw new Exception("Unknown grid cell type!");
-                }
-            }
-        }
+    /**
+     * Returns the total number of cells in this grid object.
+     *
+     * @return an integer representing the total number of cell in this grid.
+     */
+    public int getCellsCount() {
+        return this.size;
     }
 
-    public void setup(Scanner reader) throws Exception {
-        // Read grid dimensions
-        mRows = reader.nextInt();
-        mCols = reader.nextInt();
-
-        // Clear counts
-        mAgentsCount = 0;
-        mRacksCount = 0;
-
-        // Allocate grid
-        mGrid = new Cell[mRows + 2][mCols + 2];
-
-        // Read grid cells
-        for (int i = 1; i <= mRows; ++i) {
-            if (!reader.hasNext()) {
-                throw new Exception("Grid dimensions mis-match!");
-            }
-
-            String row = reader.next();
-
-            if (row.length() != mCols) {
-                throw new Exception("Grid dimensions mis-match!");
-            }
-
-            for (int j = 1; j <= mCols; ++j) {
-                mGrid[i][j] = toGridCell(row.charAt(j - 1));
-
-                if (mGrid[i][j].type == CellType.UNKNOWN) {
-                    throw new Exception("Unknown grid cell type!");
-                }
-            }
-        }
+    /**
+     * Returns the dimensions of this grid.
+     *
+     * @return a {@code Dimensions} object representing the size of this grid.
+     */
+    public Dimensions getDimensions() {
+        return new Dimensions(rows, cols);
     }
 
-    public boolean bind(Agent agent) {
-        Position p = agent.getPosition();
-
-        int r = p.r, c = p.c;
-
-        if (!isValid(r, c) || mGrid[r][c].type != CellType.AGENT) {
-            return false;
-        }
-
-        if (mGrid[r][c].agent == null) {
-            mAgentsCount++;
-        }
-
-        mGrid[r][c].agent = agent;
-
-        return true;
+    /**
+     * Returns the grid cell given its position in this grid.
+     *
+     * @param row the row position of the grid cell.
+     * @param col the column position of the grid cell.
+     *
+     * @return the {@code Cell} object in the given position, or {@code null} if position is out of bound.
+     */
+    public Cell get(int row, int col) {
+        return isInBound(row, col) ? grid[row][col] : null;
     }
 
-    public boolean bind(Rack rack) {
-        Position p = rack.getPosition();
-
-        int r = p.r, c = p.c;
-
-        if (!isValid(r, c) || mGrid[r][c].type != CellType.RACK) {
-            return false;
-        }
-
-        if (mGrid[r][c].rack == null) {
-            mRacksCount++;
-        }
-
-        mGrid[r][c].rack = rack;
-
-        return true;
+    /**
+     * Returns the grid cell given its position in this grid.
+     *
+     * @param pos the position of the grid cell.
+     *
+     * @return the {@code Cell} object in the given position, or {@code null} if position is out of bound.
+     */
+    public Cell get(Position pos) {
+        return get(pos.row, pos.col);
     }
 
+    /**
+     * Returns the grid cell given its id in this grid.
+     *
+     * @param id the id of the grid cell to return.
+     *
+     * @return the {@code Cell} object by its id, or {@code null} if position is out of bound.
+     */
+    public Cell get(int id) {
+        Position pos = toCellPos(id);
+        return get(pos.row, pos.col);
+    }
+
+    /**
+     * Converts the given grid cell position to a unique id.
+     *
+     * @param row the row position of the grid cell to convert.
+     * @param col the column position of the grid cell to convert.
+     *
+     * @return a single unique integer id corresponding to the given cell.
+     */
+    public int toCellId(int row, int col) {
+        return row * cols + col;
+    }
+
+    /**
+     * Converts the given grid cell position to a unique id.
+     *
+     * @param pos the position of the grid cell to convert.
+     *
+     * @return a single unique integer id corresponding to the given cell.
+     */
+    public int toCellId(Position pos) {
+        return toCellId(pos.row, pos.col);
+    }
+
+    /**
+     * Converts the given grid cell id to its position in the grid.
+     *
+     * @param id the id of the grid cell to convert.
+     *
+     * @return a {@code Position} object corresponding to the given cell id.
+     */
+    public Position toCellPos(int id) {
+        int row = id / cols;
+        int col = id % cols;
+        return new Position(row, col);
+    }
+
+    /**
+     * Checks whether the given cell is inside the boundaries of the grid.
+     *
+     * @param row the row position of the cell to check.
+     * @param col the column position of the cell to check.
+     *
+     * @return {@code true} if the given cell is in bound, {@code false} otherwise.
+     */
+    public boolean isInBound(int row, int col) {
+        return 1 <= row && row <= rows && 1 <= col && col <= cols;
+    }
+
+    /**
+     * Checks whether the given cell is inside the boundaries of the grid.
+     *
+     * @param pos the position of the cell to check.
+     *
+     * @return {@code true} if the given cell is in bound, {@code false} otherwise.
+     */
+    public boolean isInBound(Position pos) {
+        return isInBound(pos.row, pos.col);
+    }
+
+    /**
+     * Checks whether the given cell is inside the boundaries of the grid.
+     *
+     * @param id the id of the cell to check.
+     *
+     * @return {@code true} if the given cell is in bound, {@code false} otherwise.
+     */
+    public boolean isInBound(int id) {
+        return 0 <= id && id < size;
+    }
+
+    /**
+     * Checks whether the given cell is empty.
+     *
+     * @param row the row position of the cell to check.
+     * @param col the column position of the cell to check.
+     *
+     * @return {@code true} if the given cell is inside grid boundaries and empty, {@code false} otherwise.
+     */
+    public boolean isEmpty(int row, int col) {
+        return isInBound(row, col) && grid[row][col].isEmpty();
+    }
+
+    /**
+     * Checks whether the given cell is empty.
+     *
+     * @param pos the position of the cell to check.
+     *
+     * @return {@code true} if the given cell is inside grid boundaries and empty, {@code false} otherwise.
+     */
+    public boolean isEmpty(Position pos) {
+        return isEmpty(pos.row, pos.col);
+    }
+
+    /**
+     * Checks whether the given cell is empty.
+     *
+     * @param id the id of the cell to check.
+     *
+     * @return {@code true} if the given cell is inside grid boundaries and empty, {@code false} otherwise.
+     */
+    public boolean isEmpty(int id) {
+        Position pos = toCellPos(id);
+        return isEmpty(pos.row, pos.col);
+    }
+
+    /**
+     * Calculates the next cell position if moving in the given direction.
+     *
+     * @param row the current cell row position.
+     * @param col the current cell column position.
+     * @param dir the direction to move along.
+     *
+     * @return a {@code Position} object corresponding to the next cell position.
+     */
+    public Position next(int row, int col, Direction dir) {
+        int i = dir.ordinal();
+        row += Constants.DIR_ROW[i];
+        col += Constants.DIR_COL[i];
+        return new Position(row, col);
+    }
+
+    /**
+     * Calculates the next cell position if moving in the given direction.
+     *
+     * @param pos the current cell position.
+     * @param dir the direction to move along.
+     *
+     * @return a {@code Position} object corresponding to the next cell position.
+     */
+    public Position next(Position pos, Direction dir) {
+        return next(pos.row, pos.col, dir);
+    }
+
+    /**
+     * Calculates the next cell id if moving in the given direction.
+     *
+     * @param id  the current cell id.
+     * @param dir the direction to move along.
+     *
+     * @return the id of the next cell.
+     */
+    public int next(int id, Direction dir) {
+        int i = dir.ordinal();
+        id += Constants.DIR_ROW[i] * cols;
+        id += Constants.DIR_COL[i];
+        return id;
+    }
+
+    /**
+     * Calculates the previous cell position if moving in the given direction.
+     *
+     * @param row the current cell row position.
+     * @param col the current cell column position.
+     * @param dir the direction to move along.
+     *
+     * @return a {@code Position} object corresponding to the previous cell position.
+     */
+    public Position previous(int row, int col, Direction dir) {
+        int i = dir.ordinal();
+        row -= Constants.DIR_ROW[i];
+        col -= Constants.DIR_COL[i];
+        return new Position(row, col);
+    }
+
+    /**
+     * Calculates the previous cell position if moving in the given direction.
+     *
+     * @param pos the current cell position.
+     * @param dir the direction to move along.
+     *
+     * @return a {@code Position} object corresponding to the previous cell position.
+     */
+    public Position previous(Position pos, Direction dir) {
+        return previous(pos.row, pos.col, dir);
+    }
+
+    /**
+     * Calculates the previous cell id if moving in the given direction.
+     *
+     * @param id  the current cell id.
+     * @param dir the direction to move along.
+     *
+     * @return the id of the previous cell.
+     */
+    public int previous(int id, Direction dir) {
+        int i = dir.ordinal();
+        id -= Constants.DIR_ROW[i] * cols;
+        id -= Constants.DIR_COL[i];
+        return id;
+    }
+
+    /**
+     * Returns a string representation of this grid.
+     *
+     * @return a string representation of this grid.
+     */
+    @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
 
-        for (int i = 1; i <= mRows; ++i) {
-            for (int j = 1; j <= mCols; ++j) {
-                builder.append(toGridCellShape(mGrid[i][j].type));
+        for (int i = 1; i <= rows; ++i) {
+            for (int j = 1; j <= cols; ++j) {
+                builder.append(grid[i][j].toShape());
             }
-
             builder.append('\n');
         }
 
         return builder.toString();
-    }
-
-    // ===============================================================================================
-    //
-    // Public Getters & Setters
-    //
-
-    public Cell get(int row, int col) {
-        return isValid(row, col) ? mGrid[row][col] : null;
-    }
-
-    public Pair<Integer, Integer> getDimensions() {
-        return new Pair<>(mRows, mCols);
-    }
-
-    public int getRows() {
-        return this.mRows;
-    }
-
-    public int getCols() {
-        return this.mCols;
-    }
-
-    public int getCellId(Position pos) {
-        return getCellId(pos.r, pos.c);
-    }
-
-    public int getCellId(int row, int col) {
-        return isValid(row, col) ? (row - 1) * mCols + col - 1 : -1;
-    }
-
-    public Position getCoord(int id) {
-        int row = id / mCols + 1;
-        int col = id % mCols + 1;
-        return new Position(row, col);
-    }
-
-    public int getCellsCount() {
-        return mRows * mCols;
-    }
-
-    public int getRacksCount() {
-        return this.mRacksCount;
-    }
-
-    public int getAgentsCount() {
-        return this.mAgentsCount;
-    }
-
-    // ===============================================================================================
-    //
-    // Helper Member Functions
-    //
-
-    public int nextId(int id, Direction dir) {
-        switch (dir) {
-            case UP:
-                return id - mCols;
-            case RIGHT:
-                return id + 1;
-            case DOWN:
-                return id + mCols;
-            case LEFT:
-                return id - 1;
-        }
-
-        return id;
-    }
-
-    public int previousId(int id, Direction dir) {
-        switch (dir) {
-            case UP:
-                return id + mCols;
-            case RIGHT:
-                return id - 1;
-            case DOWN:
-                return id - mCols;
-            case LEFT:
-                return id + 1;
-        }
-
-        return id;
-    }
-
-    public boolean isFree(int id) {
-        Position pos = getCoord(id);
-        return isValid(pos.r, pos.c) && mGrid[pos.r][pos.c].type == CellType.EMPTY;
-    }
-
-    public boolean isValid(int id) {
-        return 0 <= id && id < mRows * mCols;
-    }
-
-    public boolean isValid(int r, int c) {
-        return 1 <= r && r <= mRows && 1 <= c && c <= mCols;
-    }
-
-    private Cell toGridCell(char cell) {
-        if (CELL_SHAPE_EMPTY == cell) {
-            return new Cell(CellType.EMPTY);
-        }
-        if (CELL_SHAPE_OBSTACLE == cell) {
-            return new Cell(CellType.OBSTACLE);
-        }
-        if (CELL_SHAPE_RACK == cell) {
-            return new Cell(CellType.RACK);
-        }
-        if (CELL_SHAPE_AGENT == cell) {
-            return new Cell(CellType.AGENT);
-        }
-
-        return new Cell(CellType.UNKNOWN);
-    }
-
-    private char toGridCellShape(CellType type) {
-        switch (type) {
-            case EMPTY:
-                return CELL_SHAPE_EMPTY;
-            case OBSTACLE:
-                return CELL_SHAPE_OBSTACLE;
-            case RACK:
-                return CELL_SHAPE_RACK;
-            case AGENT:
-                return CELL_SHAPE_AGENT;
-            default:
-                return '?';
-        }
     }
 }

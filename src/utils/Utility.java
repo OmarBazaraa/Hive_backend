@@ -5,7 +5,7 @@ import utils.Constants.*;
 public class Utility {
 
     public static Position nextPosition(Position pos, Direction dir) {
-        int r = pos.r, c = pos.c;
+        int r = pos.row, c = pos.col;
 
         switch (dir) {
             case UP:
@@ -22,7 +22,7 @@ public class Utility {
     }
 
     public static Position previousPosition(Position pos, Direction dir) {
-        int r = pos.r, c = pos.c;
+        int r = pos.row, c = pos.col;
 
         switch (dir) {
             case UP:

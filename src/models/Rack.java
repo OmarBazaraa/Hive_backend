@@ -1,74 +1,73 @@
 package models;
 
-import utils.Position;
 
-import java.util.Scanner;
-
-public class Rack {
+/**
+ * This {@code Rack} class is a model for rack of items in our Hive System.
+ */
+public class Rack extends HiveObject {
 
     //
     // Member Variables
     //
 
-    private int mId;
-    private int mRow, mCol;
-    private int mItemId;
-    private int mItemCount;
+    private int itemId;
+    private int itemCount;
 
     // ===============================================================================================
     //
-    // Static Functions
+    // Member Methods
     //
 
-    public static Rack create(Scanner reader) {
-        Rack ret = new Rack();
-        ret.setup(reader);
-        return ret;
+    /**
+     * Constructs a new rack of items.
+     *
+     * @param id the id of the rack.
+     */
+    public Rack(int id) {
+        super(id);
     }
 
-    // ===============================================================================================
-    //
-    // Public Member Functions
-    //
-
-    public Rack() {
-
+    /**
+     * Constructs a new rack of items.
+     *
+     * @param id  the id of the rack.
+     * @param row the row position of the rack.
+     * @param col the column position of the rack.
+     */
+    public Rack(int id, int row, int col) {
+        super(id, row, col);
     }
 
+    /**
+     * Constructs a new rack of items.
+     *
+     * @param id        the id of the rack.
+     * @param row       the row position of the rack.
+     * @param col       the column position of the rack.
+     * @param itemId    the id of the item stored in the rack.
+     * @param itemCount the count of the item stored in the rack.
+     */
     public Rack(int id, int row, int col, int itemId, int itemCount) {
-        this.mId = id;
-        this.mRow = row;
-        this.mCol = col;
-        this.mItemId = itemId;
-        this.mItemCount = itemCount;
+        this(id, row, col);
+        this.itemId = itemId;
+        this.itemCount = itemCount;
     }
 
-    public void setup(Scanner reader) {
-        mId = reader.nextInt();
-        mRow = reader.nextInt();
-        mCol = reader.nextInt();
-        mItemId = reader.nextInt();
-        mItemCount = reader.nextInt();
-    }
-
-    // ===============================================================================================
-    //
-    // Public Getters & Setters
-    //
-
-    public int getId() {
-        return this.mId;
-    }
-
-    public Position getPosition() {
-        return new Position(this.mRow, this.mCol);
-    }
-
+    /**
+     * Returns the id of the item stored in this rack.
+     *
+     * @return an integer representing the id of the stored item.
+     */
     public int getItemId() {
-        return this.mItemId;
+        return this.itemId;
     }
 
+    /**
+     * Returns the count of the item stored in this rack.
+     *
+     * @return an integer representing the count of the stored item.
+     */
     public int getItemCount() {
-        return this.mItemCount;
+        return this.itemCount;
     }
 }

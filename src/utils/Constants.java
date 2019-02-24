@@ -7,9 +7,22 @@ public class Constants {
     public static final String PROJ_VERSION = "0.0.0.1";
     public static final String PROJ_VERSION_DATE = "21 February 2019";
 
+    // Grid cell shapes
+    public static final char CELL_SHAPE_EMPTY = '.';
+    public static final char CELL_SHAPE_OBSTACLE = '#';
+    public static final char CELL_SHAPE_GATE = 'G';
+    public static final char CELL_SHAPE_RACK = '$';
+    public static final char CELL_SHAPE_AGENT = '@';
+    public static final char CELL_SHAPE_CHARGE_SPOT = 'C';
+    public static final char CELL_SHAPE_UNKOWN = '?';
+
     // Agent default configurations
     public static final int AGENT_DEFAULT_CAPACITY = 100;
     public static final int AGENT_DEFAULT_CHARGE_CAPACITY = 100;
+
+    // Direction arrays in the same order as {@code Direction} enum below
+    public static final int DIR_ROW[] = { -1, 0, 1, 0, 0 };
+    public static final int DIR_COL[] = { 0, 1, 0, -1, 0 };
 
     /**
      * Directions in clockwise order.

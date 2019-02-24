@@ -1,5 +1,6 @@
 package utils;
 
+
 /**
  * This {@code Pair} class holds a pair of objects as a unit.
  */
@@ -18,8 +19,8 @@ public class Pair<T extends Comparable<T>, U extends Comparable<U>> implements C
     /**
      * Constructs a {@code Position} object with the given coordinates.
      *
-     * @param x the first object
-     * @param y the second object
+     * @param x the first object.
+     * @param y the second object.
      */
     public Pair(T x, U y) {
         this.x = x;
