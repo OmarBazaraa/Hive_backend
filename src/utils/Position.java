@@ -1,7 +1,7 @@
 package utils;
 
 /**
- * This {@code Position} class hold the 2D coordinates of an object
+ * This {@code Position} class holds the 2D coordinates of an object
  * in the map of the Hive system.
  * <p>
  * The position of an object is described by its row and column in the map's grid.
