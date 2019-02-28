@@ -60,12 +60,25 @@ public class Item extends HiveObject {
     }
 
     /**
-     * Puts this sell item into the given rack.
+     * Puts this item into the given rack.
      *
-     * @param rack the new holding rack of this item.
+     * @param rack     the new holding rack of this item.
+     * @param quantity the quantity to be added.
      */
     public void addToRack(Rack rack, int quantity) {
-        quantity += racks.getOrDefault(rack, 0);
-        racks.put(rack, quantity);
+        this.racks.put(rack, quantity + this.racks.getOrDefault(rack, 0));
+    }
+
+    /**
+     * Takes this item from the given rack.
+     *
+     * @param rack     the new holding rack of this item.
+     * @param quantity the quantity to be taken.
+     */
+    public void takeFromRack(Rack rack, int quantity) {
+        this.racks.put(
+                rack,
+                Math.max(0, racks.getOrDefault(rack, 0) - quantity)
+        );
     }
 }

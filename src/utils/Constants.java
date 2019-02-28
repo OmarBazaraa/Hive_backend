@@ -21,6 +21,7 @@ public class Constants {
     public static final int AGENT_DEFAULT_CHARGE_CAPACITY = 100;
 
     // Rack default configurations
+    public static final int RACK_DEFAULT_INIT_WEIGHT = 100;
     public static final int RACK_DEFAULT_STORE_CAPACITY = 100;
 
     // Direction arrays in the same order as {@code Direction} enum below

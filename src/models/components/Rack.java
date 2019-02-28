@@ -3,6 +3,9 @@ package models.components;
 import models.components.base.DstHiveObject;
 import utils.Constants;
 
+import java.util.HashMap;
+import java.util.Map;
+
 
 /**
  * This {@code Rack} class is a model for rack of items in our Hive System.
@@ -17,14 +20,14 @@ public class Rack extends DstHiveObject {
     //
 
     /**
-     * The selling item type associated with this rack.
+     * The map of all the items this rack is holding.
      */
-    private Item item;
+    private Map<Item, Integer> items = new HashMap<>();
 
     /**
-     * The number of units stored in this rack of the associated selling item.
+     * The total weight of all the items stored in this rack.
      */
-    private int itemsUnitsCount;
+    private int storedWeight;
 
     /**
      * The maximum storing capacity (in weight units) of this rack.
@@ -48,57 +51,67 @@ public class Rack extends DstHiveObject {
     }
 
     /**
-     * Constructs a new rack of items.
+     * Adds the given item into this rack.
      *
-     * @param id             the id of the rack.
-     * @param row            the row position of the rack.
-     * @param col            the column position of the rack.
-     * @param item           the id of the item stored in the rack.
-     * @param itemUnitsCount the count of the item stored in the rack.
+     * @param item     the id of the items stored in the rack.
+     * @param quantity the number of copies to be added.
+     *
+     * @return {@code true} if the item with the given quantity is added successfully, {@code false} otherwise.
      */
-    public Rack(int id, int row, int col, Item item, int itemUnitsCount) {
-        this(id, row, col);
-        setItem(item, itemUnitsCount);
-    }
+    public boolean addItem(Item item, int quantity) {
+        int weight = quantity * item.getWeight();
 
-    /**
-     * Returns the item stored in this rack.
-     *
-     * @return an {@code Item} object representing the associated item in this rack,
-     * or {@code null} if the rack is empty.
-     */
-    public Item getStoredItem() {
-        return this.item;
-    }
-
-    /**
-     * Returns the count of the stored units in this rack of the associated item.
-     *
-     * @return an integer representing the count of the stored units.
-     */
-    public int getItemsUnitsCount() {
-        return this.itemsUnitsCount;
-    }
-
-    /**
-     * Set the associated item with this rack.
-     *
-     * @param item           the id of the item stored in the rack.
-     * @param itemUnitsCount the count of the item stored in the rack.
-     */
-    public void setItem(Item item, int itemUnitsCount) {
-        if (itemUnitsCount > 0) {
-            this.item = item;
-            this.itemsUnitsCount = itemUnitsCount;
+        if (0 < quantity && storedWeight + weight <= maxCapacity) {
+            items.put(item, quantity + items.getOrDefault(item, 0));
+            storedWeight += weight;
+            item.addToRack(this, quantity);
+            return true;
         }
+
+        return false;
+    }
+
+    /**
+     * Takes an item from this rack with the given quantity.
+     * <p>
+     * If the given quantity is greater than the quantity of the item stored in this rack,
+     * then nothing will be taken.
+     *
+     * @param item     the item to be taken.
+     * @param quantity the quantity to be taken.
+     *
+     * @return {@code true} if the item with the given quantity is taken successfully, {@code false} otherwise.
+     */
+    public boolean takeItem(Item item, int quantity) {
+        int count = items.getOrDefault(item, 0);
+
+        if (0 < quantity && quantity <= count) {
+            items.put(item, count - quantity);
+            storedWeight -= quantity * item.getWeight();
+            item.takeFromRack(this, quantity);
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Returns the quantity of the given item this rack is storing.
+     *
+     * @param item the item to get its quantity.
+     *
+     * @return the quantity of the given item.
+     */
+    public int getItemQuantity(Item item) {
+        return this.items.getOrDefault(item, 0);
     }
 
     /**
      * Clears and empties the current rack from all its items.
      */
     public void clear() {
-        this.item = null;
-        this.itemsUnitsCount = 0;
+        this.items = new HashMap<>();
+        this.storedWeight = 0;
     }
 
     /**
@@ -107,7 +120,7 @@ public class Rack extends DstHiveObject {
      * @return the current stored weight.
      */
     public int getStoredWeight() {
-        return (item != null ? itemsUnitsCount * item.getWeight() : 0);
+        return storedWeight;
     }
 
     /**
