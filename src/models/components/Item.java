@@ -1,21 +1,19 @@
 package models.components;
 
-import models.hive.Rack;
+import models.components.base.HiveObject;
+
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
  * This {@code Item} class represents a sell item in our Hive Warehousing System.
  */
-public class Item {
+public class Item extends HiveObject {
 
     //
     // Member Variables
     //
-
-    /**
-     * The id of this sell item.
-     */
-    private int id;
 
     /**
      * The weight of one unit of this sell item.
@@ -23,9 +21,9 @@ public class Item {
     private int weight;
 
     /**
-     * The rack holding this sell item.
+     * The racks holding this sell item.
      */
-    private Rack rack;
+    private Map<Rack, Integer> racks = new HashMap<>();
 
     // ===============================================================================================
     //
@@ -37,21 +35,10 @@ public class Item {
      *
      * @param id     the id of this item.
      * @param weight the weight of this item.
-     * @param rack   the rack holding this item.
      */
-    public Item(int id, int weight, Rack rack) {
-        this.id = id;
+    public Item(int id, int weight) {
+        super(id);
         this.weight = weight;
-        this.rack = rack;
-    }
-
-    /**
-     * Returns the id of this sell item.
-     *
-     * @return an integer unique id of this item.
-     */
-    public int getId() {
-        return this.id;
     }
 
     /**
@@ -64,12 +51,12 @@ public class Item {
     }
 
     /**
-     * Returns the rack hold this sell item.
+     * Returns the map of racks hold this sell item.
      *
-     * @return the {@code Rack} holding this item, or {@code null} if no holding rack is assigned yet.
+     * @return a map of {@code Rack} holding this item, where the key is {@code Rack} and the value is the quantity.
      */
-    public Rack getRack() {
-        return this.rack;
+    public Map<Rack, Integer> getRacks() {
+        return this.racks;
     }
 
     /**
@@ -77,7 +64,8 @@ public class Item {
      *
      * @param rack the new holding rack of this item.
      */
-    public void setRack(Rack rack) {
-        this.rack = rack;
+    public void addToRack(Rack rack, int quantity) {
+        quantity += racks.getOrDefault(rack, 0);
+        racks.put(rack, quantity);
     }
 }

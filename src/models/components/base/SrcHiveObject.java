@@ -1,4 +1,4 @@
-package models.hive;
+package models.components.base;
 
 
 /**
@@ -7,16 +7,7 @@ package models.hive;
  * <p>
  * Source Hive object's are by default dynamic object that are capable of moving around in the Hive's map.
  */
-public class SrcHiveObject extends HiveObject {
-
-    /**
-     * Constructs a new source Hive object.
-     *
-     * @param id the id of the Hive object.
-     */
-    public SrcHiveObject(int id) {
-        super(id);
-    }
+public class SrcHiveObject extends TerminalHiveObject {
 
     /**
      * Constructs a new source Hive object.

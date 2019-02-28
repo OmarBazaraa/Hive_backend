@@ -1,4 +1,4 @@
-package models.hive;
+package models.components.base;
 
 import algorithms.Planner;
 import models.map.Grid;
@@ -7,11 +7,11 @@ import models.map.GuideCell;
 
 /**
  * This {@code DstHiveObject} class is the base class of all the destination terminal Hive System's components
- * such as {@code Rack}, {@code Gate}, {@code ChargingStation}, ..etc.
+ * such as {@code Rack}, {@code Gate}, {@code Station}, ..etc.
  * <p>
  * Destination Hive object's are by default static object with fixed position in the Hive's map.
  */
-public class DstHiveObject extends HiveObject {
+public class DstHiveObject extends TerminalHiveObject {
 
     //
     // Member Variables
@@ -26,15 +26,6 @@ public class DstHiveObject extends HiveObject {
     //
     // Member Methods
     //
-
-    /**
-     * Constructs a new destination Hive object.
-     *
-     * @param id the id of the Hive object.
-     */
-    public DstHiveObject(int id) {
-        super(id);
-    }
 
     /**
      * Constructs a new destination Hive object.

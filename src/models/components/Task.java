@@ -1,14 +1,13 @@
 package models.components;
 
-import models.hive.Agent;
-import models.hive.Gate;
+import models.components.base.HiveObject;
 
 
 /**
  * This {@code Task} class represents a basic task for our robot agents
  * in our Hive Warehousing System.
  */
-public class Task {
+public class Task extends HiveObject {
 
     //
     // Member Variables
@@ -36,6 +35,25 @@ public class Task {
 
     // ===============================================================================================
     //
+    // Static Methods
+    //
+
+    /**
+     * The number of tasks in the system so far.
+     */
+    private static int tasksCount = 0;
+
+    /**
+     * Returns the next available id for the next task.
+     *
+     * @return the next available id.
+     */
+    private static int getTaskId() {
+        return tasksCount++;
+    }
+
+    // ===============================================================================================
+    //
     // Member Methods
     //
 
@@ -48,6 +66,7 @@ public class Task {
      * @param order the associated order.
      */
     public Task(Agent agent, Item item, Gate gate, Order order) {
+        super(getTaskId());
         this.agent = agent;
         this.item = item;
         this.gate = gate;

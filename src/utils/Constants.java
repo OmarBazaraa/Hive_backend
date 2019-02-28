@@ -76,6 +76,6 @@ public class Constants {
      */
     public enum OrderType {
         GET,
-        ADD
+        PUT
     }
 }

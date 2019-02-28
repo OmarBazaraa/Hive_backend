@@ -1,6 +1,6 @@
 package models.components;
 
-import models.hive.Gate;
+import models.components.base.HiveObject;
 
 import java.util.List;
 
@@ -11,16 +11,11 @@ import java.util.List;
  * The order is defined by the list of the needed {@code Item}, and the gate where the
  * order must be delivered to.
  */
-public class Order {
+public class Order extends HiveObject {
 
     //
     // Member Variables
     //
-
-    /**
-     * The id of this order.
-     */
-    private int id;
 
     /**
      * The list of needed items for this order.
@@ -55,18 +50,9 @@ public class Order {
      * @param deliveryGate the gate where the order must be delivered to.
      */
     public Order(int id, List<Item> items, Gate deliveryGate) {
-        this.id = id;
+        super(id);
         this.items = items;
         this.deliveryGate = deliveryGate;
-    }
-
-    /**
-     * Returns the id of this order.
-     *
-     * @return an integer unique id of this order.
-     */
-    public int getId() {
-        return this.id;
     }
 
     /**

@@ -10,6 +10,9 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 
+/**
+ * This {@code Planner} class contains some static method for multi-agent path planning.
+ */
 public class Planner {
 
     /**

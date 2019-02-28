@@ -1,6 +1,6 @@
-package models.hive;
+package models.components;
 
-import models.components.Task;
+import models.components.base.SrcHiveObject;
 import utils.Constants.*;
 
 
@@ -37,16 +37,6 @@ public class Agent extends SrcHiveObject implements Comparable<Agent> {
     //
     // Member Methods
     //
-
-    /**
-     * Constructs a new agent robot.
-     *
-     * @param id the id of the agent robot.
-     */
-    public Agent(int id) {
-        super(id);
-        this.priority = id; // TODO to be set dynamically
-    }
 
     /**
      * Constructs a new agent robot.

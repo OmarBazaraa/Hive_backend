@@ -1,11 +1,4 @@
-import models.components.Task;
-import models.Warehouse;
-import models.map.GuideCell;
-import utils.Constants;
 
-import java.io.FileReader;
-import java.util.*;
-import java.util.function.IntFunction;
 
 public class Main {
 
@@ -31,26 +24,6 @@ public class Main {
     }
 
     public static void run(String configFilename, String ordersFilename) throws Exception {
-        // Create warehouse object
-        Scanner reader = new Scanner(new FileReader(configFilename));
-        Warehouse warehouse = Warehouse.create(reader);
-        reader.close();
-        warehouse.print();
 
-        // Read components
-        reader = new Scanner(new FileReader(ordersFilename));
-        List<Task> orders = new ArrayList<>();
-
-        while (reader.hasNext()) {
-            int time = reader.nextInt();
-            int agentId = reader.nextInt();
-            int rackId = reader.nextInt();
-
-            warehouse.addTask(agentId, rackId);
-        }
-
-        while (warehouse.isActive()) {
-            warehouse.run();
-        }
     }
 }

@@ -1,21 +1,14 @@
-package models.hive;
+package models.components;
+
+import models.components.base.DstHiveObject;
 
 
 /**
- * This {@code Gate} class is a model for charging station for robot agents.
+ * This {@code Station} class is a model for charging station for robot agents.
  * <p>
  * A charging station is the location where robot agents go to re-charge their batteries.
  */
-public class ChargingStation extends DstHiveObject {
-
-    /**
-     * Constructs a new charging station of items.
-     *
-     * @param id the id of the charging station.
-     */
-    public ChargingStation(int id) {
-        super(id);
-    }
+public class Station extends DstHiveObject {
 
     /**
      * Constructs a new charging station of items.
@@ -24,7 +17,7 @@ public class ChargingStation extends DstHiveObject {
      * @param row the row position of the charging station.
      * @param col the column position of the charging station.
      */
-    public ChargingStation(int id, int row, int col) {
+    public Station(int id, int row, int col) {
         super(id, row, col);
     }
 }

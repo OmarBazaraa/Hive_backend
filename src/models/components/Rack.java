@@ -1,6 +1,6 @@
-package models.hive;
+package models.components;
 
-import models.components.Item;
+import models.components.base.DstHiveObject;
 import utils.Constants;
 
 
@@ -35,15 +35,6 @@ public class Rack extends DstHiveObject {
     //
     // Member Methods
     //
-
-    /**
-     * Constructs a new rack of items.
-     *
-     * @param id the id of the rack.
-     */
-    public Rack(int id) {
-        super(id);
-    }
 
     /**
      * Constructs a new rack of items.
