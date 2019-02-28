@@ -1,6 +1,6 @@
 package models.hive;
 
-import models.components.Item;
+import models.components.SellItem;
 import utils.Constants;
 
 
@@ -19,7 +19,7 @@ public class Rack extends DstHiveObject {
     /**
      * The selling item type associated with this rack.
      */
-    private Item item;
+    private SellItem item;
 
     /**
      * The number of units stored in this rack of the associated selling item.
@@ -65,7 +65,7 @@ public class Rack extends DstHiveObject {
      * @param item           the id of the item stored in the rack.
      * @param itemUnitsCount the count of the item stored in the rack.
      */
-    public Rack(int id, int row, int col, Item item, int itemUnitsCount) {
+    public Rack(int id, int row, int col, SellItem item, int itemUnitsCount) {
         this(id, row, col);
         setItem(item, itemUnitsCount);
     }
@@ -73,10 +73,10 @@ public class Rack extends DstHiveObject {
     /**
      * Returns the item stored in this rack.
      *
-     * @return an {@code Item} object representing the associated item in this rack,
-     *         or {@code null} if the rack is empty.
+     * @return an {@code SellItem} object representing the associated item in this rack,
+     * or {@code null} if the rack is empty.
      */
-    public Item getStoredItem() {
+    public SellItem getStoredItem() {
         return this.item;
     }
 
@@ -95,7 +95,7 @@ public class Rack extends DstHiveObject {
      * @param item           the id of the item stored in the rack.
      * @param itemUnitsCount the count of the item stored in the rack.
      */
-    public void setItem(Item item, int itemUnitsCount) {
+    public void setItem(SellItem item, int itemUnitsCount) {
         if (itemUnitsCount > 0) {
             this.item = item;
             this.itemsUnitsCount = itemUnitsCount;
