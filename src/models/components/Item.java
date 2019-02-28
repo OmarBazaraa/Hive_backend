@@ -1,12 +1,12 @@
 package models.components;
 
-
 import models.hive.Rack;
 
+
 /**
- * This {@code SellItem} class represent a sell item in our Hive Warehousing System.
+ * This {@code Item} class represents a sell item in our Hive Warehousing System.
  */
-public class SellItem {
+public class Item {
 
     //
     // Member Variables
@@ -27,6 +27,7 @@ public class SellItem {
      */
     private Rack rack;
 
+    // ===============================================================================================
     //
     // Member Methods
     //
@@ -38,7 +39,7 @@ public class SellItem {
      * @param weight the weight of this item.
      * @param rack   the rack holding this item.
      */
-    public SellItem(int id, int weight, Rack rack) {
+    public Item(int id, int weight, Rack rack) {
         this.id = id;
         this.weight = weight;
         this.rack = rack;

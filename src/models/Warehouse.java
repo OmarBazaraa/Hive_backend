@@ -29,6 +29,11 @@ public class Warehouse {
     private Map<Integer, Agent> agents;
 
     /**
+     * Map of all sell items in the warehouse indexed by their id.
+     */
+    private Map<Integer, List<Rack>> items;
+
+    /**
      * Map of all racks in the warehouse indexed by their id.
      */
     private Map<Integer, Rack> racks;
@@ -39,28 +44,14 @@ public class Warehouse {
     private Map<Integer, Gate> gates;
 
     /**
-     * Map of all charging spots in the warehouse indexed by their id.
+     * Map of all charging stations in the warehouse indexed by their id.
      */
     private Map<Integer, ChargingStation> chargingSpots;
 
 
 
-    private Map<Integer, List<Rack>> items;
-
     private Queue<Task> pendingOrders;
 
-    private Planner planner;
-
-    // ===============================================================================================
-    //
-    // Static Functions
-    //
-
-    public static Warehouse create(Scanner reader) throws Exception {
-        Warehouse ret = new Warehouse();
-        ret.setup(reader);
-        return ret;
-    }
 
     // ===============================================================================================
     //
@@ -68,10 +59,6 @@ public class Warehouse {
     //
 
     public Warehouse() {
-
-    }
-
-    public void setup(Scanner reader) throws Exception {
 
     }
 
