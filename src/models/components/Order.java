@@ -3,6 +3,8 @@ package models.components;
 import models.components.base.HiveObject;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 
 /**
@@ -18,9 +20,11 @@ public class Order extends HiveObject {
     //
 
     /**
-     * The list of needed items for this order.
+     * The map of needed items for this order.
+     * The keys are the needed items.
+     * The values are the needed quantities.
      */
-    private List<Item> items;
+    private Map<Item, Integer> items;
 
     /**
      * The gate where the order must be delivered to.
@@ -28,9 +32,9 @@ public class Order extends HiveObject {
     private Gate deliveryGate;
 
     /**
-     * The list of sub tasks for fulfilling this order.
+     * The set of sub tasks for fulfilling this order.
      */
-    private List<Task> subTasks;
+    private Set<Task> subTasks;
 
     /**
      * The listener to be invoked when this order has been fulfilled.
@@ -46,22 +50,22 @@ public class Order extends HiveObject {
      * Constructs a new order.
      *
      * @param id           the id of this order.
-     * @param items        the list of needed items for fulfilling this order.
+     * @param items        the map of needed items for fulfilling this order.
      * @param deliveryGate the gate where the order must be delivered to.
      */
-    public Order(int id, List<Item> items, Gate deliveryGate) {
+    public Order(int id, Map<Item, Integer> items, Gate deliveryGate) {
         super(id);
         this.items = items;
         this.deliveryGate = deliveryGate;
     }
 
     /**
-     * Returns the list of items needed for fulfilling this order.
+     * Returns the map of items needed for fulfilling this order.
      *
-     * @return the list of items of this order.
+     * @return the map of items of this order.
      */
-    public List<Item> getItems() {
-        return items;
+    public Map<Item, Integer> getItems() {
+        return this.items;
     }
 
     /**

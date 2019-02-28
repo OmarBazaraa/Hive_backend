@@ -66,7 +66,9 @@ public class Item extends HiveObject {
      * @param quantity the quantity to be added.
      */
     public void addToRack(Rack rack, int quantity) {
-        this.racks.put(rack, quantity + this.racks.getOrDefault(rack, 0));
+        if (quantity > 0) {
+            this.racks.put(rack, quantity + this.racks.getOrDefault(rack, 0));
+        }
     }
 
     /**
@@ -76,9 +78,14 @@ public class Item extends HiveObject {
      * @param quantity the quantity to be taken.
      */
     public void takeFromRack(Rack rack, int quantity) {
-        this.racks.put(
-                rack,
-                Math.max(0, racks.getOrDefault(rack, 0) - quantity)
-        );
+        if (quantity > 0) {
+            int net = racks.getOrDefault(rack, 0) - quantity;
+
+            if (net > 0) {
+                this.racks.put(rack, net);
+            } else {
+                this.racks.remove(rack);
+            }
+        }
     }
 }

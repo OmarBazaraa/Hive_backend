@@ -2,6 +2,7 @@ package models.components;
 
 import models.components.base.DstHiveObject;
 import utils.Constants;
+import utils.Constants.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,6 +19,11 @@ public class Rack extends DstHiveObject {
     //
     // Member Variables
     //
+
+    /**
+     * The current status of this rack.
+     */
+    private RackStatus status;
 
     /**
      * The map of all the items this rack is holding.
@@ -48,6 +54,24 @@ public class Rack extends DstHiveObject {
      */
     public Rack(int id, int row, int col) {
         super(id, row, col);
+    }
+
+    /**
+     * Returns the current status of this rack.
+     *
+     * @return an {@code RackStatus} value representing the current status of the rack.
+     */
+    public RackStatus getStatus() {
+        return this.status;
+    }
+
+    /**
+     * Sets a new status to this rack.
+     *
+     * @param status the new status to set.
+     */
+    public void setStatus(RackStatus status) {
+        this.status = status;
     }
 
     /**
@@ -83,16 +107,26 @@ public class Rack extends DstHiveObject {
      * @return {@code true} if the item with the given quantity is taken successfully, {@code false} otherwise.
      */
     public boolean takeItem(Item item, int quantity) {
-        int count = items.getOrDefault(item, 0);
-
-        if (0 < quantity && quantity <= count) {
-            items.put(item, count - quantity);
-            storedWeight -= quantity * item.getWeight();
-            item.takeFromRack(this, quantity);
-            return true;
+        if (quantity <= 0) {
+            return false;
         }
 
-        return false;
+        int count = items.getOrDefault(item, 0);
+        int net = count - quantity;
+
+        if (net < 0) {
+            return false;
+        }
+
+        if (net > 0) {
+            items.put(item, net);
+        } else {
+            items.remove(item);
+        }
+
+        storedWeight -= quantity * item.getWeight();
+        item.takeFromRack(this, quantity);
+        return true;
     }
 
     /**

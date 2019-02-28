@@ -63,6 +63,14 @@ public class Constants {
     }
 
     /**
+     * Different status of the racks during their lifecycle in the system.
+     */
+    public enum RackStatus {
+        READY,      // The rack is static, and ready to be shipped
+        ACTIVE      // The rack is currently being shipped
+    }
+
+    /**
      * Different status during the lifecycle of the order.
      */
     public enum OrderStatus {

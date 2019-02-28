@@ -19,14 +19,9 @@ public class Task extends HiveObject {
     private Agent agent;
 
     /**
-     * The item needed to be delivered.
+     * The rack needed to be delivered.
      */
-    private Item item;
-
-    /**
-     * The delivery gate of this task.
-     */
-    private Gate gate;
+    private Rack rack;
 
     /**
      * The order in which this task is a part of.
@@ -61,15 +56,13 @@ public class Task extends HiveObject {
      * Constructs a new task.
      *
      * @param agent the assigned agent.
-     * @param item  the needed item.
-     * @param gate  the delivery gate.
+     * @param rack  the needed rack to be delivered.
      * @param order the associated order.
      */
-    public Task(Agent agent, Item item, Gate gate, Order order) {
+    public Task(Agent agent, Rack rack, Order order) {
         super(getTaskId());
         this.agent = agent;
-        this.item = item;
-        this.gate = gate;
+        this.rack = rack;
         this.order = order;
     }
 }
