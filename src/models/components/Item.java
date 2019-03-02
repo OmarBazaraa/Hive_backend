@@ -21,6 +21,11 @@ public class Item extends HiveObject {
     private int weight;
 
     /**
+     * The total available quantity of this item across the warehouse's racks.
+     */
+    private int totalQuantity;
+
+    /**
      * The racks holding this sell item.
      */
     private Map<Rack, Integer> racks = new HashMap<>();
@@ -51,6 +56,15 @@ public class Item extends HiveObject {
     }
 
     /**
+     * Returns the total available quantity of this item across the warehouse's racks.
+     *
+     * @return an integer value representing the total quantity of this item.
+     */
+    public int getTotalQuantity() {
+        return this.totalQuantity;
+    }
+
+    /**
      * Returns the map of racks hold this sell item.
      *
      * @return a map of {@code Rack} holding this item, where the key is {@code Rack} and the value is the quantity.
@@ -67,6 +81,7 @@ public class Item extends HiveObject {
      */
     public void addToRack(Rack rack, int quantity) {
         if (quantity > 0) {
+            this.totalQuantity += quantity;
             this.racks.put(rack, quantity + this.racks.getOrDefault(rack, 0));
         }
     }
@@ -79,11 +94,14 @@ public class Item extends HiveObject {
      */
     public void takeFromRack(Rack rack, int quantity) {
         if (quantity > 0) {
-            int net = racks.getOrDefault(rack, 0) - quantity;
+            int cnt = racks.getOrDefault(rack, 0);
+            int net = cnt - quantity;
 
             if (net > 0) {
+                this.totalQuantity -= quantity;
                 this.racks.put(rack, net);
             } else {
+                this.totalQuantity -= cnt;
                 this.racks.remove(rack);
             }
         }

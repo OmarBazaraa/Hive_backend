@@ -1,6 +1,9 @@
 package models.components;
 
 import models.components.base.HiveObject;
+import utils.Pair;
+
+import java.util.List;
 
 
 /**
@@ -17,6 +20,11 @@ public class Task extends HiveObject {
      * The robot agent assigned for this task.
      */
     private Agent agent;
+
+    /**
+     * The list of needed items to be picked from the below rack.
+     */
+    private List<Pair<Item, Integer>> items;
 
     /**
      * The rack needed to be delivered.

@@ -29,6 +29,16 @@ public class Warehouse {
     private Map<Integer, Agent> agents = new HashMap<>();
 
     /**
+     * Set of all currently active agents, sorted by their priority.
+     */
+    private Set<Agent> activeAgents = new TreeSet<>();
+
+    /**
+     * Set of all currently idle agents.
+     */
+    private Set<Agent> readyAgents = new HashSet<>();
+
+    /**
      * Map of all sell items in the warehouse, indexed by their id.
      */
     private Map<Integer, Item> items = new HashMap<>();
@@ -46,10 +56,12 @@ public class Warehouse {
     /**
      * Map of all charging stations in the warehouse, indexed by their id.
      */
-    private Map<Integer, Station> chargingStations = new HashMap<>();
+    private Map<Integer, Station> stations = new HashMap<>();
 
-
-    private Queue<Task> pendingOrders;
+    /**
+     * Queue of pending and/or partially pending orders.
+     */
+    private Queue<Order> pendingOrders = new LinkedList<>();
 
     // ===============================================================================================
     //
@@ -79,14 +91,16 @@ public class Warehouse {
      * @param data the un parsed order object.
      */
     public void addOrder(List<Object> data) {
-        // Parse the incoming order object
-        Order order = parseOrder(data);
-
-
+        this.pendingOrders.add(parseOrder(data));
     }
 
+    /**
+     * Performs a single time step in this warehouse.
+     */
     public void run() {
-
+        // TODO:
+        // TODO: 1. Dispatch pending orders.
+        // TODO: 2. Move active agents.
     }
 
 

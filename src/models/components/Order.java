@@ -22,7 +22,7 @@ public class Order extends HiveObject {
     /**
      * The map of needed items for this order.
      * The keys are the needed items.
-     * The values are the needed quantities.
+     * The values are the corresponding needed quantities.
      */
     private Map<Item, Integer> items;
 
