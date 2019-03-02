@@ -214,25 +214,20 @@ public class Warehouse {
         //
         // Iterate over every pending order and tries to dispatch it
         //
-        for (Order order : pendingOrders) {
-            List<Task> tasks = Dispatcher.dispatch(order, readyAgents);
+        int size = pendingOrders.size();
 
-            activateTasks(tasks);
+        for (int i = 0; i < size && !readyAgents.isEmpty(); ++i) {
+            // Get the current order
+            Order order = pendingOrders.poll();
+
+            // Try dispatching the current order
+            Dispatcher.dispatch(order, readyAgents, activeAgents);
+
+            // Re-add the order to the queue if still pending
+            if (order.isPending()) {
+                pendingOrders.add(order);
+            }
         }
-    }
-
-    /**
-     * Activates the given list of tasks.
-     *
-     * @param tasks the tasks to activate.
-     */
-    private void activateTasks(List<Task> tasks) {
-        // Activate tasks in:
-        // 1. Order
-        // 2. Racks
-        // 3. Items
-        // 4. Agents
-        // 5. Warehouse
     }
 
     /**

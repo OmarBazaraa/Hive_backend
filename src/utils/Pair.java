@@ -9,22 +9,22 @@ public class Pair<T extends Comparable<? super T>, U extends Comparable<? super 
     /**
      * The first object in the pair.
      */
-    public T x;
+    public T key;
 
     /**
      * The second object in the pair.
      */
-    public U y;
+    public U val;
 
     /**
      * Constructs a {@code Pair} object with the given coordinates.
      *
-     * @param x the first object.
-     * @param y the second object.
+     * @param key the first object.
+     * @param val the second object.
      */
-    public Pair(T x, U y) {
-        this.x = x;
-        this.y = y;
+    public Pair(T key, U val) {
+        this.key = key;
+        this.val = val;
     }
 
     /**
@@ -37,8 +37,8 @@ public class Pair<T extends Comparable<? super T>, U extends Comparable<? super 
     @Override
     public int hashCode() {
         int hash = 17;
-        hash = hash * 31 + x.hashCode();
-        hash = hash * 31 + y.hashCode();
+        hash = hash * 31 + key.hashCode();
+        hash = hash * 31 + val.hashCode();
         return hash;
     }
 
@@ -58,7 +58,7 @@ public class Pair<T extends Comparable<? super T>, U extends Comparable<? super 
         }
         // Cast, then compare individual objects
         Pair rhs = (Pair) obj;
-        return (x == rhs.x && y == rhs.y);
+        return (key == rhs.key && val == rhs.val);
     }
 
     /**
@@ -71,9 +71,9 @@ public class Pair<T extends Comparable<? super T>, U extends Comparable<? super 
      */
     @Override
     public int compareTo(Pair<T, U> rhs) {
-        int cmp = x.compareTo(rhs.x);
+        int cmp = key.compareTo(rhs.key);
         if (cmp == 0) {
-            return y.compareTo(rhs.y);
+            return val.compareTo(rhs.val);
         }
         return cmp;
     }

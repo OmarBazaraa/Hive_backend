@@ -1,6 +1,7 @@
 package models.components;
 
 import models.components.base.HiveObject;
+import utils.Constants.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -128,6 +129,7 @@ public class Task extends HiveObject {
      */
     public void assignRack(Rack rack) {
         this.rack = rack;
+        this.rack.setStatus(RackStatus.ACTIVE);
     }
 
     /**

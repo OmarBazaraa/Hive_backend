@@ -17,73 +17,78 @@ public class Dispatcher {
      * <p>
      * TODO: ...
      * This algorithm is considered as complex as the multi-agent path planning algorithm,
-     * and maybe more. So I'm currently solving this algorithm in a naive way.
-     * The algorithm needed to be completed, revised and optimized.
+     * and maybe more. So I'm currently solving this algorithm in a greedy way.
+     * The algorithm needs to be revised and optimized in later phases.
      *
-     * @param order       the order needed to be dispatched.
-     * @param readyAgents the set of ready agents.
-     *
-     * @return a set of {@code Task} objects corresponding to the given order, or a subset of the given order.
+     * @param order        the order needed to be dispatched.
+     * @param readyAgents  the set of ready agents.
+     * @param activeAgents the set of active agents.
      */
-    public static List<Task> dispatch(Order order, Set<Agent> readyAgents) {
-        // If there is no free agent then we cannot dispatch the order right now
-        if (readyAgents.isEmpty()) {
-            return null;
-        }
-
-        // Get order needed items and quantities
-        Map<Item, Integer> neededItems = order.getItems();
-
+    public static void dispatch(Order order, Set<Agent> readyAgents, Set<Agent> activeAgents) {
         //
-        Set<Agent> usedAgents = new HashSet<>();
-        Map<Item, Integer> takenItems = new HashMap<>();
-
-        List<Task> tasks = new ArrayList<>();
-
+        // Keep dispatching while the order is still pending and
+        // there are still idle robots
         //
-        // Iterate over every needed item
-        //
-        for (Map.Entry<Item, Integer> pair : neededItems.entrySet()) {
-            // Get current needed item
+        while (order.isPending() && !readyAgents.isEmpty()) {
+            // Get current needed item in the order
+            Map.Entry<Item, Integer> pair = order.getFirstItem();
             Item item = pair.getKey();
-            int neededQuantity = pair.getValue() - takenItems.getOrDefault(item, 0);
+            int neededQuantity = pair.getValue();
 
-            List<Rack> racks = chooseRacks(item.getRacks(), neededQuantity);
+            // Sort the racks of the current item in decreasing order of the number of available quantities
+            Queue<Pair<Integer, Rack>> racks = sortRacks(item.getRacks());
+
+            //
+            // Keep assigning tasks until fulfilling the current item
+            //
+            while (neededQuantity > 0 && !racks.isEmpty() && !readyAgents.isEmpty()) {
+                // Get current rack
+                int availableQuantity = racks.poll().key;
+                Rack rack = racks.peek().val;
+
+                // Assign a new task
+                Task task = new Task();
+                task.assignOrder(order);
+                task.assignRack(rack);
+                task.fillItems();
+
+                // Assign an agent for this task
+                Agent agent = findAgent(readyAgents, task);
+                task.assignAgent(agent);
+                readyAgents.remove(agent);
+                activeAgents.add(agent);
+
+                // Commit this task
+                order.addTask(task);
+                neededQuantity -= availableQuantity;
+            }
         }
-
-        return tasks;
     }
 
-    private static List<Rack> chooseRacks(Map<Rack, Integer> racks, int neededQuantity) {
-        List<Rack> ret = new ArrayList<>();
+    /**
+     * Finds the best suitable agent for the given task.
+     * TODO: write algorithm
+     *
+     * @param agents the set of all idle agents.
+     * @param task   the task.
+     *
+     * @return the best suitable agent from the given set of agents.
+     */
+    private static Agent findAgent(Set<Agent> agents, Task task) {
+        return agents.iterator().next();
+    }
+
+
+    private static Queue<Pair<Integer, Rack>> sortRacks(Map<Rack, Integer> racks) {
         Queue<Pair<Integer, Rack>> q = new PriorityQueue<>(Collections.reverseOrder());
 
         for (Map.Entry<Rack, Integer> pair : racks.entrySet()) {
             Rack rack = pair.getKey();
-            int availableQuantity = pair.getValue();
+            int quantity = pair.getValue();
 
-            if (availableQuantity > neededQuantity) {
-                ret.add(rack);
-                return ret;
-            }
-
-            q.add(new Pair<>(availableQuantity, rack));
+            q.add(new Pair<>(quantity, rack));
         }
 
-        while (!q.isEmpty() && neededQuantity > 0) {
-            Pair<Integer, Rack> pair = q.poll();
-            Rack rack = pair.y;
-            int availableQuantity = pair.x;
-
-            ret.add(rack);
-            neededQuantity -= availableQuantity;
-        }
-
-        return ret;
-    }
-
-
-    private static void assignTasks() {
-
+        return q;
     }
 }

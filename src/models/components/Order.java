@@ -86,6 +86,26 @@ public class Order extends HiveObject {
     }
 
     /**
+     * Returns the needed pending quantity of the given item in this order.
+     *
+     * @param item the needed item.
+     *
+     * @return the quantity of the given item.
+     */
+    public int getItemQuantity(Item item) {
+        return this.items.getOrDefault(item, 0);
+    }
+
+    /**
+     * Returns the first pending item in this order.
+     *
+     * @return the first item in this order, or {@code null} if no more pending items.
+     */
+    public Map.Entry<Item, Integer> getFirstItem() {
+        return (this.items.isEmpty() ? null : this.items.entrySet().iterator().next());
+    }
+
+    /**
      * Adds a new needed item for fulfilling this order.
      *
      * @param item     the new item.
