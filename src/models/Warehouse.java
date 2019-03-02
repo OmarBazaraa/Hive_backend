@@ -44,6 +44,11 @@ public class Warehouse {
     private Map<Integer, Item> items = new HashMap<>();
 
     /**
+     * Map of the currently allocated items in the warehouse.
+     */
+    private Map<Item, Integer> allocatedItems = new HashMap<>();
+
+    /**
      * Map of all racks in the warehouse, indexed by their id.
      */
     private Map<Integer, Rack> racks = new HashMap<>();
@@ -94,7 +99,8 @@ public class Warehouse {
         Order order = parseOrder(data);
 
         if (feasible(order)) {
-            this.pendingOrders.add(order);
+            allocateOrderResources(order);
+            pendingOrders.add(order);
         } else {
             // TODO: add log message
         }
@@ -104,18 +110,11 @@ public class Warehouse {
      * Performs a single time step in this warehouse.
      */
     public void run() {
-        // TODO:
-        // TODO: 1. Dispatch pending orders.
-        // TODO: 2. Move active agents.
-    }
+        // Dispatch pending orders
+        dispatchPendingOrders();
 
-
-    public boolean isActive() {
-        return false;
-    }
-
-    public void print() {
-        System.out.println(map);
+        // Move active agents one step toward their targets
+        step();
     }
 
     // ===============================================================================================
@@ -150,19 +149,61 @@ public class Warehouse {
         // Get map of required items of this order
         Map<Item, Integer> items = order.getItems();
 
+        //
         // Iterate over every item
+        //
         for (Map.Entry<Item, Integer> pair : items.entrySet()) {
+            // Get needed item and its quantity
             Item item = pair.getKey();
             int quantity = pair.getValue();
 
+            // Get currently allocated items of this type
+            int allocated = allocatedItems.getOrDefault(item, 0);
+
             // If needed quantity is greater than the overall available quantity
             // then this order is infeasible
-            if (quantity > item.getTotalQuantity()) {
+            if (allocated + quantity > item.getTotalQuantity()) {
                 return false;
             }
         }
 
         return true;
+    }
+
+    /**
+     * Allocates the resources of the given order in terms of the needed quantities.
+     *
+     * @param order the order to check.
+     */
+    private void allocateOrderResources(Order order) {
+        // Get map of required items of this order
+        Map<Item, Integer> items = order.getItems();
+
+        //
+        // Allocate every needed item in the order
+        //
+        for (Map.Entry<Item, Integer> pair : items.entrySet()) {
+            Item item = pair.getKey();
+            int quantity = pair.getValue();
+            int allocated = allocatedItems.getOrDefault(item, 0);
+
+            allocatedItems.put(item, quantity + allocated);
+        }
+    }
+
+    /**
+     * Dispatches the current pending orders of the warehouse.
+     */
+    private void dispatchPendingOrders() {
+
+
+    }
+
+    /**
+     * Moves the active agents one step towards their targets.
+     */
+    private void step() {
+
     }
 
     // ===============================================================================================
