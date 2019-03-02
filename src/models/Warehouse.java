@@ -91,7 +91,13 @@ public class Warehouse {
      * @param data the un parsed order object.
      */
     public void addOrder(List<Object> data) {
-        this.pendingOrders.add(parseOrder(data));
+        Order order = parseOrder(data);
+
+        if (feasible(order)) {
+            this.pendingOrders.add(order);
+        } else {
+            // TODO: add log message
+        }
     }
 
     /**
@@ -131,6 +137,38 @@ public class Warehouse {
             gate.computeGuideMap(map);
         }
     }
+
+    /**
+     * Checks whether the given order is feasible of being fulfilled regarding
+     * its items and quantities.
+     *
+     * @param order the order to check.
+     *
+     * @return {@code true} if the given order is feasible, {@code false} otherwise.
+     */
+    private boolean feasible(Order order) {
+        // Get map of required items of this order
+        Map<Item, Integer> items = order.getItems();
+
+        // Iterate over every item
+        for (Map.Entry<Item, Integer> pair : items.entrySet()) {
+            Item item = pair.getKey();
+            int quantity = pair.getValue();
+
+            // If needed quantity is greater than the overall available quantity
+            // then this order is infeasible
+            if (quantity > item.getTotalQuantity()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    // ===============================================================================================
+    //
+    // Parsing Methods
+    //
 
     /**
      * Parses the configurations of the warehouse space and components,
