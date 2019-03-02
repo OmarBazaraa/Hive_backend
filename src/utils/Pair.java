@@ -4,7 +4,7 @@ package utils;
 /**
  * This {@code Pair} class holds a pair of objects as a unit.
  */
-public class Pair<T extends Comparable<T>, U extends Comparable<U>> implements Comparable<Pair<T, U>> {
+public class Pair<T extends Comparable<? super T>, U extends Comparable<? super U>> implements Comparable<Pair<T, U>> {
 
     /**
      * The first object in the pair.
@@ -17,7 +17,7 @@ public class Pair<T extends Comparable<T>, U extends Comparable<U>> implements C
     public U y;
 
     /**
-     * Constructs a {@code Position} object with the given coordinates.
+     * Constructs a {@code Pair} object with the given coordinates.
      *
      * @param x the first object.
      * @param y the second object.
