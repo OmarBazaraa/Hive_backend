@@ -75,6 +75,15 @@ public class Rack extends DstHiveObject {
     }
 
     /**
+     * Returns the map of items available in this rack.
+     *
+     * @return the map of items of this rack.
+     */
+    public Map<Item, Integer> getItems() {
+        return this.items;
+    }
+
+    /**
      * Adds the given item into this rack.
      *
      * @param item     the id of the items stored in the rack.
@@ -96,7 +105,7 @@ public class Rack extends DstHiveObject {
     }
 
     /**
-     * Takes an item from this rack with the given quantity.
+     * Removes an item from this rack with the given quantity.
      * <p>
      * If the given quantity is greater than the quantity of the item stored in this rack,
      * then nothing will be taken.
@@ -104,9 +113,9 @@ public class Rack extends DstHiveObject {
      * @param item     the item to be taken.
      * @param quantity the quantity to be taken.
      *
-     * @return {@code true} if the item with the given quantity is taken successfully, {@code false} otherwise.
+     * @return {@code true} if the item with the given quantity is removed successfully, {@code false} otherwise.
      */
-    public boolean takeItem(Item item, int quantity) {
+    public boolean removeItem(Item item, int quantity) {
         if (quantity <= 0) {
             return false;
         }

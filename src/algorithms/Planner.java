@@ -11,7 +11,7 @@ import java.util.Queue;
 
 
 /**
- * This {@code Planner} class contains some static method for multi-agent path planning.
+ * This {@code Planner} class contains some static method for multi-agent path planning algorithms.
  */
 public class Planner {
 

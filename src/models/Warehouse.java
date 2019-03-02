@@ -1,5 +1,6 @@
 package models;
 
+import algorithms.Dispatcher;
 import models.components.Item;
 import models.components.Agent;
 import models.components.Order;
@@ -100,6 +101,7 @@ public class Warehouse {
 
         if (feasible(order)) {
             allocateOrderResources(order);
+            setOrderListener(order);
             pendingOrders.add(order);
         } else {
             // TODO: add log message
@@ -192,11 +194,45 @@ public class Warehouse {
     }
 
     /**
+     * Sets the listener object to be called when the given order is fulfilled.
+     *
+     * @param order the order to set its listener.
+     */
+    private void setOrderListener(Order order) {
+        order.setOnFulfillListener(new Order.OnFulFillListener() {
+            @Override
+            public void onFulfill(Order order) {
+                // TODO: notify the frontend
+            }
+        });
+    }
+
+    /**
      * Dispatches the current pending orders of the warehouse.
      */
     private void dispatchPendingOrders() {
+        //
+        // Iterate over every pending order and tries to dispatch it
+        //
+        for (Order order : pendingOrders) {
+            List<Task> tasks = Dispatcher.dispatch(order, readyAgents);
 
+            activateTasks(tasks);
+        }
+    }
 
+    /**
+     * Activates the given list of tasks.
+     *
+     * @param tasks the tasks to activate.
+     */
+    private void activateTasks(List<Task> tasks) {
+        // Activate tasks in:
+        // 1. Order
+        // 2. Racks
+        // 3. Items
+        // 4. Agents
+        // 5. Warehouse
     }
 
     /**
