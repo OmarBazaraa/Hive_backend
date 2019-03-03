@@ -27,6 +27,8 @@ public class Item extends HiveObject {
 
     /**
      * The racks holding this sell item.
+     * The keys are the racks,
+     * The values are the corresponding quantities of this item in the racks.
      */
     private Map<Rack, Integer> racks = new HashMap<>();
 
@@ -56,12 +58,32 @@ public class Item extends HiveObject {
     }
 
     /**
+     * Sets the weight of one unit of this item.
+     *
+     * @param weight the weight of this item.
+     */
+    public void setWeight(int weight) {
+        this.weight = weight;
+    }
+
+    /**
      * Returns the total available quantity of this item across the warehouse's racks.
      *
      * @return an integer value representing the total quantity of this item.
      */
     public int getTotalQuantity() {
         return this.totalQuantity;
+    }
+
+    /**
+     * Returns the quantity of this item in the given rack.
+     *
+     * @param rack the rack.
+     *
+     * @return the quantity of this item in the given rack.
+     */
+    public int getQuantityInRack(Rack rack) {
+        return this.racks.getOrDefault(rack, 0);
     }
 
     /**
@@ -76,34 +98,45 @@ public class Item extends HiveObject {
     /**
      * Puts this item into the given rack.
      *
-     * @param rack     the new holding rack of this item.
+     * @param rack     the rack to add into.
      * @param quantity the quantity to be added.
+     *
+     * @throws Exception when passing non-positive quantity.
      */
-    public void addToRack(Rack rack, int quantity) {
-        if (quantity > 0) {
-            this.totalQuantity += quantity;
-            this.racks.put(rack, quantity + this.racks.getOrDefault(rack, 0));
+    public void addToRack(Rack rack, int quantity) throws Exception {
+        if (quantity <= 0) {
+            throw new Exception("Passing non-positive item quantity!");
         }
+
+        this.totalQuantity += quantity;
+        this.racks.put(rack, quantity + this.racks.getOrDefault(rack, 0));
     }
 
     /**
-     * Takes this item from the given rack.
+     * Removes the given quantity of this item from the given rack.
      *
-     * @param rack     the new holding rack of this item.
+     * @param rack     the rack of this item to remove from.
      * @param quantity the quantity to be taken.
+     *
+     * @throws Exception when the given quantity is greater than the current quantity in the rack.
      */
-    public void takeFromRack(Rack rack, int quantity) {
-        if (quantity > 0) {
-            int cnt = racks.getOrDefault(rack, 0);
-            int net = cnt - quantity;
+    public void removeFromRack(Rack rack, int quantity) throws Exception {
+        if (quantity <= 0) {
+            throw new Exception("Passing non-positive item quantity!");
+        }
 
-            if (net > 0) {
-                this.totalQuantity -= quantity;
-                this.racks.put(rack, net);
-            } else {
-                this.totalQuantity -= cnt;
-                this.racks.remove(rack);
-            }
+        int count = racks.getOrDefault(rack, 0);
+
+        if (quantity > count) {
+            throw new Exception("No enough items to remove from the rack!");
+        }
+
+        totalQuantity -= quantity;
+
+        if (count > quantity) {
+            racks.put(rack, count - quantity);
+        } else {
+            racks.remove(rack);
         }
     }
 }

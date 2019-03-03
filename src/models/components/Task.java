@@ -18,14 +18,14 @@ public class Task extends HiveObject {
     //
 
     /**
+     * The order in which this task is a part of.
+     */
+    private Order order;
+
+    /**
      * The robot agent assigned for this task.
      */
     private Agent agent;
-
-    /**
-     * The map of needed items to be picked from the below rack.
-     */
-    private Map<Item, Integer> items = new HashMap<>();
 
     /**
      * The rack needed to be delivered.
@@ -33,9 +33,14 @@ public class Task extends HiveObject {
     private Rack rack;
 
     /**
-     * The order in which this task is a part of.
+     * The map of needed items to be picked from the below rack.
      */
-    private Order order;
+    private Map<Item, Integer> items = new HashMap<>();
+
+    /**
+     * Flag to indicate whether this task has been activated or not.
+     */
+    private boolean activated = false;
 
     // ===============================================================================================
     //
@@ -129,7 +134,6 @@ public class Task extends HiveObject {
      */
     public void assignRack(Rack rack) {
         this.rack = rack;
-        this.rack.setStatus(RackStatus.ACTIVE);
     }
 
     /**
@@ -139,8 +143,19 @@ public class Task extends HiveObject {
      * @param rack  the assigned rack.
      */
     public void assignTerminals(Agent agent, Rack rack) {
-        this.agent = agent;
-        this.rack = rack;
+        assignAgent(agent);
+        assignRack(rack);
+    }
+
+    /**
+     * Returns the quantity of the given item needed in this task.
+     *
+     * @param item the item to get its quantity.
+     *
+     * @return the quantity of the given item.
+     */
+    public int getItemQuantity(Item item) {
+        return this.items.getOrDefault(item, 0);
     }
 
     /**
@@ -157,24 +172,29 @@ public class Task extends HiveObject {
      *
      * @param item     the new item.
      * @param quantity the needed quantity.
+     *
+     * @throws Exception when passing non-positive quantity.
      */
-    public void addItem(Item item, int quantity) {
-        if (quantity > 0) {
-            this.items.put(item, quantity + items.getOrDefault(item, 0));
+    public void addItem(Item item, int quantity) throws Exception {
+        if (quantity <= 0) {
+            throw new Exception("Passing non-positive item quantity!");
         }
+
+        this.items.put(item, quantity + items.getOrDefault(item, 0));
     }
 
     /**
-     * Fills this task with the maximum number of items needed for the
+     * Fills this task with the maximum number of items needed by the
      * associated order that are available in the assigned rack.
      */
-    public void fillItems() {
+    public void fillItems() throws Exception {
         if (order == null || rack == null) {
-            return;
+            throw new Exception("No order and/or rack is assigned yet to the task!");
         }
 
         Map<Item, Integer> m1, m2;
 
+        // Assign the smaller set of items to 'm1'
         if (order.getItems().size() < rack.getItems().size()) {
             m1 = order.getItems();
             m2 = rack.getItems();
@@ -185,6 +205,7 @@ public class Task extends HiveObject {
 
         clearItems();
 
+        // Get the intersection between the items of the order and the items in the rack
         for (Item item : m1.keySet()) {
             int quantity = Math.min(m1.getOrDefault(item, 0), m2.getOrDefault(item, 0));
             this.items.put(item, quantity);
@@ -196,5 +217,40 @@ public class Task extends HiveObject {
      */
     public void clearItems() {
         this.items.clear();
+    }
+
+    /**
+     * Returns whether this task has been activated or not.
+     *
+     * @return {@code true} if this task has been activated, {@code false} otherwise.
+     */
+    public boolean isActivated() {
+        return this.activated;
+    }
+
+    /**
+     * Activates this task and allocates its assigned resources.
+     */
+    public void activate() throws Exception {
+        // Task information must be complete
+        if (order == null || agent == null || rack == null) {
+            throw new Exception("No order, agent and/or order is assigned yet to the task!");
+        }
+
+        // Skip re-activating already activated tasks
+        if (activated) {
+            return;
+        }
+
+        // 0. Set task as activated
+        activated = true;
+
+        // 1. Remove the items from the pending item of the associated order
+
+        // 2. Allocate the task items of the assigned rack
+
+        // 3. Activate the assigned agent
+
+        // 4. Allocate the assigned rack
     }
 }

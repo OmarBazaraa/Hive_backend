@@ -26,9 +26,9 @@ public class Rack extends DstHiveObject {
     private RackStatus status;
 
     /**
-     * The map of all the items this rack is holding.
+     * The maximum storing capacity (in weight units) of this rack.
      */
-    private Map<Item, Integer> items = new HashMap<>();
+    private int maxCapacity = Constants.RACK_DEFAULT_STORE_CAPACITY;
 
     /**
      * The total weight of all the items stored in this rack.
@@ -36,9 +36,9 @@ public class Rack extends DstHiveObject {
     private int storedWeight;
 
     /**
-     * The maximum storing capacity (in weight units) of this rack.
+     * The map of all the items this rack is holding.
      */
-    private int maxCapacity = Constants.RACK_DEFAULT_STORE_CAPACITY;
+    private Map<Item, Integer> items = new HashMap<>();
 
     // ===============================================================================================
     //
@@ -75,6 +75,50 @@ public class Rack extends DstHiveObject {
     }
 
     /**
+     * Returns the maximum storing capacity (in weight units) of this rack.
+     *
+     * @return the maximum storing capacity of this rack.
+     */
+    public int getMaxCapacity() {
+        return this.maxCapacity;
+    }
+
+    /**
+     * Sets the maximum storing capacity (in weight units) of this rack.
+     *
+     * @param capacity the new maximum storing capacity.
+     *
+     * @throws Exception when the new capacity is less than the currently stored weight.
+     */
+    public void setMaxCapacity(int capacity) throws Exception {
+        if (capacity < storedWeight) {
+            throw new Exception("Unable to reduce the size of the rack!");
+        }
+
+        this.maxCapacity = capacity;
+    }
+
+    /**
+     * Returns the current stored weight in this rack.
+     *
+     * @return the current stored weight.
+     */
+    public int getStoredWeight() {
+        return this.storedWeight;
+    }
+
+    /**
+     * Returns the quantity of the given item in this rack.
+     *
+     * @param item the item to get its quantity.
+     *
+     * @return the quantity of the given item.
+     */
+    public int getItemQuantity(Item item) {
+        return this.items.getOrDefault(item, 0);
+    }
+
+    /**
      * Returns the map of items available in this rack.
      *
      * @return the map of items of this rack.
@@ -89,104 +133,60 @@ public class Rack extends DstHiveObject {
      * @param item     the id of the items stored in the rack.
      * @param quantity the number of copies to be added.
      *
-     * @return {@code true} if the item with the given quantity is added successfully, {@code false} otherwise.
+     * @throws Exception when adding the new items results in exceeding the storing limits of this rack.
      */
-    public boolean addItem(Item item, int quantity) {
-        int weight = quantity * item.getWeight();
-
-        if (0 < quantity && storedWeight + weight <= maxCapacity) {
-            items.put(item, quantity + items.getOrDefault(item, 0));
-            storedWeight += weight;
-            item.addToRack(this, quantity);
-            return true;
+    public void addItem(Item item, int quantity) throws Exception {
+        if (quantity <= 0) {
+            throw new Exception("Passing non-positive item quantity!");
         }
 
-        return false;
+        int weight = quantity * item.getWeight();
+
+        if (storedWeight + weight > maxCapacity) {
+            throw new Exception("The rack exceeded its storing capacity limits!");
+        }
+
+        storedWeight += weight;
+        items.put(item, quantity + items.getOrDefault(item, 0));
+        item.addToRack(this, quantity);
     }
 
     /**
      * Removes an item from this rack with the given quantity.
-     * <p>
-     * If the given quantity is greater than the quantity of the item stored in this rack,
-     * then nothing will be taken.
      *
      * @param item     the item to be taken.
      * @param quantity the quantity to be taken.
      *
-     * @return {@code true} if the item with the given quantity is removed successfully, {@code false} otherwise.
+     * @throws Exception when the given quantity is greater than the current quantity in the rack.
      */
-    public boolean removeItem(Item item, int quantity) {
+    public void removeItem(Item item, int quantity) throws Exception {
         if (quantity <= 0) {
-            return false;
+            throw new Exception("Passing non-positive item quantity!");
         }
 
         int count = items.getOrDefault(item, 0);
-        int net = count - quantity;
 
-        if (net < 0) {
-            return false;
+        if (quantity > count) {
+            throw new Exception("No enough items to remove from the rack!");
         }
 
-        if (net > 0) {
-            items.put(item, net);
+        storedWeight -= quantity * item.getWeight();
+
+        if (count > quantity) {
+            items.put(item, count - quantity);
         } else {
             items.remove(item);
         }
 
-        storedWeight -= quantity * item.getWeight();
-        item.takeFromRack(this, quantity);
-        return true;
-    }
-
-    /**
-     * Returns the quantity of the given item this rack is storing.
-     *
-     * @param item the item to get its quantity.
-     *
-     * @return the quantity of the given item.
-     */
-    public int getItemQuantity(Item item) {
-        return this.items.getOrDefault(item, 0);
+        item.removeFromRack(this, quantity);
     }
 
     /**
      * Clears and empties the current rack from all its items.
      */
-    public void clear() {
-        this.items = new HashMap<>();
-        this.storedWeight = 0;
-    }
-
-    /**
-     * Returns the current stored weight in this rack.
-     *
-     * @return the current stored weight.
-     */
-    public int getStoredWeight() {
-        return storedWeight;
-    }
-
-    /**
-     * Returns the maximum storing capacity (in weight units) of this rack.
-     *
-     * @return the maximum storing capacity of this rack.
-     */
-    public int getMaxCapacity() {
-        return this.maxCapacity;
-    }
-
-    /**
-     * Sets the maximum storing capacity (in weight units) of this rack.
-     * If the new maximum capacity is less than the current stored weight in the rack then
-     * the rack is cleared first.
-     *
-     * @param capacity the new maximum storing capacity.
-     */
-    public void setMaxCapacity(int capacity) {
-        if (capacity < getStoredWeight()) {
-            clear();
+    public void clear() throws Exception {
+        for (Map.Entry<Item, Integer> pair : items.entrySet()) {
+            removeItem(pair.getKey(), pair.getValue());
         }
-
-        this.maxCapacity = capacity;
     }
 }

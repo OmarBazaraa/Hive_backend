@@ -2,10 +2,7 @@ package models.components;
 
 import models.components.base.HiveObject;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 
 /**
@@ -21,6 +18,11 @@ public class Order extends HiveObject {
     //
 
     /**
+     * The gate where the order must be delivered to.
+     */
+    private Gate deliveryGate;
+
+    /**
      * The sum of all pending needed quantities for this order.
      */
     private int totalQuantity;
@@ -33,14 +35,9 @@ public class Order extends HiveObject {
     private Map<Item, Integer> items = new HashMap<>();
 
     /**
-     * The gate where the order must be delivered to.
-     */
-    private Gate deliveryGate;
-
-    /**
      * The set of sub tasks for fulfilling this order.
      */
-    private Set<Task> subTasks;
+    private Set<Task> subTasks = new HashSet<>();
 
     /**
      * The listener to be invoked when this order has been fulfilled.
@@ -63,107 +60,28 @@ public class Order extends HiveObject {
 
     /**
      * Constructs a new order.
+     *
+     * @param id           the id of this order.
+     * @param deliveryGate the gate where the order must be delivered to.
+     */
+    public Order(int id, Gate deliveryGate) {
+        super(id);
+        this.deliveryGate = deliveryGate;
+    }
+
+    /**
+     * Constructs a new order.
      * All the given item quantities must be positive integers.
      *
      * @param id           the id of this order.
-     * @param items        the map of needed items for fulfilling this order.
      * @param deliveryGate the gate where the order must be delivered to.
+     * @param items        the map of needed items for fulfilling this order.
      */
-    public Order(int id, Map<Item, Integer> items, Gate deliveryGate) {
+    public Order(int id, Gate deliveryGate, Map<Item, Integer> items) {
         super(id);
-        this.items = items;
         this.deliveryGate = deliveryGate;
+        this.items = items;
         this.init();
-    }
-
-    /**
-     * Returns the map of items needed for fulfilling this order.
-     *
-     * @return the map of items of this order.
-     */
-    public Map<Item, Integer> getItems() {
-        return this.items;
-    }
-
-    /**
-     * Returns the needed pending quantity of the given item in this order.
-     *
-     * @param item the needed item.
-     *
-     * @return the quantity of the given item.
-     */
-    public int getItemQuantity(Item item) {
-        return this.items.getOrDefault(item, 0);
-    }
-
-    /**
-     * Returns the first pending item in this order.
-     *
-     * @return the first item in this order, or {@code null} if no more pending items.
-     */
-    public Map.Entry<Item, Integer> getFirstItem() {
-        return (this.items.isEmpty() ? null : this.items.entrySet().iterator().next());
-    }
-
-    /**
-     * Adds a new needed item for fulfilling this order.
-     *
-     * @param item     the new item.
-     * @param quantity the needed quantity.
-     */
-    public void addItem(Item item, int quantity) {
-        if (quantity > 0) {
-            this.totalQuantity += quantity;
-            this.items.put(item, quantity + items.getOrDefault(item, 0));
-        }
-    }
-
-    /**
-     * Removes an item from the order.
-     *
-     * @param item     the item to be removed.
-     * @param quantity the quantity to be removed.
-     */
-    public void removeItem(Item item, int quantity) {
-        int cnt = items.getOrDefault(item, 0);
-        int net = cnt - quantity;
-
-        if (net > 0) {
-            this.totalQuantity -= quantity;
-            this.items.put(item, net);
-        } else {
-            this.totalQuantity -= cnt;
-            this.items.remove(item);
-        }
-    }
-
-    /**
-     * Adds a new sub task for fulfilling this order.
-     *
-     * @param task the new sub task to be added.
-     */
-    public void addTask(Task task) {
-        // Get the items of the given task
-        Map<Item, Integer> taskItems = task.getItems();
-
-        //
-        // Iterate over all the items in the given task
-        //
-        for (Map.Entry<Item, Integer> pair : taskItems.entrySet()) {
-            // Get the current item
-            Item item = pair.getKey();
-            int quantity = pair.getValue();
-
-            // Remove the current item from the pending items of this order
-            removeItem(item, quantity);
-
-            // Remove the current item from the assigned rack,
-            // to avoid multiple tasks allocate the same items
-            task.getRack().removeItem(item, quantity);
-        }
-
-        // Finally, add the given task to the set of active tasks of this order
-        this.subTasks.add(task);
     }
 
     /**
@@ -201,6 +119,118 @@ public class Order extends HiveObject {
      */
     public boolean isPending() {
         return (this.totalQuantity > 0);
+    }
+
+    /**
+     * Checks whether this order is fulfilled or not.
+     *
+     * @return {@code true} if this order is fulfilled, {@code false} otherwise.
+     */
+    public boolean isFulfilled() {
+        return (this.totalQuantity <= 0 && this.subTasks.isEmpty());
+    }
+
+    /**
+     * Returns the first pending item in this order.
+     *
+     * @return the first item in this order, or {@code null} if no more pending items.
+     */
+    public Map.Entry<Item, Integer> getFirstItem() {
+        return (this.items.isEmpty() ? null : this.items.entrySet().iterator().next());
+    }
+
+    /**
+     * Returns the needed pending quantity of the given item in this order.
+     *
+     * @param item the needed item.
+     *
+     * @return the quantity of the given item.
+     */
+    public int getItemQuantity(Item item) {
+        return this.items.getOrDefault(item, 0);
+    }
+
+    /**
+     * Returns the map of items needed for fulfilling this order.
+     *
+     * @return the map of items of this order.
+     */
+    public Map<Item, Integer> getItems() {
+        return this.items;
+    }
+
+    /**
+     * Adds a new needed item for fulfilling this order.
+     *
+     * @param item     the new item.
+     * @param quantity the needed quantity.
+     *
+     * @throws Exception when passing non-positive quantity.
+     */
+    public void addItem(Item item, int quantity) throws Exception {
+        if (quantity <= 0) {
+            throw new Exception("Passing non-positive item quantity!");
+        }
+
+        this.totalQuantity += quantity;
+        this.items.put(item, quantity + items.getOrDefault(item, 0));
+    }
+
+    /**
+     * Removes an item from the order.
+     *
+     * @param item     the item to be removed.
+     * @param quantity the quantity to be removed.
+     *
+     * @throws Exception when the given quantity is greater than the current quantity in the order.
+     */
+    public void removeItem(Item item, int quantity) throws Exception {
+        if (quantity <= 0) {
+            throw new Exception("Passing non-positive item quantity!");
+        }
+
+        int count = items.getOrDefault(item, 0);
+
+        if (quantity > count) {
+            throw new Exception("No enough items to remove from the order!");
+        }
+
+        totalQuantity -= quantity;
+
+        if (count > quantity) {
+            items.put(item, count - quantity);
+        } else {
+            items.remove(item);
+        }
+    }
+
+    /**
+     * Adds a new sub task for fulfilling this order.
+     *
+     * @param task the new sub task to be added.
+     */
+    public void addTask(Task task) throws Exception {
+        // Get the items of the given task
+        Map<Item, Integer> taskItems = task.getItems();
+
+        //
+        // Iterate over all the items of the given task
+        //
+        for (Map.Entry<Item, Integer> pair : taskItems.entrySet()) {
+            // Get the current item
+            Item item = pair.getKey();
+            int quantity = pair.getValue();
+
+            // Remove the current item from the pending items of this order
+            removeItem(item, quantity);
+
+            // Remove the current item from the assigned rack,
+            // to avoid multiple tasks allocate the same items
+            task.getRack().removeItem(item, quantity);
+        }
+
+        // Finally, add the given task to the set of active tasks of this order
+        subTasks.add(task);
     }
 
     /**
