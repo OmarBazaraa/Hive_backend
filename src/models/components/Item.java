@@ -21,6 +21,11 @@ public class Item extends HiveObject {
     private int weight;
 
     /**
+     * The total reserved quantity of this item across the warehouse's racks.
+     */
+    private int reservedQuantity;
+
+    /**
      * The total available quantity of this item across the warehouse's racks.
      */
     private int totalQuantity;
@@ -67,12 +72,31 @@ public class Item extends HiveObject {
     }
 
     /**
+     * Returns the reserved quantity of this item across the warehouse's racks.
+     *
+     * @return an integer value representing the reserved quantity of this item.
+     */
+    public int getReservedQuantity() {
+        return this.reservedQuantity;
+    }
+
+    /**
      * Returns the total available quantity of this item across the warehouse's racks.
      *
      * @return an integer value representing the total quantity of this item.
      */
     public int getTotalQuantity() {
         return this.totalQuantity;
+    }
+
+    /**
+     * Returns the available quantity of this item across the warehouse's racks.
+     * That is, the total quantity minus the reserved quantity.
+     *
+     * @return an integer value representing the available quantity of this item.
+     */
+    public int getAvailableQuantity() {
+        return this.totalQuantity - this.reservedQuantity;
     }
 
     /**
@@ -131,6 +155,9 @@ public class Item extends HiveObject {
             throw new Exception("No enough items to remove from the rack!");
         }
 
+        // TODO:
+        release(quantity);
+
         totalQuantity -= quantity;
 
         if (count > quantity) {
@@ -138,5 +165,45 @@ public class Item extends HiveObject {
         } else {
             racks.remove(rack);
         }
+    }
+
+    /**
+     * Reserves a quantity of units of this item across the warehouse's racks.
+     * This function just marks a number of available item quantity as reserved
+     * to avoid accepting infeasible orders.
+     *
+     * @param quantity the quantity to reserve.
+     *
+     * @throws Exception when trying to reserve more quantity than currently available.
+     */
+    public void reserve(int quantity) throws Exception {
+        if (quantity <= 0) {
+            throw new Exception("Passing non-positive item quantity!");
+        }
+
+        if (quantity > getAvailableQuantity()) {
+            throw new Exception("No enough item quantity to reserve!");
+        }
+
+        this.reservedQuantity += quantity;
+    }
+
+    /**
+     * Releases a number of reserved units of this item across the warehouse's racks.
+     *
+     * @param quantity the quantity to release.
+     *
+     * @throws Exception when trying to release more quantity than currently reserved.
+     */
+    public void release(int quantity) throws Exception {
+        if (quantity <= 0) {
+            throw new Exception("Passing non-positive item quantity!");
+        }
+
+        if (quantity > getReservedQuantity()) {
+            throw new Exception("No enough item quantity to allocate!");
+        }
+
+        this.reservedQuantity -= quantity;
     }
 }

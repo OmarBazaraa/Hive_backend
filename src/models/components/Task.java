@@ -23,14 +23,14 @@ public class Task extends HiveObject {
     private Order order;
 
     /**
-     * The robot agent assigned for this task.
-     */
-    private Agent agent;
-
-    /**
      * The rack needed to be delivered.
      */
     private Rack rack;
+
+    /**
+     * The robot agent assigned for this task.
+     */
+    private Agent agent;
 
     /**
      * The map of needed items to be picked from the below rack.
@@ -101,24 +101,6 @@ public class Task extends HiveObject {
     }
 
     /**
-     * Returns the assigned agent with this task.
-     *
-     * @return the assigned agent.
-     */
-    public Agent getAgent() {
-        return this.agent;
-    }
-
-    /**
-     * Assigns an agent for this task.
-     *
-     * @param agent the assigned agent.
-     */
-    public void assignAgent(Agent agent) {
-        this.agent = agent;
-    }
-
-    /**
      * Returns the assigned rack with this task.
      *
      * @return the assigned rack.
@@ -134,6 +116,24 @@ public class Task extends HiveObject {
      */
     public void assignRack(Rack rack) {
         this.rack = rack;
+    }
+
+    /**
+     * Returns the assigned agent with this task.
+     *
+     * @return the assigned agent.
+     */
+    public Agent getAgent() {
+        return this.agent;
+    }
+
+    /**
+     * Assigns an agent for this task.
+     *
+     * @param agent the assigned agent.
+     */
+    public void assignAgent(Agent agent) {
+        this.agent = agent;
     }
 
     /**
@@ -188,6 +188,7 @@ public class Task extends HiveObject {
      * associated order that are available in the assigned rack.
      */
     public void fillItems() throws Exception {
+        // Task information must be complete
         if (order == null || rack == null) {
             throw new Exception("No order and/or rack is assigned yet to the task!");
         }
@@ -233,7 +234,7 @@ public class Task extends HiveObject {
      */
     public void activate() throws Exception {
         // Task information must be complete
-        if (order == null || agent == null || rack == null) {
+        if (order == null || rack == null || agent == null) {
             throw new Exception("No order, agent and/or order is assigned yet to the task!");
         }
 
@@ -242,15 +243,26 @@ public class Task extends HiveObject {
             return;
         }
 
-        // 0. Set task as activated
+        // Set task as activated
         activated = true;
 
-        // 1. Remove the items from the pending item of the associated order
+        //
+        // Iterate over all the items of the given task
+        //
+        for (Map.Entry<Item, Integer> pair : items.entrySet()) {
+            // Get the current item
+            Item item = pair.getKey();
+            int quantity = pair.getValue();
 
-        // 2. Allocate the task items of the assigned rack
+            // Remove the current item from the pending items of the associated order
+            order.removeItem(item, quantity);
 
-        // 3. Activate the assigned agent
+            // Reserve the current item if the associated rack to this task
+            rack.removeItem(item, quantity);
+        }
 
-        // 4. Allocate the assigned rack
+        // TODO: Activate the assigned agent
+
+        // TODO: Allocate the assigned rack
     }
 }

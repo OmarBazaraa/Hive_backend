@@ -131,6 +131,48 @@ public class Order extends HiveObject {
     }
 
     /**
+     * Checks whether this order is feasible of being fulfilled regarding
+     * its items and quantities.
+     *
+     * @return {@code true} if the given order is feasible, {@code false} otherwise.
+     */
+    public boolean isFeasible() {
+        //
+        // Iterate over every item in the order
+        //
+        for (Map.Entry<Item, Integer> pair : items.entrySet()) {
+            // Get needed item and its quantity
+            Item item = pair.getKey();
+            int quantity = pair.getValue();
+
+            // If needed quantity is greater than the overall available units
+            // then this order is infeasible
+            if (quantity > item.getAvailableQuantity()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Reserves all the needed units of this order to avoid accepting infeasible order in the future.
+     */
+    public void reserve() throws Exception {
+        //
+        // Iterate over every item in the order
+        //
+        for (Map.Entry<Item, Integer> pair : items.entrySet()) {
+            // Get needed item and its quantity
+            Item item = pair.getKey();
+            int quantity = pair.getValue();
+
+            // Reserve the needed quantity of this item
+            item.reserve(quantity);
+        }
+    }
+
+    /**
      * Returns the first pending item in this order.
      *
      * @return the first item in this order, or {@code null} if no more pending items.
@@ -209,28 +251,8 @@ public class Order extends HiveObject {
      *
      * @param task the new sub task to be added.
      */
-    public void addTask(Task task) throws Exception {
-        // Get the items of the given task
-        Map<Item, Integer> taskItems = task.getItems();
-
-        //
-        // Iterate over all the items of the given task
-        //
-        for (Map.Entry<Item, Integer> pair : taskItems.entrySet()) {
-            // Get the current item
-            Item item = pair.getKey();
-            int quantity = pair.getValue();
-
-            // Remove the current item from the pending items of this order
-            removeItem(item, quantity);
-
-            // Remove the current item from the assigned rack,
-            // to avoid multiple tasks allocate the same items
-            task.getRack().removeItem(item, quantity);
-        }
-
-        // Finally, add the given task to the set of active tasks of this order
-        subTasks.add(task);
+    public void addTask(Task task) {
+        this.subTasks.add(task);
     }
 
     /**

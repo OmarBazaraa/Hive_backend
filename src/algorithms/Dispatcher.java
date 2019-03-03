@@ -24,7 +24,7 @@ public class Dispatcher {
      * @param readyAgents  the set of ready agents.
      * @param activeAgents the set of active agents.
      */
-    public static void dispatch(Order order, Set<Agent> readyAgents, Set<Agent> activeAgents) {
+    public static void dispatch(Order order, Set<Agent> readyAgents, Set<Agent> activeAgents) throws Exception {
         //
         // Keep dispatching while the order is still pending and
         // there are still idle robots
@@ -60,6 +60,7 @@ public class Dispatcher {
 
                 // Commit this task
                 order.addTask(task);
+                task.activate();
                 neededQuantity -= availableQuantity;
             }
         }

@@ -7,13 +7,12 @@ import models.components.Order;
 import models.components.Station;
 import models.components.Gate;
 import models.components.Rack;
-import models.components.Task;
 import models.map.Grid;
 
 import java.util.*;
 
 
-public class Warehouse {
+public class Warehouse implements Order.OnFulFillListener {
 
     //
     // Member Variables
@@ -45,9 +44,9 @@ public class Warehouse {
     private Map<Integer, Item> items = new HashMap<>();
 
     /**
-     * Map of the currently allocated items in the warehouse.
+     * Map of the total currently available items in the warehouse.
      */
-    private Map<Item, Integer> allocatedItems = new HashMap<>();
+    private Map<Item, Integer> availableItems = new HashMap<>();
 
     /**
      * Map of all racks in the warehouse, indexed by their id.
@@ -84,7 +83,7 @@ public class Warehouse {
     /**
      * Configures the specifications of the warehouse space and components.
      *
-     * @param data the un parsed warehouse object.
+     * @param data the un-parsed warehouse object.
      */
     public void configure(List<Object> data) {
         parseWarehouse(data);
@@ -92,16 +91,16 @@ public class Warehouse {
     }
 
     /**
-     * Adds a new order.
+     * Adds a new order to the warehouse.
      *
-     * @param data the un parsed order object.
+     * @param data the un-parsed order object.
      */
-    public void addOrder(List<Object> data) {
+    public void addOrder(List<Object> data) throws Exception {
         Order order = parseOrder(data);
 
-        if (feasible(order)) {
-            allocateOrderResources(order);
-            setOrderListener(order);
+        if (order.isFeasible()) {
+            order.reserve();
+            order.setOnFulfillListener(this);
             pendingOrders.add(order);
         } else {
             // TODO: add log message
@@ -109,14 +108,24 @@ public class Warehouse {
     }
 
     /**
+     * The callback function to be called when an order has been fulfilled.
+     *
+     * @param order the fulfilled order.
+     */
+    @Override
+    public void onFulfill(Order order) {
+        // TODO: send feed back to the front-end.
+    }
+
+    /**
      * Performs a single time step in this warehouse.
      */
-    public void run() {
+    public void run() throws Exception {
         // Dispatch pending orders
         dispatchPendingOrders();
 
         // Move active agents one step toward their targets
-        step();
+        stepActiveAgents();
     }
 
     // ===============================================================================================
@@ -140,77 +149,9 @@ public class Warehouse {
     }
 
     /**
-     * Checks whether the given order is feasible of being fulfilled regarding
-     * its items and quantities.
-     *
-     * @param order the order to check.
-     *
-     * @return {@code true} if the given order is feasible, {@code false} otherwise.
-     */
-    private boolean feasible(Order order) {
-        // Get map of required items of this order
-        Map<Item, Integer> items = order.getItems();
-
-        //
-        // Iterate over every item
-        //
-        for (Map.Entry<Item, Integer> pair : items.entrySet()) {
-            // Get needed item and its quantity
-            Item item = pair.getKey();
-            int quantity = pair.getValue();
-
-            // Get currently allocated items of this type
-            int allocated = allocatedItems.getOrDefault(item, 0);
-
-            // If needed quantity is greater than the overall available quantity
-            // then this order is infeasible
-            if (allocated + quantity > item.getTotalQuantity()) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * Allocates the resources of the given order in terms of the needed quantities.
-     *
-     * @param order the order to check.
-     */
-    private void allocateOrderResources(Order order) {
-        // Get map of required items of this order
-        Map<Item, Integer> items = order.getItems();
-
-        //
-        // Allocate every needed item in the order
-        //
-        for (Map.Entry<Item, Integer> pair : items.entrySet()) {
-            Item item = pair.getKey();
-            int quantity = pair.getValue();
-            int allocated = allocatedItems.getOrDefault(item, 0);
-
-            allocatedItems.put(item, quantity + allocated);
-        }
-    }
-
-    /**
-     * Sets the listener object to be called when the given order is fulfilled.
-     *
-     * @param order the order to set its listener.
-     */
-    private void setOrderListener(Order order) {
-        order.setOnFulfillListener(new Order.OnFulFillListener() {
-            @Override
-            public void onFulfill(Order order) {
-                // TODO: notify the frontend
-            }
-        });
-    }
-
-    /**
      * Dispatches the current pending orders of the warehouse.
      */
-    private void dispatchPendingOrders() {
+    private void dispatchPendingOrders() throws Exception {
         //
         // Iterate over every pending order and tries to dispatch it
         //
@@ -231,9 +172,9 @@ public class Warehouse {
     }
 
     /**
-     * Moves the active agents one step towards their targets.
+     * Moves the active agents one stepActiveAgents towards their targets.
      */
-    private void step() {
+    private void stepActiveAgents() {
 
     }
 
@@ -246,7 +187,7 @@ public class Warehouse {
      * Parses the configurations of the warehouse space and components,
      * and updates the internal corresponding member variables.
      *
-     * @param data the un parsed warehouse object.
+     * @param data the un-parsed warehouse object.
      */
     private void parseWarehouse(List<Object> data) {
 

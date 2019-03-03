@@ -1,5 +1,6 @@
 package models.components;
 
+import models.components.base.HiveObject;
 import models.components.base.SrcHiveObject;
 import utils.Constants.*;
 
@@ -7,7 +8,7 @@ import utils.Constants.*;
 /**
  * This {@code Agent} class is a model for robot agent in our Hive System.
  */
-public class Agent extends SrcHiveObject implements Comparable<Agent> {
+public class Agent extends SrcHiveObject {
 
     //
     // Member Variables
@@ -109,13 +110,17 @@ public class Agent extends SrcHiveObject implements Comparable<Agent> {
     /**
      * Compares whether some other object is less than, equal to, or greater than this one.
      *
-     * @param rhs the reference object with which to compare.
+     * @param obj the reference object with which to compare.
      *
      * @return a negative integer, zero, or a positive integer as this object
      * is less than, equal to, or greater than the specified object.
      */
     @Override
-    public int compareTo(Agent rhs) {
+    public int compareTo(HiveObject obj) {
+        if (!(obj instanceof Agent)) {
+            return id - obj.getId();
+        }
+        Agent rhs = (Agent) obj;
         int cmp = (priority - rhs.priority);
         if (cmp == 0) {
             return id - rhs.id;
