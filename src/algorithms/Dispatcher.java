@@ -21,10 +21,10 @@ public class Dispatcher {
      * The algorithm needs to be revised and optimized in later phases.
      *
      * @param order        the order needed to be dispatched.
-     * @param readyAgents  the set of ready agents.
-     * @param activeAgents the set of active agents.
+     * @param readyAgents  the queue of ready agents.
+     * @param activeAgents the queue of active agents.
      */
-    public static void dispatch(Order order, Set<Agent> readyAgents, Set<Agent> activeAgents) throws Exception {
+    public static void dispatch(Order order, Queue<Agent> readyAgents, Queue<Agent> activeAgents) throws Exception {
         //
         // Keep dispatching while the order is still pending and
         // there are still idle robots
@@ -75,7 +75,7 @@ public class Dispatcher {
      *
      * @return the best suitable agent from the given set of agents.
      */
-    private static Agent findAgent(Set<Agent> agents, Task task) {
+    private static Agent findAgent(Queue<Agent> agents, Task task) {
         return agents.iterator().next();
     }
 

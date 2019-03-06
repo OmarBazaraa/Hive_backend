@@ -1,6 +1,6 @@
 package models.components.base;
 
-import models.map.Position;
+import models.map.base.Position;
 
 
 /**

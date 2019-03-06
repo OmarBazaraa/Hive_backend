@@ -1,4 +1,4 @@
-package models.map;
+package models.map.base;
 
 /**
  * This {@code Position} class holds the 2D coordinates of an object

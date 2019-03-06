@@ -29,14 +29,14 @@ public class Warehouse implements Order.OnFulFillListener {
     private Map<Integer, Agent> agents = new HashMap<>();
 
     /**
-     * Set of all currently active agents, sorted by their priority.
+     * Queue of all currently active agents, sorted by their priority.
      */
-    private Set<Agent> activeAgents = new TreeSet<>();
+    private Queue<Agent> activeAgents = new PriorityQueue<>();
 
     /**
-     * Set of all currently idle agents.
+     * Queue of all currently idle agents.
      */
-    private Set<Agent> readyAgents = new HashSet<>();
+    private Queue<Agent> readyAgents = new LinkedList<>();
 
     /**
      * Map of all sell items in the warehouse, indexed by their id.
@@ -172,10 +172,21 @@ public class Warehouse implements Order.OnFulFillListener {
     }
 
     /**
-     * Moves the active agents one stepActiveAgents towards their targets.
+     * Moves the active agents one step towards their targets.
      */
     private void stepActiveAgents() {
+        //
+        // Iterate over all active agents
+        //
+        int size = activeAgents.size();
 
+        for (int i = 0; i < size; ++i) {
+            Agent agent = activeAgents.poll();
+
+            // Step
+
+            // If not
+        }
     }
 
     // ===============================================================================================

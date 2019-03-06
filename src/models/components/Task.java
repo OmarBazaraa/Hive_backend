@@ -38,6 +38,11 @@ public class Task extends HiveObject {
     private Map<Item, Integer> items = new HashMap<>();
 
     /**
+     * The current status of this task.
+     */
+    private TaskStatus status = TaskStatus.PENDING;
+
+    /**
      * Flag to indicate whether this task has been activated or not.
      */
     private boolean activated = false;
@@ -221,6 +226,98 @@ public class Task extends HiveObject {
     }
 
     /**
+     * Returns the current status of this task.
+     *
+     * @return an {@code TaskStatus} value representing the current status of the task.
+     */
+    public TaskStatus getStatus() {
+        return this.status;
+    }
+
+    /**
+     * Sets a new status to this task.
+     *
+     * @param status the new status to set.
+     */
+    public void setStatus(TaskStatus status) {
+        this.status = status;
+    }
+
+    /**
+     * Updates the status of this task using the last action done by the agent.
+     *
+     * @param action the last action done by the agent.
+     */
+    public void updateStatus(AgentAction action) throws Exception {
+        if (status == TaskStatus.PENDING) {
+            throw new Exception("Invalid action done by the agent!");
+        }
+        else if (status == TaskStatus.FETCH) {
+            if (action == AgentAction.MOVE) {
+                if (agent.getPosition() == rack.getPosition()) {
+                    status = TaskStatus.PICK;
+                }
+            }
+            else if (action != AgentAction.NOTHING) {
+                throw new Exception("Invalid action done by the agent!");
+            }
+        }
+        else if (status == TaskStatus.PICK) {
+            if (action == AgentAction.PICK) {
+                status = TaskStatus.DELIVER;
+            }
+            else if (action == AgentAction.MOVE) {
+                status = TaskStatus.FETCH;
+            }
+            else if (action != AgentAction.NOTHING) {
+                throw new Exception("Invalid action done by the agent!");
+            }
+        }
+        else if (status == TaskStatus.DELIVER) {
+            if (action == AgentAction.MOVE) {
+                if (agent.getPosition() == getDeliveryGate().getPosition()) {
+                    status = TaskStatus.WAIT;
+                }
+            }
+            else if (action != AgentAction.NOTHING) {
+                throw new Exception("Invalid action done by the agent!");
+            }
+        }
+        else if (status == TaskStatus.WAIT) {
+            if (action == AgentAction.WAIT) {
+                status = TaskStatus.RETURN;
+            }
+            else if (action == AgentAction.MOVE) {
+                status = TaskStatus.DELIVER;
+            }
+            else if (action != AgentAction.NOTHING) {
+                throw new Exception("Invalid action done by the agent!");
+            }
+        }
+        else if (status == TaskStatus.RETURN) {
+            if (action == AgentAction.MOVE) {
+                if (agent.getPosition() == rack.getPosition()) {
+                    status = TaskStatus.RELEASE;
+                }
+            }
+            else if (action != AgentAction.NOTHING) {
+                throw new Exception("Invalid action done by the agent!");
+            }
+        }
+        else if (status == TaskStatus.RELEASE) {
+            if (action == AgentAction.RELEASE) {
+                status = TaskStatus.DONE;
+            }
+            else if (action == AgentAction.MOVE) {
+                status = TaskStatus.RETURN;
+            }
+            else if (action != AgentAction.NOTHING) {
+                throw new Exception("Invalid action done by the agent!");
+            }
+        }
+    }
+
+    /**
      * Returns whether this task has been activated or not.
      *
      * @return {@code true} if this task has been activated, {@code false} otherwise.
@@ -245,6 +342,7 @@ public class Task extends HiveObject {
 
         // Set task as activated
         activated = true;
+        status = TaskStatus.FETCH;
 
         //
         // Iterate over all the items of the given task
@@ -264,5 +362,68 @@ public class Task extends HiveObject {
         // TODO: Activate the assigned agent
 
         // TODO: Allocate the assigned rack
+    }
+
+    /**
+     * Returns the next required action to be done by the assigned agent
+     * in order to move one step forward to accomplish this task.
+     *
+     * @return {@code AgentAction} to be done the next time step.
+     */
+    public AgentAction getNextAction() {
+        if (status == TaskStatus.PENDING) {
+            return AgentAction.NOTHING;
+        }
+
+        if (status == TaskStatus.FETCH) {
+            return AgentAction.MOVE;
+        }
+
+        if (status == TaskStatus.PICK) {
+            return AgentAction.PICK;
+        }
+
+        if (status == TaskStatus.DELIVER) {
+            return AgentAction.MOVE;
+        }
+
+        if (status == TaskStatus.WAIT) {
+            return AgentAction.WAIT;
+        }
+
+        if (status == TaskStatus.RETURN) {
+            return AgentAction.MOVE;
+        }
+
+        if (status == TaskStatus.RELEASE) {
+            return AgentAction.RELEASE;
+        }
+
+        return AgentAction.NOTHING;
+    }
+
+    /**
+     * Returns the priority of this task.
+     * Higher value indicates higher priority.
+     *
+     * @return an integer value representing the priority of this task.
+     */
+    public int getPriority() {
+        return (order != null ? -order.getId() : Integer.MIN_VALUE);
+    }
+
+    /**
+     * Returns the estimated number of time steps to finish the currently assigned task.
+     *
+     * @return an integer representing the estimated number of step to finish the assigned task.
+     */
+    public int getEstimatedDistance() {
+        Rack rack = getRack();
+        Gate gate = getDeliveryGate();
+
+        int x = rack.getEstimatedDistance(agent.getPosition());
+        int y = gate.getEstimatedDistance(rack.getPosition());
+
+        return x + y * 2;
     }
 }

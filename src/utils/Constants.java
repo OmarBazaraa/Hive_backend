@@ -8,13 +8,21 @@ public class Constants {
     public static final String PROJ_VERSION_DATE = "21 February 2019";
 
     // Grid cell shapes
-    public static final char CELL_SHAPE_EMPTY = '.';
-    public static final char CELL_SHAPE_OBSTACLE = '#';
-    public static final char CELL_SHAPE_GATE = 'G';
-    public static final char CELL_SHAPE_RACK = '$';
-    public static final char CELL_SHAPE_AGENT = '@';
-    public static final char CELL_SHAPE_CHARGING_STATION = 'C';
-    public static final char CELL_SHAPE_UNKNOWN = '?';
+    public static final char SHAPE_CELL_EMPTY = '.';
+    public static final char SHAPE_CELL_OBSTACLE = '#';
+    public static final char SHAPE_CELL_GATE = 'G';
+    public static final char SHAPE_CELL_RACK = '$';
+    public static final char SHAPE_CELL_AGENT = '@';
+    public static final char SHAPE_CELL_STATION = 'S';
+    public static final char SHAPE_CELL_UNKNOWN = '?';
+    
+    // Direction shapes
+    public static final char SHAPE_DIR_UP = '^';
+    public static final char SHAPE_DIR_RIGHT = '>';
+    public static final char SHAPE_DIR_DOWN = 'v';
+    public static final char SHAPE_DIR_LEFT = '<';
+    public static final char SHAPE_DIR_STILL = '.';
+    public static final char SHAPE_DIR_UNKNOWN = '?';
 
     // Agent default configurations
     public static final int AGENT_DEFAULT_CAPACITY = 100;
@@ -48,7 +56,7 @@ public class Constants {
         GATE,
         RACK,
         AGENT,
-        CHARGING_STATION,
+        STATION,
         UNKNOWN
     }
 
@@ -63,10 +71,22 @@ public class Constants {
     }
 
     /**
+     * Different actions that can be done by the agents
+     */
+    public enum AgentAction {
+        NOTHING,
+        MOVE,
+        PICK,
+        RELEASE,
+        WAIT
+    }
+
+    /**
      * Different status of the racks during their lifecycle in the system.
      */
     public enum RackStatus {
         READY,      // The rack is static, and ready to be shipped
+        RESERVED,   // The rack is currently reserved by a certain task
         ACTIVE      // The rack is currently being shipped
     }
 
@@ -78,6 +98,20 @@ public class Constants {
         SEMI_ASSIGNED,
         ASSIGNED,
         DELIVERED
+    }
+
+    /**
+     * Different status during the lifecycle of the task.
+     */
+    public enum TaskStatus {
+        PENDING,
+        FETCH,
+        PICK,
+        DELIVER,
+        WAIT,
+        RETURN,
+        RELEASE,
+        DONE
     }
 
     /**

@@ -1,5 +1,7 @@
 package models.map;
 
+import models.map.base.BaseCell;
+import utils.Constants;
 import utils.Constants.*;
 
 
@@ -9,7 +11,11 @@ import utils.Constants.*;
  * <p>
  * A guide cell guides the agent towards its associated target.
  */
-public class GuideCell {
+public class GuideCell extends BaseCell {
+
+    //
+    // Member Variables
+    //
 
     /**
      * The distance to reach the associated target {@code DstHiveObject}.
@@ -20,6 +26,11 @@ public class GuideCell {
      * The direction to reach the associated target {@code DstHiveObject}.
      */
     public Direction direction;
+
+    // ===============================================================================================
+    //
+    // Static Methods
+    //
 
     /**
      * Allocates and initializes a 2D array of {@code GuideCell}.
@@ -40,6 +51,11 @@ public class GuideCell {
 
         return ret;
     }
+
+    // ===============================================================================================
+    //
+    // Member Methods
+    //
 
     /**
      * Constructs a new guide cell.
@@ -77,7 +93,7 @@ public class GuideCell {
      * @return {@code true} if the target is reachable, {@code false} otherwise.
      */
     public boolean isReachable() {
-        return this.distance < Integer.MAX_VALUE;
+        return (this.distance < Integer.MAX_VALUE);
     }
 
     /**
@@ -86,17 +102,29 @@ public class GuideCell {
      * @return {@code true} if the target is unreachable, {@code false} otherwise.
      */
     public boolean isUnreachable() {
-        return this.distance == Integer.MAX_VALUE;
+        return (this.distance == Integer.MAX_VALUE);
     }
 
     /**
-     * Returns a string representation of object.
-     * In general, the toString method returns a string that "textually represents" this object.
+     * Converts this cell to a character symbol representing its type.
      *
-     * @return a string representation of object.
+     * @return a {@code char} representing this cell's type.
      */
     @Override
-    public String toString() {
-        return ("Guide Cell: { Dis: " + distance + ", Dir: " + direction + " }");
+    public char toShape() {
+        switch (direction) {
+            case UP:
+                return Constants.SHAPE_DIR_UP;
+            case RIGHT:
+                return Constants.SHAPE_DIR_RIGHT;
+            case DOWN:
+                return Constants.SHAPE_DIR_DOWN;
+            case LEFT:
+                return Constants.SHAPE_DIR_LEFT;
+            case STILL:
+                return Constants.SHAPE_DIR_STILL;
+            default:
+                return Constants.SHAPE_DIR_UNKNOWN;
+        }
     }
 }

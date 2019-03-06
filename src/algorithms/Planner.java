@@ -3,8 +3,8 @@ package algorithms;
 import models.map.Grid;
 import models.map.GuideCell;
 import utils.Constants.*;
-import models.map.Dimensions;
-import models.map.Position;
+import models.map.base.Dimensions;
+import models.map.base.Position;
 
 import java.util.LinkedList;
 import java.util.Queue;

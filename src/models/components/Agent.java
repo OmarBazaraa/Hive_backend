@@ -3,6 +3,7 @@ package models.components;
 import models.components.base.HiveObject;
 import models.components.base.SrcHiveObject;
 import utils.Constants.*;
+import utils.Constants;
 
 
 /**
@@ -15,11 +16,6 @@ public class Agent extends SrcHiveObject {
     //
 
     /**
-     * The priority of this agent among other agents.
-     */
-    private int priority;
-
-    /**
      * The current status of this agent.
      */
     private AgentStatus status = AgentStatus.READY;
@@ -28,6 +24,11 @@ public class Agent extends SrcHiveObject {
      * The assigned task of this agent.
      */
     private Task task;
+
+    /**
+     * The last time step this agent has performed a move.
+     */
+    private int lastMoveTime;
 
     // Skip for now
     private int capacity;
@@ -48,25 +49,6 @@ public class Agent extends SrcHiveObject {
      */
     public Agent(int id, int row, int col) {
         super(id, row, col);
-        this.priority = id; // TODO to be set dynamically
-    }
-
-    /**
-     * Returns the priority of this agent.
-     *
-     * @return an integer value representing the priority of this agent.
-     */
-    public int getPriority() {
-        return this.priority;
-    }
-
-    /**
-     * Sets a new priority to this agent.
-     *
-     * @param priority the new priority to set.
-     */
-    public void setPriority(int priority) {
-        this.priority = priority;
     }
 
     /**
@@ -108,6 +90,46 @@ public class Agent extends SrcHiveObject {
     }
 
     /**
+     * Returns the last time step this agent has performed a move.
+     */
+    public int getLastMoveTime() {
+        return this.lastMoveTime;
+    }
+
+    /**
+     * Returns the estimated number of steps to finish the currently assigned task.
+     *
+     * @return an integer representing the estimated number of step to finish the assigned task.
+     */
+    public int getEstimatedSteps() {
+        if (task == null) {
+            return 0;
+        }
+
+        return id;
+    }
+
+    /**
+     * Returns the priority of this agent.
+     * Higher value indicates higher priority.
+     *
+     * @return an integer value representing the priority of this agent.
+     */
+    public int getPriority() {
+        switch (status) {
+            case READY:
+                return 0;
+            case ACTIVE:
+                return getEstimatedSteps();
+            case CHARGING:
+            case OUT_OF_SERVICE:
+                return Integer.MAX_VALUE;
+            default:
+                return 0;
+        }
+    }
+
+    /**
      * Compares whether some other object is less than, equal to, or greater than this one.
      *
      * @param obj the reference object with which to compare.
@@ -121,7 +143,7 @@ public class Agent extends SrcHiveObject {
             return id - obj.getId();
         }
         Agent rhs = (Agent) obj;
-        int cmp = (priority - rhs.priority);
+        int cmp = (getPriority() - rhs.getPriority());
         if (cmp == 0) {
             return id - rhs.id;
         }

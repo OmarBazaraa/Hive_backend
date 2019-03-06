@@ -3,6 +3,7 @@ package models.components.base;
 import algorithms.Planner;
 import models.map.Grid;
 import models.map.GuideCell;
+import models.map.base.Position;
 
 
 /**
@@ -45,5 +46,51 @@ public class DstHiveObject extends TerminalHiveObject {
      */
     public void computeGuideMap(Grid map) {
         guideMap = Planner.bfs(map, getPosition());
+    }
+
+    /**
+     * Returns the guide cell at the given position.
+     *
+     * @param row the row position of the needed guide cell.
+     * @param col the column position of the needed guide cell.
+     *
+     * @return the needed guide cell.
+     */
+    public GuideCell getGuideAt(int row, int col) {
+        return (this.guideMap != null ? this.guideMap[row][col] : null);
+    }
+
+    /**
+     * Returns the guide cell at the given position.
+     *
+     * @param pos the position of the needed guide cell.
+     *
+     * @return the needed guide cell.
+     */
+    public GuideCell getGuideAt(Position pos) {
+        return this.getGuideAt(pos.row, pos.col);
+    }
+
+    /**
+     * Returns the estimated distance from the given position to this {@code DstHiveObject}.
+     *
+     * @param row the row position of the needed guide cell.
+     * @param col the column position of the needed guide cell.
+     *
+     * @return the estimated distance to the given position.
+     */
+    public int getEstimatedDistance(int row, int col) {
+        return (this.guideMap != null ? this.guideMap[row][col].distance : Integer.MAX_VALUE);
+    }
+
+    /**
+     * Returns the estimated distance from the given position to this {@code DstHiveObject}.
+     *
+     * @param pos the position of the needed guide cell.
+     *
+     * @return the estimated distance to the given position.
+     */
+    public int getEstimatedDistance(Position pos) {
+        return this.getEstimatedDistance(pos.row, pos.col);
     }
 }

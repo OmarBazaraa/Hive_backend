@@ -1,4 +1,4 @@
-package models.map;
+package models.map.base;
 
 /**
  * This {@code Dimensions} class holds the dimensions of a grid object in Hive System.
