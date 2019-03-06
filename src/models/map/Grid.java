@@ -1,5 +1,6 @@
 package models.map;
 
+import models.components.Agent;
 import models.map.base.Dimensions;
 import models.map.base.Position;
 import utils.Constants;

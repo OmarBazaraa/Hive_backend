@@ -2,8 +2,11 @@ package models.components;
 
 import models.components.base.HiveObject;
 import models.components.base.SrcHiveObject;
+import models.map.Cell;
+import models.map.Grid;
+import models.map.GuideCell;
+import models.map.base.Position;
 import utils.Constants.*;
-import utils.Constants;
 
 
 /**
@@ -28,7 +31,7 @@ public class Agent extends SrcHiveObject {
     /**
      * The last time step this agent has performed a move.
      */
-    private int lastMoveTime;
+    private int lastActionTime;
 
     // Skip for now
     private int capacity;
@@ -90,10 +93,14 @@ public class Agent extends SrcHiveObject {
     }
 
     /**
-     * Returns the last time step this agent has performed a move.
+     * Returns the last time step this agent has performed an action.
      */
-    public int getLastMoveTime() {
-        return this.lastMoveTime;
+    public int getLastActionTime() {
+        return this.lastActionTime;
+    }
+
+    public void setLastMoveTime(int lastActionTime) {
+        this.lastActionTime = lastActionTime;
     }
 
     /**
@@ -102,11 +109,7 @@ public class Agent extends SrcHiveObject {
      * @return an integer representing the estimated number of step to finish the assigned task.
      */
     public int getEstimatedSteps() {
-        if (task == null) {
-            return 0;
-        }
-
-        return id;
+        return (task != null ? task.getEstimatedDistance() : 0);
     }
 
     /**
@@ -116,17 +119,44 @@ public class Agent extends SrcHiveObject {
      * @return an integer value representing the priority of this agent.
      */
     public int getPriority() {
-        switch (status) {
-            case READY:
-                return 0;
-            case ACTIVE:
-                return getEstimatedSteps();
-            case CHARGING:
-            case OUT_OF_SERVICE:
-                return Integer.MAX_VALUE;
-            default:
-                return 0;
-        }
+        return (task != null ? task.getPriority() : Integer.MIN_VALUE);
+    }
+
+    public AgentAction getNextAction() {
+        return (task != null ? task.getNextAction() : AgentAction.NOTHING);
+    }
+
+    public GuideCell getGuideAt(int row, int col) {
+        return (task != null ? task.getGuideAt(row, col) : null);
+    }
+
+    public boolean isActive() {
+        return (task != null ? task.isActive() : false);
+    }
+
+    public boolean isTaskCompleted() {
+        return (task != null ? task.isComplete() : true);
+    }
+
+    public void executeAction(AgentAction action, int time) throws Exception {
+        setLastMoveTime(time);
+        task.updateStatus(AgentAction.MOVE);
+    }
+
+    public void move(Grid map, Direction dir, int time) throws Exception {
+        Position cur = getPosition();
+        Position nxt = map.next(cur, dir);
+
+        Cell currCell = map.get(cur);
+        Cell nextCell = map.get(nxt);
+
+        // TODO: check cells
+
+        currCell.setSrcObjcet(null);
+        nextCell.setSrcObjcet(this);
+
+        setLastMoveTime(time);
+        task.updateStatus(AgentAction.MOVE);
     }
 
     /**

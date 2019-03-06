@@ -1,6 +1,7 @@
 package models;
 
 import algorithms.Dispatcher;
+import algorithms.Planner;
 import models.components.Item;
 import models.components.Agent;
 import models.components.Order;
@@ -17,6 +18,11 @@ public class Warehouse implements Order.OnFulFillListener {
     //
     // Member Variables
     //
+
+    /**
+     * The current time step in this warehouse.
+     */
+    private int time;
 
     /**
      * Warehouse grid map.
@@ -126,6 +132,9 @@ public class Warehouse implements Order.OnFulFillListener {
 
         // Move active agents one step toward their targets
         stepActiveAgents();
+
+        // Increment time step
+        time++;
     }
 
     // ===============================================================================================
@@ -174,7 +183,8 @@ public class Warehouse implements Order.OnFulFillListener {
     /**
      * Moves the active agents one step towards their targets.
      */
-    private void stepActiveAgents() {
+    private void stepActiveAgents() throws Exception {
+        // TODO: move agent off its destination position after finishing the task
         //
         // Iterate over all active agents
         //
@@ -182,10 +192,11 @@ public class Warehouse implements Order.OnFulFillListener {
 
         for (int i = 0; i < size; ++i) {
             Agent agent = activeAgents.poll();
+            Planner.step(agent, map, time);
 
-            // Step
-
-            // If not
+            if (agent.isTaskCompleted()) {
+                readyAgents.add(agent);
+            }
         }
     }
 

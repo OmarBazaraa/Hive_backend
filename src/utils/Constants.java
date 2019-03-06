@@ -111,7 +111,7 @@ public class Constants {
         WAIT,
         RETURN,
         RELEASE,
-        DONE
+        COMPLETE
     }
 
     /**

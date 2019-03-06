@@ -28,7 +28,7 @@ public class TerminalHiveObject extends HiveObject {
      *
      * @param id  the id of the Hive object.
      * @param row the row position of the Hive object.
-     * @param id  the column position of the Hive object.
+     * @param col the column position of the Hive object.
      */
     public TerminalHiveObject(int id, int row, int col) {
         super(id);
@@ -55,11 +55,32 @@ public class TerminalHiveObject extends HiveObject {
     }
 
     /**
-     * Returns the position of the position of the Hive object in the map's grid.
+     * Returns the position of the Hive object in the map's grid.
      *
      * @return a {@code Position} object holding the coordinates of this Hive object.
      */
     public Position getPosition() {
         return new Position(this.row, this.col);
+    }
+
+    /**
+     * Sets the position of the Hive object in the map's grid.
+     *
+     * @param row the row position of the Hive object.
+     * @param col the column position of the Hive object.
+     */
+    public void setPosition(int row, int col) {
+        this.row = row;
+        this.col = col;
+    }
+
+    /**
+     * Sets the position of the Hive object in the map's grid.
+     *
+     * @param pos the position of the Hive object.
+     */
+    public void setPosition(Position pos) {
+        this.row = pos.row;
+        this.col = pos.col;
     }
 }

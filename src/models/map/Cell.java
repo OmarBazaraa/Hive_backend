@@ -1,6 +1,8 @@
 package models.map;
 
+import models.components.base.DstHiveObject;
 import models.components.base.HiveObject;
+import models.components.base.SrcHiveObject;
 import models.map.base.BaseCell;
 import utils.Constants;
 import utils.Constants.*;
@@ -21,9 +23,14 @@ public class Cell extends BaseCell {
     public CellType type;
 
     /**
-     * The Hive object in this cell if exists; {@code null} otherwise.
+     * The {@code SrcHiveObject} in this cell if exists; {@code null} otherwise.
      */
-    public HiveObject obj;
+    public SrcHiveObject srcObj;
+
+    /**
+     * The {@code DstHiveObject} in this cell if exists; {@code null} otherwise.
+     */
+    public DstHiveObject dstObj;
 
     // ===============================================================================================
     //
@@ -60,29 +67,79 @@ public class Cell extends BaseCell {
      */
     public Cell() {
         this.type = CellType.UNKNOWN;
-        this.obj = null;
+        this.srcObj = null;
+        this.dstObj = null;
     }
 
     /**
      * Constructs a new grid cell.
      *
      * @param type the type of the cell.
-     * @param obj  the existing Hive object in the cell.
      */
-    public Cell(CellType type, HiveObject obj) {
+    public Cell(CellType type) {
         this.type = type;
-        this.obj = obj;
+    }
+
+    /**
+     * Constructs a new grid cell.
+     *
+     * @param type   the type of the cell.
+     * @param srcObj the existing {@code SrcHiveObject} in the cell.
+     * @param dstObj the existing {@code DstHiveObject} in the cell.
+     */
+    public Cell(CellType type, SrcHiveObject srcObj, DstHiveObject dstObj) {
+        this.type = type;
+        this.srcObj = srcObj;
+        this.dstObj = dstObj;
+    }
+
+    /**
+     * Sets the source object in this cell.
+     *
+     * @param srcObj the existing {@code SrcHiveObject} in the cell.
+     */
+    public void setSrcObjcet(SrcHiveObject srcObj) {
+        this.srcObj = srcObj;
+    }
+
+    /**
+     * Sets the source object in this cell.
+     *
+     * @param dstObj the existing {@code DstHiveObject} in the cell.
+     */
+    public void setDstObjcet(DstHiveObject dstObj) {
+        this.dstObj = dstObj;
     }
 
     /**
      * Sets the parameters of this cell.
      *
-     * @param type the type of the cell.
-     * @param obj  the existing Hive object in the cell.
+     * @param type   the type of the cell.
+     * @param srcObj the existing {@code SrcHiveObject} in the cell.
+     * @param dstObj the existing {@code DstHiveObject} in the cell.
      */
-    public void set(CellType type, HiveObject obj) {
+    public void set(CellType type, SrcHiveObject srcObj, DstHiveObject dstObj) {
         this.type = type;
-        this.obj = obj;
+        this.srcObj = srcObj;
+        this.dstObj = dstObj;
+    }
+
+    /**
+     * Checks whether this cell has a destination object in it or not.
+     *
+     * @return {@code true} if this cell contains {@code DstHiveObject}, {@code false} otherwise.
+     */
+    public boolean hasDestination() {
+        return dstObj != null;
+    }
+
+    /**
+     * Checks whether this cell has an agent in it or not.
+     *
+     * @return {@code true} if this cell contains {@code Agent}, {@code false} otherwise.
+     */
+    public boolean hasAgent() {
+        return srcObj != null;
     }
 
     /**
@@ -93,6 +150,16 @@ public class Cell extends BaseCell {
      */
     public boolean isEmpty() {
         return type == CellType.EMPTY || type == CellType.AGENT;
+    }
+
+    /**
+     * Checks whether this cell is movable or not.
+     * A cell is considered movable if the agents can move into it.
+     *
+     * @return {@code true} if this cell is movable, {@code false} otherwise.
+     */
+    public boolean isMovable() {
+        return type == CellType.EMPTY || type == CellType.RACK || type == CellType.GATE || type == CellType.STATION;
     }
 
     /**

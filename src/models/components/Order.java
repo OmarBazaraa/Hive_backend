@@ -25,7 +25,7 @@ public class Order extends HiveObject {
     /**
      * The sum of all pending needed quantities for this order.
      */
-    private int totalQuantity;
+    private int pendingQuantities;
 
     /**
      * The map of needed items for this order.
@@ -107,8 +107,8 @@ public class Order extends HiveObject {
      *
      * @return the total pending quantities needed for this order.
      */
-    public int totalPendingQuantities() {
-        return this.totalQuantity;
+    public int getTotalPendingQuantities() {
+        return this.pendingQuantities;
     }
 
     /**
@@ -118,7 +118,7 @@ public class Order extends HiveObject {
      * @return {@code true} if this order is still pending, {@code false} otherwise.
      */
     public boolean isPending() {
-        return (this.totalQuantity > 0);
+        return (this.pendingQuantities > 0);
     }
 
     /**
@@ -127,7 +127,7 @@ public class Order extends HiveObject {
      * @return {@code true} if this order is fulfilled, {@code false} otherwise.
      */
     public boolean isFulfilled() {
-        return (this.totalQuantity <= 0 && this.subTasks.isEmpty());
+        return (this.pendingQuantities <= 0 && this.subTasks.isEmpty());
     }
 
     /**
@@ -214,7 +214,7 @@ public class Order extends HiveObject {
             throw new Exception("Passing non-positive item quantity!");
         }
 
-        this.totalQuantity += quantity;
+        this.pendingQuantities += quantity;
         this.items.put(item, quantity + items.getOrDefault(item, 0));
     }
 
@@ -237,7 +237,7 @@ public class Order extends HiveObject {
             throw new Exception("No enough items to remove from the order!");
         }
 
-        totalQuantity -= quantity;
+        pendingQuantities -= quantity;
 
         if (count > quantity) {
             items.put(item, count - quantity);
@@ -256,6 +256,21 @@ public class Order extends HiveObject {
     }
 
     /**
+     * A callback function to be called when a sub-task of this order has been completed.
+     *
+     * @param task the task that has been complete.
+     */
+    public void onTaskCompleted(Task task) {
+        this.subTasks.remove(task);
+
+        if (isFulfilled()) {
+            if (fulFillListener != null) {
+                fulFillListener.onFulfill(this);
+            }
+        }
+    }
+
+    /**
      * Sets the listener to be invoked when this order has been fulfilled.
      *
      * @param listener the {@code OnFulFillListener} object.
@@ -270,7 +285,7 @@ public class Order extends HiveObject {
     private void init() {
         // Iterate over all the needed items to compute the sum of all the quantities
         for (Map.Entry<Item, Integer> pair : items.entrySet()) {
-            this.totalQuantity += pair.getValue();
+            this.pendingQuantities += pair.getValue();
         }
     }
 

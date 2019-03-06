@@ -1,6 +1,7 @@
 package models.components;
 
 import models.components.base.HiveObject;
+import models.map.GuideCell;
 import utils.Constants.*;
 
 import java.util.HashMap;
@@ -306,7 +307,8 @@ public class Task extends HiveObject {
         }
         else if (status == TaskStatus.RELEASE) {
             if (action == AgentAction.RELEASE) {
-                status = TaskStatus.DONE;
+                status = TaskStatus.COMPLETE;
+                onComplete();
             }
             else if (action == AgentAction.MOVE) {
                 status = TaskStatus.RETURN;
@@ -315,6 +317,18 @@ public class Task extends HiveObject {
                 throw new Exception("Invalid action done by the agent!");
             }
         }
+    }
+
+    public void onComplete() {
+        order.onTaskCompleted(this);
+    }
+
+    public boolean isActive() {
+        return this.status != TaskStatus.COMPLETE;
+    }
+
+    public boolean isComplete() {
+        return this.status == TaskStatus.COMPLETE;
     }
 
     /**
@@ -400,6 +414,18 @@ public class Task extends HiveObject {
         }
 
         return AgentAction.NOTHING;
+    }
+
+    public GuideCell getGuideAt(int row, int col) {
+        if (status == TaskStatus.FETCH || status == TaskStatus.RETURN) {
+            return rack.getGuideAt(row, col);
+        }
+
+        if (status == TaskStatus.DELIVER) {
+            return getDeliveryGate().getGuideAt(row, col);
+        }
+
+        return new GuideCell(0, Direction.STILL);
     }
 
     /**
