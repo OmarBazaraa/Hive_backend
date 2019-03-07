@@ -1,12 +1,13 @@
 package algorithms;
 
 import models.components.Agent;
-import models.map.Cell;
-import models.map.Grid;
+import models.map.MapCell;
+import models.map.MapGrid;
 import models.map.GuideCell;
 import utils.Constants.*;
 import models.map.base.Dimensions;
 import models.map.base.Position;
+import utils.Utility;
 
 import java.util.LinkedList;
 import java.util.Queue;
@@ -18,33 +19,63 @@ import java.util.Queue;
 public class Planner {
 
     /**
+     * Performs one step forward in the path planning algorithm.
+     * <p>
+     * This function is to be called for all active agents in descending order of their priorities.
      *
+     * @param agent the agent to move.
+     * @param map   the map's grid of the warehouse.
+     * @param time  the current time step.
      */
-    public static void step(Agent agent, Grid map, int time) throws Exception {
+    public static void step(Agent agent, MapGrid map, int time) throws Exception {
+        // Return if the agent already performed a move in this time step
+        // This can only happen when a higher priority agent displaces some lower priority agents
+        // so it can move in its desired location
         if (agent.getLastActionTime() >= time) {
             return;
         }
 
+        // Get the required action of the agent
         AgentAction action = agent.getNextAction();
 
-        if (action != AgentAction.MOVE) {
-            agent.executeAction(action, time);
-            return;
+        // Try to perform the required action
+        if (action == AgentAction.MOVE) {
+            move(agent, agent, map, time);
+        } else {
+            agent.executeAction(action, map, time);
         }
-
-        move(agent, agent, map, time);
     }
 
-    public static boolean move(Agent agent, Agent neededAgent, Grid map, int time) throws Exception {
-        // TODO: Avoid infinite loop by checking for lastGetBlankTime
+    /**
+     * Tries to move the given agent by bring a blank position
+     *
+     * @param agent
+     * @param neededAgent
+     * @param map
+     * @param time
+     *
+     * @return {@code true} if the function manged to move agent, {@code false} otherwise.
+     */
+    public static boolean move(Agent agent, Agent neededAgent, MapGrid map, int time) throws Exception {
+        // Return if this agent has higher priority than the agent needed to be moved
+        if (agent.compareTo(neededAgent) > 0) {
+            return false;
+        }
 
+        // Return if this agent has already been displaced by a higher priority agent
         if (agent.getLastActionTime() >= time) {
             return false;
         }
 
-        if (neededAgent.compareTo(agent) < 0) {
+        // Return if we already tried to displace this agent, to avoid infinite loop
+        if (agent.getLastBringBlankTime() >= time) {
             return false;
         }
+
+        // Set bring blank time
+        agent.setLastBringBlankTime(time);
+
+
 
         Position pos = agent.getPosition();
         GuideCell guide = agent.getGuideAt(pos.row, pos.col);
@@ -60,10 +91,10 @@ public class Planner {
                 continue;
             }
 
-            Cell cell = map.get(nxt);
+            MapCell cell = map.get(nxt);
 
             if (cell.type == CellType.EMPTY || cell.type == CellType.RACK) {
-                agent.move(map, dir, time);
+                agent.executeAction(Utility.dirToAction(dir), map, time);
                 return true;
             }
         }
@@ -80,13 +111,13 @@ public class Planner {
                 continue;
             }
 
-            Cell cell = map.get(nxt);
+            MapCell cell = map.get(nxt);
 
             if (cell.type == CellType.AGENT) {
                 Agent nextAgent = (Agent) cell.srcObj;
 
                 if (move(nextAgent, neededAgent, map, time)) {
-                    agent.move(map, dir, time);
+                    agent.executeAction(Utility.dirToAction(dir), map, time);
                     return true;
                 }
             }
@@ -104,7 +135,7 @@ public class Planner {
      *
      * @return a 2D {@code GuideCell} array representing the guide map to reach the destination.
      */
-    public static GuideCell[][] bfs(Grid map, Position dst) {
+    public static GuideCell[][] bfs(MapGrid map, Position dst) {
         // Initialize BFS algorithm requirements
         Dimensions dim = map.getDimensions();
         Queue<Position> q = new LinkedList<>();
@@ -125,6 +156,7 @@ public class Planner {
                 // Get previous position
                 Position prv = map.previous(cur, dir);
 
+                // TODO: fix
                 // Continue if occupied cell
                 if (!map.isEmpty(prv)) {
                     continue;

@@ -2,6 +2,7 @@ package models.components;
 
 import models.components.base.HiveObject;
 import models.map.GuideCell;
+import models.map.base.Position;
 import utils.Constants.*;
 
 import java.util.HashMap;
@@ -29,6 +30,11 @@ public class Task extends HiveObject {
     private Rack rack;
 
     /**
+     * The gate to deliver the rack at.
+     */
+    private Gate gate;
+
+    /**
      * The robot agent assigned for this task.
      */
     private Agent agent;
@@ -42,11 +48,6 @@ public class Task extends HiveObject {
      * The current status of this task.
      */
     private TaskStatus status = TaskStatus.PENDING;
-
-    /**
-     * Flag to indicate whether this task has been activated or not.
-     */
-    private boolean activated = false;
 
     // ===============================================================================================
     //
@@ -94,7 +95,7 @@ public class Task extends HiveObject {
      * @return the delivery gate.
      */
     public Gate getDeliveryGate() {
-        return (order != null ? order.getDeliveryGate() : null);
+        return this.gate;
     }
 
     /**
@@ -104,6 +105,7 @@ public class Task extends HiveObject {
      */
     public void assignOrder(Order order) {
         this.order = order;
+        this.gate = order.getDeliveryGate();
     }
 
     /**
@@ -236,12 +238,21 @@ public class Task extends HiveObject {
     }
 
     /**
-     * Sets a new status to this task.
+     * Checks whether this task is currently active or not.
      *
-     * @param status the new status to set.
+     * @return {@code true} if this task is active, {@code false} otherwise.
      */
-    public void setStatus(TaskStatus status) {
-        this.status = status;
+    public boolean isActive() {
+        return this.status != TaskStatus.COMPLETE;
+    }
+
+    /**
+     * Checks whether this task has been completed or not.
+     *
+     * @return {@code true} if this task has been completed, {@code false} otherwise.
+     */
+    public boolean isComplete() {
+        return this.status == TaskStatus.COMPLETE;
     }
 
     /**
@@ -253,65 +264,65 @@ public class Task extends HiveObject {
         if (status == TaskStatus.PENDING) {
             throw new Exception("Invalid action done by the agent!");
         }
-        else if (status == TaskStatus.FETCH) {
+        else if (status == TaskStatus.FETCHING) {
             if (action == AgentAction.MOVE) {
                 if (agent.getPosition() == rack.getPosition()) {
-                    status = TaskStatus.PICK;
+                    status = TaskStatus.LOADING;
                 }
             }
             else if (action != AgentAction.NOTHING) {
                 throw new Exception("Invalid action done by the agent!");
             }
         }
-        else if (status == TaskStatus.PICK) {
-            if (action == AgentAction.PICK) {
-                status = TaskStatus.DELIVER;
+        else if (status == TaskStatus.LOADING) {
+            if (action == AgentAction.LOAD) {
+                status = TaskStatus.DELIVERING;
             }
             else if (action == AgentAction.MOVE) {
-                status = TaskStatus.FETCH;
+                status = TaskStatus.FETCHING;
             }
             else if (action != AgentAction.NOTHING) {
                 throw new Exception("Invalid action done by the agent!");
             }
         }
-        else if (status == TaskStatus.DELIVER) {
+        else if (status == TaskStatus.DELIVERING) {
             if (action == AgentAction.MOVE) {
-                if (agent.getPosition() == getDeliveryGate().getPosition()) {
-                    status = TaskStatus.WAIT;
+                if (agent.getPosition() == gate.getPosition()) {
+                    status = TaskStatus.WAITING;
                 }
             }
             else if (action != AgentAction.NOTHING) {
                 throw new Exception("Invalid action done by the agent!");
             }
         }
-        else if (status == TaskStatus.WAIT) {
+        else if (status == TaskStatus.WAITING) {
             if (action == AgentAction.WAIT) {
-                status = TaskStatus.RETURN;
+                status = TaskStatus.RETURNING;
             }
             else if (action == AgentAction.MOVE) {
-                status = TaskStatus.DELIVER;
+                status = TaskStatus.DELIVERING;
             }
             else if (action != AgentAction.NOTHING) {
                 throw new Exception("Invalid action done by the agent!");
             }
         }
-        else if (status == TaskStatus.RETURN) {
+        else if (status == TaskStatus.RETURNING) {
             if (action == AgentAction.MOVE) {
                 if (agent.getPosition() == rack.getPosition()) {
-                    status = TaskStatus.RELEASE;
+                    status = TaskStatus.OFFLOADING;
                 }
             }
             else if (action != AgentAction.NOTHING) {
                 throw new Exception("Invalid action done by the agent!");
             }
         }
-        else if (status == TaskStatus.RELEASE) {
-            if (action == AgentAction.RELEASE) {
+        else if (status == TaskStatus.OFFLOADING) {
+            if (action == AgentAction.OFFLOAD) {
                 status = TaskStatus.COMPLETE;
                 onComplete();
             }
             else if (action == AgentAction.MOVE) {
-                status = TaskStatus.RETURN;
+                status = TaskStatus.RETURNING;
             }
             else if (action != AgentAction.NOTHING) {
                 throw new Exception("Invalid action done by the agent!");
@@ -319,47 +330,17 @@ public class Task extends HiveObject {
         }
     }
 
-    public void onComplete() {
-        order.onTaskCompleted(this);
-    }
-
-    public boolean isActive() {
-        return this.status != TaskStatus.COMPLETE;
-    }
-
-    public boolean isComplete() {
-        return this.status == TaskStatus.COMPLETE;
-    }
-
     /**
-     * Returns whether this task has been activated or not.
-     *
-     * @return {@code true} if this task has been activated, {@code false} otherwise.
-     */
-    public boolean isActivated() {
-        return this.activated;
-    }
-
-    /**
-     * Activates this task and allocates its assigned resources.
+     * Activates this task and reserves its assigned resources.
      */
     public void activate() throws Exception {
-        // Task information must be complete
-        if (order == null || rack == null || agent == null) {
-            throw new Exception("No order, agent and/or order is assigned yet to the task!");
-        }
-
         // Skip re-activating already activated tasks
-        if (activated) {
+        if (isActive()) {
             return;
         }
 
-        // Set task as activated
-        activated = true;
-        status = TaskStatus.FETCH;
-
         //
-        // Iterate over all the items of the given task
+        // Iterate over all the items of the given task and reserve them
         //
         for (Map.Entry<Item, Integer> pair : items.entrySet()) {
             // Get the current item
@@ -373,59 +354,20 @@ public class Task extends HiveObject {
             rack.removeItem(item, quantity);
         }
 
-        // TODO: Activate the assigned agent
-
-        // TODO: Allocate the assigned rack
+        // Activate this task
+        agent.setTask(this);
+        rack.setTask(this);
+        status = TaskStatus.FETCHING;
     }
 
     /**
-     * Returns the next required action to be done by the assigned agent
-     * in order to move one step forward to accomplish this task.
-     *
-     * @return {@code AgentAction} to be done the next time step.
+     * A callback function to be invoked when this task has been completed.
+     * Used to clear and finalize resources.
      */
-    public AgentAction getNextAction() {
-        if (status == TaskStatus.PENDING) {
-            return AgentAction.NOTHING;
-        }
-
-        if (status == TaskStatus.FETCH) {
-            return AgentAction.MOVE;
-        }
-
-        if (status == TaskStatus.PICK) {
-            return AgentAction.PICK;
-        }
-
-        if (status == TaskStatus.DELIVER) {
-            return AgentAction.MOVE;
-        }
-
-        if (status == TaskStatus.WAIT) {
-            return AgentAction.WAIT;
-        }
-
-        if (status == TaskStatus.RETURN) {
-            return AgentAction.MOVE;
-        }
-
-        if (status == TaskStatus.RELEASE) {
-            return AgentAction.RELEASE;
-        }
-
-        return AgentAction.NOTHING;
-    }
-
-    public GuideCell getGuideAt(int row, int col) {
-        if (status == TaskStatus.FETCH || status == TaskStatus.RETURN) {
-            return rack.getGuideAt(row, col);
-        }
-
-        if (status == TaskStatus.DELIVER) {
-            return getDeliveryGate().getGuideAt(row, col);
-        }
-
-        return new GuideCell(0, Direction.STILL);
+    public void onComplete() {
+        agent.clearTask();
+        rack.clearTask();
+        order.onTaskCompleted(this);
     }
 
     /**
@@ -435,21 +377,88 @@ public class Task extends HiveObject {
      * @return an integer value representing the priority of this task.
      */
     public int getPriority() {
+        // TODO: add better heuristic to compute the priority
         return (order != null ? -order.getId() : Integer.MIN_VALUE);
     }
 
     /**
-     * Returns the estimated number of time steps to finish the currently assigned task.
+     * Returns the guide cell at the given position to reach the target of this task.
+     *
+     * @param row the row position of the needed guide cell.
+     * @param row the column position of the needed guide cell.
+     *
+     * @return the {@code GuideCell} at the given position.
+     */
+    public GuideCell getGuideAt(int row, int col) {
+        if (status == TaskStatus.FETCHING || status == TaskStatus.RETURNING) {
+            return rack.getGuideAt(row, col);
+        }
+
+        if (status == TaskStatus.DELIVERING) {
+            return gate.getGuideAt(row, col);
+        }
+
+        return new GuideCell(0, Direction.STILL);
+    }
+
+    /**
+     * Returns the guide cell at the given position to reach the target of this task.
+     *
+     * @param pos the position of the needed guide cell.
+     *
+     * @return the {@code GuideCell} at the given position.
+     */
+    public GuideCell getGuideAt(Position pos) {
+        return getGuideAt(pos.row, pos.col);
+    }
+
+    /**
+     * Returns the estimated number of time steps to finish this task.
      *
      * @return an integer representing the estimated number of step to finish the assigned task.
      */
     public int getEstimatedDistance() {
-        Rack rack = getRack();
-        Gate gate = getDeliveryGate();
-
         int x = rack.getEstimatedDistance(agent.getPosition());
         int y = gate.getEstimatedDistance(rack.getPosition());
 
         return x + y * 2;
+    }
+
+    /**
+     * Returns the next required action to be done by the assigned agent
+     * in order to move one step forward to complete this task.
+     *
+     * @return {@code AgentAction} to be done the next time step.
+     */
+    public AgentAction getNextAction() {
+        if (status == TaskStatus.PENDING) {
+            return AgentAction.NOTHING;
+        }
+
+        if (status == TaskStatus.FETCHING) {
+            return AgentAction.MOVE;
+        }
+
+        if (status == TaskStatus.LOADING) {
+            return AgentAction.LOAD;
+        }
+
+        if (status == TaskStatus.DELIVERING) {
+            return AgentAction.MOVE;
+        }
+
+        if (status == TaskStatus.WAITING) {
+            return AgentAction.WAIT;
+        }
+
+        if (status == TaskStatus.RETURNING) {
+            return AgentAction.MOVE;
+        }
+
+        if (status == TaskStatus.OFFLOADING) {
+            return AgentAction.OFFLOAD;
+        }
+
+        return AgentAction.NOTHING;
     }
 }

@@ -1,6 +1,6 @@
 package models.map;
 
-import models.map.base.BaseCell;
+import models.map.base.Cell;
 import utils.Constants;
 import utils.Constants.*;
 
@@ -11,7 +11,7 @@ import utils.Constants.*;
  * <p>
  * A guide cell guides the agent towards its associated target.
  */
-public class GuideCell extends BaseCell {
+public class GuideCell extends Cell {
 
     //
     // Member Variables

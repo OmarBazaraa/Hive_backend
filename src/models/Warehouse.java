@@ -8,7 +8,8 @@ import models.components.Order;
 import models.components.Station;
 import models.components.Gate;
 import models.components.Rack;
-import models.map.Grid;
+import models.map.MapGrid;
+import utils.Constants.*;
 
 import java.util.*;
 
@@ -25,9 +26,9 @@ public class Warehouse implements Order.OnFulFillListener {
     private int time;
 
     /**
-     * Warehouse grid map.
+     * Warehouse map grid.
      */
-    private Grid map;
+    private MapGrid map;
 
     /**
      * Map of all agents in the warehouse, indexed by their id.
@@ -48,11 +49,6 @@ public class Warehouse implements Order.OnFulFillListener {
      * Map of all sell items in the warehouse, indexed by their id.
      */
     private Map<Integer, Item> items = new HashMap<>();
-
-    /**
-     * Map of the total currently available items in the warehouse.
-     */
-    private Map<Item, Integer> availableItems = new HashMap<>();
 
     /**
      * Map of all racks in the warehouse, indexed by their id.
@@ -194,7 +190,7 @@ public class Warehouse implements Order.OnFulFillListener {
             Agent agent = activeAgents.poll();
             Planner.step(agent, map, time);
 
-            if (agent.isTaskCompleted()) {
+            if (agent.getStatus() == AgentStatus.IDLE) {
                 readyAgents.add(agent);
             }
         }

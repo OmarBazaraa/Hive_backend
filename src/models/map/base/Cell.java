@@ -4,9 +4,9 @@ import utils.Constants;
 
 
 /**
- * This {@code BaseCell} class represents a grid cell in our Hive System's map.
+ * This {@code Cell} class represents a grid cell in our Hive System's map.
  */
-public class BaseCell {
+public class Cell {
 
     /**
      * Converts this cell to a character symbol representing its shape.

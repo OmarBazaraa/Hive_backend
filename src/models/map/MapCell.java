@@ -1,17 +1,16 @@
 package models.map;
 
 import models.components.base.DstHiveObject;
-import models.components.base.HiveObject;
 import models.components.base.SrcHiveObject;
-import models.map.base.BaseCell;
+import models.map.base.Cell;
 import utils.Constants;
 import utils.Constants.*;
 
 
 /**
- * This {@code Cell} class represents a grid cell in our Hive System's map.
+ * This {@code MapCell} class represents a grid cell in our Hive System's map.
  */
-public class Cell extends BaseCell {
+public class MapCell extends Cell {
 
     //
     // Member Variables
@@ -45,12 +44,12 @@ public class Cell extends BaseCell {
      *
      * @return the allocated array.
      */
-    public static Cell[][] allocate2D(int n, int m) {
-        Cell[][] ret = new Cell[n][m];
+    public static MapCell[][] allocate2D(int n, int m) {
+        MapCell[][] ret = new MapCell[n][m];
 
         for (int i = 0; i < n; ++i) {
             for (int j = 0; j < m; ++j) {
-                ret[i][j] = new Cell();
+                ret[i][j] = new MapCell();
             }
         }
 
@@ -65,7 +64,7 @@ public class Cell extends BaseCell {
     /**
      * Constructs a new cell.
      */
-    public Cell() {
+    public MapCell() {
         this.type = CellType.UNKNOWN;
         this.srcObj = null;
         this.dstObj = null;
@@ -76,7 +75,7 @@ public class Cell extends BaseCell {
      *
      * @param type the type of the cell.
      */
-    public Cell(CellType type) {
+    public MapCell(CellType type) {
         this.type = type;
     }
 
@@ -87,7 +86,7 @@ public class Cell extends BaseCell {
      * @param srcObj the existing {@code SrcHiveObject} in the cell.
      * @param dstObj the existing {@code DstHiveObject} in the cell.
      */
-    public Cell(CellType type, SrcHiveObject srcObj, DstHiveObject dstObj) {
+    public MapCell(CellType type, SrcHiveObject srcObj, DstHiveObject dstObj) {
         this.type = type;
         this.srcObj = srcObj;
         this.dstObj = dstObj;
@@ -98,7 +97,7 @@ public class Cell extends BaseCell {
      *
      * @param srcObj the existing {@code SrcHiveObject} in the cell.
      */
-    public void setSrcObjcet(SrcHiveObject srcObj) {
+    public void setSrcObject(SrcHiveObject srcObj) {
         this.srcObj = srcObj;
     }
 
@@ -107,7 +106,7 @@ public class Cell extends BaseCell {
      *
      * @param dstObj the existing {@code DstHiveObject} in the cell.
      */
-    public void setDstObjcet(DstHiveObject dstObj) {
+    public void setDstObject(DstHiveObject dstObj) {
         this.dstObj = dstObj;
     }
 

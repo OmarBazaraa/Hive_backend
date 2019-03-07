@@ -191,9 +191,9 @@ public class Item extends HiveObject {
     /**
      * Releases a number of reserved units of this item across the warehouse's racks.
      *
-     * @param quantity the quantity to release.
+     * @param quantity the quantity to offloadRack.
      *
-     * @throws Exception when trying to release more quantity than currently reserved.
+     * @throws Exception when trying to offloadRack more quantity than currently reserved.
      */
     public void release(int quantity) throws Exception {
         if (quantity <= 0) {

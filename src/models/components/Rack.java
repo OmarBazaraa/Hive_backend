@@ -26,6 +26,11 @@ public class Rack extends DstHiveObject {
     private RackStatus status;
 
     /**
+     * The assigned task to deliver this rack.
+     */
+    private Task task;
+
+    /**
      * The maximum storing capacity (in weight units) of this rack.
      */
     private int maxCapacity = Constants.RACK_DEFAULT_STORE_CAPACITY;
@@ -72,6 +77,55 @@ public class Rack extends DstHiveObject {
      */
     public void setStatus(RackStatus status) {
         this.status = status;
+    }
+
+    /**
+     * Returns the assigned task to deliver this rack.
+     *
+     * @return a {@code Task} object representing the assigned task; {@code null} if no current assigned task.
+     */
+    public Task getTask() {
+        return this.task;
+    }
+
+    /**
+     * Assigns a new task to deliver this rack.
+     *
+     * @param task the new task to assign.
+     */
+    public void setTask(Task task) {
+        this.task = task;
+        this.status = RackStatus.RESERVED;
+    }
+
+    /**
+     * Clears the currently assigned task of this rack.
+     */
+    public void clearTask() {
+        this.task = null;
+        this.status = RackStatus.IDLE;
+    }
+
+    /**
+     * Loads this rack to be delivered by an agent.
+     */
+    public void load() throws Exception {
+        if (status != RackStatus.RESERVED) {
+            throw new Exception("Loading un-reserved rack!");
+        }
+
+        this.status = RackStatus.LOADED;
+    }
+
+    /**
+     * Offloads this rack after being delivered by an agent.
+     */
+    public void offload() throws Exception {
+        if (status != RackStatus.LOADED) {
+            throw new Exception("Offloading un-loaded rack!");
+        }
+
+        this.status = RackStatus.RESERVED;
     }
 
     /**

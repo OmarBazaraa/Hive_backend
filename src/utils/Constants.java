@@ -7,7 +7,7 @@ public class Constants {
     public static final String PROJ_VERSION = "0.0.0.1";
     public static final String PROJ_VERSION_DATE = "21 February 2019";
 
-    // Grid cell shapes
+    // MapGrid cell shapes
     public static final char SHAPE_CELL_EMPTY = '.';
     public static final char SHAPE_CELL_OBSTACLE = '#';
     public static final char SHAPE_CELL_GATE = 'G';
@@ -64,30 +64,36 @@ public class Constants {
      * Different status of the agents during their lifecycle in the system.
      */
     public enum AgentStatus {
-        READY,
+        IDLE,
         ACTIVE,
+        ACTIVE_LOADED,
         CHARGING,
         OUT_OF_SERVICE
     }
 
     /**
-     * Different actions that can be done by the agents
+     * Different actions that can be done by the agents.
+     * Note that the first 4 values should be in the same order as the {@code Direction} enum.
      */
     public enum AgentAction {
-        NOTHING,
+        MOVE_UP,
+        MOVE_RIGHT,
+        MOVE_DOWN,
+        MOVE_LEFT,
         MOVE,
-        PICK,
-        RELEASE,
-        WAIT
+        LOAD,
+        OFFLOAD,
+        WAIT,
+        NOTHING
     }
 
     /**
      * Different status of the racks during their lifecycle in the system.
      */
     public enum RackStatus {
-        READY,      // The rack is static, and ready to be shipped
+        IDLE,       // The rack is static, and ready to be shipped
         RESERVED,   // The rack is currently reserved by a certain task
-        ACTIVE      // The rack is currently being shipped
+        LOADED      // The rack is currently picked by an agent
     }
 
     /**
@@ -105,12 +111,12 @@ public class Constants {
      */
     public enum TaskStatus {
         PENDING,
-        FETCH,
-        PICK,
-        DELIVER,
-        WAIT,
-        RETURN,
-        RELEASE,
+        FETCHING,
+        LOADING,
+        DELIVERING,
+        WAITING,
+        RETURNING,
+        OFFLOADING,
         COMPLETE
     }
 

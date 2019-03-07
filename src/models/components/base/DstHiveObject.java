@@ -1,7 +1,7 @@
 package models.components.base;
 
 import algorithms.Planner;
-import models.map.Grid;
+import models.map.MapGrid;
 import models.map.GuideCell;
 import models.map.base.Position;
 
@@ -44,7 +44,7 @@ public class DstHiveObject extends TerminalHiveObject {
      *
      * @param map the grid map of our Hive System.
      */
-    public void computeGuideMap(Grid map) {
+    public void computeGuideMap(MapGrid map) {
         guideMap = Planner.bfs(map, getPosition());
     }
 

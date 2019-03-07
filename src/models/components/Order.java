@@ -256,7 +256,7 @@ public class Order extends HiveObject {
     }
 
     /**
-     * A callback function to be called when a sub-task of this order has been completed.
+     * A callback function to be invoked when a sub-task of this order has been completed.
      *
      * @param task the task that has been complete.
      */
