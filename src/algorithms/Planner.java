@@ -6,8 +6,8 @@ import models.map.MapCell;
 import models.map.MapGrid;
 import models.map.GuideCell;
 import utils.Constants.*;
-import models.map.base.Dimensions;
-import models.map.base.Position;
+import utils.Dimensions;
+import utils.Position;
 import utils.Utility;
 
 import java.util.ArrayList;

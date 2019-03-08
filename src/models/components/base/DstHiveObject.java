@@ -3,9 +3,6 @@ package models.components.base;
 import algorithms.Planner;
 import models.map.GuideGrid;
 import models.map.MapGrid;
-import models.map.GuideCell;
-import models.map.base.Position;
-import utils.Constants;
 
 
 /**

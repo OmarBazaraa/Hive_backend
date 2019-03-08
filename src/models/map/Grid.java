@@ -1,5 +1,7 @@
-package models.map.base;
+package models.map;
 
+import utils.Dimensions;
+import utils.Position;
 import utils.Constants;
 import utils.Constants.*;
 

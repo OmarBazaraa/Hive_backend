@@ -1,4 +1,4 @@
-package models.map.base;
+package models.map;
 
 import utils.Constants;
 

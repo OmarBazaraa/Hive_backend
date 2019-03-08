@@ -1,7 +1,6 @@
 package models.map;
 
-import models.map.base.Grid;
-import models.map.base.Position;
+import utils.Position;
 import utils.Constants.*;
 
 

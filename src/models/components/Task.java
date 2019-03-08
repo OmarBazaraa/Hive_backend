@@ -1,9 +1,7 @@
 package models.components;
 
 import models.components.base.HiveObject;
-import models.map.GuideCell;
 import models.map.GuideGrid;
-import models.map.base.Position;
 import utils.Constants.*;
 
 import java.util.HashMap;

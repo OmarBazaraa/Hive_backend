@@ -1,7 +1,6 @@
 package models.map;
 
-import models.map.base.Grid;
-import models.map.base.Position;
+import utils.Position;
 import utils.Constants.*;
 
 import java.util.ArrayList;
@@ -31,12 +30,12 @@ public class GuideGrid extends Grid<GuideCell> {
 
     /**
      * Returns the guide distance to reach the associated target
-     * from a given {@code GuideCell} and vice versa.
+     * from a {@code GuideCell} in this {@code GuideMap} and vice versa.
      *
      * @param row the row position of the cell.
      * @param col the column position of the cell.
      *
-     * @return the distance to reach the target
+     * @return the distance to reach the target.
      */
     public int getDistance(int row, int col) {
         return isInBound(row, col) ? grid[row][col].distance : Integer.MAX_VALUE;
@@ -48,7 +47,7 @@ public class GuideGrid extends Grid<GuideCell> {
      *
      * @param pos the {@code Position} of the cell.
      *
-     * @return the distance to reach the target
+     * @return the distance to reach the target.
      */
     public int getDistance(Position pos) {
         return getDistance(pos.row, pos.col);

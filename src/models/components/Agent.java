@@ -5,7 +5,7 @@ import models.components.base.TerminalHiveObject;
 import models.map.GuideGrid;
 import models.map.MapCell;
 import models.map.MapGrid;
-import models.map.base.Position;
+import utils.Position;
 import utils.Constants.*;
 import utils.Utility;
 

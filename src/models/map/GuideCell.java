@@ -1,9 +1,5 @@
 package models.map;
 
-import models.map.base.Cell;
-import utils.Constants;
-import utils.Constants.*;
-
 
 /**
  * This {@code GuideCell} class represents a guide cell used by {@link GuideGrid} class.
