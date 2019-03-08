@@ -17,7 +17,7 @@ public class Pair<T extends Comparable<? super T>, U extends Comparable<? super 
     public U val;
 
     /**
-     * Constructs a {@code Pair} object with the given coordinates.
+     * Constructs a {@code Pair} object with the given key value pairs.
      *
      * @param key the first object.
      * @param val the second object.

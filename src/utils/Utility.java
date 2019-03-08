@@ -4,34 +4,34 @@ import utils.Constants.*;
 
 
 /**
- * This {@code Utility} class is a collection of utility functions to be used across the entire project modules.
- * <p>
- * Note that all methods in this class must be static methods.
+ * This {@code Utility} class is a collection of a static utility functions
+ * to be used across the entire project modules.
  */
 public class Utility {
 
     /**
-     * Returns the reverse direction of the given one.
+     * Returns the reverse (opposite) direction of the given one.
      *
      * @param dir the direction to get its reverse.
      *
      * @return the reverse direction.
      */
-    public static Direction getReverseDirection(Direction dir) {
+    public static Direction getReverseDir(Direction dir) {
         if (dir == Direction.STILL) {
             return dir;
         }
+
         int i = dir.ordinal();
-        Direction dirs[] = Direction.values();
+        Direction[] dirs = Direction.values();
         return dirs[(i + 2) % 4];
     }
 
     /**
-     * Converts the given agent action into its corresponding direction.
+     * Converts an {@code AgentAction} into its corresponding {@code Direction}.
      *
-     * @param action the agent action.
+     * @param action the {@code AgentAction} to convert.
      *
-     * @return the corresponding agent {@code Direction}.
+     * @return the corresponding {@code Direction}.
      */
     public static Direction actionToDir(AgentAction action) {
         int i = action.ordinal();
@@ -44,11 +44,11 @@ public class Utility {
     }
 
     /**
-     * Converts the given agent direction into its corresponding action.
+     * Converts the given {@code Direction} into its corresponding {@code AgentAction}.
      *
-     * @param dir the agent direction.
+     * @param dir the {@code Direction} to convert.
      *
-     * @return the corresponding agent {@code AgentAction}.
+     * @return the corresponding {@code AgentAction}.
      */
     public static AgentAction dirToAction(Direction dir) {
         int i = dir.ordinal();

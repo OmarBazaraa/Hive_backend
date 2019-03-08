@@ -28,22 +28,5 @@ public class Main {
 
     public static void run(String configFilename, String ordersFilename) throws Exception {
 
-
-        List<Integer> l1 = new ArrayList<>();
-        List<Integer> l2 = new ArrayList<>();
-        List<Integer> l3 = new ArrayList<>();
-
-        l1.add(1);
-        l2.add(2);
-        l2.add(3);
-        l2.add(4);
-        l3.add(5);
-        l3.add(6);
-
-        // Append the lists in order
-        l1.addAll(l2);
-        l1.addAll(l3);
-
-        System.out.println(l1);
     }
 }
