@@ -1,9 +1,9 @@
 package models.map.base;
 
 /**
- * This {@code Dimensions} class holds the dimensions of a grid object in Hive System.
+ * This {@code Dimensions} class holds the dimensions of a 2D grid.
  * <p>
- * The dimensions of a grid is described by its number of rows and columns.
+ * The dimensions of a grid is described by its number of rows and number of columns.
  */
 public class Dimensions implements Comparable<Dimensions> {
 

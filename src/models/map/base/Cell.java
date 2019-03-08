@@ -4,14 +4,16 @@ import utils.Constants;
 
 
 /**
- * This {@code Cell} class represents a grid cell in our Hive System's map.
+ * This {@code Cell} class represents a grid cell used by {@link Grid} class.
+ * <p>
+ * This class is the parent class of {@link models.map.MapCell} and {@link models.map.GuideCell}.
  */
 public class Cell {
 
     /**
-     * Converts this cell to a character symbol representing its shape.
+     * Converts this {@code Cell} to a character symbol representing its shape.
      *
-     * @return a {@code char} representing this cell's type.
+     * @return a character representing the shape of this cell.
      */
     public char toShape() {
         return Constants.SHAPE_CELL_UNKNOWN;

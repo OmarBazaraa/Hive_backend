@@ -1,10 +1,9 @@
 package models.map.base;
 
 /**
- * This {@code Position} class holds the 2D coordinates of an object
- * in the map of the Hive system.
+ * This {@code Position} class holds the coordinates of an object in a 2D grid.
  * <p>
- * The position of an object is described by its row and column in the map's grid.
+ * The position of an object is described by its row and column in the grid.
  */
 public class Position implements Comparable<Position> {
 

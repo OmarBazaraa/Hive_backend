@@ -4,6 +4,8 @@ package utils;
 /**
  * This {@code Constants} class contains some static constants values
  * to be used across the entire project modules.
+ *
+ * TODO: refactor?! :: move types and enums to their corresponding classes
  */
 public class Constants {
 
@@ -21,7 +23,7 @@ public class Constants {
     //
 
     // Map grid cell shapes
-    // TODO: rename confusion :: SHAPE_CELL_* <-> CELL_SHAPE_*
+    // TODO: refactor?! :: SHAPE_CELL_* <-> CELL_SHAPE_*
     public static final char SHAPE_CELL_EMPTY = '.';
     public static final char SHAPE_CELL_OBSTACLE = '#';
     public static final char SHAPE_CELL_GATE = 'G';
@@ -37,8 +39,8 @@ public class Constants {
     public enum CellType {
         EMPTY,
         OBSTACLE,
-        GATE,
         RACK,
+        GATE,
         STATION,
         UNKNOWN
     }
@@ -48,7 +50,7 @@ public class Constants {
     //
     
     // Direction shapes
-    // TODO: rename confusion :: SHAPE_DIR_* <-> DIR_SHAPE_*
+    // TODO: refactor?! :: SHAPE_DIR_* <-> DIR_SHAPE_*
     public static final char SHAPE_DIR_UP = '^';
     public static final char SHAPE_DIR_RIGHT = '>';
     public static final char SHAPE_DIR_DOWN = 'v';
@@ -76,7 +78,7 @@ public class Constants {
     //
 
     // Agent default configurations
-    // TODO: rename confusion :: AGENT_DEFAULT_* <-> DEFAULT_AGENT_*
+    // TODO: refactor?! :: AGENT_DEFAULT_* <-> DEFAULT_AGENT_*
     public static final int AGENT_DEFAULT_CAPACITY = 100;
     public static final int AGENT_DEFAULT_CHARGE_CAPACITY = 100;
 
@@ -114,7 +116,7 @@ public class Constants {
     //
 
     // Rack default configurations
-    // TODO: rename confusion :: RACK_DEFAULT_* <-> DEFAULT_RACK_*
+    // TODO: refactor?! :: RACK_DEFAULT_* <-> DEFAULT_RACK_*
     public static final int RACK_DEFAULT_INIT_WEIGHT = 100;
     public static final int RACK_DEFAULT_STORE_CAPACITY = 100;
 

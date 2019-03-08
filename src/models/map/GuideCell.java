@@ -6,10 +6,10 @@ import utils.Constants.*;
 
 
 /**
- * This {@code GuideCell} class represents a cell in the guide map associated with
- * a target {@code DstHiveObject}.
+ * This {@code GuideCell} class represents a guide cell used by {@link GuideGrid} class.
  * <p>
- * A guide cell guides the agent towards its associated target.
+ * A guide cell guides an {@code agent} towards its associated target,
+ * typically a {@link models.components.base.DstHiveObject}.
  */
 public class GuideCell extends Cell {
 
@@ -18,14 +18,9 @@ public class GuideCell extends Cell {
     //
 
     /**
-     * The distance to reach the associated target {@code DstHiveObject}.
+     * The guide distance to reach the associated target.
      */
     public int distance;
-
-    /**
-     * The direction to reach the associated target {@code DstHiveObject}.
-     */
-    public Direction direction;
 
     // ===============================================================================================
     //
@@ -58,82 +53,54 @@ public class GuideCell extends Cell {
     //
 
     /**
-     * Constructs a new guide cell.
+     * Constructs a new {@code GuideCell} with default guide distance.
      */
     public GuideCell() {
         this.distance = Integer.MAX_VALUE;
-        this.direction = Direction.STILL;
     }
 
     /**
-     * Constructs a new guide cell.
+     * Constructs a new {@code GuideCell} with the given guide distance.
      *
-     * @param distance  the distance to reach the target.
-     * @param direction the direction to reach the target.
+     * @param distance the distance to reach the target.
      */
-    public GuideCell(int distance, Direction direction) {
+    public GuideCell(int distance) {
         this.distance = distance;
-        this.direction = direction;
     }
 
     /**
-     * Sets the guides of this cell.
+     * Returns the guide distance of this {@code GuideCell} to reach the associated target.
      *
-     * @param distance  the distance to reach the target.
-     * @param direction the direction to reach the target.
-     */
-    public void set(int distance, Direction direction) {
-        this.distance = distance;
-        this.direction = direction;
-    }
-
-    /**
-     * Returns the minimum distance to reach the associated target.
-     *
-     * @return the minimum distance to reach the target.
+     * @return the guide distance to reach the target.
      */
     public int getDistance() {
         return distance;
     }
 
     /**
-     * Checks whether the target is reachable from this cell and vice versa.
+     * Sets the guide distance of this {@code GuideCell} to reach the associated target.
      *
-     * @return {@code true} if the target is reachable, {@code false} otherwise.
+     * @param distance the distance to reach the target.
+     */
+    public void setDistance(int distance) {
+        this.distance = distance;
+    }
+
+    /**
+     * Checks whether the target is reachable from this {@code GuideCell} and vice versa.
+     *
+     * @return {@code true} if the target is reachable; {@code false} otherwise.
      */
     public boolean isReachable() {
-        return (this.distance < Integer.MAX_VALUE);
+        return (distance < Integer.MAX_VALUE);
     }
 
     /**
-     * Checks whether the target is unreachable from this cell and vice versa.
+     * Checks whether the target is unreachable from this {@code GuideCell} and vice versa.
      *
-     * @return {@code true} if the target is unreachable, {@code false} otherwise.
+     * @return {@code true} if the target is unreachable; {@code false} otherwise.
      */
     public boolean isUnreachable() {
-        return (this.distance == Integer.MAX_VALUE);
-    }
-
-    /**
-     * Converts this cell to a character symbol representing its type.
-     *
-     * @return a {@code char} representing this cell's type.
-     */
-    @Override
-    public char toShape() {
-        switch (direction) {
-            case UP:
-                return Constants.SHAPE_DIR_UP;
-            case RIGHT:
-                return Constants.SHAPE_DIR_RIGHT;
-            case DOWN:
-                return Constants.SHAPE_DIR_DOWN;
-            case LEFT:
-                return Constants.SHAPE_DIR_LEFT;
-            case STILL:
-                return Constants.SHAPE_DIR_STILL;
-            default:
-                return Constants.SHAPE_DIR_UNKNOWN;
-        }
+        return (distance == Integer.MAX_VALUE);
     }
 }

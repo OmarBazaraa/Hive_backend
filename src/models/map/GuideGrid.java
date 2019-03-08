@@ -3,81 +3,61 @@ package models.map;
 import models.map.base.Grid;
 import models.map.base.Position;
 import utils.Constants.*;
-import utils.Utility;
 
 import java.util.ArrayList;
 import java.util.List;
 
 
 /**
- * This {@code GuideGrid} class represents the guide map of {@code DstHiveObject}.
+ * This {@code GuideGrid} class represents a guide map to reach a target object.
+ * <p>
+ * A guide map guides an {@code agent} towards its associated target,
+ * typically a {@link models.components.base.DstHiveObject}.
  */
 public class GuideGrid extends Grid<GuideCell> {
 
-    //
-    // Member Variables
-    //
-
-    private CellType accessibleCellType;
-
-    // ===============================================================================================
     //
     // Member Methods
     //
 
     /**
-     * Constructs a new grid.
+     * Constructs a new {@code GuideMap} object with the given 2D {@code GuideCell} array.
      *
-     * @param grid the grid configurations.
+     * @param grid a 2D array of {@code GuideCell} objects.
      */
-    public GuideGrid(GuideCell[][] grid, CellType accessibleCellType) {
+    public GuideGrid(GuideCell[][] grid) {
         super(grid);
-        this.accessibleCellType = accessibleCellType;
     }
 
     /**
-     * Returns the accessible {@code CellType} of this guide map.
+     * Returns the guide distance to reach the associated target
+     * from a given {@code GuideCell} and vice versa.
      *
-     * @return the accessible {@code CellType} of this guide map.
-     */
-    public CellType getAccessibleCellType() {
-        return accessibleCellType;
-    }
-
-    /**
-     * Sets the accessible {@code CellType} of this guide map.
+     * @param row the row position of the cell.
+     * @param col the column position of the cell.
      *
-     * @param accessibleCellType the accessible {@code CellType} to set.
-     */
-    public void setAccessibleCellType(CellType accessibleCellType) {
-        this.accessibleCellType = accessibleCellType;
-    }
-
-    /**
-     * Returns the minimum distance to reach the associated {@code DstHiveObject}
-     * from the given cell and vice versa.
-     *
-     * @param row the row position of the needed cell.
-     * @param col the column position of the needed cell.
-     *
-     * @return the minimum distance to the given position.
+     * @return the distance to reach the target
      */
     public int getDistance(int row, int col) {
         return isInBound(row, col) ? grid[row][col].distance : Integer.MAX_VALUE;
     }
 
     /**
-     * Returns the minimum distance to reach the associated {@code DstHiveObject}
-     * from the given cell and vice versa.
+     * Returns the guide distance to reach the associated target
+     * from a given {@code GuideCell} and vice versa.
      *
-     * @param pos the position of the needed cell.
+     * @param pos the {@code Position} of the cell.
      *
-     * @return the minimum distance to the given position.
+     * @return the distance to reach the target
      */
     public int getDistance(Position pos) {
         return getDistance(pos.row, pos.col);
     }
 
+
+    //
+    // TODO
+    //
 
     public List<Direction> getGuideDirections(Position pos) {
         List<Direction> ret = new ArrayList<>();

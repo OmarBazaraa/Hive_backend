@@ -2,7 +2,7 @@ package models.map;
 
 import models.map.base.Grid;
 import models.map.base.Position;
-import utils.Constants;
+import utils.Constants.*;
 
 
 /**
@@ -15,94 +15,71 @@ public class MapGrid extends Grid<MapCell> {
     //
 
     /**
-     * Constructs a new grid.
+     * Constructs a new {@code MapGrid} object with the given 2D {@code MapCell} array.
      *
-     * @param grid the grid configurations.
+     * @param grid a 2D array of {@code MapCell} objects.
      */
     public MapGrid(MapCell[][] grid) {
         super(grid);
     }
 
     /**
-     * Checks whether the given cell is statically empty or not.
-     * A cell is considered statically empty if it is currently empty or it's occupied by an agent.
+     * Checks whether a {@code MapCell} in this {@code MapGrid} is statically empty or not.
+     * <p>
+     * A cell is considered statically empty if it is empty or it is currently
+     * occupied by an {@code Agent}.
      *
      * @param row the row position of the cell to check.
      * @param col the column position of the cell to check.
      *
-     * @return {@code true} if the given cell is inside grid boundaries and empty, {@code false} otherwise.
+     * @return {@code true} if the cell exists and is empty; {@code false} otherwise.
      */
     public boolean isEmpty(int row, int col) {
         return isInBound(row, col) && grid[row][col].isEmpty();
     }
 
     /**
-     * Checks whether the given cell is statically empty or not.
-     * A cell is considered statically empty if it is currently empty or it's occupied by an agent.
+     * Checks whether a {@code MapCell} in this {@code MapGrid} is statically empty or not.
+     * <p>
+     * A cell is considered statically empty if it is empty or it is currently
+     * occupied by an {@code Agent}.
      *
-     * @param pos the position of the cell to check.
+     * @param pos the {@code Position} of the cell to check.
      *
-     * @return {@code true} if the given cell is inside grid boundaries and empty, {@code false} otherwise.
+     * @return {@code true} if the cell exists and is empty; {@code false} otherwise.
      */
     public boolean isEmpty(Position pos) {
         return isEmpty(pos.row, pos.col);
     }
 
     /**
-     * Checks whether the given cell is accessible or not.
-     * A cell is considered accessible if it is empty, occupied by an agent,
+     * Checks whether a {@code MapCell} in this {@code MapGrid} is accessible or not.
+     * <p>
+     * A cell is considered accessible if it is empty, currently occupied by an {@code Agent},
      * or its type matches one of the given types.
      *
-     * @param row             the row position of the cell to check.
-     * @param col             the column position of the cell to check.
-     * @param accessibleTypes the list of accessible cell types.
+     * @param row         the row position of the cell to check.
+     * @param col         the column position of the cell to check.
+     * @param accessTypes a list of accessible cell types.
      *
-     * @return {@code true} if this cell is accessible, {@code false} otherwise.
+     * @return {@code true} if the cell exists and is accessible; {@code false} otherwise.
      */
-    public boolean isAccessible(int row, int col, Constants.CellType... accessibleTypes) {
-        return isInBound(row, col) && grid[row][col].isAccessible(accessibleTypes);
+    public boolean isAccessible(int row, int col, CellType... accessTypes) {
+        return isInBound(row, col) && grid[row][col].isAccessible(accessTypes);
     }
 
     /**
-     * Checks whether the given cell is accessible or not.
-     * A cell is considered accessible if it is empty, occupied by an agent,
+     * Checks whether a {@code MapCell} in this {@code MapGrid} is accessible or not.
+     * <p>
+     * A cell is considered accessible if it is empty, currently occupied by an {@code Agent},
      * or its type matches one of the given types.
      *
-     * @param pos             the position of the cell to check.
-     * @param accessibleTypes the list of accessible cell types.
+     * @param pos         the {@code Position} of the cell to check.
+     * @param accessTypes a list of accessible cell types.
      *
-     * @return {@code true} if this cell is accessible, {@code false} otherwise.
+     * @return {@code true} if the cell exists and is accessible; {@code false} otherwise.
      */
-    public boolean isAccessible(Position pos, Constants.CellType... accessibleTypes) {
-        return isAccessible(pos.row, pos.col, accessibleTypes);
-    }
-
-    /**
-     * Checks whether the given cell is accessible by an agent to move into or not.
-     * A cell is considered agent accessible if it is not occupied by an agent, and
-     * it is empty or its type matches one of the given types.
-     *
-     * @param row             the row position of the cell to check.
-     * @param col             the column position of the cell to check.
-     * @param accessibleTypes the list of accessible cell types.
-     *
-     * @return {@code true} if this cell is agent accessible, {@code false} otherwise.
-     */
-    public boolean isAgentAccessible(int row, int col, Constants.CellType... accessibleTypes) {
-        return isInBound(row, col) && grid[row][col].isAgentAccessible(accessibleTypes);
-    }
-
-    /**
-     * Checks whether the given cell is accessible by an agent to move into or not.
-     * A cell is considered agent accessible if it is not occupied by an agent, and
-     * it is empty or its type matches one of the given types.
-     *
-     * @param pos             the position of the cell to check.
-     * @param accessibleTypes the list of accessible cell types.
-     *
-     * @return {@code true} if this cell is agent accessible, {@code false} otherwise.
-     */
-    public boolean isAgentAccessible(Position pos, Constants.CellType... accessibleTypes) {
-        return isAgentAccessible(pos.row, pos.col, accessibleTypes);
+    public boolean isAccessible(Position pos, CellType... accessTypes) {
+        return isAccessible(pos.row, pos.col, accessTypes);
     }
 }

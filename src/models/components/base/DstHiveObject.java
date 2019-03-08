@@ -56,6 +56,6 @@ public class DstHiveObject extends TerminalHiveObject {
      * @param map the grid map of our Hive System.
      */
     public void computeGuideMap(MapGrid map) {
-        guideMap = new GuideGrid(Planner.bfs(map, getPosition()), Constants.CellType.EMPTY);
+        guideMap = new GuideGrid(Planner.bfs(map, getPosition()));
     }
 }

@@ -35,7 +35,7 @@ public class Order extends HiveObject {
     private Map<Item, Integer> items = new HashMap<>();
 
     /**
-     * The set of sub tasks for fulfilling this order.
+     * The setDistance of sub tasks for fulfilling this order.
      */
     private Set<Task> subTasks = new HashSet<>();
 
@@ -115,7 +115,7 @@ public class Order extends HiveObject {
      * Checks whether this order is still pending or semi pending.
      * That is, there is still some pending items to be assigned.
      *
-     * @return {@code true} if this order is still pending, {@code false} otherwise.
+     * @return {@code true} if this order is still pending; {@code false} otherwise.
      */
     public boolean isPending() {
         return (this.pendingQuantities > 0);
@@ -124,7 +124,7 @@ public class Order extends HiveObject {
     /**
      * Checks whether this order is fulfilled or not.
      *
-     * @return {@code true} if this order is fulfilled, {@code false} otherwise.
+     * @return {@code true} if this order is fulfilled; {@code false} otherwise.
      */
     public boolean isFulfilled() {
         return (this.pendingQuantities <= 0 && this.subTasks.isEmpty());
@@ -134,7 +134,7 @@ public class Order extends HiveObject {
      * Checks whether this order is feasible of being fulfilled regarding
      * its items and quantities.
      *
-     * @return {@code true} if the given order is feasible, {@code false} otherwise.
+     * @return {@code true} if the given order is feasible; {@code false} otherwise.
      */
     public boolean isFeasible() {
         //

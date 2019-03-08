@@ -1,11 +1,10 @@
 package models.components;
 
 import models.components.base.HiveObject;
-import models.components.base.SrcHiveObject;
+import models.components.base.TerminalHiveObject;
 import models.map.GuideGrid;
 import models.map.MapCell;
 import models.map.MapGrid;
-import models.map.GuideCell;
 import models.map.base.Position;
 import utils.Constants.*;
 import utils.Utility;
@@ -14,7 +13,7 @@ import utils.Utility;
 /**
  * This {@code Agent} class is a model for robot agent in our Hive System.
  */
-public class Agent extends SrcHiveObject {
+public class Agent extends TerminalHiveObject {
 
     //
     // Member Variables
@@ -75,7 +74,7 @@ public class Agent extends SrcHiveObject {
     /**
      * Sets a new status to this agent.
      *
-     * @param status the new status to set.
+     * @param status the new status to setDistance.
      */
     public void setStatus(AgentStatus status) {
         this.status = status;
@@ -84,7 +83,7 @@ public class Agent extends SrcHiveObject {
     /**
      * Checks whether this agent is currently active or not.
      *
-     * @return {@code true} if this agent is active, {@code false} otherwise.
+     * @return {@code true} if this agent is active; {@code false} otherwise.
      */
     public boolean isActive() {
         return (status == AgentStatus.ACTIVE || status == AgentStatus.ACTIVE_LOADED);
@@ -93,7 +92,7 @@ public class Agent extends SrcHiveObject {
     /**
      * Checks whether this agent is currently loaded by a rack or not.
      *
-     * @return {@code true} if this agent is loaded, {@code false} otherwise.
+     * @return {@code true} if this agent is loaded; {@code false} otherwise.
      */
     public boolean isLoaded() {
         return (status == AgentStatus.ACTIVE_LOADED);
@@ -267,13 +266,13 @@ public class Agent extends SrcHiveObject {
         }
 
         // Ensure no racks in the next position if this agent is currently loaded
-        if (nxtCell.type == CellType.RACK && isLoaded()) {
+        if (nxtCell.getType() == CellType.RACK && isLoaded()) {
             throw new Exception("Moving into a rack while the robot is currently loaded!");
         }
 
         // Move agent
-        curCell.setSrcObject(null);
-        nxtCell.setSrcObject(this);
+        curCell.setAgent(null);
+        nxtCell.setAgent(this);
         setPosition(nxt);
     }
 
@@ -323,16 +322,16 @@ public class Agent extends SrcHiveObject {
      *
      * @param map the map's grid of the warehouse where the agent is.
      *
-     * @return {@code true} if the rack is valid, {@code false} otherwise.
+     * @return {@code true} if the rack is valid; {@code false} otherwise.
      */
     private boolean checkRackValidity(MapGrid map) {
         MapCell cell = map.get(getPosition());
 
-        if (cell.type != CellType.RACK) {
+        if (cell.getType() != CellType.RACK) {
             return false;
         }
 
-        Rack rack = (Rack) cell.dstObj;
+        Rack rack = (Rack) cell.getDestination();
 
         if (!rack.equals(task.getRack())) {
             return false;

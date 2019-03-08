@@ -204,7 +204,7 @@ public class Task extends HiveObject {
 
         Map<Item, Integer> m1, m2;
 
-        // Assign the smaller set of items to 'm1'
+        // Assign the smaller setDistance of items to 'm1'
         if (order.getItems().size() < rack.getItems().size()) {
             m1 = order.getItems();
             m2 = rack.getItems();
@@ -241,7 +241,7 @@ public class Task extends HiveObject {
     /**
      * Checks whether this task is currently active or not.
      *
-     * @return {@code true} if this task is active, {@code false} otherwise.
+     * @return {@code true} if this task is active; {@code false} otherwise.
      */
     public boolean isActive() {
         return this.status != TaskStatus.COMPLETE;
@@ -250,7 +250,7 @@ public class Task extends HiveObject {
     /**
      * Checks whether this task has been completed or not.
      *
-     * @return {@code true} if this task has been completed, {@code false} otherwise.
+     * @return {@code true} if this task has been completed; {@code false} otherwise.
      */
     public boolean isComplete() {
         return this.status == TaskStatus.COMPLETE;

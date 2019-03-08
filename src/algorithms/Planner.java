@@ -87,7 +87,7 @@ public class Planner {
             MapCell cell = map.get(nxt);
 
             // Get agent at the next cell
-            Agent nxtAgent = (Agent) cell.srcObj;
+            Agent nxtAgent = cell.getAgent();
 
             // Try to move the agent at the next cell to bring blank to the main agent
             if (bringBlank(nxtAgent, agent, map, time)) {
@@ -107,7 +107,7 @@ public class Planner {
      * @param map
      * @param time
      *
-     * @return {@code true} if the function manged to bring blank agent, {@code false} otherwise.
+     * @return {@code true} if the function manged to bring blank agent; {@code false} otherwise.
      */
     public static boolean bringBlank(Agent agent, Agent mainAgent, MapGrid map, int time) throws Exception {
         // Return if this agent has higher priority than the agent needed to be moved
@@ -145,7 +145,7 @@ public class Planner {
 
             MapCell cell = map.get(nxt);
 
-            if (cell.type == CellType.EMPTY || cell.type == CellType.RACK) {
+            if (cell.getType() == CellType.EMPTY || cell.getType() == CellType.RACK) {
                 agent.executeAction(Utility.dirToAction(dir), map, time);
                 return true;
             }
@@ -166,7 +166,7 @@ public class Planner {
             MapCell cell = map.get(nxt);
 
             if (cell.hasAgent()) {
-                Agent nextAgent = (Agent) cell.srcObj;
+                Agent nextAgent = cell.getAgent();
 
                 if (bringBlank(nextAgent, mainAgent, map, time)) {
                     agent.executeAction(Utility.dirToAction(dir), map, time);
@@ -184,7 +184,7 @@ public class Planner {
      *
      * @param map                 the grid map to compute upon.
      * @param dst                 the destination position.
-     * @param accessibleCellTypes the accessible {@code CellType} to set.
+     * @param accessibleCellTypes the accessible {@code CellType} to setDistance.
      *
      * @return a 2D {@code GuideCell} array representing the guide map to reach the destination.
      */
@@ -196,7 +196,7 @@ public class Planner {
 
         // Add BFS base case
         q.add(dst);
-        ret[dst.row][dst.col].set(0, Direction.STILL);
+        ret[dst.row][dst.col].setDistance(0);
 
         // Keep expanding all cell in the map
         while (!q.isEmpty()) {
@@ -221,7 +221,7 @@ public class Planner {
 
                 // Add expanded cell to the queue and update its guide values
                 q.add(prv);
-                ret[prv.row][prv.col].set(dis + 1, dir);
+                ret[prv.row][prv.col].setDistance(dis + 1);
             }
         }
 

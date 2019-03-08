@@ -73,7 +73,7 @@ public class Rack extends DstHiveObject {
     /**
      * Sets a new status to this rack.
      *
-     * @param status the new status to set.
+     * @param status the new status to setDistance.
      */
     public void setStatus(RackStatus status) {
         this.status = status;

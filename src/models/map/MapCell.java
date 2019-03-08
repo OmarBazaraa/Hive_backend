@@ -1,14 +1,17 @@
 package models.map;
 
+import models.components.Agent;
+import models.components.Gate;
+import models.components.Rack;
+import models.components.Station;
 import models.components.base.DstHiveObject;
-import models.components.base.SrcHiveObject;
 import models.map.base.Cell;
 import utils.Constants;
 import utils.Constants.*;
 
 
 /**
- * This {@code MapCell} class represents a grid cell in our Hive System's map.
+ * This {@code MapCell} class represents a map grid cell used by {@link MapGrid} class.
  */
 public class MapCell extends Cell {
 
@@ -17,19 +20,20 @@ public class MapCell extends Cell {
     //
 
     /**
-     * Type of the cell.
+     * The type of this {@code MapCell}.
      */
-    public CellType type;
+    private CellType type;
 
     /**
-     * The {@code SrcHiveObject} in this cell if exists; {@code null} otherwise.
+     * The {@code DstHiveObject} in this {@code MapCell} if exists; {@code null} otherwise.
+     * TODO: refactor
      */
-    public SrcHiveObject srcObj;
+    private DstHiveObject dstObj;
 
     /**
-     * The {@code DstHiveObject} in this cell if exists; {@code null} otherwise.
+     * The {@code Agent} in this {@code MapCell} if exists; {@code null} otherwise.
      */
-    public DstHiveObject dstObj;
+    private Agent agent;
 
     // ===============================================================================================
     //
@@ -62,110 +66,125 @@ public class MapCell extends Cell {
     //
 
     /**
-     * Constructs a new cell.
+     * Constructs a new empty {@code MapCell}.
      */
     public MapCell() {
-        this.type = CellType.UNKNOWN;
-        this.srcObj = null;
-        this.dstObj = null;
+        this.type = CellType.EMPTY;
     }
 
     /**
-     * Constructs a new grid cell.
+     * Constructs a new {@code MapCell}.
      *
-     * @param type the type of the cell.
+     * @param type the {@code CellType} of the cell.
      */
     public MapCell(CellType type) {
         this.type = type;
     }
 
     /**
-     * Constructs a new grid cell.
+     * Returns the type of this {@code MapCell}.
      *
-     * @param type   the type of the cell.
-     * @param srcObj the existing {@code SrcHiveObject} in the cell.
-     * @param dstObj the existing {@code DstHiveObject} in the cell.
+     * @return the {@code CellType} of this {@code MapCell}.
      */
-    public MapCell(CellType type, SrcHiveObject srcObj, DstHiveObject dstObj) {
+    public CellType getType() {
+        return type;
+    }
+
+    /**
+     * Sets the type of this {@code MapCell}.
+     *
+     * @param type the {@code CellType} of the cell.
+     */
+    public void setType(CellType type) {
         this.type = type;
-        this.srcObj = srcObj;
-        this.dstObj = dstObj;
     }
 
     /**
-     * Sets the source object in this cell.
+     * Returns the existing {@code DstHiveObject} in this {@code MapCell}.
+     * TODO: refactor
      *
-     * @param srcObj the existing {@code SrcHiveObject} in the cell.
+     * @return the {@code DstHiveObject} in this {@code MapCell} if exists; {@code null} otherwise.
      */
-    public void setSrcObject(SrcHiveObject srcObj) {
-        this.srcObj = srcObj;
+    public DstHiveObject getDestination() {
+        return dstObj;
     }
 
     /**
-     * Sets the source object in this cell.
+     * Checks whether this {@code MapCell} has an existing {@code DstHiveObject} in it or not.
+     * TODO: refactor
      *
-     * @param dstObj the existing {@code DstHiveObject} in the cell.
-     */
-    public void setDstObject(DstHiveObject dstObj) {
-        this.dstObj = dstObj;
-    }
-
-    /**
-     * Sets the parameters of this cell.
-     *
-     * @param type   the type of the cell.
-     * @param srcObj the existing {@code SrcHiveObject} in the cell.
-     * @param dstObj the existing {@code DstHiveObject} in the cell.
-     */
-    public void set(CellType type, SrcHiveObject srcObj, DstHiveObject dstObj) {
-        this.type = type;
-        this.srcObj = srcObj;
-        this.dstObj = dstObj;
-    }
-
-    /**
-     * Checks whether this cell has a destination object in it or not.
-     *
-     * @return {@code true} if this cell contains {@code DstHiveObject}, {@code false} otherwise.
+     * @return {@code true} if this cell contains a {@code DstHiveObject}; {@code false} otherwise.
      */
     public boolean hasDestination() {
-        return dstObj != null;
+        return (dstObj != null);
     }
 
     /**
-     * Checks whether this cell has an agent in it or not.
+     * Sets the existing {@code DstHiveObject} in this {@code MapCell}.
+     * TODO: refactor
+     * TODO: check if the type is matching with the object
      *
-     * @return {@code true} if this cell contains {@code Agent}, {@code false} otherwise.
+     * @param dstObj the {@code DstHiveObject} to setDistance.
+     */
+    public void setDestination(DstHiveObject dstObj) {
+        this.dstObj = dstObj;
+    }
+
+    /**
+     * Returns the existing {@code Agent} in this {@code MapCell}.
+     *
+     * @return the {@code Agent} in this {@code MapCell} if exists; {@code null} otherwise.
+     */
+    public Agent getAgent() {
+        return agent;
+    }
+
+    /**
+     * Checks whether this {@code MapCell} has an existing {@code Agent} in it or not.
+     *
+     * @return {@code true} if this cell contains an {@code Agent}; {@code false} otherwise.
      */
     public boolean hasAgent() {
-        return srcObj != null;
+        return (agent != null);
     }
 
     /**
-     * Checks whether this cell is statically empty or not.
-     * A cell is considered statically empty if it is currently empty or it's occupied by an agent.
+     * Sets the existing {@code Agent} in this {@code MapCell}.
      *
-     * @return {@code true} if this cell is empty, {@code false} otherwise.
+     * @param agent the {@code Agent} to setDistance.
+     */
+    public void setAgent(Agent agent) {
+        this.agent = agent;
+    }
+
+    /**
+     * Checks whether this {@code MapCell} is statically empty or not.
+     * <p>
+     * A cell is considered statically empty if it is empty or it is currently
+     * occupied by an {@code Agent}.
+     *
+     * @return {@code true} if this cell is statically empty; {@code false} otherwise.
      */
     public boolean isEmpty() {
-        return type == CellType.EMPTY;
+        return (type == CellType.EMPTY);
     }
 
     /**
-     * Checks whether this cell is accessible or not.
-     * A cell is considered accessible if it is empty, occupied by an agent,
+     * Checks whether this {@code MapCell} is accessible or not.
+     * <p>
+     * A cell is considered accessible if it is empty, currently occupied by an {@code Agent},
      * or its type matches one of the given types.
      *
-     * @param accessibleTypes the list of accessible cell types.
+     * @param accessTypes a list of accessible cell types.
      *
-     * @return {@code true} if this cell is accessible, {@code false} otherwise.
+     * @return {@code true} if this cell is accessible; {@code false} otherwise.
      */
-    public boolean isAccessible(CellType... accessibleTypes) {
+    public boolean isAccessible(CellType... accessTypes) {
         if (isEmpty()) {
             return true;
         }
 
-        for (CellType t : accessibleTypes) {
+        for (CellType t : accessTypes) {
             if (type == t) {
                 return true;
             }
@@ -175,20 +194,7 @@ public class MapCell extends Cell {
     }
 
     /**
-     * Checks whether this cell is accessible by an agent to move into or not.
-     * A cell is considered agent accessible if it is not occupied by an agent, and
-     * it is empty or its type matches one of the given types.
-     *
-     * @param accessibleTypes the list of accessible cell types.
-     *
-     * @return {@code true} if this cell is agent accessible, {@code false} otherwise.
-     */
-    public boolean isAgentAccessible(CellType... accessibleTypes) {
-        return (!hasAgent() && isAccessible(accessibleTypes));
-    }
-
-    /**
-     * Converts a given cell shape to a {@code CellType} value.
+     * Converts a cell shape to its corresponding {@code CellType} value.
      *
      * @param shape the shape of the grid cell to convert.
      *
@@ -200,10 +206,10 @@ public class MapCell extends Cell {
                 return CellType.EMPTY;
             case Constants.SHAPE_CELL_OBSTACLE:
                 return CellType.OBSTACLE;
-            case Constants.SHAPE_CELL_GATE:
-                return CellType.GATE;
             case Constants.SHAPE_CELL_RACK:
                 return CellType.RACK;
+            case Constants.SHAPE_CELL_GATE:
+                return CellType.GATE;
             case Constants.SHAPE_CELL_STATION:
                 return CellType.STATION;
             default:
@@ -212,9 +218,9 @@ public class MapCell extends Cell {
     }
 
     /**
-     * Converts this cell to a character symbol representing its type.
+     * Converts this {@code MapCell} to a character symbol representing its shape.
      *
-     * @return a {@code char} representing this cell's type.
+     * @return a character representing the shape of this cell.
      */
     @Override
     public char toShape() {
@@ -227,10 +233,10 @@ public class MapCell extends Cell {
                 return Constants.SHAPE_CELL_EMPTY;
             case OBSTACLE:
                 return Constants.SHAPE_CELL_OBSTACLE;
-            case GATE:
-                return Constants.SHAPE_CELL_GATE;
             case RACK:
                 return Constants.SHAPE_CELL_RACK;
+            case GATE:
+                return Constants.SHAPE_CELL_GATE;
             case STATION:
                 return Constants.SHAPE_CELL_STATION;
             default:
