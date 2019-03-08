@@ -142,23 +142,49 @@ public class MapCell extends Cell {
     }
 
     /**
-     * Checks whether this cell is empty or not.
-     * A cell is considered empty if it's currently empty or it's occupied by an agent.
+     * Checks whether this cell is statically empty or not.
+     * A cell is considered statically empty if it is currently empty or it's occupied by an agent.
      *
      * @return {@code true} if this cell is empty, {@code false} otherwise.
      */
     public boolean isEmpty() {
-        return type == CellType.EMPTY || type == CellType.AGENT;
+        return type == CellType.EMPTY;
     }
 
     /**
-     * Checks whether this cell is movable or not.
-     * A cell is considered movable if the agents can move into it.
+     * Checks whether this cell is accessible or not.
+     * A cell is considered accessible if it is empty, occupied by an agent,
+     * or its type matches one of the given types.
      *
-     * @return {@code true} if this cell is movable, {@code false} otherwise.
+     * @param accessibleTypes the list of accessible cell types.
+     *
+     * @return {@code true} if this cell is accessible, {@code false} otherwise.
      */
-    public boolean isMovable() {
-        return type == CellType.EMPTY || type == CellType.RACK || type == CellType.GATE || type == CellType.STATION;
+    public boolean isAccessible(CellType... accessibleTypes) {
+        if (isEmpty()) {
+            return true;
+        }
+
+        for (CellType t : accessibleTypes) {
+            if (type == t) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Checks whether this cell is accessible by an agent to move into or not.
+     * A cell is considered agent accessible if it is not occupied by an agent, and
+     * it is empty or its type matches one of the given types.
+     *
+     * @param accessibleTypes the list of accessible cell types.
+     *
+     * @return {@code true} if this cell is agent accessible, {@code false} otherwise.
+     */
+    public boolean isAgentAccessible(CellType... accessibleTypes) {
+        return (!hasAgent() && isAccessible(accessibleTypes));
     }
 
     /**
@@ -178,8 +204,6 @@ public class MapCell extends Cell {
                 return CellType.GATE;
             case Constants.SHAPE_CELL_RACK:
                 return CellType.RACK;
-            case Constants.SHAPE_CELL_AGENT:
-                return CellType.AGENT;
             case Constants.SHAPE_CELL_STATION:
                 return CellType.STATION;
             default:
@@ -194,6 +218,10 @@ public class MapCell extends Cell {
      */
     @Override
     public char toShape() {
+        if (hasAgent()) {
+            return Constants.SHAPE_CELL_AGENT;
+        }
+
         switch (type) {
             case EMPTY:
                 return Constants.SHAPE_CELL_EMPTY;
@@ -203,8 +231,6 @@ public class MapCell extends Cell {
                 return Constants.SHAPE_CELL_GATE;
             case RACK:
                 return Constants.SHAPE_CELL_RACK;
-            case AGENT:
-                return Constants.SHAPE_CELL_AGENT;
             case STATION:
                 return Constants.SHAPE_CELL_STATION;
             default:

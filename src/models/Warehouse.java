@@ -180,7 +180,7 @@ public class Warehouse implements Order.OnFulFillListener {
      * Moves the active agents one step towards their targets.
      */
     private void stepActiveAgents() throws Exception {
-        // TODO: move agent off its destination position after finishing the task
+        // TODO: bringBlank agent off its destination position after finishing the task
         //
         // Iterate over all active agents
         //

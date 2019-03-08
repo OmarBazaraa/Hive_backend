@@ -55,7 +55,6 @@ public class Constants {
         OBSTACLE,
         GATE,
         RACK,
-        AGENT,
         STATION,
         UNKNOWN
     }

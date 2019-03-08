@@ -2,6 +2,7 @@ package models.components;
 
 import models.components.base.HiveObject;
 import models.components.base.SrcHiveObject;
+import models.map.GuideGrid;
 import models.map.MapCell;
 import models.map.MapGrid;
 import models.map.GuideCell;
@@ -30,7 +31,7 @@ public class Agent extends SrcHiveObject {
     private Task task;
 
     /**
-     * The last time this agent has performed a move.
+     * The last time this agent has performed a bringBlank.
      * Needed by the planner algorithm.
      */
     private int lastActionTime;
@@ -179,26 +180,12 @@ public class Agent extends SrcHiveObject {
     }
 
     /**
-     * Returns the guide cell at the given position to reach the target of the assigned task.
+     * Returns the guide map to reach the target of the assigned task.
      *
-     * @param row the row position of the needed guide cell.
-     * @param row the column position of the needed guide cell.
-     *
-     * @return the {@code GuideCell} at the given position.
+     * @return the {@code GuideGrid} to reach the target.
      */
-    public GuideCell getGuideAt(int row, int col) {
-        return (task != null ? task.getGuideAt(row, col) : new GuideCell(0, Direction.STILL));
-    }
-
-    /**
-     * Returns the guide cell at the given position to reach the target of the assigned task.
-     *
-     * @param pos the position of the needed guide cell.
-     *
-     * @return the {@code GuideCell} at the given position.
-     */
-    public GuideCell getGuideAt(Position pos) {
-        return getGuideAt(pos.row, pos.col);
+    public GuideGrid getGuideMap() {
+        return (task != null ? task.getGuideMap() : null);
     }
 
     /**
@@ -212,7 +199,7 @@ public class Agent extends SrcHiveObject {
 
     /**
      * Returns the next required action to be done by this agent
-     * in order to move one step forward to complete this task.
+     * in order to bringBlank one step forward to complete this task.
      *
      * @return {@code AgentAction} to be done the next time step.
      */
@@ -262,20 +249,32 @@ public class Agent extends SrcHiveObject {
     /**
      * Moves this agent in the given direction.
      *
-     * @param dir the direction to move.
+     * @param dir the direction to bringBlank.
      * @param map the map's grid of the warehouse where the agent is.
      */
     public void move(Direction dir, MapGrid map) throws Exception {
+        // Get current position
         Position cur = getPosition();
-        Position nxt = map.next(cur, dir);
-
         MapCell curCell = map.get(cur);
+
+        // Get next position
+        Position nxt = map.next(cur, dir);
         MapCell nxtCell = map.get(nxt);
 
-        // TODO: check cells
+        // Ensure no agents in the next position
+        if (nxtCell.hasAgent()) {
+            throw new Exception("Moving into a another robot!");
+        }
 
+        // Ensure no racks in the next position if this agent is currently loaded
+        if (nxtCell.type == CellType.RACK && isLoaded()) {
+            throw new Exception("Moving into a rack while the robot is currently loaded!");
+        }
+
+        // Move agent
         curCell.setSrcObject(null);
         nxtCell.setSrcObject(this);
+        setPosition(nxt);
     }
 
     /**
@@ -348,7 +347,7 @@ public class Agent extends SrcHiveObject {
      * @param map the map's grid of the warehouse where the agent is.
      */
     public void waitOnGate(MapGrid map) throws Exception {
-        // TODO
+        // TODO:
     }
 
     /**

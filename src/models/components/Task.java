@@ -2,6 +2,7 @@ package models.components;
 
 import models.components.base.HiveObject;
 import models.map.GuideCell;
+import models.map.GuideGrid;
 import models.map.base.Position;
 import utils.Constants.*;
 
@@ -382,34 +383,22 @@ public class Task extends HiveObject {
     }
 
     /**
-     * Returns the guide cell at the given position to reach the target of this task.
+     * Returns the guide map to reach the target of this task.
      *
-     * @param row the row position of the needed guide cell.
-     * @param row the column position of the needed guide cell.
-     *
-     * @return the {@code GuideCell} at the given position.
+     * @return the {@code GuideGrid} to reach the target.
      */
-    public GuideCell getGuideAt(int row, int col) {
-        if (status == TaskStatus.FETCHING || status == TaskStatus.RETURNING) {
-            return rack.getGuideAt(row, col);
+    public GuideGrid getGuideMap() {
+        if (status == TaskStatus.FETCHING || status == TaskStatus.LOADING) {
+            return rack.getGuideMap();
+        }
+        if (status == TaskStatus.DELIVERING || status == TaskStatus.WAITING) {
+            return gate.getGuideMap();
+        }
+        if (status == TaskStatus.RETURNING || status == TaskStatus.OFFLOADING) {
+            return rack.getGuideMap();
         }
 
-        if (status == TaskStatus.DELIVERING) {
-            return gate.getGuideAt(row, col);
-        }
-
-        return new GuideCell(0, Direction.STILL);
-    }
-
-    /**
-     * Returns the guide cell at the given position to reach the target of this task.
-     *
-     * @param pos the position of the needed guide cell.
-     *
-     * @return the {@code GuideCell} at the given position.
-     */
-    public GuideCell getGuideAt(Position pos) {
-        return getGuideAt(pos.row, pos.col);
+        return null;
     }
 
     /**
@@ -418,15 +407,13 @@ public class Task extends HiveObject {
      * @return an integer representing the estimated number of step to finish the assigned task.
      */
     public int getEstimatedDistance() {
-        int x = rack.getEstimatedDistance(agent.getPosition());
-        int y = gate.getEstimatedDistance(rack.getPosition());
-
-        return x + y * 2;
+        // TODO:
+        return 0;
     }
 
     /**
      * Returns the next required action to be done by the assigned agent
-     * in order to move one step forward to complete this task.
+     * in order to bringBlank one step forward to complete this task.
      *
      * @return {@code AgentAction} to be done the next time step.
      */

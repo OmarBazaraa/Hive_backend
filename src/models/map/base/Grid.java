@@ -182,7 +182,7 @@ public class Grid<T extends Cell> {
      *
      * @param row the current cell row position.
      * @param col the current cell column position.
-     * @param dir the direction to move along.
+     * @param dir the direction to bringBlank along.
      *
      * @return a {@code Position} object corresponding to the next cell position.
      */
@@ -198,7 +198,7 @@ public class Grid<T extends Cell> {
      * (i.e. position(current) + dir = position(next)).
      *
      * @param pos the current cell position.
-     * @param dir the direction to move along.
+     * @param dir the direction to bringBlank along.
      *
      * @return a {@code Position} object corresponding to the next cell position.
      */
@@ -211,7 +211,7 @@ public class Grid<T extends Cell> {
      * (i.e. position(current) + dir = position(next)).
      *
      * @param id  the current cell id.
-     * @param dir the direction to move along.
+     * @param dir the direction to bringBlank along.
      *
      * @return the id of the next cell.
      */
@@ -228,7 +228,7 @@ public class Grid<T extends Cell> {
      *
      * @param row the current cell row position.
      * @param col the current cell column position.
-     * @param dir the direction to move along.
+     * @param dir the direction to bringBlank along.
      *
      * @return a {@code Position} object corresponding to the previous cell position.
      */
@@ -244,7 +244,7 @@ public class Grid<T extends Cell> {
      * (i.e. position(previous) + dir = position(current)).
      *
      * @param pos the current cell position.
-     * @param dir the direction to move along.
+     * @param dir the direction to bringBlank along.
      *
      * @return a {@code Position} object corresponding to the previous cell position.
      */
@@ -257,7 +257,7 @@ public class Grid<T extends Cell> {
      * (i.e. position(previous) + dir = position(current)).
      *
      * @param id  the current cell id.
-     * @param dir the direction to move along.
+     * @param dir the direction to bringBlank along.
      *
      * @return the id of the previous cell.
      */

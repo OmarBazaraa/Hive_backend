@@ -88,6 +88,15 @@ public class GuideCell extends Cell {
     }
 
     /**
+     * Returns the minimum distance to reach the associated target.
+     *
+     * @return the minimum distance to reach the target.
+     */
+    public int getDistance() {
+        return distance;
+    }
+
+    /**
      * Checks whether the target is reachable from this cell and vice versa.
      *
      * @return {@code true} if the target is reachable, {@code false} otherwise.
