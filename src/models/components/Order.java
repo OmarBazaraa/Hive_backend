@@ -1,7 +1,7 @@
 package models.components;
 
+import utils.Entity;
 import models.facilities.Gate;
-import models.HiveObject;
 import models.tasks.Task;
 
 import java.util.*;
@@ -13,7 +13,7 @@ import java.util.*;
  * The order is defined by the list of the needed {@code Item}, and the gate where the
  * order must be delivered to.
  */
-public class Order extends HiveObject {
+public class Order extends Entity {
 
     //
     // Member Variables
@@ -30,7 +30,7 @@ public class Order extends HiveObject {
     private int pendingQuantities;
 
     /**
-     * The map of needed items for this order.
+     * The maps of needed items for this order.
      * The keys are the needed items.
      * The values are the corresponding needed quantities.
      */
@@ -77,7 +77,7 @@ public class Order extends HiveObject {
      *
      * @param id           the id of this order.
      * @param deliveryGate the gate where the order must be delivered to.
-     * @param items        the map of needed items for fulfilling this order.
+     * @param items        the maps of needed items for fulfilling this order.
      */
     public Order(int id, Gate deliveryGate, Map<Item, Integer> items) {
         super(id);
@@ -195,9 +195,9 @@ public class Order extends HiveObject {
     }
 
     /**
-     * Returns the map of items needed for fulfilling this order.
+     * Returns the maps of items needed for fulfilling this order.
      *
-     * @return the map of items of this order.
+     * @return the maps of items of this order.
      */
     public Map<Item, Integer> getItems() {
         return this.items;
@@ -267,7 +267,7 @@ public class Order extends HiveObject {
 
         if (isFulfilled()) {
             if (fulFillListener != null) {
-                fulFillListener.onFulfill(this);
+                fulFillListener.onOrderFulfilled(this);
             }
         }
     }
@@ -297,15 +297,15 @@ public class Order extends HiveObject {
     //
 
     /**
-     * Interface definition for a callback to be invoked when an order is fulfilled.
+     * Interface definition for a callback to be invoked when an {@link Order} is fulfilled.
      */
     public interface OnFulFillListener {
 
         /**
-         * Called when an order is fulfilled.
+         * Called when an {@code Order} has been fulfilled.
          *
-         * @param order the fulfilled order.
+         * @param order the fulfilled {@code Order}.
          */
-        public void onFulfill(Order order);
+        void onOrderFulfilled(Order order);
     }
 }

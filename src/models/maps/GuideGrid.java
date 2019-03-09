@@ -1,6 +1,7 @@
-package models.map;
+package models.maps;
 
 import models.facilities.Facility;
+
 import utils.Position;
 import utils.Constants.*;
 
@@ -9,7 +10,7 @@ import java.util.List;
 
 
 /**
- * This {@code GuideGrid} class represents a guide map to reach a target object.
+ * This {@code GuideGrid} class represents a guide maps to reach a target object.
  * <p>
  * A guide map guides an {@code agent} towards its associated target,
  * typically a {@link Facility}.

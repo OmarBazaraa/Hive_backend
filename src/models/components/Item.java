@@ -1,16 +1,26 @@
 package models.components;
 
 import models.facilities.Rack;
-import models.HiveObject;
+import models.tasks.Task;
+
+import utils.Entity;
 
 import java.util.HashMap;
 import java.util.Map;
 
 
 /**
- * This {@code Item} class represents a sell item in our Hive Warehousing System.
+ * This {@code Item} class represents a sell item in our Hive Warehouse System.
+ * <p>
+ * An item is typically stored in a {@link Rack}.
+ * Different items can be stored in a single {@link Rack}, and a single item type can
+ * be stored in multiple {@link Rack} objects.
+ *
+ * @see Rack
+ * @see Order
+ * @see Task
  */
-public class Item extends HiveObject {
+public class Item extends Entity {
 
     //
     // Member Variables
@@ -112,9 +122,9 @@ public class Item extends HiveObject {
     }
 
     /**
-     * Returns the map of racks hold this sell item.
+     * Returns the maps of racks hold this sell item.
      *
-     * @return a map of {@code Rack} holding this item, where the key is {@code Rack} and the value is the quantity.
+     * @return a maps of {@code Rack} holding this item, where the key is {@code Rack} and the value is the quantity.
      */
     public Map<Rack, Integer> getRacks() {
         return this.racks;

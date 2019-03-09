@@ -1,19 +1,24 @@
-package models;
+package models.warehouses;
 
 import algorithms.Dispatcher;
 import algorithms.Planner;
-import models.components.Item;
+
 import models.agents.Agent;
+import models.components.Item;
 import models.components.Order;
-import models.facilities.Station;
 import models.facilities.Gate;
 import models.facilities.Rack;
-import models.map.MapGrid;
-import utils.Constants.*;
+import models.facilities.Station;
+import models.maps.MapGrid;
 
 import java.util.*;
 
 
+/**
+ * This {@code Warehouse} class is considered the main controller of our Hive Warehouse System.
+ * <p>
+ * It contains required functions to simulate the process inside an automated smart warehouse.
+ */
 public class Warehouse implements Order.OnFulFillListener {
 
     //
@@ -21,52 +26,53 @@ public class Warehouse implements Order.OnFulFillListener {
     //
 
     /**
-     * The current time step in this warehouse.
+     * The current time step in this {@code Warehouse}.
+     * Needed to simulation purposes.
      */
     private int time;
 
     /**
-     * Warehouse map grid.
+     * The map grid of this {@code Warehouse}.
      */
     private MapGrid map;
 
     /**
-     * Map of all agents in the warehouse, indexed by their id.
+     * The map of all {@code Agent}s in this {@code Warehouse}, indexed by their id.
      */
     private Map<Integer, Agent> agents = new HashMap<>();
 
     /**
-     * Queue of all currently active agents, sorted by their priority.
+     * The queue of all currently active {@code Agent}s, sorted by their priority.
      */
     private Queue<Agent> activeAgents = new PriorityQueue<>();
 
     /**
-     * Queue of all currently idle agents.
+     * The queue of all currently idle {@code Agent}s.
      */
     private Queue<Agent> readyAgents = new LinkedList<>();
 
     /**
-     * Map of all sell items in the warehouse, indexed by their id.
+     * The map of all {@code Item}s in this {@code Warehouse}, indexed by their id.
      */
     private Map<Integer, Item> items = new HashMap<>();
 
     /**
-     * Map of all racks in the warehouse, indexed by their id.
+     * The map of all {@code Rack}s in this {@code Warehouse}, indexed by their id.
      */
     private Map<Integer, Rack> racks = new HashMap<>();
 
     /**
-     * Map of all gates in the warehouse, indexed by their id.
+     * The map of all {@code Gate}s in this {@code Warehouse}, indexed by their id.
      */
     private Map<Integer, Gate> gates = new HashMap<>();
 
     /**
-     * Map of all charging stations in the warehouse, indexed by their id.
+     * The map of all charging {@code Station}s in this {@code Warehouse}, indexed by their id.
      */
     private Map<Integer, Station> stations = new HashMap<>();
 
     /**
-     * Queue of pending and/or partially pending orders.
+     * The queue of pending (not fully dispatched) {@code Order}s.
      */
     private Queue<Order> pendingOrders = new LinkedList<>();
 
@@ -83,9 +89,9 @@ public class Warehouse implements Order.OnFulFillListener {
     }
 
     /**
-     * Configures the specifications of the warehouse space and components.
+     * Configures the specifications of this {@code Warehouse}'s space and components.
      *
-     * @param data the un-parsed warehouse object.
+     * @param data the un-parsed {@code Warehouse} data.
      */
     public void configure(List<Object> data) {
         parseWarehouse(data);
@@ -93,9 +99,9 @@ public class Warehouse implements Order.OnFulFillListener {
     }
 
     /**
-     * Adds a new order to the warehouse.
+     * Adds a new {@code Order} to this {@code Warehouse} to be delivered.
      *
-     * @param data the un-parsed order object.
+     * @param data the un-parsed {@code Order} data.
      */
     public void addOrder(List<Object> data) throws Exception {
         Order order = parseOrder(data);
@@ -110,17 +116,17 @@ public class Warehouse implements Order.OnFulFillListener {
     }
 
     /**
-     * The callback function to be called when an order has been fulfilled.
+     * The callback function to be called when an {@code Order} has been fulfilled.
      *
-     * @param order the fulfilled order.
+     * @param order the fulfilled {@code Order}.
      */
     @Override
-    public void onFulfill(Order order) {
+    public void onOrderFulfilled(Order order) {
         // TODO: send feed back to the front-end.
     }
 
     /**
-     * Performs a single time step in this warehouse.
+     * Performs and simulates a single time step in this {@code Warehouse}.
      */
     public void run() throws Exception {
         // Dispatch pending orders
@@ -142,26 +148,27 @@ public class Warehouse implements Order.OnFulFillListener {
      * Initializes and pre-computes some required values.
      */
     private void init() {
-        // Compute guide map for every rack
+        // Compute guide maps for every rack
         for (Rack rack : racks.values()) {
             rack.computeGuideMap(map);
         }
 
-        // Compute guide map for every gate
+        // Compute guide maps for every gate
         for (Gate gate : gates.values()) {
             gate.computeGuideMap(map);
         }
     }
 
     /**
-     * Dispatches the current pending orders of the warehouse.
+     * Dispatches the current pending {@code Order}s of this {@code Warehouse}.
      */
     private void dispatchPendingOrders() throws Exception {
+        // Get the initial size of the queue
+        int size = pendingOrders.size();
+
         //
         // Iterate over every pending order and tries to dispatch it
         //
-        int size = pendingOrders.size();
-
         for (int i = 0; i < size && !readyAgents.isEmpty(); ++i) {
             // Get the current order
             Order order = pendingOrders.poll();
@@ -177,20 +184,29 @@ public class Warehouse implements Order.OnFulFillListener {
     }
 
     /**
-     * Moves the active agents one step towards their targets.
+     * Moves the active {@code Agent}s one step towards their targets.
+     *
+     * TODO: move agent off its destination position after finishing the task
      */
     private void stepActiveAgents() throws Exception {
-        // TODO: bringBlank agent off its destination position after finishing the task
+        // Get the initial size of the queue
+        int size = activeAgents.size();
+
         //
         // Iterate over all active agents
         //
-        int size = activeAgents.size();
-
         for (int i = 0; i < size; ++i) {
+            // Get current active agent
             Agent agent = activeAgents.poll();
+
+            // Try moving the current agent towards its target
             Planner.step(agent, map, time);
 
-            if (agent.getStatus() == AgentStatus.IDLE) {
+            // Re-add agent to the active queue if still active, otherwise add it to the ready queue
+            if (agent.isActive()) {
+                // TODO: edit agent comparator function to be function of last action time step
+                activeAgents.add(agent);
+            } else {
                 readyAgents.add(agent);
             }
         }
@@ -202,19 +218,19 @@ public class Warehouse implements Order.OnFulFillListener {
     //
 
     /**
-     * Parses the configurations of the warehouse space and components,
+     * Parses the configurations of the {@code Warehouse} space and components,
      * and updates the internal corresponding member variables.
      *
-     * @param data the un-parsed warehouse object.
+     * @param data the un-parsed {@code Warehouse} data.
      */
     private void parseWarehouse(List<Object> data) {
 
     }
 
     /**
-     * Parses the given robot agent data.
+     * Parses the given data representing an {@code Agent}.
      *
-     * @param data the un-parsed agent object.
+     * @param data the un-parsed {@code Agent} object.
      *
      * @return an {@code Agent} object corresponding to the given specs.
      */
@@ -223,9 +239,9 @@ public class Warehouse implements Order.OnFulFillListener {
     }
 
     /**
-     * Parses the given item data.
+     * Parses the given data representing an {@code Item}.
      *
-     * @param data the un-parsed item object.
+     * @param data the un-parsed {@code Item} data.
      *
      * @return an {@code Item} object corresponding to the given specs.
      */
@@ -234,9 +250,9 @@ public class Warehouse implements Order.OnFulFillListener {
     }
 
     /**
-     * Parses the given rack data.
+     * Parses the given data representing a {@code Rack}.
      *
-     * @param data the un-parsed rack object.
+     * @param data the un-parsed {@code Rack} data.
      *
      * @return an {@code Rack} object corresponding to the given specs.
      */
@@ -245,9 +261,9 @@ public class Warehouse implements Order.OnFulFillListener {
     }
 
     /**
-     * Parses the given gate data.
+     * Parses the given data representing a {@code Gate}.
      *
-     * @param data the un-parsed gate object.
+     * @param data the un-parsed {@code Gate} data.
      *
      * @return an {@code Gate} object corresponding to the given specs.
      */
@@ -256,9 +272,9 @@ public class Warehouse implements Order.OnFulFillListener {
     }
 
     /**
-     * Parses the given charging station data.
+     * Parses the given data representing a charging {@code Station}.
      *
-     * @param data the un-parsed charging station object.
+     * @param data the un-parsed charging {@code Station} data.
      *
      * @return an {@code Station} object corresponding to the given specs.
      */
@@ -267,9 +283,9 @@ public class Warehouse implements Order.OnFulFillListener {
     }
 
     /**
-     * Parses the given order data.
+     * Parses the given data representing an {@code Order}.
      *
-     * @param data the un-parsed order object.
+     * @param data the un-parsed {@code Order} data.
      *
      * @return an {@code Order} object corresponding to the given specs.
      */

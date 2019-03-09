@@ -1,31 +1,33 @@
 package models.facilities;
 
 import algorithms.Planner;
-import models.TerminalHiveObject;
-import models.map.GuideGrid;
-import models.map.MapGrid;
+
+import models.HiveObject;
+import models.agents.Agent;
+import models.maps.GuideGrid;
+import models.maps.MapGrid;
 
 
 /**
  * This {@code Facility} class is the base class of all the facility components
  * in our Hive Warehouse System.
  * <p>
- * Facility component is an objects in the warehouse map that provide services or functions
- * to either an {@code Agent} or to a client. Facility component is typically static object
- * with fixed location in the warehouse's grid.
- * <p>
+ * A facility component is an objects in the warehouse maps that provide services or functions
+ * to either an {@link Agent} or to a client.
+ * A facility component is typically a static object with fixed location in the warehouse's grid.
+ *
  * @see Rack
  * @see Gate
  * @see Station
  */
-public class Facility extends TerminalHiveObject {
+public class Facility extends HiveObject {
 
     //
     // Member Variables
     //
 
     /**
-     * The guide map grid of this {@code Facility}.
+     * The guide maps grid of this {@code Facility}.
      */
     protected GuideGrid guideMap;
 
@@ -35,29 +37,29 @@ public class Facility extends TerminalHiveObject {
     //
 
     /**
-     * Constructs a new destination Hive object.
+     * Constructs a new {@code Facility} object with the given initial information.
      *
-     * @param id  the id of the Hive object.
-     * @param row the row position of the Hive object.
-     * @param col the column position of the Hive object.
+     * @param id  the id of the {@code Facility}.
+     * @param row the row position of the {@code Facility}.
+     * @param col the column position of the {@code Facility}.
      */
     public Facility(int id, int row, int col) {
         super(id, row, col);
     }
 
     /**
-     * Returns the guide map of this {@code Facility}.
+     * Returns a guide maps to reach this {@code Facility}.
      *
-     * @return the guide map of this {@code Facility}.
+     * @return the {@code GuideGrid} of this {@code Facility}.
      */
     public GuideGrid getGuideMap() {
         return guideMap;
     }
 
     /**
-     * Computes the guide map of this {@code Facility}
+     * Computes a guide maps to reach this {@code Facility}
      *
-     * @param map the grid map of our Hive System.
+     * @param map the {@code MapGrid} of the warehouse where this {@code Facility} is located in.
      */
     public void computeGuideMap(MapGrid map) {
         guideMap = new GuideGrid(Planner.bfs(map, getPosition()));

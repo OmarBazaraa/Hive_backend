@@ -16,7 +16,7 @@ public class Dispatcher {
 
 
     /**
-     * Dispatches the given order into a setDistance of specific tasks assigned to a setDistance of agents.
+     * Dispatches the given order into a set of specific tasks assigned to a set of agents.
      * <p>
      * TODO: ...
      * This algorithm is considered as complex as the multi-agent path planning algorithm,
@@ -73,10 +73,10 @@ public class Dispatcher {
      * Finds the best suitable agent for the given task.
      * TODO: write algorithm
      *
-     * @param agents the setDistance of all idle agents.
+     * @param agents the set of all idle agents.
      * @param task   the task.
      *
-     * @return the best suitable agent from the given setDistance of agents.
+     * @return the best suitable agent from the given set of agents.
      */
     private static Agent findAgent(Queue<Agent> agents, Task task) {
         return agents.iterator().next();

@@ -1,13 +1,14 @@
-package models.map;
+package models.maps;
 
 import models.agents.Agent;
 import models.facilities.Facility;
+
 import utils.Constants;
 import utils.Constants.*;
 
 
 /**
- * This {@code MapCell} class represents a map grid cell used by {@link MapGrid} class.
+ * This {@code MapCell} class represents a maps grid cell used by {@link MapGrid} class.
  */
 public class MapCell extends Cell {
 
@@ -117,10 +118,10 @@ public class MapCell extends Cell {
      * Sets the existing {@code Facility} in this {@code MapCell}.
      * TODO: check if the type is matching with the facility
      *
-     * @param dstObj the {@code Facility} to setDistance.
+     * @param facility the {@code Facility} to set.
      */
-    public void setFacility(Facility dstObj) {
-        this.facility = dstObj;
+    public void setFacility(Facility facility) {
+        this.facility = facility;
     }
 
     /**
@@ -144,7 +145,7 @@ public class MapCell extends Cell {
     /**
      * Sets the existing {@code Agent} in this {@code MapCell}.
      *
-     * @param agent the {@code Agent} to setDistance.
+     * @param agent the {@code Agent} to set.
      */
     public void setAgent(Agent agent) {
         this.agent = agent;

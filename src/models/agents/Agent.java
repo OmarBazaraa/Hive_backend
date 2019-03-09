@@ -1,21 +1,22 @@
 package models.agents;
 
-import models.tasks.Task;
-import models.facilities.Rack;
 import models.HiveObject;
-import models.TerminalHiveObject;
-import models.map.GuideGrid;
-import models.map.MapCell;
-import models.map.MapGrid;
+import models.facilities.Rack;
+import models.maps.GuideGrid;
+import models.maps.MapCell;
+import models.maps.MapGrid;
+import models.tasks.Task;
+
+import utils.Entity;
 import utils.Position;
-import utils.Constants.*;
 import utils.Utility;
+import utils.Constants.*;
 
 
 /**
  * This {@code Agent} class is a model for robot agent in our Hive System.
  */
-public class Agent extends TerminalHiveObject {
+public class Agent extends HiveObject {
 
     //
     // Member Variables
@@ -76,7 +77,7 @@ public class Agent extends TerminalHiveObject {
     /**
      * Sets a new status to this agent.
      *
-     * @param status the new status to setDistance.
+     * @param status the new status to set.
      */
     public void setStatus(AgentStatus status) {
         this.status = status;
@@ -181,7 +182,7 @@ public class Agent extends TerminalHiveObject {
     }
 
     /**
-     * Returns the guide map to reach the target of the assigned task.
+     * Returns the guide maps to reach the target of the assigned task.
      *
      * @return the {@code GuideGrid} to reach the target.
      */
@@ -212,7 +213,7 @@ public class Agent extends TerminalHiveObject {
      * Executes the given action by this agent.
      *
      * @param action the action to be executed.
-     * @param map    the map's grid of the warehouse where the agent is.
+     * @param map    the maps's grid of the warehouse where the agent is.
      * @param time   the current time step.
      */
     public void executeAction(AgentAction action, MapGrid map, int time) throws Exception {
@@ -251,7 +252,7 @@ public class Agent extends TerminalHiveObject {
      * Moves this agent in the given direction.
      *
      * @param dir the direction to bringBlank.
-     * @param map the map's grid of the warehouse where the agent is.
+     * @param map the maps's grid of the warehouse where the agent is.
      */
     public void move(Direction dir, MapGrid map) throws Exception {
         // Get current position
@@ -281,7 +282,7 @@ public class Agent extends TerminalHiveObject {
     /**
      * Loads the rack above this agent.
      *
-     * @param map the map's grid of the warehouse where the agent is.
+     * @param map the maps's grid of the warehouse where the agent is.
      */
     public void loadRack(MapGrid map) throws Exception {
         if (isLoaded()) {
@@ -301,7 +302,7 @@ public class Agent extends TerminalHiveObject {
     /**
      * Offloads the rack above this agent.
      *
-     * @param map the map's grid of the warehouse where the agent is.
+     * @param map the maps's grid of the warehouse where the agent is.
      */
     public void offloadRack(MapGrid map) throws Exception {
         if (!isLoaded()) {
@@ -322,7 +323,7 @@ public class Agent extends TerminalHiveObject {
      * Checks the validity of the rack during loading/offloading actions.
      * This methods checks the position of the rack and the identity of the assigned rack.
      *
-     * @param map the map's grid of the warehouse where the agent is.
+     * @param map the maps's grid of the warehouse where the agent is.
      *
      * @return {@code true} if the rack is valid; {@code false} otherwise.
      */
@@ -345,7 +346,7 @@ public class Agent extends TerminalHiveObject {
     /**
      * Waits until the items of the task are taken at the gate.
      *
-     * @param map the map's grid of the warehouse where the agent is.
+     * @param map the maps's grid of the warehouse where the agent is.
      */
     public void waitOnGate(MapGrid map) throws Exception {
         // TODO:
@@ -360,7 +361,7 @@ public class Agent extends TerminalHiveObject {
      * is less than, equal to, or greater than the specified object.
      */
     @Override
-    public int compareTo(HiveObject obj) {
+    public int compareTo(Entity obj) {
         if (!(obj instanceof Agent)) {
             return id - obj.getId();
         }

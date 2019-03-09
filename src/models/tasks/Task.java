@@ -1,12 +1,12 @@
 package models.tasks;
 
+import utils.Entity;
 import models.agents.Agent;
 import models.components.Item;
 import models.components.Order;
 import models.facilities.Gate;
 import models.facilities.Rack;
-import models.HiveObject;
-import models.map.GuideGrid;
+import models.maps.GuideGrid;
 import utils.Constants.*;
 
 import java.util.HashMap;
@@ -17,7 +17,7 @@ import java.util.Map;
  * This {@code Task} class represents a basic task for our robot agents
  * in our Hive Warehousing System.
  */
-public class Task extends HiveObject {
+public class Task extends Entity {
 
     //
     // Member Variables
@@ -44,7 +44,7 @@ public class Task extends HiveObject {
     private Agent agent;
 
     /**
-     * The map of needed items to be picked from the below rack.
+     * The maps of needed items to be picked from the below rack.
      */
     private Map<Item, Integer> items = new HashMap<>();
 
@@ -171,9 +171,9 @@ public class Task extends HiveObject {
     }
 
     /**
-     * Returns the map of items needed for fulfilling this task.
+     * Returns the maps of items needed for fulfilling this task.
      *
-     * @return the map of items of this task.
+     * @return the maps of items of this task.
      */
     public Map<Item, Integer> getItems() {
         return this.items;
@@ -207,7 +207,7 @@ public class Task extends HiveObject {
 
         Map<Item, Integer> m1, m2;
 
-        // Assign the smaller setDistance of items to 'm1'
+        // Assign the smaller set of items to 'm1'
         if (order.getItems().size() < rack.getItems().size()) {
             m1 = order.getItems();
             m2 = rack.getItems();
@@ -386,7 +386,7 @@ public class Task extends HiveObject {
     }
 
     /**
-     * Returns the guide map to reach the target of this task.
+     * Returns the guide maps to reach the target of this task.
      *
      * @return the {@code GuideGrid} to reach the target.
      */

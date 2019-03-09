@@ -1,10 +1,10 @@
 package algorithms;
 
 import models.agents.Agent;
-import models.map.GuideGrid;
-import models.map.MapCell;
-import models.map.MapGrid;
-import models.map.GuideCell;
+import models.maps.GuideGrid;
+import models.maps.MapCell;
+import models.maps.MapGrid;
+import models.maps.GuideCell;
 import utils.Constants.*;
 import utils.Dimensions;
 import utils.Position;
@@ -27,7 +27,7 @@ public class Planner {
      * This function is to be called for all active agents in descending order of their priorities.
      *
      * @param agent the agent to bringBlank.
-     * @param map   the map's grid of the warehouse.
+     * @param map   the maps's grid of the warehouse.
      * @param time  the current time step.
      */
     public static void step(Agent agent, MapGrid map, int time) throws Exception {
@@ -50,7 +50,7 @@ public class Planner {
     }
 
     public static boolean move(Agent agent, MapGrid map, int time) throws Exception {
-        // Get current agent and guide map
+        // Get current agent and guide maps
         Position cur = agent.getPosition();
         GuideGrid guide = agent.getGuideMap();
 
@@ -179,14 +179,14 @@ public class Planner {
     }
 
     /**
-     * Runs a BFS algorithms on the given grid to compute the guide map
+     * Runs a BFS algorithms on the given grid to compute the guide maps
      * to the given destination position.
      *
-     * @param map                 the grid map to compute upon.
+     * @param map                 the grid maps to compute upon.
      * @param dst                 the destination position.
-     * @param accessibleCellTypes the accessible {@code CellType} to setDistance.
+     * @param accessibleCellTypes the accessible {@code CellType} to set.
      *
-     * @return a 2D {@code GuideCell} array representing the guide map to reach the destination.
+     * @return a 2D {@code GuideCell} array representing the guide maps to reach the destination.
      */
     public static GuideCell[][] bfs(MapGrid map, Position dst, CellType... accessibleCellTypes) {
         // Initialize BFS algorithm requirements
@@ -198,7 +198,7 @@ public class Planner {
         q.add(dst);
         ret[dst.row][dst.col].setDistance(0);
 
-        // Keep expanding all cell in the map
+        // Keep expanding all cell in the maps
         while (!q.isEmpty()) {
             // Get current node and its distance to the destination
             Position cur = q.poll();

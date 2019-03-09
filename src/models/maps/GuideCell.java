@@ -1,4 +1,4 @@
-package models.map;
+package models.maps;
 
 import models.facilities.Facility;
 

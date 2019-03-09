@@ -1,7 +1,9 @@
 package models.facilities;
 
+import models.agents.Agent;
 import models.components.Item;
 import models.tasks.Task;
+
 import utils.Constants;
 import utils.Constants.*;
 
@@ -10,10 +12,21 @@ import java.util.Map;
 
 
 /**
- * This {@code Rack} class is a model for rack of items in our Hive System.
+ * This {@code Rack} class is a one of the {@link Facility} components
+ * in our Hive Warehouse System.
  * <p>
- * A rack is a position in the warehouse grid map where selling items are stored.
- * Each rack can hold at most one unique type of items.
+ * A rack component is a container located in the warehouse's grid where items and goods
+ * are stored.
+ * A rack can possibly contain different items with different quantities.
+ * <p>
+ * A rack by itself is a static {@link Facility} component,
+ * but it is different from other facilities in that it can be loaded and move around by
+ * an {@link Agent}.
+ *
+ * @see Facility
+ * @see Gate
+ * @see Station
+ * @see Agent
  */
 public class Rack extends Facility {
 
@@ -42,7 +55,7 @@ public class Rack extends Facility {
     private int storedWeight;
 
     /**
-     * The map of all the items this rack is holding.
+     * The maps of all the items this rack is holding.
      */
     private Map<Item, Integer> items = new HashMap<>();
 
@@ -74,7 +87,7 @@ public class Rack extends Facility {
     /**
      * Sets a new status to this rack.
      *
-     * @param status the new status to setDistance.
+     * @param status the new status to set.
      */
     public void setStatus(RackStatus status) {
         this.status = status;
@@ -174,9 +187,9 @@ public class Rack extends Facility {
     }
 
     /**
-     * Returns the map of items available in this rack.
+     * Returns the maps of items available in this rack.
      *
-     * @return the map of items of this rack.
+     * @return the maps of items of this rack.
      */
     public Map<Item, Integer> getItems() {
         return this.items;

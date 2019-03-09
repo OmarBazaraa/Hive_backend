@@ -1,4 +1,4 @@
-package models.map;
+package models.maps;
 
 import utils.Constants;
 
@@ -6,7 +6,7 @@ import utils.Constants;
 /**
  * This {@code Cell} class represents a grid cell used by {@link Grid} class.
  * <p>
- * This class is the parent class of {@link models.map.MapCell} and {@link models.map.GuideCell}.
+ * This class is the parent class of {@link models.maps.MapCell} and {@link models.maps.GuideCell}.
  */
 public class Cell {
 

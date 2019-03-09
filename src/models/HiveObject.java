@@ -1,19 +1,23 @@
 package models;
 
+import utils.Entity;
+import utils.Position;
+
 
 /**
- * This {@code HiveObject} class is the base class of all the basic Hive system components.
+ * This {@code HiveObject} class is the base class of all the basic terminal Hive System's components
+ * such as {@code Agent}, {@code Rack}, {@code Gate}, {@code Station}, ..etc.
  */
-public class HiveObject implements Comparable<HiveObject> {
+public class HiveObject extends Entity {
 
     //
     // Member Variables
     //
 
     /**
-     * The id of this Hive object.
+     * The position of an object in terms of row, column pairs.
      */
-    protected int id;
+    protected int row, col;
 
     // ===============================================================================================
     //
@@ -23,62 +27,61 @@ public class HiveObject implements Comparable<HiveObject> {
     /**
      * Constructs a new Hive object.
      *
-     * @param id the id of the Hive object.
+     * @param id  the id of the Hive object.
+     * @param row the row position of the Hive object.
+     * @param col the column position of the Hive object.
      */
-    public HiveObject(int id) {
-        this.id = id;
+    public HiveObject(int id, int row, int col) {
+        super(id);
+        this.row = row;
+        this.col = col;
     }
 
     /**
-     * Returns the id of this Hive object.
+     * Returns the row position of the Hive object in the maps's grid.
      *
-     * @return an integer unique id of this Hive object.
+     * @return an integer representing the row position of this Hive object.
      */
-    public int getId() {
-        return this.id;
+    public int getRow() {
+        return this.row;
     }
 
     /**
-     * Indicates whether some other object is equal to this one.
+     * Returns the column position of the Hive object in the maps's grid.
      *
-     * @param obj the reference object with which to compare.
-     *
-     * @return {@code true} if this object is the same as the obj argument;
-     *         {@code false} otherwise.
+     * @return an integer representing the column position of this Hive object.
      */
-    @Override
-    public boolean equals(Object obj) {
-        // Not the same object type
-        if (!(obj instanceof HiveObject)) {
-            return false;
-        }
-        // Cast, then compare coordinates
-        HiveObject rhs = (HiveObject) obj;
-        return (id == rhs.id);
+    public int getCol() {
+        return this.col;
     }
 
     /**
-     * Computes a hash code for this object.
-     * This method is supported for the benefit of hash tables such as those provided by
-     * {@link java.util.HashMap}.
+     * Returns the position of the Hive object in the maps's grid.
      *
-     * @return a hash code value for this object.
+     * @return a {@code Position} object holding the coordinates of this Hive object.
      */
-    @Override
-    public int hashCode() {
-        return this.id;
+    public Position getPosition() {
+        return new Position(this.row, this.col);
     }
 
     /**
-     * Compares whether some other object is less than, equal to, or greater than this one.
+     * Sets the position of the Hive object in the maps's grid.
      *
-     * @param rhs the reference object with which to compare.
-     *
-     * @return a negative integer, zero, or a positive integer as this object
-     *         is less than, equal to, or greater than the specified object.
+     * @param row the row position of the Hive object.
+     * @param col the column position of the Hive object.
      */
-    @Override
-    public int compareTo(HiveObject rhs) {
-        return id - rhs.id;
+    public void setPosition(int row, int col) {
+        this.row = row;
+        this.col = col;
+    }
+
+    /**
+     * Sets the position of the Hive object in the maps's grid.
+     *
+     * @param pos the position of the Hive object.
+     */
+    public void setPosition(Position pos) {
+        this.row = pos.row;
+        this.col = pos.col;
     }
 }
