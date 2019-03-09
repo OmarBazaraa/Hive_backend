@@ -3,11 +3,11 @@ package models;
 import algorithms.Dispatcher;
 import algorithms.Planner;
 import models.components.Item;
-import models.components.Agent;
+import models.agents.Agent;
 import models.components.Order;
-import models.components.Station;
-import models.components.Gate;
-import models.components.Rack;
+import models.facilities.Station;
+import models.facilities.Gate;
+import models.facilities.Rack;
 import models.map.MapGrid;
 import utils.Constants.*;
 

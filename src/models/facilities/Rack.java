@@ -1,6 +1,7 @@
-package models.components;
+package models.facilities;
 
-import models.components.base.DstHiveObject;
+import models.components.Item;
+import models.tasks.Task;
 import utils.Constants;
 import utils.Constants.*;
 
@@ -14,7 +15,7 @@ import java.util.Map;
  * A rack is a position in the warehouse grid map where selling items are stored.
  * Each rack can hold at most one unique type of items.
  */
-public class Rack extends DstHiveObject {
+public class Rack extends Facility {
 
     //
     // Member Variables

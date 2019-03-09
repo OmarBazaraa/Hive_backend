@@ -1,5 +1,6 @@
 package models.map;
 
+import models.facilities.Facility;
 import utils.Position;
 import utils.Constants.*;
 
@@ -11,7 +12,7 @@ import java.util.List;
  * This {@code GuideGrid} class represents a guide map to reach a target object.
  * <p>
  * A guide map guides an {@code agent} towards its associated target,
- * typically a {@link models.components.base.DstHiveObject}.
+ * typically a {@link Facility}.
  */
 public class GuideGrid extends Grid<GuideCell> {
 

@@ -1,11 +1,13 @@
 package models.map;
 
+import models.facilities.Facility;
+
 
 /**
  * This {@code GuideCell} class represents a guide cell used by {@link GuideGrid} class.
  * <p>
  * A guide cell guides an {@code agent} towards its associated target,
- * typically a {@link models.components.base.DstHiveObject}.
+ * typically a {@link Facility}.
  */
 public class GuideCell extends Cell {
 

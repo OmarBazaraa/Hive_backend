@@ -1,6 +1,7 @@
 package models.components;
 
-import models.components.base.HiveObject;
+import models.facilities.Rack;
+import models.HiveObject;
 
 import java.util.HashMap;
 import java.util.Map;

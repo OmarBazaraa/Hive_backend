@@ -1,6 +1,6 @@
 package algorithms;
 
-import models.components.Agent;
+import models.agents.Agent;
 import models.map.GuideGrid;
 import models.map.MapCell;
 import models.map.MapGrid;

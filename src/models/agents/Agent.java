@@ -1,7 +1,9 @@
-package models.components;
+package models.agents;
 
-import models.components.base.HiveObject;
-import models.components.base.TerminalHiveObject;
+import models.tasks.Task;
+import models.facilities.Rack;
+import models.HiveObject;
+import models.TerminalHiveObject;
 import models.map.GuideGrid;
 import models.map.MapCell;
 import models.map.MapGrid;
@@ -331,7 +333,7 @@ public class Agent extends TerminalHiveObject {
             return false;
         }
 
-        Rack rack = (Rack) cell.getDestination();
+        Rack rack = (Rack) cell.getFacility();
 
         if (!rack.equals(task.getRack())) {
             return false;

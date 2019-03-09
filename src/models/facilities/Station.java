@@ -1,6 +1,4 @@
-package models.components;
-
-import models.components.base.DstHiveObject;
+package models.facilities;
 
 
 /**
@@ -8,7 +6,7 @@ import models.components.base.DstHiveObject;
  * <p>
  * A charging station is the location where robot agents go to re-charge their batteries.
  */
-public class Station extends DstHiveObject {
+public class Station extends Facility {
 
     /**
      * Constructs a new charging station of items.

@@ -1,6 +1,8 @@
 package models.components;
 
-import models.components.base.HiveObject;
+import models.facilities.Gate;
+import models.HiveObject;
+import models.tasks.Task;
 
 import java.util.*;
 

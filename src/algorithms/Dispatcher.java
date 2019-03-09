@@ -1,6 +1,9 @@
 package algorithms;
 
+import models.agents.Agent;
+import models.facilities.Rack;
 import models.components.*;
+import models.tasks.Task;
 import utils.Pair;
 
 import java.util.*;

@@ -1,6 +1,11 @@
-package models.components;
+package models.tasks;
 
-import models.components.base.HiveObject;
+import models.agents.Agent;
+import models.components.Item;
+import models.components.Order;
+import models.facilities.Gate;
+import models.facilities.Rack;
+import models.HiveObject;
 import models.map.GuideGrid;
 import utils.Constants.*;
 

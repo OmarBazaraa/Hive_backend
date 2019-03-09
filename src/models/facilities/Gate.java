@@ -1,6 +1,4 @@
-package models.components;
-
-import models.components.base.DstHiveObject;
+package models.facilities;
 
 
 /**
@@ -8,7 +6,7 @@ import models.components.base.DstHiveObject;
  * <p>
  * A gate is the location where robot agents deliver their assigned orders.
  */
-public class Gate extends DstHiveObject {
+public class Gate extends Facility {
 
     /**
      * Constructs a new gate of items.

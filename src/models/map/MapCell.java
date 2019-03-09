@@ -1,7 +1,7 @@
 package models.map;
 
-import models.components.Agent;
-import models.components.base.DstHiveObject;
+import models.agents.Agent;
+import models.facilities.Facility;
 import utils.Constants;
 import utils.Constants.*;
 
@@ -21,10 +21,9 @@ public class MapCell extends Cell {
     private CellType type;
 
     /**
-     * The {@code DstHiveObject} in this {@code MapCell} if exists; {@code null} otherwise.
-     * TODO: refactor
+     * The {@code Facility} in this {@code MapCell} if exists; {@code null} otherwise.
      */
-    private DstHiveObject dstObj;
+    private Facility facility;
 
     /**
      * The {@code Agent} in this {@code MapCell} if exists; {@code null} otherwise.
@@ -88,6 +87,7 @@ public class MapCell extends Cell {
 
     /**
      * Sets the type of this {@code MapCell}.
+     * TODO: check if the type is matching with the facility
      *
      * @param type the {@code CellType} of the cell.
      */
@@ -96,34 +96,31 @@ public class MapCell extends Cell {
     }
 
     /**
-     * Returns the existing {@code DstHiveObject} in this {@code MapCell}.
-     * TODO: refactor
+     * Returns the existing {@code Facility} in this {@code MapCell}.
      *
-     * @return the {@code DstHiveObject} in this {@code MapCell} if exists; {@code null} otherwise.
+     * @return the {@code Facility} in this {@code MapCell} if exists; {@code null} otherwise.
      */
-    public DstHiveObject getDestination() {
-        return dstObj;
+    public Facility getFacility() {
+        return facility;
     }
 
     /**
-     * Checks whether this {@code MapCell} has an existing {@code DstHiveObject} in it or not.
-     * TODO: refactor
+     * Checks whether this {@code MapCell} has an existing {@code Facility} in it or not.
      *
-     * @return {@code true} if this cell contains a {@code DstHiveObject}; {@code false} otherwise.
+     * @return {@code true} if this cell contains a {@code Facility}; {@code false} otherwise.
      */
-    public boolean hasDestination() {
-        return (dstObj != null);
+    public boolean hasFacility() {
+        return (facility != null);
     }
 
     /**
-     * Sets the existing {@code DstHiveObject} in this {@code MapCell}.
-     * TODO: refactor
-     * TODO: check if the type is matching with the object
+     * Sets the existing {@code Facility} in this {@code MapCell}.
+     * TODO: check if the type is matching with the facility
      *
-     * @param dstObj the {@code DstHiveObject} to setDistance.
+     * @param dstObj the {@code Facility} to setDistance.
      */
-    public void setDestination(DstHiveObject dstObj) {
-        this.dstObj = dstObj;
+    public void setFacility(Facility dstObj) {
+        this.facility = dstObj;
     }
 
     /**
