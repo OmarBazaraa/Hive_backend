@@ -267,7 +267,7 @@ public class Order extends Entity {
 
         if (isFulfilled()) {
             if (fulFillListener != null) {
-                fulFillListener.onOrderFulfilled(this);
+                fulFillListener.onOrderFulfill(this);
             }
         }
     }
@@ -306,6 +306,6 @@ public class Order extends Entity {
          *
          * @param order the fulfilled {@code Order}.
          */
-        void onOrderFulfilled(Order order);
+        void onOrderFulfill(Order order);
     }
 }

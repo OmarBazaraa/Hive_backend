@@ -121,7 +121,7 @@ public class Warehouse implements Order.OnFulFillListener {
      * @param order the fulfilled {@code Order}.
      */
     @Override
-    public void onOrderFulfilled(Order order) {
+    public void onOrderFulfill(Order order) {
         // TODO: send feed back to the front-end.
     }
 

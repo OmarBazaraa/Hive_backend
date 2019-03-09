@@ -451,4 +451,22 @@ public class Task extends Entity {
 
         return AgentAction.NOTHING;
     }
+
+    // ===============================================================================================
+    //
+    // Sub-classes & Interface
+    //
+
+    /**
+     * Interface definition for a callback to be invoked when a {@link Task} is completed.
+     */
+    public interface OnCompleteListener {
+
+        /**
+         * Called when a {@code Task} has been completed.
+         *
+         * @param task the fulfilled {@code Task}.
+         */
+        void onTaskComplete(Task task);
+    }
 }
