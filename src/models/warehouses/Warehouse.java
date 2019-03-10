@@ -4,8 +4,8 @@ import algorithms.Dispatcher;
 import algorithms.Planner;
 
 import models.agents.Agent;
-import models.components.Item;
-import models.components.Order;
+import models.items.Item;
+import models.orders.Order;
 import models.facilities.Gate;
 import models.facilities.Rack;
 import models.facilities.Station;
@@ -107,7 +107,7 @@ public class Warehouse implements Order.OnFulFillListener {
         Order order = parseOrder(data);
 
         if (order.isFeasible()) {
-            order.reserve();
+            order.activate();
             order.setOnFulfillListener(this);
             pendingOrders.add(order);
         } else {
@@ -116,7 +116,7 @@ public class Warehouse implements Order.OnFulFillListener {
     }
 
     /**
-     * The callback function to be called when an {@code Order} has been fulfilled.
+     * The callback function to be invoked when an {@code Order} is fulfilled.
      *
      * @param order the fulfilled {@code Order}.
      */

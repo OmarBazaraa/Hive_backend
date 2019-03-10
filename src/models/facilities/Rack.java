@@ -1,13 +1,16 @@
 package models.facilities;
 
 import models.agents.Agent;
-import models.components.Item;
+import models.items.Item;
+import models.items.ItemAddable;
 import models.tasks.Task;
 
+import models.tasks.TaskAssignable;
 import utils.Constants;
 import utils.Constants.*;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 
@@ -28,36 +31,38 @@ import java.util.Map;
  * @see Station
  * @see Agent
  */
-public class Rack extends Facility {
+public class Rack extends Facility implements ItemAddable, TaskAssignable {
 
     //
     // Member Variables
     //
 
     /**
-     * The current status of this rack.
+     * The storing capacity (in weight units) of this {@code Rack}.
      */
-    private RackStatus status;
+    private int capacity = Constants.RACK_DEFAULT_STORE_CAPACITY;
 
     /**
-     * The assigned task to deliver this rack.
+     * The total stored weight of all the {@code Item}s in this {@code Rack}.
      */
-    private Task task;
+    private int weight;
 
     /**
-     * The maximum storing capacity (in weight units) of this rack.
-     */
-    private int maxCapacity = Constants.RACK_DEFAULT_STORE_CAPACITY;
-
-    /**
-     * The total weight of all the items stored in this rack.
-     */
-    private int storedWeight;
-
-    /**
-     * The maps of all the items this rack is holding.
+     * The map of all {@code Item}s this {@code Rack} is storing.<p>
+     * The key is an {@code Item}.<p>
+     * The mapped value represents the quantity of this {@code Item}.
      */
     private Map<Item, Integer> items = new HashMap<>();
+
+    /**
+     * The current status of this {@code Rack}.
+     */
+    private RackStatus status = RackStatus.IDLE;
+
+    /**
+     * The assigned {@code Task} responsible of delivering this {@code Rack}.
+     */
+    private Task task;
 
     // ===============================================================================================
     //
@@ -65,196 +70,183 @@ public class Rack extends Facility {
     //
 
     /**
-     * Constructs a new rack of items.
+     * Constructs a new {@code Rack} object.
      *
-     * @param id  the id of the rack.
-     * @param row the row position of the rack.
-     * @param col the column position of the rack.
+     * @param id  the id of the {@code Rack}.
+     * @param row the row position of the {@code Rack}.
+     * @param col the column position of the {@code Rack}.
      */
     public Rack(int id, int row, int col) {
         super(id, row, col);
     }
 
     /**
-     * Returns the current status of this rack.
+     * Returns the storing capacity (in weight units) of this {@code Rack}.
      *
-     * @return an {@code RackStatus} value representing the current status of the rack.
+     * @return the maximum storing capacity of this rack.
+     */
+    public int getCapacity() {
+        return capacity;
+    }
+
+    /**
+     * Sets the storing capacity (in weight units) of this {@code Rack}.
+     *
+     * @param cap the new maximum storing capacity.
+     */
+    public void setCapacity(int cap) throws Exception {
+        if (cap < weight) {
+            throw new Exception("Unable to reduce the size of the rack!");
+        }
+
+        capacity = cap;
+    }
+
+    /**
+     * Returns the current stored weight in this {@code Rack}.
+     *
+     * @return the current stored weight.
+     */
+    public int getWeight() {
+        return weight;
+    }
+
+    /**
+     * Updates the weight of this {@code Rack} by the given amount.
+     *
+     * @param w the weight to be added/removed.
+     */
+    private void updateWeight(int w) throws Exception {
+        weight += w;
+
+        if (weight < 0) {
+            throw new Exception("Invalid negative weight of the rack!");
+        }
+
+        if (weight > capacity) {
+            throw new Exception("The weight of the rack exceeded maximum capacity!");
+        }
+    }
+
+    /**
+     * Returns the current quantity of an {@code Item} in this {@code Rack}.
+     *
+     * @param item the {@code Item} to get its quantity.
+     *
+     * @return the quantity of the given {@code Item}.
+     */
+    @Override
+    public int getQuantity(Item item) {
+        return items.getOrDefault(item, 0);
+    }
+
+    /**
+     * Updates the quantity of an {@code Item} in this {@code Rack}.
+     * <p>
+     * This function is used to add extra units of the given {@code Item} if the given
+     * quantity is positive,
+     * and used to remove existing units if the given quantity is negative.
+     *
+     * @param item     the {@code Item} to be updated.
+     * @param quantity the quantity to be updated with.
+     */
+    @Override
+    public void addItem(Item item, int quantity) throws Exception {
+        int total = quantity + items.getOrDefault(item, 0);
+
+        if (total < 0) {
+            throw new Exception("No enough items to be removed from the rack!");
+        }
+
+        updateWeight(quantity * item.getWeight());
+
+        if (total > 0) {
+            items.put(item, total);
+        } else {
+            items.remove(item);
+        }
+
+        item.add(this, quantity); // TODO: updateQuantity
+    }
+
+    /**
+     * Clears and empties this {@code Rack} from all its available {@code Item}s.
+     */
+    public void clear() throws Exception {
+        for (Map.Entry<Item, Integer> pair : items.entrySet()) {
+            addItem(pair.getKey(), -pair.getValue());
+        }
+    }
+
+    /**
+     * Returns an {@code Iterator} to iterate over the available items in this {@code Rack}.
+     * <p>
+     * Note that this iterator should be used in read-only operations;
+     * otherwise undefined behaviour could arises.
+     *
+     * @return an {@code Iterator}.
+     */
+    @Override
+    public Iterator<Map.Entry<Item, Integer>> iterator() {
+        return items.entrySet().iterator();
+    }
+
+    /**
+     * Returns the current status of this {@code Rack}.
+     *
+     * @return the {@code RackStatus} of this {@code Rack}.
      */
     public RackStatus getStatus() {
-        return this.status;
+        return status;
     }
 
     /**
-     * Sets a new status to this rack.
+     * Assigns a new {@code Task} responsible of delivering this {@code Rack}.
      *
-     * @param status the new status to set.
+     * @param t the new {@code Task} to assign.
      */
-    public void setStatus(RackStatus status) {
-        this.status = status;
+    @Override
+    public void assignTask(Task t) throws Exception {
+        if (status != RackStatus.IDLE) {
+            throw new Exception("The previously assigned task has not been completed yet!");
+        }
+
+        task = t;
+        status = RackStatus.RESERVED;
     }
 
     /**
-     * Returns the assigned task to deliver this rack.
+     * The callback function to be invoked when the assigned {@code Task} is completed.
      *
-     * @return a {@code Task} object representing the assigned task; {@code null} if no current assigned task.
+     * @param t the completed {@code Task}.
      */
-    public Task getTask() {
-        return this.task;
+    @Override
+    public void onTaskComplete(Task t) {
+        if (task == t) {
+            task = null;
+            status = RackStatus.IDLE;
+        }
     }
 
     /**
-     * Assigns a new task to deliver this rack.
-     *
-     * @param task the new task to assign.
-     */
-    public void setTask(Task task) {
-        this.task = task;
-        this.status = RackStatus.RESERVED;
-    }
-
-    /**
-     * Clears the currently assigned task of this rack.
-     */
-    public void clearTask() {
-        this.task = null;
-        this.status = RackStatus.IDLE;
-    }
-
-    /**
-     * Loads this rack to be delivered by an agent.
+     * Loads this {@code Rack} to be delivered by an {@code Agent}.
      */
     public void load() throws Exception {
         if (status != RackStatus.RESERVED) {
             throw new Exception("Loading un-reserved rack!");
         }
 
-        this.status = RackStatus.LOADED;
+        status = RackStatus.LOADED;
     }
 
     /**
-     * Offloads this rack after being delivered by an agent.
+     * Offloads this {@code Rack} after being delivered by an {@code Agent}.
      */
     public void offload() throws Exception {
         if (status != RackStatus.LOADED) {
             throw new Exception("Offloading un-loaded rack!");
         }
 
-        this.status = RackStatus.RESERVED;
-    }
-
-    /**
-     * Returns the maximum storing capacity (in weight units) of this rack.
-     *
-     * @return the maximum storing capacity of this rack.
-     */
-    public int getMaxCapacity() {
-        return this.maxCapacity;
-    }
-
-    /**
-     * Sets the maximum storing capacity (in weight units) of this rack.
-     *
-     * @param capacity the new maximum storing capacity.
-     *
-     * @throws Exception when the new capacity is less than the currently stored weight.
-     */
-    public void setMaxCapacity(int capacity) throws Exception {
-        if (capacity < storedWeight) {
-            throw new Exception("Unable to reduce the size of the rack!");
-        }
-
-        this.maxCapacity = capacity;
-    }
-
-    /**
-     * Returns the current stored weight in this rack.
-     *
-     * @return the current stored weight.
-     */
-    public int getStoredWeight() {
-        return this.storedWeight;
-    }
-
-    /**
-     * Returns the quantity of the given item in this rack.
-     *
-     * @param item the item to get its quantity.
-     *
-     * @return the quantity of the given item.
-     */
-    public int getItemQuantity(Item item) {
-        return this.items.getOrDefault(item, 0);
-    }
-
-    /**
-     * Returns the maps of items available in this rack.
-     *
-     * @return the maps of items of this rack.
-     */
-    public Map<Item, Integer> getItems() {
-        return this.items;
-    }
-
-    /**
-     * Adds the given item into this rack.
-     *
-     * @param item     the id of the items stored in the rack.
-     * @param quantity the number of copies to be added.
-     *
-     * @throws Exception when adding the new items results in exceeding the storing limits of this rack.
-     */
-    public void addItem(Item item, int quantity) throws Exception {
-        if (quantity <= 0) {
-            throw new Exception("Passing non-positive item quantity!");
-        }
-
-        int weight = quantity * item.getWeight();
-
-        if (storedWeight + weight > maxCapacity) {
-            throw new Exception("The rack exceeded its storing capacity limits!");
-        }
-
-        storedWeight += weight;
-        items.put(item, quantity + items.getOrDefault(item, 0));
-        item.addToRack(this, quantity);
-    }
-
-    /**
-     * Removes an item from this rack with the given quantity.
-     *
-     * @param item     the item to be taken.
-     * @param quantity the quantity to be taken.
-     *
-     * @throws Exception when the given quantity is greater than the current quantity in the rack.
-     */
-    public void removeItem(Item item, int quantity) throws Exception {
-        if (quantity <= 0) {
-            throw new Exception("Passing non-positive item quantity!");
-        }
-
-        int count = items.getOrDefault(item, 0);
-
-        if (quantity > count) {
-            throw new Exception("No enough items to remove from the rack!");
-        }
-
-        storedWeight -= quantity * item.getWeight();
-
-        if (count > quantity) {
-            items.put(item, count - quantity);
-        } else {
-            items.remove(item);
-        }
-
-        item.removeFromRack(this, quantity);
-    }
-
-    /**
-     * Clears and empties the current rack from all its items.
-     */
-    public void clear() throws Exception {
-        for (Map.Entry<Item, Integer> pair : items.entrySet()) {
-            removeItem(pair.getKey(), pair.getValue());
-        }
+        status = RackStatus.RESERVED;
     }
 }

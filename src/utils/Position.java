@@ -1,5 +1,6 @@
 package utils;
 
+
 /**
  * This {@code Position} class holds the coordinates of an object in a 2D grid.
  * <p>

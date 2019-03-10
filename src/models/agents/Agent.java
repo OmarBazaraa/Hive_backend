@@ -116,7 +116,7 @@ public class Agent extends HiveObject {
      *
      * @param task the new task to assign.
      */
-    public void setTask(Task task) {
+    public void assignTask(Task task) {
         this.task = task;
         this.status = AgentStatus.ACTIVE;
     }
@@ -124,7 +124,7 @@ public class Agent extends HiveObject {
     /**
      * Clears the currently assigned task of this agent.
      */
-    public void clearTask() {
+    public void onTaskComplete(Task task) {
         this.task = null;
         this.status = AgentStatus.IDLE;
     }

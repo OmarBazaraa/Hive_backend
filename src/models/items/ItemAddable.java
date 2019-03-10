@@ -18,6 +18,14 @@ import java.util.Map;
  */
 public interface ItemAddable extends Iterable<Map.Entry<Item, Integer>> {
 
+    /**
+     * Returns the first {@code Item} in this object.
+     *
+     * @return the first {@code Item}.
+     */
+    default Map.Entry<Item, Integer> getFirstItem() {
+        return iterator().next();
+    }
 
     /**
      * Returns the current quantity of an {@code Item} in this object.
@@ -38,5 +46,5 @@ public interface ItemAddable extends Iterable<Map.Entry<Item, Integer>> {
      * @param item     the {@code Item} to be updated.
      * @param quantity the quantity to be updated with.
      */
-    void addItem(Item item, int quantity);
+    void addItem(Item item, int quantity) throws Exception;
 }

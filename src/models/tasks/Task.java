@@ -1,55 +1,67 @@
 package models.tasks;
 
-import utils.Entity;
 import models.agents.Agent;
-import models.components.Item;
-import models.components.Order;
+import models.items.Item;
 import models.facilities.Gate;
 import models.facilities.Rack;
+import models.items.ItemAddable;
 import models.maps.GuideGrid;
+import models.orders.Order;
+
+import utils.Entity;
 import utils.Constants.*;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 
 /**
- * This {@code Task} class represents a basic task for our robot agents
- * in our Hive Warehousing System.
+ * This {@code Task} class represents the basic delivery task in our Hive Warehouse System.
+ * <p>
+ * A task represent the basic commands that a robot {@link Agent} can execute.
+ *
+ * @see Order
+ * @see Agent
+ * @see Rack
+ * @see Gate
+ * @see Item
  */
-public class Task extends Entity {
+public class Task extends Entity implements ItemAddable {
 
     //
     // Member Variables
     //
 
     /**
-     * The order in which this task is a part of.
+     * The {@code Order} in which this {@code Task} is a part of.
      */
     private Order order;
 
     /**
-     * The rack needed to be delivered.
+     * The {@code Rack} needed to be delivered.
      */
     private Rack rack;
 
     /**
-     * The gate to deliver the rack at.
+     * The {@code Rack} to deliver the {@code Rack} at.
      */
     private Gate gate;
 
     /**
-     * The robot agent assigned for this task.
+     * The {@code Agent} assigned for this {@code Task}.
      */
     private Agent agent;
 
     /**
-     * The maps of needed items to be picked from the below rack.
+     * The map of {@code Item}s this {@code Task} is needing.<p>
+     * The key is an {@code Item}.<p>
+     * The mapped value represents the needed quantity of this {@code Item}.
      */
     private Map<Item, Integer> items = new HashMap<>();
 
     /**
-     * The current status of this task.
+     * The current status of this {@code Task}.
      */
     private TaskStatus status = TaskStatus.PENDING;
 
@@ -78,191 +90,221 @@ public class Task extends Entity {
     //
 
     /**
-     * Constructs a new task.
+     * Constructs a new {@code Task} object.
      */
-    public Task() {
+    public Task(Order order, Rack rack, Agent agent) {
         super(getTaskId());
-    }
-
-    /**
-     * Returns the associated order with this task.
-     *
-     * @return the associated order.
-     */
-    public Order getOrder() {
-        return this.order;
-    }
-
-    /**
-     * Returns the delivery gate of this task.
-     *
-     * @return the delivery gate.
-     */
-    public Gate getDeliveryGate() {
-        return this.gate;
-    }
-
-    /**
-     * Assigns the associated order of this task.
-     *
-     * @param order the associated order.
-     */
-    public void assignOrder(Order order) {
         this.order = order;
         this.gate = order.getDeliveryGate();
-    }
-
-    /**
-     * Returns the assigned rack with this task.
-     *
-     * @return the assigned rack.
-     */
-    public Rack getRack() {
-        return this.rack;
-    }
-
-    /**
-     * Assigns a destination rack for this task.
-     *
-     * @param rack the assigned rack.
-     */
-    public void assignRack(Rack rack) {
         this.rack = rack;
-    }
-
-    /**
-     * Returns the assigned agent with this task.
-     *
-     * @return the assigned agent.
-     */
-    public Agent getAgent() {
-        return this.agent;
-    }
-
-    /**
-     * Assigns an agent for this task.
-     *
-     * @param agent the assigned agent.
-     */
-    public void assignAgent(Agent agent) {
         this.agent = agent;
     }
 
     /**
-     * Assigns the terminals of this task.
+     * Returns the associated {@code Order} with this {@code Task}.
      *
-     * @param agent the assigned agent.
-     * @param rack  the assigned rack.
+     * @return the associated {@code Order}.
      */
-    public void assignTerminals(Agent agent, Rack rack) {
-        assignAgent(agent);
-        assignRack(rack);
+    public Order getOrder() {
+        return order;
     }
 
     /**
-     * Returns the quantity of the given item needed in this task.
+     * Returns the {@code Gate} where this {@code Task} must be delivered.
      *
-     * @param item the item to get its quantity.
-     *
-     * @return the quantity of the given item.
+     * @return the delivery {@code Gate}.
      */
-    public int getItemQuantity(Item item) {
-        return this.items.getOrDefault(item, 0);
+    public Gate getDeliveryGate() {
+        return gate;
     }
 
     /**
-     * Returns the maps of items needed for fulfilling this task.
+     * Returns the assigned {@code Rack} with this {@code Task}.
      *
-     * @return the maps of items of this task.
+     * @return the assigned {@code Rack}.
      */
-    public Map<Item, Integer> getItems() {
-        return this.items;
+    public Rack getRack() {
+        return rack;
     }
 
     /**
-     * Adds a new needed item for this task.
+     * Returns the assigned {@code Agent} with this {@code Task}.
      *
-     * @param item     the new item.
-     * @param quantity the needed quantity.
-     *
-     * @throws Exception when passing non-positive quantity.
+     * @return the assigned {@code Agent}.
      */
+    public Agent getAgent() {
+        return agent;
+    }
+
+    /**
+     * Returns the quantity of the an {@code Item} needed by this {@code Task}.
+     *
+     * @param item the needed {@code Item}.
+     *
+     * @return the pending quantity of the given {@code Item}.
+     */
+    @Override
+    public int getQuantity(Item item) {
+        return items.getOrDefault(item, 0);
+    }
+
+    /**
+     * Updates the quantity of an {@code Item} in this {@code Order}.
+     * <p>
+     * This function is used to add extra units of the given {@code Item} if the given
+     * quantity is positive,
+     * and used to remove existing units if the given quantity is negative.
+     *
+     * TODO: prevent adding item after activation the order
+     *
+     * @param item     the {@code Item} to be updated.
+     * @param quantity the quantity to be updated with.
+     */
+    @Override
     public void addItem(Item item, int quantity) throws Exception {
-        if (quantity <= 0) {
-            throw new Exception("Passing non-positive item quantity!");
+        int total = quantity + items.getOrDefault(item, 0);
+
+        if (total < 0) {
+            throw new Exception("No enough items to be removed from the task!");
         }
 
-        this.items.put(item, quantity + items.getOrDefault(item, 0));
-    }
-
-    /**
-     * Fills this task with the maximum number of items needed by the
-     * associated order that are available in the assigned rack.
-     */
-    public void fillItems() throws Exception {
-        // Task information must be complete
-        if (order == null || rack == null) {
-            throw new Exception("No order and/or rack is assigned yet to the task!");
-        }
-
-        Map<Item, Integer> m1, m2;
-
-        // Assign the smaller set of items to 'm1'
-        if (order.getItems().size() < rack.getItems().size()) {
-            m1 = order.getItems();
-            m2 = rack.getItems();
+        if (total > 0) {
+            items.put(item, total);
         } else {
-            m1 = rack.getItems();
-            m2 = order.getItems();
-        }
-
-        clearItems();
-
-        // Get the intersection between the items of the order and the items in the rack
-        for (Item item : m1.keySet()) {
-            int quantity = Math.min(m1.getOrDefault(item, 0), m2.getOrDefault(item, 0));
-            this.items.put(item, quantity);
+            items.remove(item);
         }
     }
 
     /**
-     * Clears this task from all its assigned items.
-     */
-    public void clearItems() {
-        this.items.clear();
-    }
-
-    /**
-     * Returns the current status of this task.
+     * Fills this {@code Task} with the maximum number of items needed by the
+     * associated {@code Order} that are available in the assigned {@code Rack}.
      *
-     * @return an {@code TaskStatus} value representing the current status of the task.
+     * This is done by taking the intersection of items in both the associated {@code Order},
+     * and the assigned {@code Rack}.
+     */
+    public void fillItems() {
+        items.clear();
+
+        for (Map.Entry<Item, Integer> pair : order) {
+            Item item = pair.getKey();
+            items.put(item, Math.min(rack.getQuantity(item), pair.getValue()));
+        }
+    }
+
+    /**
+     * Returns an {@code Iterator} to iterate over the needed items in this {@code Task}.
+     * <p>
+     * Note that this iterator should be used in read-only operations;
+     * otherwise undefined behaviour could arises.
+     *
+     * @return an {@code Iterator}.
+     */
+    @Override
+    public Iterator<Map.Entry<Item, Integer>> iterator() {
+        return items.entrySet().iterator();
+    }
+
+    /**
+     * Returns the current status of this {@code Task}.
+     *
+     * @return the {@code TaskStatus} of this {@code Task}.
      */
     public TaskStatus getStatus() {
-        return this.status;
+        return status;
     }
 
     /**
-     * Checks whether this task is currently active or not.
+     * Checks whether this {@code Task} is currently active or not.
      *
-     * @return {@code true} if this task is active; {@code false} otherwise.
+     * @return {@code true} if this {@code Task} is active; {@code false} otherwise.
      */
     public boolean isActive() {
-        return this.status != TaskStatus.COMPLETE;
+        return (status != TaskStatus.PENDING && status != TaskStatus.COMPLETE);
     }
 
     /**
-     * Checks whether this task has been completed or not.
+     * Checks whether this {@code Task} has been completed or not.
      *
-     * @return {@code true} if this task has been completed; {@code false} otherwise.
+     * @return {@code true} if this {@code Task} has been completed; {@code false} otherwise.
      */
     public boolean isComplete() {
-        return this.status == TaskStatus.COMPLETE;
+        return (status == TaskStatus.COMPLETE);
     }
 
     /**
-     * Updates the status of this task using the last action done by the agent.
+     * Activates this {@code Task} and allocates its required resources.
+     */
+    public void activate() throws Exception {
+        // Skip re-activating already activated tasks
+        if (status != TaskStatus.PENDING) {
+            return;
+        }
+
+        // Allocate task resources
+        order.assignTask(this);
+        rack.assignTask(this);
+        agent.assignTask(this);
+
+        // Activate the task
+        status = TaskStatus.FETCHING;
+    }
+
+    /**
+     * Terminates this {@code Task} after completion.
+     * <p>
+     * A callback function to be invoked when this {@code Task} has been completed.
+     * Used to clear and finalize allocated resources.
+     */
+    private void terminate() {
+        order.onTaskComplete(this);
+        rack.onTaskComplete(this);
+        agent.onTaskComplete(this);
+    }
+
+    /**
+     * Returns the priority of this task.
+     * Higher value indicates higher priority.
      *
-     * @param action the last action done by the agent.
+     * @return an integer value representing the priority of this task.
+     */
+    public int getPriority() {
+        // TODO: add better heuristic to compute the priority
+        return (order != null ? -order.getId() : Integer.MIN_VALUE);
+    }
+
+    /**
+     * Returns the guide maps to reach the target of this task.
+     *
+     * @return the {@code GuideGrid} to reach the target.
+     */
+    public GuideGrid getGuideMap() {
+        if (status == TaskStatus.FETCHING || status == TaskStatus.LOADING) {
+            return rack.getGuideMap();
+        }
+        if (status == TaskStatus.DELIVERING || status == TaskStatus.WAITING) {
+            return gate.getGuideMap();
+        }
+        if (status == TaskStatus.RETURNING || status == TaskStatus.OFFLOADING) {
+            return rack.getGuideMap();
+        }
+
+        return null;
+    }
+
+    /**
+     * Returns the estimated number of time steps to finish this task.
+     *
+     * @return an integer representing the estimated number of step to finish the assigned task.
+     */
+    public int getEstimatedDistance() {
+        // TODO:
+        return 0;
+    }
+
+    /**
+     * Updates the status of this {@code Task} using the last action done by the {@code Agent}.
+     *
+     * @param action the last action done by the {@code Agent}.
      */
     public void updateStatus(AgentAction action) throws Exception {
         if (status == TaskStatus.PENDING) {
@@ -323,7 +365,7 @@ public class Task extends Entity {
         else if (status == TaskStatus.OFFLOADING) {
             if (action == AgentAction.OFFLOAD) {
                 status = TaskStatus.COMPLETE;
-                onComplete();
+                terminate();
             }
             else if (action == AgentAction.MOVE) {
                 status = TaskStatus.RETURNING;
@@ -332,86 +374,6 @@ public class Task extends Entity {
                 throw new Exception("Invalid action done by the agent!");
             }
         }
-    }
-
-    /**
-     * Activates this task and reserves its assigned resources.
-     */
-    public void activate() throws Exception {
-        // Skip re-activating already activated tasks
-        if (isActive()) {
-            return;
-        }
-
-        //
-        // Iterate over all the items of the given task and reserve them
-        //
-        for (Map.Entry<Item, Integer> pair : items.entrySet()) {
-            // Get the current item
-            Item item = pair.getKey();
-            int quantity = pair.getValue();
-
-            // Remove the current item from the pending items of the associated order
-            order.removeItem(item, quantity);
-
-            // Reserve the current item if the associated rack to this task
-            rack.removeItem(item, quantity);
-        }
-
-        // Activate this task
-        agent.setTask(this);
-        rack.setTask(this);
-        status = TaskStatus.FETCHING;
-    }
-
-    /**
-     * A callback function to be invoked when this task has been completed.
-     * Used to clear and finalize resources.
-     */
-    public void onComplete() {
-        agent.clearTask();
-        rack.clearTask();
-        order.onTaskCompleted(this);
-    }
-
-    /**
-     * Returns the priority of this task.
-     * Higher value indicates higher priority.
-     *
-     * @return an integer value representing the priority of this task.
-     */
-    public int getPriority() {
-        // TODO: add better heuristic to compute the priority
-        return (order != null ? -order.getId() : Integer.MIN_VALUE);
-    }
-
-    /**
-     * Returns the guide maps to reach the target of this task.
-     *
-     * @return the {@code GuideGrid} to reach the target.
-     */
-    public GuideGrid getGuideMap() {
-        if (status == TaskStatus.FETCHING || status == TaskStatus.LOADING) {
-            return rack.getGuideMap();
-        }
-        if (status == TaskStatus.DELIVERING || status == TaskStatus.WAITING) {
-            return gate.getGuideMap();
-        }
-        if (status == TaskStatus.RETURNING || status == TaskStatus.OFFLOADING) {
-            return rack.getGuideMap();
-        }
-
-        return null;
-    }
-
-    /**
-     * Returns the estimated number of time steps to finish this task.
-     *
-     * @return an integer representing the estimated number of step to finish the assigned task.
-     */
-    public int getEstimatedDistance() {
-        // TODO:
-        return 0;
     }
 
     /**
@@ -450,23 +412,5 @@ public class Task extends Entity {
         }
 
         return AgentAction.NOTHING;
-    }
-
-    // ===============================================================================================
-    //
-    // Sub-classes & Interface
-    //
-
-    /**
-     * Interface definition for a callback to be invoked when a {@link Task} is completed.
-     */
-    public interface OnCompleteListener {
-
-        /**
-         * Called when a {@code Task} has been completed.
-         *
-         * @param task the fulfilled {@code Task}.
-         */
-        void onTaskComplete(Task task);
     }
 }

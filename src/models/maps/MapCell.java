@@ -56,6 +56,30 @@ public class MapCell extends Cell {
         return ret;
     }
 
+    /**
+     * Converts a cell shape to its corresponding {@code CellType} value.
+     *
+     * @param shape the shape of the grid cell to convert.
+     *
+     * @return the corresponding {@code CellType} of the given shape.
+     */
+    public static CellType toType(char shape) {
+        switch (shape) {
+            case Constants.SHAPE_CELL_EMPTY:
+                return CellType.EMPTY;
+            case Constants.SHAPE_CELL_OBSTACLE:
+                return CellType.OBSTACLE;
+            case Constants.SHAPE_CELL_RACK:
+                return CellType.RACK;
+            case Constants.SHAPE_CELL_GATE:
+                return CellType.GATE;
+            case Constants.SHAPE_CELL_STATION:
+                return CellType.STATION;
+            default:
+                return CellType.UNKNOWN;
+        }
+    }
+
     // ===============================================================================================
     //
     // Member Methods
@@ -185,30 +209,6 @@ public class MapCell extends Cell {
         }
 
         return false;
-    }
-
-    /**
-     * Converts a cell shape to its corresponding {@code CellType} value.
-     *
-     * @param shape the shape of the grid cell to convert.
-     *
-     * @return the corresponding {@code CellType} of the given shape.
-     */
-    public static CellType toType(char shape) {
-        switch (shape) {
-            case Constants.SHAPE_CELL_EMPTY:
-                return CellType.EMPTY;
-            case Constants.SHAPE_CELL_OBSTACLE:
-                return CellType.OBSTACLE;
-            case Constants.SHAPE_CELL_RACK:
-                return CellType.RACK;
-            case Constants.SHAPE_CELL_GATE:
-                return CellType.GATE;
-            case Constants.SHAPE_CELL_STATION:
-                return CellType.STATION;
-            default:
-                return CellType.UNKNOWN;
-        }
     }
 
     /**

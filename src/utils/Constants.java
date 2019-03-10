@@ -136,6 +136,7 @@ public class Constants {
 
     /**
      * Different supported types of an {@code Order}.
+     * TODO: may be another order class
      */
     public enum OrderType {
         GET,            // Take from a rack to a gate
@@ -148,9 +149,8 @@ public class Constants {
      */
     public enum OrderStatus {
         PENDING,
-        SEMI_ASSIGNED,
-        ASSIGNED,
-        DELIVERED
+        ACTIVATED,
+        FULFILLED
     }
 
     /**

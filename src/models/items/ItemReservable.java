@@ -19,7 +19,7 @@ public interface ItemReservable {
      *
      * @param container the {@code ItemAddable} container.
      */
-    void reserve(ItemAddable container);
+    void reserve(ItemAddable container) throws Exception;
 
     /**
      * Confirms the previously assigned reservations specified by the given
@@ -27,5 +27,5 @@ public interface ItemReservable {
      *
      * @param container the {@code ItemAddable} container.
      */
-    void confirmReservation(ItemAddable container);
+    void confirmReservation(ItemAddable container) throws Exception;
 }

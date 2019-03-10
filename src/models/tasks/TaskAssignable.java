@@ -1,10 +1,19 @@
 package models.tasks;
 
+import models.agents.Agent;
+import models.facilities.Rack;
+import models.orders.Order;
+
 
 /**
  * Interface definition for all {@link Task} assignable classes.
  * <p>
  * A {@code TaskAssignable} class is a class that can be assigned a {@link Task}.
+ * <p>
+ * This interface is to be implemented by {@link Agent}, {@link Rack}, {@link Order}.
+ *
+ * @see Task
+ * @see Order
  */
 public interface TaskAssignable {
 

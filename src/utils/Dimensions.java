@@ -1,5 +1,6 @@
 package utils;
 
+
 /**
  * This {@code Dimensions} class holds the dimensions of a 2D grid.
  * <p>
