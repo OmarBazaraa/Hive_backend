@@ -130,6 +130,31 @@ public class Rack extends Facility implements QuantityAddable<Item>, QuantityRes
     }
 
     /**
+     * Updates the quantity of an {@code Item} in this {@code Rack}
+     * without updating the weight of the rack.
+     * <p>
+     * This function is used to add extra units of the given {@code Item} if the given
+     * quantity is positive,
+     * and used to remove existing units if the given quantity is negative.
+     *
+     * @param item     the {@code Item} to be updated.
+     * @param quantity the quantity to be updated with.
+     */
+    private void updateQuantity(Item item, int quantity) throws Exception {
+        int total = quantity + items.getOrDefault(item, 0);
+
+        if (total < 0) {
+            throw new Exception("No enough items to be removed from the rack!");
+        }
+
+        if (total > 0) {
+            items.put(item, total);
+        } else {
+            items.remove(item);
+        }
+    }
+
+    /**
      * Returns the current quantity of an {@code Item} in this {@code Rack}.
      *
      * @param item the {@code Item} to get its quantity.
@@ -153,36 +178,9 @@ public class Rack extends Facility implements QuantityAddable<Item>, QuantityRes
      */
     @Override
     public void add(Item item, int quantity) throws Exception {
-        updateItem(item, quantity);
+        updateQuantity(item, quantity);
         updateWeight(quantity * item.getWeight());
         item.add(this, quantity);
-    }
-
-    /**
-     * Updates the quantity of an {@code Item} in this {@code Rack}
-     * without updating the weight of the rack.
-     * <p>
-     * This function is used to add extra units of the given {@code Item} if the given
-     * quantity is positive,
-     * and used to remove existing units if the given quantity is negative.
-     *
-     * @param item     the {@code Item} to be updated.
-     * @param quantity the quantity to be updated with.
-     */
-    private void updateItem(Item item, int quantity) throws Exception {
-        int total = quantity + items.getOrDefault(item, 0);
-
-        if (total < 0) {
-            throw new Exception("No enough items to be removed from the rack!");
-        }
-
-        updateWeight(quantity * item.getWeight());
-
-        if (total > 0) {
-            items.put(item, total);
-        } else {
-            items.remove(item);
-        }
     }
 
     /**
@@ -219,7 +217,7 @@ public class Rack extends Facility implements QuantityAddable<Item>, QuantityRes
     @Override
     public void reserve(QuantityAddable<Item> container) throws Exception {
         for (Map.Entry<Item, Integer> pair : container) {
-            updateItem(pair.getKey(), -pair.getValue());
+            updateQuantity(pair.getKey(), -pair.getValue());
         }
     }
 
