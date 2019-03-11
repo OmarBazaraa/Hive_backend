@@ -3,7 +3,6 @@ package models.facilities;
 import algorithms.Planner;
 
 import models.HiveObject;
-import models.agents.Agent;
 import models.maps.GuideGrid;
 import models.maps.MapGrid;
 
@@ -12,13 +11,15 @@ import models.maps.MapGrid;
  * This {@code Facility} class is the base class of all the facility components
  * in our Hive Warehouse System.
  * <p>
- * A facility component is an objects in the warehouse maps that provide services or functions
- * to either an {@link Agent} or to a client.
+ * A facility component is an object in the {@link models.warehouses.Warehouse Warehouse} grid
+ * that provide services and functions to either an {@link models.agents.Agent Agent} or to a client.
  * A facility component is typically a static object with fixed location in the warehouse's grid.
  *
- * @see Rack
- * @see Gate
- * @see Station
+ * @see models.HiveObject HiveObject
+ * @see models.agents.Agent Agent
+ * @see models.facilities.Rack Rack
+ * @see models.facilities.Gate Gate
+ * @see models.facilities.Station Station
  */
 public class Facility extends HiveObject {
 
@@ -27,7 +28,7 @@ public class Facility extends HiveObject {
     //
 
     /**
-     * The guide maps grid of this {@code Facility}.
+     * The guide map grid of this {@code Facility}.
      */
     protected GuideGrid guideMap;
 
@@ -48,7 +49,7 @@ public class Facility extends HiveObject {
     }
 
     /**
-     * Returns a guide maps to reach this {@code Facility}.
+     * Returns a guide map to reach this {@code Facility}.
      *
      * @return the {@code GuideGrid} of this {@code Facility}.
      */
@@ -57,9 +58,9 @@ public class Facility extends HiveObject {
     }
 
     /**
-     * Computes a guide maps to reach this {@code Facility}
+     * Computes a guide map to reach this {@code Facility}.
      *
-     * @param map the {@code MapGrid} of the warehouse where this {@code Facility} is located in.
+     * @param map the {@code MapGrid} of the {@code Warehouse} where this {@code Facility} is located in.
      */
     public void computeGuideMap(MapGrid map) {
         guideMap = new GuideGrid(Planner.bfs(map, getPosition()));

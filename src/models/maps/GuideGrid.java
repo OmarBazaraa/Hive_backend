@@ -1,8 +1,7 @@
 package models.maps;
 
-import models.facilities.Facility;
+import models.maps.utils.Position;
 
-import utils.Position;
 import utils.Constants.*;
 
 import java.util.ArrayList;
@@ -10,10 +9,13 @@ import java.util.List;
 
 
 /**
- * This {@code GuideGrid} class represents a guide maps to reach a target object.
+ * This {@code GuideGrid} class represents a guide map to reach a target object.
  * <p>
- * A guide map guides an {@code agent} towards its associated target,
- * typically a {@link Facility}.
+ * A guide map guides an {@link models.agents.Agent Agent} towards its associated target,
+ * typically a {@link models.facilities.Facility Facility}.
+ *
+ * @see Grid
+ * @see MapGrid
  */
 public class GuideGrid extends Grid<GuideCell> {
 

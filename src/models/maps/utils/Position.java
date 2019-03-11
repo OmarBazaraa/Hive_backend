@@ -1,27 +1,27 @@
-package utils;
+package models.maps.utils;
 
 
 /**
- * This {@code Dimensions} class holds the dimensions of a 2D grid.
+ * This {@code Position} class holds the coordinates of an object in a 2D grid.
  * <p>
- * The dimensions of a grid is described by its number of rows and number of columns.
+ * The position of an object is described by its row and column in the grid.
  */
-public class Dimensions implements Comparable<Dimensions> {
+public class Position implements Comparable<Position> {
 
     /**
-     * The dimensions in terms of the number of rows and columns.
+     * The position of an object in terms of row, column pairs.
      */
-    public int rows, cols;
+    public int row, col;
 
     /**
-     * Constructs a {@code Dimensions} object with the given dimensions.
+     * Constructs a {@code Position} object with the given coordinates.
      *
-     * @param rows the number of rows.
-     * @param cols the number of columns.
+     * @param row the row position of the object.
+     * @param col the column position of the object.
      */
-    public Dimensions(int rows, int cols) {
-        this.rows = rows;
-        this.cols = cols;
+    public Position(int row, int col) {
+        this.row = row;
+        this.col = col;
     }
 
     /**
@@ -35,12 +35,12 @@ public class Dimensions implements Comparable<Dimensions> {
     @Override
     public boolean equals(Object obj) {
         // Not the same object type
-        if (!(obj instanceof Dimensions)) {
+        if (!(obj instanceof Position)) {
             return false;
         }
         // Cast, then compare coordinates
-        Dimensions rhs = (Dimensions) obj;
-        return (rows == rhs.rows && cols == rhs.cols);
+        Position rhs = (Position) obj;
+        return (row == rhs.row && col == rhs.col);
     }
 
     /**
@@ -52,11 +52,11 @@ public class Dimensions implements Comparable<Dimensions> {
      *         is less than, equal to, or greater than the specified object.
      */
     @Override
-    public int compareTo(Dimensions rhs) {
-        if (rows == rhs.rows) {
-            return cols - rhs.cols;
+    public int compareTo(Position rhs) {
+        if (row == rhs.row) {
+            return col - rhs.col;
         } else {
-            return rows - rhs.rows;
+            return row - rhs.row;
         }
     }
 }

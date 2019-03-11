@@ -1,12 +1,10 @@
-package utils;
+package models;
 
 
 /**
  * This {@code Entity} class is the base class of all entity objects.
  * <p>
  * An entity object is just an object with a unique id representing and defining it.
- *
- * TODO: refactor?! :: which package this class should be in?
  */
 public class Entity implements Comparable<Entity> {
 

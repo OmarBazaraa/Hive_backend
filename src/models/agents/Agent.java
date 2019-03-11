@@ -1,29 +1,30 @@
 package models.agents;
 
+import models.Entity;
 import models.HiveObject;
 import models.facilities.Rack;
-import models.facilities.Gate;
 import models.maps.GuideGrid;
 import models.maps.MapCell;
 import models.maps.MapGrid;
+import models.maps.utils.Position;
 import models.tasks.Task;
 import models.tasks.TaskAssignable;
-import models.warehouses.Warehouse;
 
-import utils.Entity;
-import utils.Position;
-import utils.Utility;
 import utils.Constants.*;
+import utils.Utility;
 
 
 /**
  * This {@code Agent} class is the model class for robot agents in our Hive System.
  * <p>
- * An {@code Agent} is responsible for carrying out {@link Task tasts} inside a {@link Warehouse warehouse}.
+ * An {@code Agent} is responsible for carrying out {@link Task Tasks} inside a {@link models.warehouses.Warehouse Warehouse}.
  *
- * @see Task
- * @see Rack
- * @see Gate
+ * @see models.HiveObject HiveObject
+ * @see models.facilities.Facility Facility
+ * @see models.facilities.Rack Rack
+ * @see models.facilities.Gate Gate
+ * @see models.facilities.Station Station
+ * @see models.tasks.Task Task
  */
 public class Agent extends HiveObject implements TaskAssignable {
 
@@ -148,7 +149,7 @@ public class Agent extends HiveObject implements TaskAssignable {
     }
 
     /**
-     * Returns the guide maps to reach the target of the assigned {@code Task}.
+     * Returns the guide map to reach the target of the assigned {@code Task}.
      *
      * @return a {@code GuideGrid} to reach the target.
      */
@@ -323,7 +324,7 @@ public class Agent extends HiveObject implements TaskAssignable {
 
     /**
      * Sets the last time this {@code Agent} has performed an action.
-     *
+     * <p>
      * TODO: may need to change time to 'long'
      *
      * @param time the time to set.

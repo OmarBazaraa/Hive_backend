@@ -10,6 +10,7 @@ import models.facilities.Rack;
  * <p>
  * This interface is to be implemented by {@link Rack}, {@link Item}.
  *
+ * @see Item
  * @see QuantityAddable
  */
 public interface QuantityReservable<T> {

@@ -8,7 +8,7 @@ import models.items.QuantityAddable;
 import models.maps.GuideGrid;
 import models.orders.Order;
 
-import utils.Entity;
+import models.Entity;
 import utils.Constants.*;
 
 import java.util.HashMap;
@@ -19,13 +19,13 @@ import java.util.Map;
 /**
  * This {@code Task} class represents the basic delivery task in our Hive Warehouse System.
  * <p>
- * A task represent the basic commands that a robot {@link Agent} can execute.
+ * A task represent the basic commands that an {@link Agent} can execute.
  *
  * @see Order
+ * @see Item
  * @see Agent
  * @see Rack
  * @see Gate
- * @see Item
  */
 public class Task extends Entity implements QuantityAddable<Item> {
 
@@ -278,7 +278,7 @@ public class Task extends Entity implements QuantityAddable<Item> {
     }
 
     /**
-     * Returns the guide maps to reach the target of this {@code Task}.
+     * Returns the guide map to reach the target of this {@code Task}.
      *
      * @return the {@code GuideGrid} to reach the target.
      */

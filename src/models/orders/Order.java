@@ -1,12 +1,13 @@
 package models.orders;
 
-import models.items.Item;
+import models.Entity;
 import models.facilities.Gate;
+import models.items.Item;
 import models.items.QuantityAddable;
 import models.tasks.Task;
 import models.tasks.TaskAssignable;
+
 import utils.Constants.*;
-import utils.Entity;
 
 import java.util.*;
 
@@ -17,8 +18,8 @@ import java.util.*;
  * An order is defined by a list of needed {@link Item Items}, and a {@link Gate}
  * where the {@code Order} must be delivered.
  *
- * @see Item
  * @see Task
+ * @see Item
  * @see Gate
  */
 public class Order extends Entity implements QuantityAddable<Item>, TaskAssignable {

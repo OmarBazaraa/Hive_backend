@@ -1,10 +1,9 @@
 package models.items;
 
-import models.orders.Order;
+import models.Entity;
 import models.facilities.Rack;
+import models.orders.Order;
 import models.tasks.Task;
-
-import utils.Entity;
 
 import java.util.HashMap;
 import java.util.Iterator;

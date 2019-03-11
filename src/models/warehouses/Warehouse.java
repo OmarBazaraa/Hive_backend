@@ -4,12 +4,12 @@ import algorithms.Dispatcher;
 import algorithms.Planner;
 
 import models.agents.Agent;
-import models.items.Item;
-import models.orders.Order;
 import models.facilities.Gate;
 import models.facilities.Rack;
 import models.facilities.Station;
+import models.items.Item;
 import models.maps.MapGrid;
+import models.orders.Order;
 
 import java.util.*;
 
@@ -148,12 +148,12 @@ public class Warehouse implements Order.OnFulFillListener {
      * Initializes and pre-computes some required values.
      */
     private void init() {
-        // Compute guide maps for every rack
+        // Compute guide map for every rack
         for (Rack rack : racks.values()) {
             rack.computeGuideMap(map);
         }
 
-        // Compute guide maps for every gate
+        // Compute guide map for every gate
         for (Gate gate : gates.values()) {
             gate.computeGuideMap(map);
         }

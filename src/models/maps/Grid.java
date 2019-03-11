@@ -1,15 +1,17 @@
 package models.maps;
 
-import utils.Dimensions;
-import utils.Position;
+import models.maps.utils.Dimensions;
+import models.maps.utils.Position;
+
 import utils.Constants;
 import utils.Constants.*;
 
 
 /**
  * This {@code Grid} class represents a grid of 2D {@link Cell} objects.
- * <p>
- * This class is the parent class of {@link MapGrid} and {@link GuideGrid}.
+ *
+ * @see MapGrid
+ * @see GuideGrid
  */
 public class Grid<T extends Cell> {
 

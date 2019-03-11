@@ -1,11 +1,15 @@
 package models.maps;
 
-import utils.Position;
+import models.maps.utils.Position;
+
 import utils.Constants.*;
 
 
 /**
- * This {@code MapGrid} class represents the maps grid of our Hive Warehouse System.
+ * This {@code MapGrid} class represents the map grid of our Hive Warehouse System.
+ *
+ * @see Grid
+ * @see GuideGrid
  */
 public class MapGrid extends Grid<MapCell> {
 

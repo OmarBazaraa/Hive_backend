@@ -5,8 +5,9 @@ import utils.Constants;
 
 /**
  * This {@code Cell} class represents a grid cell used by {@link Grid} class.
- * <p>
- * This class is the parent class of {@link models.maps.MapCell} and {@link models.maps.GuideCell}.
+ *
+ * @see MapCell
+ * @see GuideCell
  */
 public class Cell {
 

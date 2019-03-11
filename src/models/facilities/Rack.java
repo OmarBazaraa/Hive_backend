@@ -5,8 +5,8 @@ import models.items.Item;
 import models.items.QuantityAddable;
 import models.items.QuantityReservable;
 import models.tasks.Task;
-
 import models.tasks.TaskAssignable;
+
 import utils.Constants;
 import utils.Constants.*;
 
@@ -19,18 +19,20 @@ import java.util.Map;
  * This {@code Rack} class is a one of the {@link Facility} components
  * in our Hive Warehouse System.
  * <p>
- * A rack component is a container located in the warehouse's grid where items and goods
- * are stored.
+ * A rack component is a container located in the {@link models.warehouses.Warehouse Warehouse} grid
+ * where {@link Item Items} are stored.
  * A rack can possibly contain different items with different quantities.
  * <p>
  * A rack by itself is a static {@link Facility} component,
- * but it is different from other facilities in that it can be loaded and move around by
+ * but it is different from other facilities in that it can be loaded and be moved around by
  * an {@link Agent}.
  *
- * @see Facility
- * @see Gate
- * @see Station
- * @see Agent
+ * @see models.HiveObject HiveObject
+ * @see models.agents.Agent Agent
+ * @see models.facilities.Facility Facility
+ * @see models.facilities.Gate Gate
+ * @see models.facilities.Station Station
+ * @see models.tasks.Task Task
  */
 public class Rack extends Facility implements QuantityAddable<Item>, QuantityReservable<Item>, TaskAssignable {
 

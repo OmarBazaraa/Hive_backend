@@ -1,13 +1,14 @@
 package models.maps;
 
-import models.facilities.Facility;
-
 
 /**
  * This {@code GuideCell} class represents a guide cell used by {@link GuideGrid} class.
  * <p>
- * A guide cell guides an {@code agent} towards its associated target,
- * typically a {@link Facility}.
+ * A guide cell guides an {@link models.agents.Agent Agent} towards its associated target,
+ * typically a {@link models.facilities.Facility Facility}.
+ *
+ * @see Cell
+ * @see MapCell
  */
 public class GuideCell extends Cell {
 

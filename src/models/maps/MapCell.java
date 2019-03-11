@@ -8,7 +8,10 @@ import utils.Constants.*;
 
 
 /**
- * This {@code MapCell} class represents a maps grid cell used by {@link MapGrid} class.
+ * This {@code MapCell} class represents a map grid cell used by {@link MapGrid} class.
+ *
+ * @see Cell
+ * @see GuideCell
  */
 public class MapCell extends Cell {
 

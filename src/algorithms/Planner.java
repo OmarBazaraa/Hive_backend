@@ -6,8 +6,8 @@ import models.maps.MapCell;
 import models.maps.MapGrid;
 import models.maps.GuideCell;
 import utils.Constants.*;
-import utils.Dimensions;
-import utils.Position;
+import models.maps.utils.Dimensions;
+import models.maps.utils.Position;
 import utils.Utility;
 
 import java.util.ArrayList;
@@ -182,11 +182,11 @@ public class Planner {
      * Runs a BFS algorithms on the given grid to compute the guide maps
      * to the given destination position.
      *
-     * @param map                 the grid maps to compute upon.
+     * @param map                 the grid map to compute upon.
      * @param dst                 the destination position.
      * @param accessibleCellTypes the accessible {@code CellType} to set.
      *
-     * @return a 2D {@code GuideCell} array representing the guide maps to reach the destination.
+     * @return a 2D {@code GuideCell} array representing the guide map to reach the destination.
      */
     public static GuideCell[][] bfs(MapGrid map, Position dst, CellType... accessibleCellTypes) {
         // Initialize BFS algorithm requirements
