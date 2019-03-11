@@ -22,7 +22,7 @@ import java.util.Map;
  * @see Order
  * @see Task
  */
-public class Item extends Entity implements QuantityAddable<Rack>, ItemReservable {
+public class Item extends Entity implements QuantityAddable<Rack>, QuantityReservable<Item> {
 
     //
     // Member Variables
@@ -176,7 +176,7 @@ public class Item extends Entity implements QuantityAddable<Rack>, ItemReservabl
      * @param container the {@code QuantityAddable} container.
      */
     @Override
-    public void reserve(QuantityAddable container) throws Exception {
+    public void reserve(QuantityAddable<Item> container) throws Exception {
         int reserveQuantity = container.get(this);
 
         if (reserveQuantity > getAvailableUnits()) {
@@ -193,7 +193,7 @@ public class Item extends Entity implements QuantityAddable<Rack>, ItemReservabl
      * @param container the {@code QuantityAddable} container.
      */
     @Override
-    public void confirmReservation(QuantityAddable container) throws Exception {
+    public void confirmReservation(QuantityAddable<Item> container) throws Exception {
         int reserveQuantity = container.get(this);
 
         if (reserveQuantity > reservedUnits) {

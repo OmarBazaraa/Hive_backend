@@ -3,7 +3,7 @@ package models.facilities;
 import models.agents.Agent;
 import models.items.Item;
 import models.items.QuantityAddable;
-import models.items.ItemReservable;
+import models.items.QuantityReservable;
 import models.tasks.Task;
 
 import models.tasks.TaskAssignable;
@@ -32,7 +32,7 @@ import java.util.Map;
  * @see Station
  * @see Agent
  */
-public class Rack extends Facility implements QuantityAddable<Item>, ItemReservable, TaskAssignable {
+public class Rack extends Facility implements QuantityAddable<Item>, QuantityReservable<Item>, TaskAssignable {
 
     //
     // Member Variables
@@ -217,8 +217,8 @@ public class Rack extends Facility implements QuantityAddable<Item>, ItemReserva
      * @param container the {@code QuantityAddable} container.
      */
     @Override
-    public void reserve(QuantityAddable container) throws Exception {
-        for (Map.Entry<Item, Integer> pair : task) {
+    public void reserve(QuantityAddable<Item> container) throws Exception {
+        for (Map.Entry<Item, Integer> pair : container) {
             updateItem(pair.getKey(), -pair.getValue());
         }
     }
@@ -233,8 +233,8 @@ public class Rack extends Facility implements QuantityAddable<Item>, ItemReserva
      * @param container the {@code QuantityAddable} container.
      */
     @Override
-    public void confirmReservation(QuantityAddable container) throws Exception {
-        for (Map.Entry<Item, Integer> pair : task) {
+    public void confirmReservation(QuantityAddable<Item> container) throws Exception {
+        for (Map.Entry<Item, Integer> pair : container) {
             updateWeight(-pair.getKey().getWeight() * pair.getValue());
         }
     }

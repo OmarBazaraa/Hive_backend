@@ -14,7 +14,7 @@ import java.util.Map;
  * <p>
  * This interface is to be implemented by {@link Rack}, {@link Item}, {@link Order}, {@link Task}.
  *
- * @see ItemReservable
+ * @see QuantityReservable
  */
 public interface QuantityAddable<T> extends Iterable<Map.Entry<T, Integer>> {
 
