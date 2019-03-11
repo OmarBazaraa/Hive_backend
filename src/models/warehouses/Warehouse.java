@@ -37,42 +37,42 @@ public class Warehouse implements Order.OnFulFillListener {
     private MapGrid map;
 
     /**
-     * The map of all {@code Agent}s in this {@code Warehouse}, indexed by their id.
+     * The map of all agents in this {@code Warehouse}, indexed by their id.
      */
     private Map<Integer, Agent> agents = new HashMap<>();
 
     /**
-     * The queue of all currently active {@code Agent}s, sorted by their priority.
+     * The queue of all currently active agents, sorted by their priority.
      */
     private Queue<Agent> activeAgents = new PriorityQueue<>();
 
     /**
-     * The queue of all currently idle {@code Agent}s.
+     * The queue of all currently idle agents.
      */
     private Queue<Agent> readyAgents = new LinkedList<>();
 
     /**
-     * The map of all {@code Item}s in this {@code Warehouse}, indexed by their id.
+     * The map of all items in this {@code Warehouse}, indexed by their id.
      */
     private Map<Integer, Item> items = new HashMap<>();
 
     /**
-     * The map of all {@code Rack}s in this {@code Warehouse}, indexed by their id.
+     * The map of all racks in this {@code Warehouse}, indexed by their id.
      */
     private Map<Integer, Rack> racks = new HashMap<>();
 
     /**
-     * The map of all {@code Gate}s in this {@code Warehouse}, indexed by their id.
+     * The map of all gates in this {@code Warehouse}, indexed by their id.
      */
     private Map<Integer, Gate> gates = new HashMap<>();
 
     /**
-     * The map of all charging {@code Station}s in this {@code Warehouse}, indexed by their id.
+     * The map of all charging stations in this {@code Warehouse}, indexed by their id.
      */
     private Map<Integer, Station> stations = new HashMap<>();
 
     /**
-     * The queue of pending (not fully dispatched) {@code Order}s.
+     * The queue of pending (not fully dispatched) orders.
      */
     private Queue<Order> pendingOrders = new LinkedList<>();
 
@@ -160,7 +160,7 @@ public class Warehouse implements Order.OnFulFillListener {
     }
 
     /**
-     * Dispatches the current pending {@code Order}s of this {@code Warehouse}.
+     * Dispatches the current pending orders of this {@code Warehouse}.
      */
     private void dispatchPendingOrders() throws Exception {
         // Get the initial size of the queue
@@ -184,7 +184,7 @@ public class Warehouse implements Order.OnFulFillListener {
     }
 
     /**
-     * Moves the active {@code Agent}s one step towards their targets.
+     * Moves the active agents one step towards their targets.
      *
      * TODO: move agent off its destination position after finishing the task
      */

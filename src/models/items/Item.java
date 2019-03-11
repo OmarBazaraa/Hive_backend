@@ -34,17 +34,17 @@ public class Item extends Entity implements QuantityAddable<Rack>, QuantityReser
     private int weight;
 
     /**
-     * The number of reserved units of this {@code Item} across the {@code Rack}s of a {@code Warehouse}.
+     * The number of reserved units of this {@code Item} across the racks of a {@code Warehouse}.
      */
     private int reservedUnits;
 
     /**
-     * The total number of units of this {@code Item} across the {@code Rack}s of a {@code Warehouse}.
+     * The total number of units of this {@code Item} across the racks of a {@code Warehouse}.
      */
     private int totalUnits;
 
     /**
-     * The map of {@code Rack}s storing this {@code Item}.<p>
+     * The map of racks storing this {@code Item}.<p>
      * The key is a {@code Rack}.<p>
      * The mapped value represents the quantity of this {@code Item}.
      */
@@ -86,7 +86,7 @@ public class Item extends Entity implements QuantityAddable<Rack>, QuantityReser
 
     /**
      * Returns the number of reserved units of this {@code Item} across
-     * the {@code Rack}s of a {@code Warehouse}.
+     * the racks of a {@code Warehouse}.
      *
      * @return the number of reserved units.
      */
@@ -96,7 +96,7 @@ public class Item extends Entity implements QuantityAddable<Rack>, QuantityReser
 
     /**
      * Returns the total number of units of this {@code Item} across
-     * the {@code Rack}s of a {@code Warehouse}.
+     * the racks of a {@code Warehouse}.
      *
      * @return the total number of units.
      */
@@ -106,7 +106,7 @@ public class Item extends Entity implements QuantityAddable<Rack>, QuantityReser
 
     /**
      * Returns the number of available units of this {@code Item} across
-     * the {@code Rack}s of a {@code Warehouse}.
+     * the racks of a {@code Warehouse}.
      * <p>
      * That is, the total number of units minus the number of reserved units.
      *

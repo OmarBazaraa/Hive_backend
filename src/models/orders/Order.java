@@ -38,7 +38,7 @@ public class Order extends Entity implements QuantityAddable<Item>, TaskAssignab
     private int pendingUnits;
 
     /**
-     * The map of {@code Item}s this {@code Order} is needing.<p>
+     * The map of items this {@code Order} is needing.<p>
      * The key is an {@code Item}.<p>
      * The mapped value represents the needed quantity of this {@code Item}.
      */
@@ -103,9 +103,9 @@ public class Order extends Entity implements QuantityAddable<Item>, TaskAssignab
     }
 
     /**
-     * Checks whether this {@code Order} still has some pending {@code Item}s or not.
+     * Checks whether this {@code Order} still has some pending items or not.
      *
-     * TODO: refactor :: change pending to avoid confusion with status.PENDING
+     * TODO: refactor :: change pending to avoid confusion with status.INACTIVE
      *
      * @return {@code true} if this {@code Order} is still pending; {@code false} otherwise.
      */
@@ -167,6 +167,7 @@ public class Order extends Entity implements QuantityAddable<Item>, TaskAssignab
      * and used to remove existing units if the given quantity is negative.
      *
      * TODO: prevent adding item after activation the order
+     * TODO: prevent adding/removing from outside this class
      *
      * @param item     the {@code Item} to be updated.
      * @param quantity the quantity to be updated with.
@@ -215,7 +216,7 @@ public class Order extends Entity implements QuantityAddable<Item>, TaskAssignab
         }
 
         // Activate the order
-        status = OrderStatus.ACTIVATED;
+        status = OrderStatus.ACTIVE;
     }
 
     /**
@@ -225,7 +226,7 @@ public class Order extends Entity implements QuantityAddable<Item>, TaskAssignab
      */
     @Override
     public void assignTask(Task task) throws Exception {
-        if (status != OrderStatus.ACTIVATED) {
+        if (status != OrderStatus.ACTIVE) {
             throw new Exception("The order is not activated yet!");
         }
 

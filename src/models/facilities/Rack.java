@@ -44,12 +44,12 @@ public class Rack extends Facility implements QuantityAddable<Item>, QuantityRes
     private int capacity = Constants.RACK_DEFAULT_STORE_CAPACITY;
 
     /**
-     * The total stored weight of all the {@code Item}s in this {@code Rack}.
+     * The total stored weight of all the items in this {@code Rack}.
      */
     private int weight;
 
     /**
-     * The map of all {@code Item}s this {@code Rack} is storing.<p>
+     * The map of all items this {@code Rack} is storing.<p>
      * The key is an {@code Item}.<p>
      * The mapped value represents the quantity of this {@code Item}.
      */
@@ -159,7 +159,7 @@ public class Rack extends Facility implements QuantityAddable<Item>, QuantityRes
     }
 
     /**
-     * Clears and empties this {@code Rack} from all its available {@code Item}s.
+     * Clears and empties this {@code Rack} from all its available items.
      */
     public void clear() throws Exception {
         for (Map.Entry<Item, Integer> pair : items.entrySet()) {

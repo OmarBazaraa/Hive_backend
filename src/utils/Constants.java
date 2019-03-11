@@ -149,7 +149,7 @@ public class Constants {
      */
     public enum OrderStatus {
         INACTIVE,       // Inactive order, meaning that its item has not been reserved
-        ACTIVATED,      // Active order with all its items has been reserved
+        ACTIVE,         // Active order with all its items has been reserved
         FULFILLED       // The order has been fulfilled
     }
 
@@ -158,7 +158,7 @@ public class Constants {
      * TODO: think of a more general way to combine multiple tasks together
      */
     public enum TaskStatus {
-        PENDING,        // The task is still pending not active yet
+        INACTIVE,       // The task is still pending not active yet
         FETCHING,       // Agent is moving to fetch the assigned rack
         LOADING,        // Agent reached the rack and is currently loading it
         DELIVERING,     // Agent is moving to deliver the loaded rack to a gate

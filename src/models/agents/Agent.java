@@ -2,10 +2,13 @@ package models.agents;
 
 import models.HiveObject;
 import models.facilities.Rack;
+import models.facilities.Gate;
 import models.maps.GuideGrid;
 import models.maps.MapCell;
 import models.maps.MapGrid;
 import models.tasks.Task;
+import models.tasks.TaskAssignable;
+import models.warehouses.Warehouse;
 
 import utils.Entity;
 import utils.Position;
@@ -14,40 +17,47 @@ import utils.Constants.*;
 
 
 /**
- * This {@code Agent} class is a model for robot agent in our Hive System.
+ * This {@code Agent} class is the model class for robot agents in our Hive System.
+ * <p>
+ * An {@code Agent} is responsible for carrying out {@link Task tasts} inside a {@link Warehouse warehouse}.
+ *
+ * @see Task
+ * @see Rack
+ * @see Gate
  */
-public class Agent extends HiveObject {
+public class Agent extends HiveObject implements TaskAssignable {
 
     //
     // Member Variables
     //
 
+    // Skip for now
+    private int capacity;
+    private int chargeMaxCap;
+    private int chargeLevel;
+
     /**
-     * The current status of this agent.
+     * The current status of this {@code Agent}.
      */
     private AgentStatus status = AgentStatus.IDLE;
 
     /**
-     * The assigned task of this agent.
+     * The assigned {@code Task} of this {@code Agent}.
      */
     private Task task;
 
     /**
-     * The last time this agent has performed a bringBlank.
+     * The last time this {@code Agent} has performed an action.
      * Needed by the planner algorithm.
      */
     private int lastActionTime;
 
     /**
-     * The last time this agent tried to be bring a blank to a higher priority agent.
+     * The last time this {@code Agent} tried to be bring a blank location
+     * to a higher priority {@code Agent}.
      * Needed by the planner algorithm.
      */
     private int lastBringBlankTime;
-
-    // Skip for now
-    private int capacity;
-    private int chargeMaxCap;
-    private int chargeLevel;
 
     // ===============================================================================================
     //
@@ -55,153 +65,100 @@ public class Agent extends HiveObject {
     //
 
     /**
-     * Constructs a new agent robot.
+     * Constructs a new {@code Agent} robot.
      *
-     * @param id  the id of the agent.
-     * @param row the row position of the agent.
-     * @param col the column position of the agent.
+     * @param id  the id of the {@code Agent}.
+     * @param row the row position of the {@code Agent}.
+     * @param col the column position of the {@code Agent}.
      */
     public Agent(int id, int row, int col) {
         super(id, row, col);
     }
 
     /**
-     * Returns the current status of this agent.
+     * Returns the current status of this {@code Agent}.
      *
-     * @return an {@code AgentStatus} value representing the current status of the agent.
+     * @return an {@code AgentStatus} of this {@code Agent}.
      */
     public AgentStatus getStatus() {
-        return this.status;
+        return status;
     }
 
     /**
-     * Sets a new status to this agent.
+     * Checks whether this {@code Agent} is currently active or not.
+     * <p>
+     * An {@code Agent} is said to be active if it is currently performing a {@code Task}.
      *
-     * @param status the new status to set.
-     */
-    public void setStatus(AgentStatus status) {
-        this.status = status;
-    }
-
-    /**
-     * Checks whether this agent is currently active or not.
-     *
-     * @return {@code true} if this agent is active; {@code false} otherwise.
+     * @return {@code true} if this {@code Agent} is active; {@code false} otherwise.
      */
     public boolean isActive() {
         return (status == AgentStatus.ACTIVE || status == AgentStatus.ACTIVE_LOADED);
     }
 
     /**
-     * Checks whether this agent is currently loaded by a rack or not.
+     * Checks whether this {@code Agent} is currently loaded by a {@code Rack} or not.
      *
-     * @return {@code true} if this agent is loaded; {@code false} otherwise.
+     * @return {@code true} if this {@code Agent} is loaded; {@code false} otherwise.
      */
     public boolean isLoaded() {
         return (status == AgentStatus.ACTIVE_LOADED);
     }
 
     /**
-     * Returns the assigned task of this agent.
+     * Assigns a new {@code Task} to this {@code Agent}.
      *
-     * @return a {@code Task} object representing the assigned task of this agent;
-     * {@code null} if no current assigned task.
+     * @param t the new {@code Task} to assign.
      */
-    public Task getTask() {
-        return this.task;
+    @Override
+    public void assignTask(Task t) {
+        task = t;
+        status = AgentStatus.ACTIVE;
     }
 
     /**
-     * Assigns a new task to this agent.
+     * The callback function to be invoked when the assigned {@code Task} is completed.
      *
-     * @param task the new task to assign.
+     * @param t the completed {@code Task}.
      */
-    public void assignTask(Task task) {
-        this.task = task;
-        this.status = AgentStatus.ACTIVE;
-    }
-
-    /**
-     * Clears the currently assigned task of this agent.
-     */
-    public void onTaskComplete(Task task) {
-        this.task = null;
-        this.status = AgentStatus.IDLE;
-    }
-
-    /**
-     * Returns the last time this agent has performed an action.
-     */
-    public int getLastActionTime() {
-        return this.lastActionTime;
-    }
-
-    /**
-     * Sets the last time this agent has performed an action.
-     *
-     * @param time the time step of the last action.
-     */
-    public void setLastActionTime(int time) throws Exception {
-        if (lastActionTime > time) {
-            throw new Exception("The given time is smaller than the time of the last action performed by the agent!");
+    @Override
+    public void onTaskComplete(Task t) {
+        if (task == t) {
+            task = null;
+            status = AgentStatus.IDLE;
         }
-
-        this.lastActionTime = time;
     }
 
     /**
-     * Returns the last time this agent tried to be bring a blank position
-     * to a higher priority agent.
-     */
-    public int getLastBringBlankTime() {
-        return this.lastBringBlankTime;
-    }
-
-    /**
-     * Sets the last time this agent tried to be bring a blank position
-     * to a higher priority agent.
-     *
-     * @param time the time step of the last trial.
-     */
-    public void setLastBringBlankTime(int time) throws Exception {
-        if (lastActionTime > time) {
-            throw new Exception("The given time is smaller than the time of the last bring blank trial performed by the agent!");
-        }
-
-        this.lastBringBlankTime = time;
-    }
-
-    /**
-     * Returns the priority of this agent.
+     * Returns the priority of this {@code Agent}.
      * Higher value indicates higher priority.
      *
-     * @return an integer value representing the priority of this agent.
+     * @return the priority of this {@code Agent}.
      */
     public int getPriority() {
         return (task != null ? task.getPriority() : Integer.MIN_VALUE);
     }
 
     /**
-     * Returns the guide maps to reach the target of the assigned task.
+     * Returns the estimated number of steps to finish the currently assigned {@code Task}.
      *
-     * @return the {@code GuideGrid} to reach the target.
-     */
-    public GuideGrid getGuideMap() {
-        return (task != null ? task.getGuideMap() : null);
-    }
-
-    /**
-     * Returns the estimated number of steps to finish the currently assigned task.
-     *
-     * @return an integer representing the estimated number of step to finish the assigned task.
+     * @return the estimated number of steps.
      */
     public int getEstimatedSteps() {
         return (task != null ? task.getEstimatedDistance() : 0);
     }
 
     /**
-     * Returns the next required action to be done by this agent
-     * in order to bringBlank one step forward to complete this task.
+     * Returns the guide maps to reach the target of the assigned {@code Task}.
+     *
+     * @return a {@code GuideGrid} to reach the target.
+     */
+    public GuideGrid getGuideMap() {
+        return (task != null ? task.getGuideMap() : null);
+    }
+
+    /**
+     * Returns the next required action to be done by this {@code Agent}.
+     * This is to be determined by the assigned {@code Task}.
      *
      * @return {@code AgentAction} to be done the next time step.
      */
@@ -210,10 +167,10 @@ public class Agent extends HiveObject {
     }
 
     /**
-     * Executes the given action by this agent.
+     * Executes the given action.
      *
      * @param action the action to be executed.
-     * @param map    the maps's grid of the warehouse where the agent is.
+     * @param map    the map grid of the {@code Warehouse} where this {@code Agent} is located.
      * @param time   the current time step.
      */
     public void executeAction(AgentAction action, MapGrid map, int time) throws Exception {
@@ -350,6 +307,55 @@ public class Agent extends HiveObject {
      */
     public void waitOnGate(MapGrid map) throws Exception {
         // TODO:
+    }
+
+    // ===============================================================================================
+    //
+    // Helper Methods
+    //
+
+    /**
+     * Returns the last time this {@code Agent} has performed an action.
+     */
+    public int getLastActionTime() {
+        return lastActionTime;
+    }
+
+    /**
+     * Sets the last time this {@code Agent} has performed an action.
+     *
+     * TODO: may need to change time to 'long'
+     *
+     * @param time the time to set.
+     */
+    public void setLastActionTime(int time) throws Exception {
+        if (time < lastActionTime) {
+            throw new Exception("Invalid time to set!");
+        }
+
+        lastActionTime = time;
+    }
+
+    /**
+     * Returns the last time this {@code Agent} tried to be bring a blank location
+     * to a higher priority {@code Agent}.
+     */
+    public int getLastBringBlankTime() {
+        return lastBringBlankTime;
+    }
+
+    /**
+     * Sets the last time this agent tried to be bring a blank position
+     * to a higher priority agent.
+     *
+     * @param time the time step of the last trial.
+     */
+    public void setLastBringBlankTime(int time) throws Exception {
+        if (time < lastActionTime || time < lastBringBlankTime) {
+            throw new Exception("Invalid time to set!");
+        }
+
+        lastBringBlankTime = time;
     }
 
     /**

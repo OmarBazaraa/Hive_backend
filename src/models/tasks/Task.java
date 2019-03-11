@@ -54,7 +54,7 @@ public class Task extends Entity implements QuantityAddable<Item> {
     private Agent agent;
 
     /**
-     * The map of {@code Item}s this {@code Task} is needing.<p>
+     * The map of items this {@code Task} is needing.<p>
      * The key is an {@code Item}.<p>
      * The mapped value represents the needed quantity of this {@code Item}.
      */
@@ -63,7 +63,7 @@ public class Task extends Entity implements QuantityAddable<Item> {
     /**
      * The current status of this {@code Task}.
      */
-    private TaskStatus status = TaskStatus.PENDING;
+    private TaskStatus status = TaskStatus.INACTIVE;
 
     // ===============================================================================================
     //
@@ -156,6 +156,7 @@ public class Task extends Entity implements QuantityAddable<Item> {
      * and used to remove existing units if the given quantity is negative.
      *
      * TODO: prevent adding item after activation the order
+     * TODO: prevent adding/removing from outside this class
      *
      * @param item     the {@code Item} to be updated.
      * @param quantity the quantity to be updated with.
@@ -171,6 +172,8 @@ public class Task extends Entity implements QuantityAddable<Item> {
      *
      * This is done by taking the intersection of items in both the associated {@code Order},
      * and the assigned {@code Rack}.
+     *
+     * TODO: call this automatically from the constructor
      */
     public void fillItems() {
         items.clear();
@@ -209,7 +212,7 @@ public class Task extends Entity implements QuantityAddable<Item> {
      * @return {@code true} if this {@code Task} is active; {@code false} otherwise.
      */
     public boolean isActive() {
-        return (status != TaskStatus.PENDING && status != TaskStatus.COMPLETED);
+        return (status != TaskStatus.INACTIVE && status != TaskStatus.COMPLETED);
     }
 
     /**
@@ -226,7 +229,7 @@ public class Task extends Entity implements QuantityAddable<Item> {
      */
     public void activate() throws Exception {
         // Skip re-activating already activated tasks
-        if (status != TaskStatus.PENDING) {
+        if (status != TaskStatus.INACTIVE) {
             return;
         }
 
@@ -252,18 +255,30 @@ public class Task extends Entity implements QuantityAddable<Item> {
     }
 
     /**
-     * Returns the priority of this task.
+     * Returns the priority of this {@code Task}.
      * Higher value indicates higher priority.
      *
-     * @return an integer value representing the priority of this task.
+     * TODO: add better heuristic to compute the priority
+     *
+     * @return the priority of this {@code Task}.
      */
     public int getPriority() {
-        // TODO: add better heuristic to compute the priority
         return (order != null ? -order.getId() : Integer.MIN_VALUE);
     }
 
     /**
-     * Returns the guide maps to reach the target of this task.
+     * Returns the estimated number of steps to finish this {@code Task}.
+     *
+     * TODO: implement if needed
+     *
+     * @return the estimated number of steps.
+     */
+    public int getEstimatedDistance() {
+        return 0;
+    }
+
+    /**
+     * Returns the guide maps to reach the target of this {@code Task}.
      *
      * @return the {@code GuideGrid} to reach the target.
      */
@@ -282,13 +297,25 @@ public class Task extends Entity implements QuantityAddable<Item> {
     }
 
     /**
-     * Returns the estimated number of time steps to finish this task.
+     * Returns the next required action to be done by the assigned {@code Agent}.
      *
-     * @return an integer representing the estimated number of step to finish the assigned task.
+     * @return {@code AgentAction} to be done the next time step.
      */
-    public int getEstimatedDistance() {
-        // TODO:
-        return 0;
+    public AgentAction getNextAction() {
+        if (status == TaskStatus.FETCHING || status == TaskStatus.DELIVERING || status == TaskStatus.RETURNING) {
+            return AgentAction.MOVE;
+        }
+        if (status == TaskStatus.LOADING) {
+            return AgentAction.LOAD;
+        }
+        if (status == TaskStatus.WAITING) {
+            return AgentAction.WAIT;
+        }
+        if (status == TaskStatus.OFFLOADING) {
+            return AgentAction.OFFLOAD;
+        }
+
+        return AgentAction.NOTHING;
     }
 
     /**
@@ -297,7 +324,7 @@ public class Task extends Entity implements QuantityAddable<Item> {
      * @param action the last action done by the {@code Agent}.
      */
     public void updateStatus(AgentAction action) throws Exception {
-        if (status == TaskStatus.PENDING) {
+        if (status == TaskStatus.INACTIVE) {
             throw new Exception("Invalid action done by the agent!");
         }
         else if (status == TaskStatus.FETCHING) {
@@ -364,43 +391,5 @@ public class Task extends Entity implements QuantityAddable<Item> {
                 throw new Exception("Invalid action done by the agent!");
             }
         }
-    }
-
-    /**
-     * Returns the next required action to be done by the assigned agent
-     * in order to bringBlank one step forward to complete this task.
-     *
-     * @return {@code AgentAction} to be done the next time step.
-     */
-    public AgentAction getNextAction() {
-        if (status == TaskStatus.PENDING) {
-            return AgentAction.NOTHING;
-        }
-
-        if (status == TaskStatus.FETCHING) {
-            return AgentAction.MOVE;
-        }
-
-        if (status == TaskStatus.LOADING) {
-            return AgentAction.LOAD;
-        }
-
-        if (status == TaskStatus.DELIVERING) {
-            return AgentAction.MOVE;
-        }
-
-        if (status == TaskStatus.WAITING) {
-            return AgentAction.WAIT;
-        }
-
-        if (status == TaskStatus.RETURNING) {
-            return AgentAction.MOVE;
-        }
-
-        if (status == TaskStatus.OFFLOADING) {
-            return AgentAction.OFFLOAD;
-        }
-
-        return AgentAction.NOTHING;
     }
 }
