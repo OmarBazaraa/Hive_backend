@@ -148,9 +148,9 @@ public class Constants {
      * TODO: may be removed
      */
     public enum OrderStatus {
-        PENDING,
-        ACTIVATED,
-        FULFILLED
+        INACTIVE,       // Inactive order, meaning that its item has not been reserved
+        ACTIVATED,      // Active order with all its items has been reserved
+        FULFILLED       // The order has been fulfilled
     }
 
     /**
@@ -165,6 +165,6 @@ public class Constants {
         WAITING,        // Agent reached the gate and is currently waiting until the items is taken
         RETURNING,      // Agent is returning the rack back
         OFFLOADING,     // Agent reached the initial rack position and is currently offloading the rack
-        COMPLETE        // The task has been completed
+        COMPLETED       // The task has been completed
     }
 }

@@ -260,6 +260,10 @@ public class Rack extends Facility implements ItemAddable, ItemReservable, TaskA
             throw new Exception("The previously assigned task has not been completed yet!");
         }
 
+        // Reserve task items
+        reserve(t);
+
+        // Assign task
         task = t;
         status = RackStatus.RESERVED;
     }

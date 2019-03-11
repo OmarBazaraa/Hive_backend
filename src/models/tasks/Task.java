@@ -219,7 +219,7 @@ public class Task extends Entity implements ItemAddable {
      * @return {@code true} if this {@code Task} is active; {@code false} otherwise.
      */
     public boolean isActive() {
-        return (status != TaskStatus.PENDING && status != TaskStatus.COMPLETE);
+        return (status != TaskStatus.PENDING && status != TaskStatus.COMPLETED);
     }
 
     /**
@@ -228,7 +228,7 @@ public class Task extends Entity implements ItemAddable {
      * @return {@code true} if this {@code Task} has been completed; {@code false} otherwise.
      */
     public boolean isComplete() {
-        return (status == TaskStatus.COMPLETE);
+        return (status == TaskStatus.COMPLETED);
     }
 
     /**
@@ -364,7 +364,7 @@ public class Task extends Entity implements ItemAddable {
         }
         else if (status == TaskStatus.OFFLOADING) {
             if (action == AgentAction.OFFLOAD) {
-                status = TaskStatus.COMPLETE;
+                status = TaskStatus.COMPLETED;
                 terminate();
             }
             else if (action == AgentAction.MOVE) {

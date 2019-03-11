@@ -47,7 +47,7 @@ public class Order extends Entity implements ItemAddable, TaskAssignable {
     /**
      * The current status of this {@code Order}.
      */
-    private OrderStatus status = OrderStatus.PENDING;
+    private OrderStatus status = OrderStatus.INACTIVE;
 
     /**
      * The set of sub tasks for fulfilling this {@code Order}.
@@ -216,7 +216,7 @@ public class Order extends Entity implements ItemAddable, TaskAssignable {
      */
     public void activate() throws Exception {
         // Skip re-activating already activated orders
-        if (status != OrderStatus.PENDING) {
+        if (status != OrderStatus.INACTIVE) {
             return;
         }
 
@@ -240,9 +240,13 @@ public class Order extends Entity implements ItemAddable, TaskAssignable {
             throw new Exception("The order is not activated yet!");
         }
 
-        subTasks.add(task);
+        // Remove task items from the pending items of the order
+        for (Map.Entry<Item, Integer> pair : task) {
+            addItem(pair.getKey(), -pair.getValue());
+        }
 
-        // TODO: reserve task items and remove them from pending
+        // Add task to the list of sub tasks
+        subTasks.add(task);
     }
 
     /**
