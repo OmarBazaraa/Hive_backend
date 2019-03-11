@@ -155,6 +155,7 @@ public class Rack extends Facility implements ItemAddable, ItemReservable, TaskA
     public void addItem(Item item, int quantity) throws Exception {
         updateItem(item, quantity);
         updateWeight(quantity * item.getWeight());
+        item.add(this, quantity);
     }
 
     /**
@@ -182,8 +183,6 @@ public class Rack extends Facility implements ItemAddable, ItemReservable, TaskA
         } else {
             items.remove(item);
         }
-
-        item.add(this, quantity);
     }
 
     /**
