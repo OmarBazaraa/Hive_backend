@@ -2,7 +2,7 @@ package models.facilities;
 
 import models.agents.Agent;
 import models.items.Item;
-import models.items.ItemAddable;
+import models.items.QuantityAddable;
 import models.items.ItemReservable;
 import models.tasks.Task;
 
@@ -32,7 +32,7 @@ import java.util.Map;
  * @see Station
  * @see Agent
  */
-public class Rack extends Facility implements ItemAddable, ItemReservable, TaskAssignable {
+public class Rack extends Facility implements QuantityAddable<Item>, ItemReservable, TaskAssignable {
 
     //
     // Member Variables
@@ -137,7 +137,7 @@ public class Rack extends Facility implements ItemAddable, ItemReservable, TaskA
      * @return the quantity of the given {@code Item}.
      */
     @Override
-    public int getQuantity(Item item) {
+    public int get(Item item) {
         return items.getOrDefault(item, 0);
     }
 
@@ -152,7 +152,7 @@ public class Rack extends Facility implements ItemAddable, ItemReservable, TaskA
      * @param quantity the quantity to be updated with.
      */
     @Override
-    public void addItem(Item item, int quantity) throws Exception {
+    public void add(Item item, int quantity) throws Exception {
         updateItem(item, quantity);
         updateWeight(quantity * item.getWeight());
         item.add(this, quantity);
@@ -190,7 +190,7 @@ public class Rack extends Facility implements ItemAddable, ItemReservable, TaskA
      */
     public void clear() throws Exception {
         for (Map.Entry<Item, Integer> pair : items.entrySet()) {
-            addItem(pair.getKey(), -pair.getValue());
+            add(pair.getKey(), -pair.getValue());
         }
     }
 
@@ -208,16 +208,16 @@ public class Rack extends Facility implements ItemAddable, ItemReservable, TaskA
     }
 
     /**
-     * Reserves some units specified by the given {@code ItemAddable} container.
+     * Reserves some units specified by the given {@code QuantityAddable} container.
      * <p>
      * This functions removes some items from the rack without actually reducing
      * the weight of this {@code Rack}.
      * The items are physically removed when the reservation is confirmed.
      *
-     * @param container the {@code ItemAddable} container.
+     * @param container the {@code QuantityAddable} container.
      */
     @Override
-    public void reserve(ItemAddable container) throws Exception {
+    public void reserve(QuantityAddable container) throws Exception {
         for (Map.Entry<Item, Integer> pair : task) {
             updateItem(pair.getKey(), -pair.getValue());
         }
@@ -225,15 +225,15 @@ public class Rack extends Facility implements ItemAddable, ItemReservable, TaskA
 
     /**
      * Confirms the previously assigned reservations specified by the given
-     * {@code ItemAddable} container, and removes those reserved units from this object.
+     * {@code QuantityAddable} container, and removes those reserved units from this object.
      * <p></p>
      * This function physically removes some of the reserved items and reduces the weight
      * of this {@code Rack}.
      *
-     * @param container the {@code ItemAddable} container.
+     * @param container the {@code QuantityAddable} container.
      */
     @Override
-    public void confirmReservation(ItemAddable container) throws Exception {
+    public void confirmReservation(QuantityAddable container) throws Exception {
         for (Map.Entry<Item, Integer> pair : task) {
             updateWeight(-pair.getKey().getWeight() * pair.getValue());
         }

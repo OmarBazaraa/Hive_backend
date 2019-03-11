@@ -10,22 +10,22 @@ import models.facilities.Rack;
  * <p>
  * This interface is to be implemented by {@link Rack}, {@link Item}.
  *
- * @see ItemAddable
+ * @see QuantityAddable
  */
 public interface ItemReservable {
 
     /**
-     * Reserves some units specified by the given {@code ItemAddable} container.
+     * Reserves some units specified by the given {@code QuantityAddable} container.
      *
-     * @param container the {@code ItemAddable} container.
+     * @param container the {@code QuantityAddable} container.
      */
-    void reserve(ItemAddable container) throws Exception;
+    void reserve(QuantityAddable container) throws Exception;
 
     /**
      * Confirms the previously assigned reservations specified by the given
-     * {@code ItemAddable} container, and removes those reserved units from this object.
+     * {@code QuantityAddable} container, and removes those reserved units from this object.
      *
-     * @param container the {@code ItemAddable} container.
+     * @param container the {@code QuantityAddable} container.
      */
-    void confirmReservation(ItemAddable container) throws Exception;
+    void confirmReservation(QuantityAddable container) throws Exception;
 }

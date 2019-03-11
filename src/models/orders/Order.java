@@ -2,7 +2,7 @@ package models.orders;
 
 import models.items.Item;
 import models.facilities.Gate;
-import models.items.ItemAddable;
+import models.items.QuantityAddable;
 import models.tasks.Task;
 import models.tasks.TaskAssignable;
 import utils.Constants.*;
@@ -21,7 +21,7 @@ import java.util.*;
  * @see Task
  * @see Gate
  */
-public class Order extends Entity implements ItemAddable, TaskAssignable {
+public class Order extends Entity implements QuantityAddable<Item>, TaskAssignable {
 
     //
     // Member Variables
@@ -155,7 +155,7 @@ public class Order extends Entity implements ItemAddable, TaskAssignable {
      * @return the pending quantity of the given {@code Item}.
      */
     @Override
-    public int getQuantity(Item item) {
+    public int get(Item item) {
         return items.getOrDefault(item, 0);
     }
 
@@ -172,7 +172,7 @@ public class Order extends Entity implements ItemAddable, TaskAssignable {
      * @param quantity the quantity to be updated with.
      */
     @Override
-    public void addItem(Item item, int quantity) throws Exception {
+    public void add(Item item, int quantity) throws Exception {
         int total = quantity + items.getOrDefault(item, 0);
 
         if (total < 0) {
@@ -242,7 +242,7 @@ public class Order extends Entity implements ItemAddable, TaskAssignable {
 
         // Remove task items from the pending items of the order
         for (Map.Entry<Item, Integer> pair : task) {
-            addItem(pair.getKey(), -pair.getValue());
+            add(pair.getKey(), -pair.getValue());
         }
 
         // Add task to the list of sub tasks

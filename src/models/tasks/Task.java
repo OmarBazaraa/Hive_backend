@@ -4,7 +4,7 @@ import models.agents.Agent;
 import models.items.Item;
 import models.facilities.Gate;
 import models.facilities.Rack;
-import models.items.ItemAddable;
+import models.items.QuantityAddable;
 import models.maps.GuideGrid;
 import models.orders.Order;
 
@@ -27,7 +27,7 @@ import java.util.Map;
  * @see Gate
  * @see Item
  */
-public class Task extends Entity implements ItemAddable {
+public class Task extends Entity implements QuantityAddable<Item> {
 
     //
     // Member Variables
@@ -144,7 +144,7 @@ public class Task extends Entity implements ItemAddable {
      * @return the pending quantity of the given {@code Item}.
      */
     @Override
-    public int getQuantity(Item item) {
+    public int get(Item item) {
         return items.getOrDefault(item, 0);
     }
 
@@ -161,7 +161,7 @@ public class Task extends Entity implements ItemAddable {
      * @param quantity the quantity to be updated with.
      */
     @Override
-    public void addItem(Item item, int quantity) throws Exception {
+    public void add(Item item, int quantity) throws Exception {
         int total = quantity + items.getOrDefault(item, 0);
 
         if (total < 0) {
@@ -187,7 +187,7 @@ public class Task extends Entity implements ItemAddable {
 
         for (Map.Entry<Item, Integer> pair : order) {
             Item item = pair.getKey();
-            items.put(item, Math.min(rack.getQuantity(item), pair.getValue()));
+            items.put(item, Math.min(rack.get(item), pair.getValue()));
         }
     }
 

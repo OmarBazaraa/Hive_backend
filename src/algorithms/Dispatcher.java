@@ -5,7 +5,6 @@ import models.facilities.Rack;
 import models.items.Item;
 import models.orders.Order;
 import models.tasks.Task;
-import utils.Pair;
 
 import java.util.*;
 
@@ -35,10 +34,10 @@ public class Dispatcher {
         //
         while (order.isPending() && !readyAgents.isEmpty()) {
             // Get current needed item in the order
-            Item item = order.getFirstItem().getKey();
+            Item item = order.getFirst().getKey();
 
             // Get current rack having the item
-            Rack rack = item.getFirstRack().getKey();
+            Rack rack = item.getFirst().getKey();
 
             // Find a suitable agent
             Agent agent = findAgent(readyAgents, rack, order);

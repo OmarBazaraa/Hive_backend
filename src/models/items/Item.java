@@ -22,7 +22,7 @@ import java.util.Map;
  * @see Order
  * @see Task
  */
-public class Item extends Entity implements ItemReservable, Iterable<Map.Entry<Rack, Integer>> {
+public class Item extends Entity implements QuantityAddable<Rack>, ItemReservable {
 
     //
     // Member Variables
@@ -117,22 +117,14 @@ public class Item extends Entity implements ItemReservable, Iterable<Map.Entry<R
     }
 
     /**
-     * Returns the first {@code Rack} storing this {@code Item}.
-     *
-     * @return the first {@code Rack}.
-     */
-    public Map.Entry<Rack, Integer> getFirstRack() {
-        return iterator().next();
-    }
-
-    /**
      * Returns the current quantity of this {@code Item} in a {@code Rack}.
      *
      * @param rack the {@code Rack} to get its quantity.
      *
      * @return the quantity in the given {@code Rack}.
      */
-    public int getQuantity(Rack rack) {
+    @Override
+    public int get(Rack rack) {
         return racks.getOrDefault(rack, 0);
     }
 
@@ -148,6 +140,7 @@ public class Item extends Entity implements ItemReservable, Iterable<Map.Entry<R
      * @param rack     the {@code Rack} to add into.
      * @param quantity the quantity to be updated with.
      */
+    @Override
     public void add(Rack rack, int quantity) throws Exception {
         int total = quantity + racks.getOrDefault(rack, 0);
 
@@ -178,13 +171,13 @@ public class Item extends Entity implements ItemReservable, Iterable<Map.Entry<R
     }
 
     /**
-     * Reserves some units of this {@code Item} specified by the given {@code ItemAddable} container.
+     * Reserves some units of this {@code Item} specified by the given {@code QuantityAddable} container.
      *
-     * @param container the {@code ItemAddable} container.
+     * @param container the {@code QuantityAddable} container.
      */
     @Override
-    public void reserve(ItemAddable container) throws Exception {
-        int reserveQuantity = container.getQuantity(this);
+    public void reserve(QuantityAddable container) throws Exception {
+        int reserveQuantity = container.get(this);
 
         if (reserveQuantity > getAvailableUnits()) {
             throw new Exception("No enough item units to be reserved!");
@@ -195,13 +188,13 @@ public class Item extends Entity implements ItemReservable, Iterable<Map.Entry<R
 
     /**
      * Confirms the previously assigned reservations specified by the given
-     * {@code ItemAddable} container, and removes those reserved units from this object.
+     * {@code QuantityAddable} container, and removes those reserved units from this object.
      *
-     * @param container the {@code ItemAddable} container.
+     * @param container the {@code QuantityAddable} container.
      */
     @Override
-    public void confirmReservation(ItemAddable container) throws Exception {
-        int reserveQuantity = container.getQuantity(this);
+    public void confirmReservation(QuantityAddable container) throws Exception {
+        int reserveQuantity = container.get(this);
 
         if (reserveQuantity > reservedUnits) {
             throw new Exception("No enough item units to be reserved!");
