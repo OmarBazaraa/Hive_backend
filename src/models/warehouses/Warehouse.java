@@ -78,13 +78,34 @@ public class Warehouse implements Order.OnFulFillListener {
 
     // ===============================================================================================
     //
+    // Static Methods
+    //
+
+    /**
+     * The only instance of this {@code Warehouse} class.
+     */
+    private static Warehouse ourInstance = new Warehouse();
+
+    /**
+     * Returns the only available instance of this {@code Warehouse} class.
+     *
+     * @return the only available {@code Warehouse} object.
+     */
+    public static Warehouse getInstance() {
+        return ourInstance;
+    }
+
+    // ===============================================================================================
+    //
     // Member Methods
     //
 
     /**
      * Constructs a new {@code Warehouse} object.
+     *
+     * Private constructor to ensure a single object.
      */
-    public Warehouse() {
+    private Warehouse() {
 
     }
 
@@ -156,6 +177,11 @@ public class Warehouse implements Order.OnFulFillListener {
         // Compute guide map for every gate
         for (Gate gate : gates.values()) {
             gate.computeGuideMap(map);
+        }
+
+        // Compute guide map for every station
+        for (Station station : stations.values()) {
+            station.computeGuideMap(map);
         }
     }
 
