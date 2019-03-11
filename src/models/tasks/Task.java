@@ -162,17 +162,7 @@ public class Task extends Entity implements QuantityAddable<Item> {
      */
     @Override
     public void add(Item item, int quantity) throws Exception {
-        int total = quantity + items.getOrDefault(item, 0);
-
-        if (total < 0) {
-            throw new Exception("No enough items to be removed from the task!");
-        }
-
-        if (total > 0) {
-            items.put(item, total);
-        } else {
-            items.remove(item);
-        }
+        QuantityAddable.update(items, item, quantity);
     }
 
     /**

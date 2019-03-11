@@ -47,4 +47,32 @@ public interface QuantityAddable<T> extends Iterable<Map.Entry<T, Integer>> {
      * @param quantity the quantity to be updated with.
      */
     void add(T key, int quantity) throws Exception;
+
+    /**
+     * Updates the quantity of a key in this object
+     * <p>
+     * This function is used to add extra units of the given key if the given
+     * quantity is positive,
+     * and used to remove existing units if the given quantity is negative.
+     * <p>
+     * This function is considered the default implementation of the
+     * {@link QuantityAddable#add(Object, int)} method.
+     *
+     * @param map      the map of key-value pairs to be updated.
+     * @param key      the key to be updated.
+     * @param quantity the quantity to be updated with.
+     */
+    static <T> void update(Map<T, Integer> map, T key, int quantity) throws Exception {
+        int total = quantity + map.getOrDefault(key, 0);
+
+        if (total < 0) {
+            throw new Exception("No enough quantity to be removed!");
+        }
+
+        if (total > 0) {
+            map.put(key, total);
+        } else {
+            map.remove(key);
+        }
+    }
 }

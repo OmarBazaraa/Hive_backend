@@ -142,19 +142,8 @@ public class Item extends Entity implements QuantityAddable<Rack>, QuantityReser
      */
     @Override
     public void add(Rack rack, int quantity) throws Exception {
-        int total = quantity + racks.getOrDefault(rack, 0);
-
-        if (total < 0) {
-            throw new Exception("No enough items to be removed from the rack!");
-        }
-
+        QuantityAddable.update(racks, rack, quantity);
         totalUnits += quantity;
-
-        if (total > 0) {
-            racks.put(rack, total);
-        } else {
-            racks.remove(rack);
-        }
     }
 
     /**
