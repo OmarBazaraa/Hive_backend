@@ -84,7 +84,7 @@ public class Warehouse implements Order.OnFulFillListener {
     /**
      * The only instance of this {@code Warehouse} class.
      */
-    private static Warehouse ourInstance = new Warehouse();
+    private static Warehouse sWarehouse = new Warehouse();
 
     /**
      * Returns the only available instance of this {@code Warehouse} class.
@@ -92,7 +92,27 @@ public class Warehouse implements Order.OnFulFillListener {
      * @return the only available {@code Warehouse} object.
      */
     public static Warehouse getInstance() {
-        return ourInstance;
+        return sWarehouse;
+    }
+
+    /**
+     * Returns the map grid of the singleton {@code Warehouse} object.
+     *
+     * TODO: prevent editing the map from outside the warehouse
+     *
+     * @return the {@code MapGrid} of the {@code Warehouse}.
+     */
+    public static MapGrid getMap() {
+        return sWarehouse.map;
+    }
+
+    /**
+     * Returns the current time step in the singleton {@code Warehouse} object.
+     *
+     * @return the current time step of the {@code Warehouse}.
+     */
+    public static int getTime() {
+        return sWarehouse.time;
     }
 
     // ===============================================================================================
@@ -102,11 +122,9 @@ public class Warehouse implements Order.OnFulFillListener {
 
     /**
      * Constructs a new {@code Warehouse} object.
-     *
-     * Private constructor to ensure a single object.
      */
     private Warehouse() {
-
+        // Private constructor to ensure a singleton object.
     }
 
     /**
@@ -117,6 +135,20 @@ public class Warehouse implements Order.OnFulFillListener {
     public void configure(List<Object> data) {
         parseWarehouse(data);
         init();
+    }
+
+    /**
+     * Performs and simulates a single time step in this {@code Warehouse}.
+     */
+    public void run() throws Exception {
+        // Dispatch pending orders
+        dispatchPendingOrders();
+
+        // Move active agents one step toward their targets
+        stepActiveAgents();
+
+        // Increment time step
+        time++;
     }
 
     /**
@@ -146,47 +178,15 @@ public class Warehouse implements Order.OnFulFillListener {
         // TODO: send feed back to the front-end.
     }
 
-    /**
-     * Performs and simulates a single time step in this {@code Warehouse}.
-     */
-    public void run() throws Exception {
-        // Dispatch pending orders
-        dispatchPendingOrders();
-
-        // Move active agents one step toward their targets
-        stepActiveAgents();
-
-        // Increment time step
-        time++;
-    }
-
     // ===============================================================================================
     //
     // Helper Methods
     //
 
     /**
-     * Initializes and pre-computes some required values.
-     */
-    private void init() {
-        // Compute guide map for every rack
-        for (Rack rack : racks.values()) {
-            rack.computeGuideMap(map);
-        }
-
-        // Compute guide map for every gate
-        for (Gate gate : gates.values()) {
-            gate.computeGuideMap(map);
-        }
-
-        // Compute guide map for every station
-        for (Station station : stations.values()) {
-            station.computeGuideMap(map);
-        }
-    }
-
-    /**
      * Dispatches the current pending orders of this {@code Warehouse}.
+     *
+     * TODO: check agent to rack reachability
      */
     private void dispatchPendingOrders() throws Exception {
         // Get the initial size of the queue
@@ -235,6 +235,26 @@ public class Warehouse implements Order.OnFulFillListener {
             } else {
                 readyAgents.add(agent);
             }
+        }
+    }
+
+    /**
+     * Initializes and pre-computes some required values.
+     */
+    private void init() {
+        // Compute guide map for every rack
+        for (Rack rack : racks.values()) {
+            rack.computeGuideMap(map);
+        }
+
+        // Compute guide map for every gate
+        for (Gate gate : gates.values()) {
+            gate.computeGuideMap(map);
+        }
+
+        // Compute guide map for every station
+        for (Station station : stations.values()) {
+            station.computeGuideMap(map);
         }
     }
 
