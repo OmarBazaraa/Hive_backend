@@ -2,7 +2,11 @@ package models.maps;
 
 import models.maps.utils.Position;
 
+import models.warehouses.Warehouse;
 import utils.Constants.*;
+
+import java.util.LinkedList;
+import java.util.List;
 
 
 /**
@@ -84,5 +88,58 @@ public class MapGrid extends Grid<MapCell> {
      */
     public boolean isAccessible(Position pos, CellType... accessTypes) {
         return isAccessible(pos.row, pos.col, accessTypes);
+    }
+
+    /**
+     * Returns a list of statically empty directions surrounding a given {@code Position}.
+     * <p>
+     * The directions are sorted so that a {@code Direction} leading to an empty cell
+     * cell comes before a {@code Direction} leading to a cell with an {@code Agent}.
+     *
+     * @param row the row position of the cell.
+     * @param col the column position of the cell.
+     *
+     * @return a list of guide directions.
+     */
+    public List<Direction> getEmptyDirections(int row, int col) {
+        // Create empty list of direction
+        LinkedList<Direction> ret = new LinkedList<>();
+
+        //
+        // Iterate over all direction and select the ones that lead to an empty cell
+        //
+        for (Direction dir : Direction.values()) {
+            // Get next position
+            Position nxt = next(row, col, dir);
+
+            // Skip if not empty
+            if (!isEmpty(nxt)) {
+                continue;
+            }
+
+            // Add current direction to the corresponding list depending
+            // whether there is an agent or not
+            if (get(nxt).hasAgent()) {
+                ret.addLast(dir);
+            } else {
+                ret.addFirst(dir);
+            }
+        }
+
+        return ret;
+    }
+
+    /**
+     * Returns a list of statically empty directions surrounding a given {@code Position}.
+     * <p>
+     * The directions are sorted so that a {@code Direction} leading to an empty cell
+     * cell comes before a {@code Direction} leading to a cell with an {@code Agent}.
+     *
+     * @param pos the {@code Position} of the cell.
+     *
+     * @return a list of guide directions.
+     */
+    public List<Direction> getEmptyDirections(Position pos) {
+        return getEmptyDirections(pos.row, pos.col);
     }
 }

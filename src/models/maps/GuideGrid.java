@@ -2,9 +2,11 @@ package models.maps;
 
 import models.maps.utils.Position;
 
+import models.warehouses.Warehouse;
 import utils.Constants.*;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 
@@ -57,46 +59,36 @@ public class GuideGrid extends Grid<GuideCell> {
         return getDistance(pos.row, pos.col);
     }
 
+    /**
+     * Returns the guide directions to reach associated target sorted by their chance.
+     * <p>
+     * The directions are sorted so that a {@code Direction} with smaller distance to
+     * the target comes before a {@code Direction} with larger distance.
+     * <p>
+     * Among those directions with the same distance to the target, a {@code Direction} leading
+     * to an empty cell comes before a {@code Direction} leading to a cell with an {@code Agent}.
+     *
+     * @param row the row position of the cell.
+     * @param col the column position of the cell.
+     *
+     * @return a list of guide directions.
+     */
+    public List<Direction> getGuideDirections(int row, int col) {
+        LinkedList<Direction> l1 = new LinkedList<>();
+        LinkedList<Direction> l2 = new LinkedList<>();
 
-    //
-    // TODO
-    //
+        // Get current distance to the target
+        int curDis = getDistance(row, col);
 
-    public List<Direction> getGuideDirections(Position pos) {
-        List<Direction> ret = new ArrayList<>();
-
-        //
-        // Iterate over all direction and select the ones that lead to the target
-        //
-        for (Direction dir : Direction.values()) {
-            // Get next position
-            Position nxt = next(pos, dir);
-
-            // Skip if moving away from the target
-            if (getDistance(nxt) >= getDistance(pos)) {
-                continue;
-            }
-
-            // Add the current direction
-            ret.add(dir);
-        }
-
-        return ret;
-    }
-
-    public List<Direction> getSortedDirections(Position pos) {
-        List<Direction> l1 = new ArrayList<>();
-        List<Direction> l2 = new ArrayList<>();
-        List<Direction> l3 = new ArrayList<>();
-
-        int curDis = getDistance(pos);
+        // Get warehouse map grid
+        MapGrid map = Warehouse.getMap();
 
         //
         // Iterate over all direction and select the ones that lead to the target
         //
         for (Direction dir : Direction.values()) {
             // Get next position
-            Position nxt = next(pos, dir);
+            Position nxt = next(row, col, dir);
             int nxtDis = getDistance(nxt);
 
             // Skip if unreachable
@@ -104,20 +96,46 @@ public class GuideGrid extends Grid<GuideCell> {
                 continue;
             }
 
+            // Get next cell
+            MapCell cell = map.get(nxt);
+
             // Add current direction to the corresponding list depending on its distance
+            // and whether there is an agent or not
             if (nxtDis < curDis) {
-                l1.add(dir);
-            } else if (nxtDis == curDis) {
-                l2.add(dir);
+                if (cell.hasAgent()) {
+                    l1.addLast(dir);
+                } else {
+                    l1.addFirst(dir);
+                }
             } else {
-                l3.add(dir);
+                if (cell.hasAgent()) {
+                    l2.addLast(dir);
+                } else {
+                    l2.addFirst(dir);
+                }
             }
         }
 
         // Append the lists in order
         l1.addAll(l2);
-        l1.addAll(l3);
 
         return l1;
+    }
+
+    /**
+     * Returns the guide directions to reach associated target sorted by their chance.
+     * <p>
+     * The directions are sorted so that a {@code Direction} with smaller distance to
+     * the target comes before a {@code Direction} with larger distance.
+     * <p>
+     * Among those directions with the same distance to the target, a {@code Direction} leading
+     * to an empty cell comes before a {@code Direction} leading to a cell with an {@code Agent}.
+     *
+     * @param pos the {@code Position} of the cell.
+     *
+     * @return a list of guide directions.
+     */
+    public List<Direction> getGuideDirections(Position pos) {
+        return getGuideDirections(pos.row, pos.col);
     }
 }

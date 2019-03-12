@@ -17,10 +17,6 @@ public class Utility {
      * @return the reverse direction.
      */
     public static Direction getReverseDir(Direction dir) {
-        if (dir == Direction.STILL) {
-            return dir;
-        }
-
         int i = dir.ordinal();
         Direction[] dirs = Direction.values();
         return dirs[(i + 2) % 4];
@@ -35,12 +31,7 @@ public class Utility {
      */
     public static Direction actionToDir(AgentAction action) {
         int i = action.ordinal();
-
-        if (i < 4) {
-            return Direction.values()[i];
-        } else {
-            return Direction.STILL;
-        }
+        return Direction.values()[i % 4];
     }
 
     /**
@@ -52,11 +43,6 @@ public class Utility {
      */
     public static AgentAction dirToAction(Direction dir) {
         int i = dir.ordinal();
-
-        if (i < 4) {
-            return AgentAction.values()[i];
-        } else {
-            return AgentAction.NOTHING;
-        }
+        return AgentAction.values()[i];
     }
 }

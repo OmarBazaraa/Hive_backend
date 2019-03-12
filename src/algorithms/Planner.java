@@ -27,8 +27,8 @@ public class Planner {
      * <p>
      * This function is to be called for all active agents in descending order of their priorities.
      *
-     * @param agent the agent to bringBlank.
-     * @param map   the maps's grid of the warehouse.
+     * @param agent the {@code Agent} to be stepped.
+     * @param map   the {@code MapGrid} of the {@code Warehouse}.
      */
     public static void step(Agent agent, MapGrid map) throws Exception {
         // Return if the agent already performed a move in this time step
@@ -43,134 +43,63 @@ public class Planner {
 
         // Try to perform the required action
         if (action == AgentAction.MOVE) {
-            move(agent, map);
+            route(agent, agent, map);
         } else {
             agent.executeAction(action, map);
         }
     }
 
-    public static boolean move(Agent agent, MapGrid map) throws Exception {
+    public static boolean route(Agent agent, Agent mainAgent, MapGrid map) throws Exception {
+        // Return if this agent has higher priority than the agent needed to be moved
+        if (agent.compareTo(mainAgent) > 0) {
+            return false;
+        }
+
+        // Return if this agent has already been displaced by a higher priority agent,
+        // or it has been tried to displace it
+        long time = Warehouse.getTime();
+        if (agent.getLastActionTime() >= time || agent.getLastBringBlankTime() >= time) {
+            return false;
+        }
+
+        // Update bring blank time
+        agent.updateLastBringBlankTime();
+
         // Get current agent and guide maps
         Position cur = agent.getPosition();
         GuideGrid guide = agent.getGuideMap();
 
-        // List of directions occupied by agents
-        List<Direction> dirs = new ArrayList<>();
+        // Get list of valid directions
+        List<Direction> dirs;
 
-        //
-        // Iterate over all directions
-        //
-        for (Direction dir : Direction.values()) {
-            // Get next position
-            Position nxt = map.next(cur, dir);
-
-            // Skip moving away from the target
-            if (guide.getDistance(nxt) >= guide.getDistance(cur)) {
-                continue;
-            }
-
-            // Move the agent if accessible cell, otherwise add the current direction to the list
-            if (map.get(nxt).hasAgent()) {
-                dirs.add(dir);
-            } else {
-                agent.executeAction(Utility.dirToAction(dir), map);
-                return true;
-            }
+        if (guide != null) {
+            dirs = guide.getGuideDirections(cur);
+        } else {
+            dirs = map.getEmptyDirections(cur);
         }
 
         //
-        // No empty direction is found, try to bring blank
+        // Iterate over all guide directions
         //
         for (Direction dir : dirs) {
             // Get next position
             Position nxt = map.next(cur, dir);
-            MapCell cell = map.get(nxt);
 
-            // Get agent at the next cell
-            Agent nxtAgent = cell.getAgent();
-
-            // Try to move the agent at the next cell to bring blank to the main agent
-            if (bringBlank(nxtAgent, agent, map)) {
-                agent.executeAction(Utility.dirToAction(dir), map);
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Tries to bringBlank the given agent by bring a blank position
-     *
-     * @param agent
-     * @param mainAgent
-     * @param map
-     *
-     * @return {@code true} if the function manged to bring blank agent; {@code false} otherwise.
-     */
-    public static boolean bringBlank(Agent agent, Agent mainAgent, MapGrid map) throws Exception {
-        // Return if this agent has higher priority than the agent needed to be moved
-        if (agent.compareTo(mainAgent) >= 0) {
-            return false;
-        }
-
-        // Return if this agent has already been displaced by a higher priority agent
-        if (agent.getLastActionTime() >= Warehouse.getTime()) {
-            return false;
-        }
-
-        // Return if we already tried to displace this agent, to avoid infinite loop
-        if (agent.getLastBringBlankTime() >= Warehouse.getTime()) {
-            return false;
-        }
-
-        // Set bring blank time
-        agent.updateLastBringBlankTime();
-
-        //
-        Position pos = agent.getPosition();
-        GuideGrid guide = agent.getGuideMap();
-
-        for (Direction dir : Direction.values()) {
-            Position nxt = map.next(pos, dir);
-
-            if (!map.isInBound(nxt)) {
-                continue;
-            }
-
-            if (guide.getDistance(nxt) >= guide.getDistance(pos)) {
-                continue;
-            }
-
-            MapCell cell = map.get(nxt);
-
-            if (cell.getType() == CellType.EMPTY || cell.getType() == CellType.RACK) {
-                agent.executeAction(Utility.dirToAction(dir), map);
-                return true;
-            }
-        }
-
-        for (Direction dir : Direction.values()) {
-            Position nxt = map.next(pos, dir);
-
-            if (!map.isInBound(nxt)) {
-                continue;
-            }
-
-            // TODO: try moving agents out of its path
-            if (guide.getDistance(nxt) < guide.getDistance(pos)) {
-                continue;
-            }
-
-            MapCell cell = map.get(nxt);
-
-            if (cell.hasAgent()) {
-                Agent nextAgent = cell.getAgent();
-
-                if (bringBlank(nextAgent, mainAgent, map)) {
-                    agent.executeAction(Utility.dirToAction(dir), map);
-                    return true;
+            // Skip moving away from the target if this is our main agent
+            if (agent == mainAgent) {
+                // Guide map should never be null here
+                if (guide != null && guide.getDistance(nxt) >= guide.getDistance(cur)) {
+                    continue;
                 }
+            }
+
+            // Get agent in the next cell
+            Agent nxtAgent = map.get(nxt).getAgent();
+
+            // Move the agent if free cell or we manged to get a blank in the next position
+            if (nxtAgent == null || route(nxtAgent, mainAgent, map)) {
+                agent.executeAction(Utility.dirToAction(dir), map);
+                return true;
             }
         }
 
