@@ -10,6 +10,7 @@ import models.maps.utils.Position;
 import models.tasks.Task;
 import models.tasks.TaskAssignable;
 
+import models.warehouses.Warehouse;
 import utils.Constants.*;
 import utils.Utility;
 
@@ -51,14 +52,14 @@ public class Agent extends HiveObject implements TaskAssignable {
      * The last time this {@code Agent} has performed an action.
      * Needed by the planner algorithm.
      */
-    private int lastActionTime;
+    private long lastActionTime;
 
     /**
      * The last time this {@code Agent} tried to be bring a blank location
      * to a higher priority {@code Agent}.
      * Needed by the planner algorithm.
      */
-    private int lastBringBlankTime;
+    private long lastBringBlankTime;
 
     // ===============================================================================================
     //
@@ -172,9 +173,8 @@ public class Agent extends HiveObject implements TaskAssignable {
      *
      * @param action the action to be executed.
      * @param map    the map grid of the {@code Warehouse} where this {@code Agent} is located.
-     * @param time   the current time step.
      */
-    public void executeAction(AgentAction action, MapGrid map, int time) throws Exception {
+    public void executeAction(AgentAction action, MapGrid map) throws Exception {
         // Return if the action is nothing
         if (action == AgentAction.NOTHING) {
             return;
@@ -202,14 +202,14 @@ public class Agent extends HiveObject implements TaskAssignable {
         }
 
         // Set the last action time
-        setLastActionTime(time);
+        updateLastActionTime();
         task.updateStatus(action);
     }
 
     /**
      * Moves this agent in the given direction.
      *
-     * @param dir the direction to bringBlank.
+     * @param dir the direction to move along.
      * @param map the maps's grid of the warehouse where the agent is.
      */
     public void move(Direction dir, MapGrid map) throws Exception {
@@ -318,45 +318,31 @@ public class Agent extends HiveObject implements TaskAssignable {
     /**
      * Returns the last time this {@code Agent} has performed an action.
      */
-    public int getLastActionTime() {
+    public long getLastActionTime() {
         return lastActionTime;
     }
 
     /**
      * Sets the last time this {@code Agent} has performed an action.
-     * <p>
-     * TODO: may need to change time to 'long'
-     *
-     * @param time the time to set.
      */
-    public void setLastActionTime(int time) throws Exception {
-        if (time < lastActionTime) {
-            throw new Exception("Invalid time to set!");
-        }
-
-        lastActionTime = time;
+    public void updateLastActionTime() {
+        lastActionTime = Warehouse.getTime();
     }
 
     /**
      * Returns the last time this {@code Agent} tried to be bring a blank location
      * to a higher priority {@code Agent}.
      */
-    public int getLastBringBlankTime() {
+    public long getLastBringBlankTime() {
         return lastBringBlankTime;
     }
 
     /**
-     * Sets the last time this agent tried to be bring a blank position
+     * Updates the last time this agent tried to be bring a blank position
      * to a higher priority agent.
-     *
-     * @param time the time step of the last trial.
      */
-    public void setLastBringBlankTime(int time) throws Exception {
-        if (time < lastActionTime || time < lastBringBlankTime) {
-            throw new Exception("Invalid time to set!");
-        }
-
-        lastBringBlankTime = time;
+    public void updateLastBringBlankTime() {
+        lastBringBlankTime = Warehouse.getTime();
     }
 
     /**

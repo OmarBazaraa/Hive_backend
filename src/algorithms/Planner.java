@@ -5,6 +5,7 @@ import models.maps.GuideGrid;
 import models.maps.MapCell;
 import models.maps.MapGrid;
 import models.maps.GuideCell;
+import models.warehouses.Warehouse;
 import utils.Constants.*;
 import models.maps.utils.Dimensions;
 import models.maps.utils.Position;
@@ -28,13 +29,12 @@ public class Planner {
      *
      * @param agent the agent to bringBlank.
      * @param map   the maps's grid of the warehouse.
-     * @param time  the current time step.
      */
-    public static void step(Agent agent, MapGrid map, int time) throws Exception {
-        // Return if the agent already performed a bringBlank in this time step
-        // This can only happen when a higher priority agent displaces some lower priority agents
-        // so it can bringBlank in its desired location
-        if (agent.getLastActionTime() >= time) {
+    public static void step(Agent agent, MapGrid map) throws Exception {
+        // Return if the agent already performed a move in this time step
+        // This can only happen when a higher priority agent displaces some other lower priority agent
+        // so that the higher one can move towards its desired location
+        if (agent.getLastActionTime() >= Warehouse.getTime()) {
             return;
         }
 
@@ -43,13 +43,13 @@ public class Planner {
 
         // Try to perform the required action
         if (action == AgentAction.MOVE) {
-            move(agent, map, time);
+            move(agent, map);
         } else {
-            agent.executeAction(action, map, time);
+            agent.executeAction(action, map);
         }
     }
 
-    public static boolean move(Agent agent, MapGrid map, int time) throws Exception {
+    public static boolean move(Agent agent, MapGrid map) throws Exception {
         // Get current agent and guide maps
         Position cur = agent.getPosition();
         GuideGrid guide = agent.getGuideMap();
@@ -73,13 +73,13 @@ public class Planner {
             if (map.get(nxt).hasAgent()) {
                 dirs.add(dir);
             } else {
-                agent.executeAction(Utility.dirToAction(dir), map, time);
+                agent.executeAction(Utility.dirToAction(dir), map);
                 return true;
             }
         }
 
         //
-        // No empty direction is found, try to bring blanks
+        // No empty direction is found, try to bring blank
         //
         for (Direction dir : dirs) {
             // Get next position
@@ -90,8 +90,8 @@ public class Planner {
             Agent nxtAgent = cell.getAgent();
 
             // Try to move the agent at the next cell to bring blank to the main agent
-            if (bringBlank(nxtAgent, agent, map, time)) {
-                agent.executeAction(Utility.dirToAction(dir), map, time);
+            if (bringBlank(nxtAgent, agent, map)) {
+                agent.executeAction(Utility.dirToAction(dir), map);
                 return true;
             }
         }
@@ -105,28 +105,27 @@ public class Planner {
      * @param agent
      * @param mainAgent
      * @param map
-     * @param time
      *
      * @return {@code true} if the function manged to bring blank agent; {@code false} otherwise.
      */
-    public static boolean bringBlank(Agent agent, Agent mainAgent, MapGrid map, int time) throws Exception {
+    public static boolean bringBlank(Agent agent, Agent mainAgent, MapGrid map) throws Exception {
         // Return if this agent has higher priority than the agent needed to be moved
         if (agent.compareTo(mainAgent) >= 0) {
             return false;
         }
 
         // Return if this agent has already been displaced by a higher priority agent
-        if (agent.getLastActionTime() >= time) {
+        if (agent.getLastActionTime() >= Warehouse.getTime()) {
             return false;
         }
 
         // Return if we already tried to displace this agent, to avoid infinite loop
-        if (agent.getLastBringBlankTime() >= time) {
+        if (agent.getLastBringBlankTime() >= Warehouse.getTime()) {
             return false;
         }
 
         // Set bring blank time
-        agent.setLastBringBlankTime(time);
+        agent.updateLastBringBlankTime();
 
         //
         Position pos = agent.getPosition();
@@ -146,7 +145,7 @@ public class Planner {
             MapCell cell = map.get(nxt);
 
             if (cell.getType() == CellType.EMPTY || cell.getType() == CellType.RACK) {
-                agent.executeAction(Utility.dirToAction(dir), map, time);
+                agent.executeAction(Utility.dirToAction(dir), map);
                 return true;
             }
         }
@@ -168,8 +167,8 @@ public class Planner {
             if (cell.hasAgent()) {
                 Agent nextAgent = cell.getAgent();
 
-                if (bringBlank(nextAgent, mainAgent, map, time)) {
-                    agent.executeAction(Utility.dirToAction(dir), map, time);
+                if (bringBlank(nextAgent, mainAgent, map)) {
+                    agent.executeAction(Utility.dirToAction(dir), map);
                     return true;
                 }
             }
@@ -182,13 +181,13 @@ public class Planner {
      * Runs a BFS algorithms on the given grid to compute the guide maps
      * to the given destination position.
      *
-     * @param map                 the grid map to compute upon.
-     * @param dst                 the destination position.
-     * @param accessibleCellTypes the accessible {@code CellType} to set.
+     * @param map         the map grid to compute upon.
+     * @param dst         the destination position.
+     * @param accessTypes the accessible {@code CellType} to set.
      *
      * @return a 2D {@code GuideCell} array representing the guide map to reach the destination.
      */
-    public static GuideCell[][] bfs(MapGrid map, Position dst, CellType... accessibleCellTypes) {
+    public static GuideCell[][] bfs(MapGrid map, Position dst, CellType... accessTypes) {
         // Initialize BFS algorithm requirements
         Dimensions dim = map.getDimensions();
         Queue<Position> q = new LinkedList<>();
@@ -202,7 +201,7 @@ public class Planner {
         while (!q.isEmpty()) {
             // Get current node and its distance to the destination
             Position cur = q.poll();
-            int dis = ret[cur.row][cur.col].distance;
+            int dis = ret[cur.row][cur.col].getDistance();
 
             // Expanding in all directions
             for (Direction dir : Direction.values()) {
@@ -210,7 +209,7 @@ public class Planner {
                 Position prv = map.previous(cur, dir);
 
                 // Continue if not accessible cell
-                if (!map.isAccessible(prv, accessibleCellTypes)) {
+                if (!map.isAccessible(prv, accessTypes)) {
                     continue;
                 }
 

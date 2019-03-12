@@ -29,7 +29,7 @@ public class Warehouse implements Order.OnFulFillListener {
      * The current time step in this {@code Warehouse}.
      * Needed to simulation purposes.
      */
-    private int time;
+    private long time;
 
     /**
      * The map grid of this {@code Warehouse}.
@@ -111,7 +111,7 @@ public class Warehouse implements Order.OnFulFillListener {
      *
      * @return the current time step of the {@code Warehouse}.
      */
-    public static int getTime() {
+    public static long getTime() {
         return sWarehouse.time;
     }
 
@@ -226,7 +226,7 @@ public class Warehouse implements Order.OnFulFillListener {
             Agent agent = activeAgents.poll();
 
             // Try moving the current agent towards its target
-            Planner.step(agent, map, time);
+            Planner.step(agent, map);
 
             // Re-add agent to the active queue if still active, otherwise add it to the ready queue
             if (agent.isActive()) {

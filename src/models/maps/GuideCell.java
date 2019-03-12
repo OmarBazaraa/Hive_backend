@@ -19,7 +19,7 @@ public class GuideCell extends Cell {
     /**
      * The guide distance to reach the associated target.
      */
-    public int distance;
+    private int distance = Integer.MAX_VALUE;
 
     // ===============================================================================================
     //
@@ -55,16 +55,7 @@ public class GuideCell extends Cell {
      * Constructs a new {@code GuideCell} with default guide distance.
      */
     public GuideCell() {
-        this.distance = Integer.MAX_VALUE;
-    }
 
-    /**
-     * Constructs a new {@code GuideCell} with the given guide distance.
-     *
-     * @param distance the distance to reach the target.
-     */
-    public GuideCell(int distance) {
-        this.distance = distance;
     }
 
     /**
@@ -79,10 +70,10 @@ public class GuideCell extends Cell {
     /**
      * Sets the guide distance of this {@code GuideCell} to reach the associated target.
      *
-     * @param distance the distance to reach the target.
+     * @param dis the guide distance to set.
      */
-    public void setDistance(int distance) {
-        this.distance = distance;
+    public void setDistance(int dis) {
+        distance = dis;
     }
 
     /**

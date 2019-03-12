@@ -42,7 +42,7 @@ public class GuideGrid extends Grid<GuideCell> {
      * @return the distance to reach the target.
      */
     public int getDistance(int row, int col) {
-        return isInBound(row, col) ? grid[row][col].distance : Integer.MAX_VALUE;
+        return isInBound(row, col) ? grid[row][col].getDistance() : Integer.MAX_VALUE;
     }
 
     /**
