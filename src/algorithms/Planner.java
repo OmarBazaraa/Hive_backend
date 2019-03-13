@@ -2,7 +2,6 @@ package algorithms;
 
 import models.agents.Agent;
 import models.maps.GuideGrid;
-import models.maps.MapCell;
 import models.maps.MapGrid;
 import models.maps.GuideCell;
 import models.warehouses.Warehouse;
@@ -11,7 +10,6 @@ import models.maps.utils.Dimensions;
 import models.maps.utils.Position;
 import utils.Utility;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;

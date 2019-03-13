@@ -1,11 +1,16 @@
-import utils.Constants;
-
-import java.util.ArrayList;
-import java.util.List;
+import communicator.Communicator;
 
 
+/**
+ * This is the main entry class of the project.
+ */
 public class Main {
 
+    /**
+     * The main entry function of the project.
+     *
+     * @param args external system arguments.
+     */
     public static void main(String[] args) throws Exception {
 
         // Welcome screen
@@ -29,5 +34,6 @@ public class Main {
 
     public static void run(String configFilename, String ordersFilename) throws Exception {
 
+        Communicator.getInstance();
     }
 }

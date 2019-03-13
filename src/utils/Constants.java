@@ -18,6 +18,10 @@ public class Constants {
     public static final String PROJ_VERSION = "0.0.1.0";
     public static final String PROJ_VERSION_DATE = "8 March 2019";
 
+    // WebSocket server details
+    public static final String WS_SERVER_PATH = "/";
+    public static final int WS_SERVER_PORT = 8080;
+
     //
     // Map Grid
     //
