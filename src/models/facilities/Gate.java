@@ -19,12 +19,17 @@ public class Gate extends Facility {
 
     /**
      * Constructs a new {@code Gate} object.
+     */
+    public Gate() {
+        super();
+    }
+
+    /**
+     * Constructs a new {@code Gate} object.
      *
      * @param id  the id of the {@code Gate}.
-     * @param row the row position of the {@code Gate}.
-     * @param col the column position of the {@code Gate}.
      */
-    public Gate(int id, int row, int col) {
-        super(id, row, col);
+    public Gate(int id) {
+        super(id);
     }
 }

@@ -74,13 +74,18 @@ public class Rack extends Facility implements QuantityAddable<Item>, QuantityRes
 
     /**
      * Constructs a new {@code Rack} object.
+     */
+    public Rack() {
+        super();
+    }
+
+    /**
+     * Constructs a new {@code Rack} object.
      *
      * @param id  the id of the {@code Rack}.
-     * @param row the row position of the {@code Rack}.
-     * @param col the column position of the {@code Rack}.
      */
-    public Rack(int id, int row, int col) {
-        super(id, row, col);
+    public Rack(int id) {
+        super(id);
     }
 
     /**

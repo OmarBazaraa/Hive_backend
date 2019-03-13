@@ -68,13 +68,18 @@ public class Agent extends HiveObject implements TaskAssignable {
 
     /**
      * Constructs a new {@code Agent} robot.
+     */
+    public Agent() {
+        super();
+    }
+
+    /**
+     * Constructs a new {@code Agent} robot.
      *
      * @param id  the id of the {@code Agent}.
-     * @param row the row position of the {@code Agent}.
-     * @param col the column position of the {@code Agent}.
      */
-    public Agent(int id, int row, int col) {
-        super(id, row, col);
+    public Agent(int id) {
+        super(id);
     }
 
     /**

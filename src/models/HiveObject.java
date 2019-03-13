@@ -15,7 +15,7 @@ import models.maps.utils.Position;
  * @see models.facilities.Gate Gate
  * @see models.facilities.Station Station
  */
-public class HiveObject extends Entity {
+abstract public class HiveObject extends Entity {
 
     //
     // Member Variables
@@ -28,20 +28,42 @@ public class HiveObject extends Entity {
 
     // ===============================================================================================
     //
+    // Static Methods
+    //
+
+    /**
+     * The number of objects in the system so far.
+     */
+    protected static int count = 0;
+
+    /**
+     * Returns the first available id for the next object and increments.
+     *
+     * @return the first available id.
+     */
+    protected static int getNextId() {
+        return count++;
+    }
+
+    // ===============================================================================================
+    //
     // Member Methods
     //
 
     /**
-     * Constructs a new {@code HiveObject}.
-     *
-     * @param id  the id of the {@code HiveObject}.
-     * @param row the row position of the {@code HiveObject}.
-     * @param col the column position of the {@code HiveObject}.
+     * Constructs a new {@code HiveObject} with the given id.
      */
-    public HiveObject(int id, int row, int col) {
+    public HiveObject() {
+        super(getNextId());
+    }
+
+    /**
+     * Constructs a new {@code HiveObject} with the given id.
+     *
+     * @param id the id of the {@code HiveObject}.
+     */
+    public HiveObject(int id) {
         super(id);
-        this.row = row;
-        this.col = col;
     }
 
     /**
@@ -51,7 +73,7 @@ public class HiveObject extends Entity {
      * @return the row position of this {@code HiveObject}.
      */
     public int getRow() {
-        return this.row;
+        return row;
     }
 
     /**
@@ -61,7 +83,7 @@ public class HiveObject extends Entity {
      * @return the column position of this {@code HiveObject}.
      */
     public int getCol() {
-        return this.col;
+        return col;
     }
 
     /**

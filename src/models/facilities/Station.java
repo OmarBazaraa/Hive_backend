@@ -19,12 +19,17 @@ public class Station extends Facility {
 
     /**
      * Constructs a new {@code Station} object.
-     *
-     * @param id  the id of the {@code Station}.
-     * @param row the row position of the {@code Station}.
-     * @param col the column position of the {@code Station}.
      */
-    public Station(int id, int row, int col) {
-        super(id, row, col);
+    public Station() {
+        super();
+    }
+
+    /**
+     * Constructs a new {@code Station} object.
+     *
+     * @param id the id of the {@code Station}.
+     */
+    public Station(int id) {
+        super(id);
     }
 }

@@ -21,7 +21,7 @@ import models.maps.MapGrid;
  * @see models.facilities.Gate Gate
  * @see models.facilities.Station Station
  */
-public class Facility extends HiveObject {
+abstract public class Facility extends HiveObject {
 
     //
     // Member Variables
@@ -38,14 +38,19 @@ public class Facility extends HiveObject {
     //
 
     /**
-     * Constructs a new {@code Facility} object with the given initial information.
-     *
-     * @param id  the id of the {@code Facility}.
-     * @param row the row position of the {@code Facility}.
-     * @param col the column position of the {@code Facility}.
+     * Constructs a new {@code Facility} object.
      */
-    public Facility(int id, int row, int col) {
-        super(id, row, col);
+    public Facility() {
+        super();
+    }
+
+    /**
+     * Constructs a new {@code Facility} object with the given id.
+     *
+     * @param id the id of the {@code Facility}.
+     */
+    public Facility(int id) {
+        super(id);
     }
 
     /**
