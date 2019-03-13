@@ -14,14 +14,8 @@ import java.util.*;
  */
 public class Dispatcher {
 
-
     /**
      * Dispatches the given order into a set of specific tasks assigned to a set of agents.
-     * <p>
-     * TODO: ...
-     * This algorithm is considered as complex as the multi-agent path planning algorithm,
-     * and maybe more. So I'm currently solving this algorithm in a greedy way.
-     * The algorithm needs to be revised and optimized in later phases.
      *
      * @param order        the order needed to be dispatched.
      * @param readyAgents  the queue of ready agents.

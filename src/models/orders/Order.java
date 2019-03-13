@@ -106,8 +106,6 @@ public class Order extends Entity implements QuantityAddable<Item>, TaskAssignab
     /**
      * Checks whether this {@code Order} still has some pending items or not.
      *
-     * TODO: refactor :: change pending to avoid confusion with status.INACTIVE
-     *
      * @return {@code true} if this {@code Order} is still pending; {@code false} otherwise.
      */
     public boolean isPending() {

@@ -211,12 +211,13 @@ public class Warehouse implements Order.OnFulFillListener {
 
     /**
      * Moves the active agents one step towards their targets.
-     *
-     * TODO: move agent off its destination position after finishing the task
      */
     private void stepActiveAgents() throws Exception {
         // Get the initial size of the queue
         int size = activeAgents.size();
+
+        // Create another queue of agent
+        Queue<Agent> q = new PriorityQueue<>(size);
 
         //
         // Iterate over all active agents
@@ -230,12 +231,14 @@ public class Warehouse implements Order.OnFulFillListener {
 
             // Re-add agent to the active queue if still active, otherwise add it to the ready queue
             if (agent.isActive()) {
-                // TODO: edit agent comparator function to be function of last action time step
-                activeAgents.add(agent);
+                q.add(agent);
             } else {
                 readyAgents.add(agent);
             }
         }
+
+        // Update active agents queue
+        activeAgents = q;
     }
 
     /**
