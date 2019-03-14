@@ -5,6 +5,11 @@ import models.facilities.Rack;
 import models.orders.Order;
 import models.tasks.Task;
 
+import utils.Constants;
+import utils.Constants.*;
+
+import org.json.JSONObject;
+
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -48,6 +53,24 @@ public class Item extends Entity implements QuantityAddable<Rack>, QuantityReser
      * The mapped value represents the quantity of this {@code Item}.
      */
     private Map<Rack, Integer> racks = new HashMap<>();
+
+    // ===============================================================================================
+    //
+    // Static Methods
+    //
+
+    /**
+     * Creates a new {@code Item} object from JSON data.
+     *
+     * @param data the un-parsed JSON data.
+     *
+     * @return an {@code Item} object.
+     */
+    public static Item create(JSONObject data) throws Exception {
+        int id = data.getInt(Constants.MSG_KEY_ID);
+        int weight = data.getInt(Constants.MSG_KEY_WEIGHT);
+        return new Item(id, weight);
+    }
 
     // ===============================================================================================
     //

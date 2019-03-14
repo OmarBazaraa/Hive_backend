@@ -6,9 +6,13 @@ import models.items.QuantityAddable;
 import models.items.QuantityReservable;
 import models.tasks.Task;
 import models.tasks.TaskAssignable;
+import models.warehouses.Warehouse;
 
 import utils.Constants;
 import utils.Constants.*;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -66,6 +70,51 @@ public class Rack extends Facility implements QuantityAddable<Item>, QuantityRes
      * The assigned {@code Task} responsible of delivering this {@code Rack}.
      */
     private Task task;
+
+    // ===============================================================================================
+    //
+    // Static Methods
+    //
+
+    /**
+     * Creates a new {@code Rack} object from JSON data.
+     *
+     * TODO: add checks and throw exceptions
+     *
+     * @param data the un-parsed JSON data.
+     *
+     * @return an {@code Rack} object.
+     */
+    public static Rack create(JSONObject data) throws Exception {
+        Rack ret = new Rack();
+        ret.capacity = data.getInt(Constants.MSG_KEY_CAPACITY);
+
+        if (ret.capacity < 0) {
+            throw new Exception("Invalid rack capacity!");
+        }
+
+        JSONArray itemsJSON = data.getJSONArray(Constants.MSG_KEY_ITEMS);
+
+        for (int i = 0; i < itemsJSON.length(); ++i) {
+            JSONObject itemJSON = itemsJSON.getJSONObject(i);
+
+            int itemId = itemJSON.getInt(Constants.MSG_KEY_ID);
+            int quantity = itemJSON.getInt(Constants.MSG_KEY_QUANTITY);
+            Item item = Warehouse.getInstance().getItemById(itemId);
+
+            if (quantity < 0) {
+                throw new Exception("Invalid quantity to add to the rack!");
+            }
+
+            if (item == null) {
+                throw new Exception("Invalid item to add to the rack!");
+            }
+
+            ret.add(item, quantity);
+        }
+
+        return ret;
+    }
 
     // ===============================================================================================
     //

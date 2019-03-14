@@ -9,10 +9,13 @@ import models.maps.MapGrid;
 import models.maps.utils.Position;
 import models.tasks.Task;
 import models.tasks.TaskAssignable;
-
 import models.warehouses.Warehouse;
+
+import utils.Constants;
 import utils.Constants.*;
 import utils.Utility;
+
+import org.json.JSONObject;
 
 
 /**
@@ -60,6 +63,23 @@ public class Agent extends HiveObject implements TaskAssignable {
      * Needed by the planner algorithm.
      */
     private long lastBringBlankTime;
+
+    // ===============================================================================================
+    //
+    // Static Methods
+    //
+
+    /**
+     * Creates a new {@code Agent} object from JSON data.
+     *
+     * @param data the un-parsed JSON data.
+     *
+     * @return an {@code Agent} object.
+     */
+    public static Agent create(JSONObject data) throws Exception {
+        int id = data.getInt(Constants.MSG_KEY_ID);
+        return new Agent(id);
+    }
 
     // ===============================================================================================
     //
@@ -331,7 +351,7 @@ public class Agent extends HiveObject implements TaskAssignable {
      * Sets the last time this {@code Agent} has performed an action.
      */
     public void updateLastActionTime() {
-        lastActionTime = Warehouse.getTime();
+        lastActionTime = Warehouse.getInstance().getTime();
     }
 
     /**
@@ -347,7 +367,7 @@ public class Agent extends HiveObject implements TaskAssignable {
      * to a higher priority agent.
      */
     public void updateLastBringBlankTime() {
-        lastBringBlankTime = Warehouse.getTime();
+        lastBringBlankTime = Warehouse.getInstance().getTime();
     }
 
     /**

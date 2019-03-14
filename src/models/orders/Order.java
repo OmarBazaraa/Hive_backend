@@ -6,8 +6,13 @@ import models.items.Item;
 import models.items.QuantityAddable;
 import models.tasks.Task;
 import models.tasks.TaskAssignable;
+import models.warehouses.Warehouse;
 
+import utils.Constants;
 import utils.Constants.*;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.*;
 
@@ -59,6 +64,47 @@ public class Order extends Entity implements QuantityAddable<Item>, TaskAssignab
      * The listener to be invoked when this {@code Order} has been fulfilled.
      */
     private OnFulFillListener fulFillListener;
+
+    // ===============================================================================================
+    //
+    // Static Methods
+    //
+
+    /**
+     * Creates a new {@code Order} object from JSON data.
+     *
+     * TODO: add checks and throw exceptions
+     *
+     * @param data the un-parsed JSON data.
+     *
+     * @return an {@code Order} object.
+     */
+    public static Order create(JSONObject data) throws Exception {
+        int id = data.getInt(Constants.MSG_KEY_ID);
+        JSONArray itemsJSON = data.getJSONArray(Constants.MSG_KEY_ITEMS);
+
+        Order ret = new Order(id);
+
+        for (int i = 0; i < itemsJSON.length(); ++i) {
+            JSONObject itemJSON = itemsJSON.getJSONObject(i);
+
+            int itemId = itemJSON.getInt(Constants.MSG_KEY_ID);
+            int quantity = itemJSON.getInt(Constants.MSG_KEY_QUANTITY);
+            Item item = Warehouse.getInstance().getItemById(itemId);
+
+            if (quantity < 0) {
+                throw new Exception("Invalid quantity to add to the order!");
+            }
+
+            if (item == null) {
+                throw new Exception("Invalid item to add to the order!");
+            }
+
+            ret.add(item, quantity);
+        }
+
+        return ret;
+    }
 
     // ===============================================================================================
     //

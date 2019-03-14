@@ -1,5 +1,7 @@
 package models.facilities;
 
+import org.json.JSONObject;
+
 
 /**
  * This {@code Gate} class is a one of the {@link Facility} components
@@ -16,6 +18,26 @@ package models.facilities;
  * @see models.tasks.Task Task
  */
 public class Gate extends Facility {
+
+    //
+    // Static Methods
+    //
+
+    /**
+     * Creates a new {@code Gate} object from JSON data.
+     *
+     * @param data the un-parsed JSON data.
+     *
+     * @return an {@code Gate} object.
+     */
+    public static Gate create(JSONObject data) throws Exception {
+        return new Gate();
+    }
+
+    // ===============================================================================================
+    //
+    // Member Methods
+    //
 
     /**
      * Constructs a new {@code Gate} object.

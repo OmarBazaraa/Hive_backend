@@ -76,11 +76,11 @@ public class Task extends Entity implements QuantityAddable<Item> {
     private static int tasksCount = 0;
 
     /**
-     * Returns the next available id for the next task.
+     * Returns the first available id for the next {@code Task} and increments.
      *
-     * @return the next available id.
+     * @return the first available id.
      */
-    private static int getTaskId() {
+    private static int getNextId() {
         return tasksCount++;
     }
 
@@ -93,7 +93,7 @@ public class Task extends Entity implements QuantityAddable<Item> {
      * Constructs a new {@code Task} object.
      */
     public Task(Order order, Rack rack, Agent agent) {
-        super(getTaskId());
+        super(getNextId());
         this.order = order;
         this.gate = order.getDeliveryGate();
         this.rack = rack;

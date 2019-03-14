@@ -2,9 +2,14 @@ package models.maps;
 
 import models.agents.Agent;
 import models.facilities.Facility;
+import models.facilities.Gate;
+import models.facilities.Rack;
+import models.facilities.Station;
 
 import utils.Constants;
 import utils.Constants.*;
+
+import org.json.JSONObject;
 
 
 /**
@@ -22,7 +27,7 @@ public class MapCell extends Cell {
     /**
      * The type of this {@code MapCell}.
      */
-    private CellType type;
+    private CellType type = CellType.EMPTY;
 
     /**
      * The {@code Facility} in this {@code MapCell} if exists; {@code null} otherwise.
@@ -38,6 +43,44 @@ public class MapCell extends Cell {
     //
     // Static Methods
     //
+
+    /**
+     * Creates a new {@code MapCell} object from JSON data.
+     *
+     * @param data the un-parsed JSON data.
+     *
+     * @return an {@code MapCell} object.
+     */
+    public static MapCell create(JSONObject data) throws Exception {
+        MapCell ret = new MapCell();
+
+        int type = data.getInt(Constants.MSG_KEY_TYPE);
+
+        switch (type) {
+            case Constants.MSG_TYPE_CELL_EMPTY:
+                ret.setFacility(null, CellType.EMPTY);
+                break;
+            case Constants.MSG_TYPE_CELL_OBSTACLE:
+                ret.setFacility(null, CellType.OBSTACLE);
+                break;
+            case Constants.MSG_TYPE_CELL_RACK:
+                ret.setFacility(Rack.create(data), CellType.RACK);
+                break;
+            case Constants.MSG_TYPE_CELL_GATE:
+                ret.setFacility(Gate.create(data), CellType.GATE);
+                break;
+            case Constants.MSG_TYPE_CELL_STATION:
+                ret.setFacility(Station.create(data), CellType.STATION);
+                break;
+            case Constants.MSG_TYPE_CELL_AGENT:
+                ret.setAgent(Agent.create(data));
+                break;
+            default:
+                throw new Exception("Unknown cell type!");
+        }
+
+        return ret;
+    }
 
     /**
      * Allocates and initializes a 2D array of {@code GuideCell}.
@@ -59,30 +102,6 @@ public class MapCell extends Cell {
         return ret;
     }
 
-    /**
-     * Converts a cell shape to its corresponding {@code CellType} value.
-     *
-     * @param shape the shape of the grid cell to convert.
-     *
-     * @return the corresponding {@code CellType} of the given shape.
-     */
-    public static CellType toType(char shape) {
-        switch (shape) {
-            case Constants.SHAPE_CELL_EMPTY:
-                return CellType.EMPTY;
-            case Constants.SHAPE_CELL_OBSTACLE:
-                return CellType.OBSTACLE;
-            case Constants.SHAPE_CELL_RACK:
-                return CellType.RACK;
-            case Constants.SHAPE_CELL_GATE:
-                return CellType.GATE;
-            case Constants.SHAPE_CELL_STATION:
-                return CellType.STATION;
-            default:
-                return CellType.UNKNOWN;
-        }
-    }
-
     // ===============================================================================================
     //
     // Member Methods
@@ -92,16 +111,38 @@ public class MapCell extends Cell {
      * Constructs a new empty {@code MapCell}.
      */
     public MapCell() {
-        this.type = CellType.EMPTY;
+
     }
 
     /**
-     * Constructs a new {@code MapCell}.
+     * Constructs a new {@code MapCell} with the given {@code Agent} and {@code Facility}.
      *
-     * @param type the {@code CellType} of the cell.
+     * @param agent    the {@code Agent} of the cell.
+     * @param facility the {@code Facility} of the cell.
+     * @param type     the {@code CellType} of the cell.
      */
-    public MapCell(CellType type) {
-        this.type = type;
+    public MapCell(Agent agent, Facility facility, CellType type) throws Exception {
+        setFacility(facility, type);
+        setAgent(agent);
+    }
+
+    /**
+     * Constructs a new {@code MapCell} with the given {@code Facility}.
+     *
+     * @param facility the {@code Facility} of the cell.
+     * @param type     the {@code CellType} of the cell.
+     */
+    public MapCell(Facility facility, CellType type) throws Exception {
+        setFacility(facility, type);
+    }
+
+    /**
+     * Constructs a new {@code MapCell} with the given {@code Agent}.
+     *
+     * @param agent the {@code Agent} of the cell.
+     */
+    public MapCell(Agent agent) throws Exception {
+        setAgent(agent);
     }
 
     /**
@@ -111,16 +152,6 @@ public class MapCell extends Cell {
      */
     public CellType getType() {
         return type;
-    }
-
-    /**
-     * Sets the type of this {@code MapCell}.
-     * TODO: check if the type is matching with the facility
-     *
-     * @param type the {@code CellType} of the cell.
-     */
-    public void setType(CellType type) {
-        this.type = type;
     }
 
     /**
@@ -143,12 +174,17 @@ public class MapCell extends Cell {
 
     /**
      * Sets the existing {@code Facility} in this {@code MapCell}.
-     * TODO: check if the type is matching with the facility
      *
      * @param facility the {@code Facility} to set.
+     * @param type     the {@code CellType} of {@code Facility}.
      */
-    public void setFacility(Facility facility) {
+    public void setFacility(Facility facility, CellType type) throws Exception {
+        if (type == CellType.OBSTACLE && hasAgent()) {
+            throw new Exception("Invalid position to place an obstacle!");
+        }
+
         this.facility = facility;
+        this.type = type;
     }
 
     /**
@@ -174,7 +210,11 @@ public class MapCell extends Cell {
      *
      * @param agent the {@code Agent} to set.
      */
-    public void setAgent(Agent agent) {
+    public void setAgent(Agent agent) throws Exception {
+        if (type == CellType.OBSTACLE) {
+            throw new Exception("Invalid position to place an agent!");
+        }
+
         this.agent = agent;
     }
 

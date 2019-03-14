@@ -1,15 +1,14 @@
 package communicator;
 
+import models.warehouses.Warehouse;
 import utils.Constants;
+
+import org.json.JSONObject;
 
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.*;
 
 import spark.Spark;
-
-import com.google.gson.Gson;
-
-import java.io.IOException;
 
 
 /**
@@ -29,11 +28,6 @@ public class Communicator {
      */
     private Session session;
 
-    /**
-     * The {@code Gson} object used in parsing JSON objects.
-     */
-    private Gson gson = new Gson();
-
     // ===============================================================================================
     //
     // Static Methods
@@ -43,7 +37,7 @@ public class Communicator {
      * The only instance of this {@code Communicator} class.
      */
     private static Communicator sCommunicator =
-            new Communicator(Constants.WS_SERVER_PATH, Constants.WS_SERVER_PORT);
+            new Communicator(Constants.SERVER_PATH, Constants.SERVER_PORT);
 
     /**
      * Returns the only available instance of this {@code Communicator} class.
@@ -103,8 +97,22 @@ public class Communicator {
      *
      * @param message the message to parse.
      */
-    private synchronized void dispatchMessage(String message) throws IOException {
-        session.getRemote().sendString(message);
+    private synchronized void dispatchMessage(String message) throws Exception {
+        JSONObject msg = new JSONObject(message);
+
+        int type = msg.optInt(Constants.MSG_KEY_TYPE);
+        JSONObject data = msg.optJSONObject(Constants.MSG_KEY_DATA);
+
+        switch (type) {
+            case Constants.MSG_TYPE_CONFIG:
+                Warehouse.getInstance().configure(data);
+                break;
+            case Constants.MSG_TYPE_ORDER:
+
+                break;
+            default:
+                System.out.println("Invalid message type!");
+        }
     }
 
     // ===============================================================================================
@@ -134,7 +142,7 @@ public class Communicator {
         }
 
         @OnWebSocketMessage
-        public void onMessage(Session client, String message) throws IOException {
+        public void onMessage(Session client, String message) throws Exception {
             dispatchMessage(message);
         }
     }

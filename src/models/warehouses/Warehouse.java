@@ -4,12 +4,19 @@ import algorithms.Dispatcher;
 import algorithms.Planner;
 
 import models.agents.Agent;
+import models.facilities.Facility;
 import models.facilities.Gate;
 import models.facilities.Rack;
 import models.facilities.Station;
 import models.items.Item;
+import models.maps.MapCell;
 import models.maps.MapGrid;
 import models.orders.Order;
+
+import utils.Constants;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.*;
 
@@ -95,26 +102,6 @@ public class Warehouse implements Order.OnFulFillListener {
         return sWarehouse;
     }
 
-    /**
-     * Returns the map grid of the singleton {@code Warehouse} object.
-     *
-     * TODO: prevent editing the map from outside the warehouse
-     *
-     * @return the {@code MapGrid} of the {@code Warehouse}.
-     */
-    public static MapGrid getMap() {
-        return sWarehouse.map;
-    }
-
-    /**
-     * Returns the current time step in the singleton {@code Warehouse} object.
-     *
-     * @return the current time step of the {@code Warehouse}.
-     */
-    public static long getTime() {
-        return sWarehouse.time;
-    }
-
     // ===============================================================================================
     //
     // Member Methods
@@ -132,22 +119,17 @@ public class Warehouse implements Order.OnFulFillListener {
      *
      * @param data the un-parsed {@code Warehouse} data.
      */
-    public void configure(List<Object> data) {
-        parseWarehouse(data);
-        init();
+    public void configure(JSONObject data) throws Exception {
+        configureItems(data.getJSONArray(Constants.MSG_KEY_ITEMS));
+        configureWarehouse(data.getJSONObject(Constants.MSG_KEY_MAP));
     }
 
     /**
      * Performs and simulates a single time step in this {@code Warehouse}.
      */
     public void run() throws Exception {
-        // Dispatch pending orders
         dispatchPendingOrders();
-
-        // Move active agents one step toward their targets
         stepActiveAgents();
-
-        // Increment time step
         time++;
     }
 
@@ -156,8 +138,8 @@ public class Warehouse implements Order.OnFulFillListener {
      *
      * @param data the un-parsed {@code Order} data.
      */
-    public void addOrder(List<Object> data) throws Exception {
-        Order order = parseOrder(data);
+    public void addOrder(JSONObject data) throws Exception {
+        Order order = Order.create(data);
 
         if (order.isFeasible()) {
             order.activate();
@@ -186,7 +168,7 @@ public class Warehouse implements Order.OnFulFillListener {
     /**
      * Dispatches the current pending orders of this {@code Warehouse}.
      *
-     * TODO: check agent to rack reachability
+     * TODO: check agent to rack reach-ability
      */
     private void dispatchPendingOrders() throws Exception {
         // Get the initial size of the queue
@@ -241,24 +223,84 @@ public class Warehouse implements Order.OnFulFillListener {
         activeAgents = q;
     }
 
+    // ===============================================================================================
+    //
+    // Getter Methods
+    //
+
     /**
-     * Initializes and pre-computes some required values.
+     * Returns the current time step in this {@code Warehouse} object.
+     *
+     * @return the current time step of this {@code Warehouse}.
      */
-    private void init() {
-        // Compute guide map for every rack
-        for (Rack rack : racks.values()) {
-            rack.computeGuideMap(map);
-        }
+    public long getTime() {
+        return time;
+    }
 
-        // Compute guide map for every gate
-        for (Gate gate : gates.values()) {
-            gate.computeGuideMap(map);
-        }
+    /**
+     * Returns the map grid of this {@code Warehouse} object.
+     *
+     * TODO: prevent editing the map from outside the warehouse
+     *
+     * @return the {@code MapGrid} of this {@code Warehouse}.
+     */
+    public MapGrid getMap() {
+        return map;
+    }
 
-        // Compute guide map for every station
-        for (Station station : stations.values()) {
-            station.computeGuideMap(map);
-        }
+    /**
+     * Returns the {@code Agent} object with the given id.
+     *
+     * @param id the id of the needed {@code Agent}.
+     *
+     * @return the needed {@code Agent} if available; {@code null} otherwise.
+     */
+    public Agent getAgentById(int id) {
+        return agents.get(id);
+    }
+
+    /**
+     * Returns the {@code Rack} object with the given id.
+     *
+     * @param id the id of the needed {@code Rack}.
+     *
+     * @return the needed {@code Rack} if available; {@code null} otherwise.
+     */
+    public Rack getRackById(int id) {
+        return racks.get(id);
+    }
+
+    /**
+     * Returns the {@code Gate} object with the given id.
+     *
+     * @param id the id of the needed {@code Gate}.
+     *
+     * @return the needed {@code Gate} if available; {@code null} otherwise.
+     */
+    public Gate getGateById(int id) {
+        return gates.get(id);
+    }
+
+    /**
+     * Returns the {@code Station} object with the given id.
+     *
+     * @param id the id of the needed {@code Station}.
+     *
+     * @return the needed {@code Station} if available; {@code null} otherwise.
+     */
+    public Station getStationById(int id) {
+        return stations.get(id);
+    }
+
+    /**
+     * Returns the {@code Item} object with the given id.
+     *
+     * @param id the id of the needed {@code Item}.
+     *
+     * @return the needed {@code Item} if available; {@code null} otherwise.
+     */
+    public Item getItemById(int id) {
+        return items.get(id);
     }
 
     // ===============================================================================================
@@ -267,78 +309,58 @@ public class Warehouse implements Order.OnFulFillListener {
     //
 
     /**
-     * Parses the configurations of the {@code Warehouse} space and components,
+     * Configures the space and components of this {@code Warehouse},
      * and updates the internal corresponding member variables.
      *
      * @param data the un-parsed {@code Warehouse} data.
      */
-    private void parseWarehouse(List<Object> data) {
+    private void configureWarehouse(JSONObject data) throws Exception {
+        map = MapGrid.create(data);
 
+        for (int i = 0; i < map.getRows(); ++i) {
+            for (int j = 0; j < map.getCols(); ++j) {
+                MapCell cell = map.get(i, j);
+
+                Agent agent = cell.getAgent();
+
+                if (agent != null) {
+                    agent.setPosition(i, j);
+                    agents.put(agent.getId(), agent);
+                    readyAgents.add(agent);
+                }
+
+                Facility facility = cell.getFacility();
+
+                if (facility != null) {
+                    facility.setPosition(i, j);
+                    facility.computeGuideMap(map);
+
+                    switch (cell.getType()) {
+                        case RACK:
+                            racks.put(facility.getId(), (Rack) facility);
+                            break;
+                        case GATE:
+                            gates.put(facility.getId(), (Gate) facility);
+                            break;
+                        case STATION:
+                            stations.put(facility.getId(), (Station) facility);
+                            break;
+                    }
+                }
+            }
+        }
     }
 
     /**
-     * Parses the given data representing an {@code Agent}.
+     * Configures the items of this {@code Warehouse},
+     * and updates the internal corresponding member variables.
      *
-     * @param data the un-parsed {@code Agent} object.
-     *
-     * @return an {@code Agent} object corresponding to the given specs.
+     * @param data the un-parsed {@code Items} data.
      */
-    private Agent parseAgent(List<Object> data) {
-        return null;
-    }
-
-    /**
-     * Parses the given data representing an {@code Item}.
-     *
-     * @param data the un-parsed {@code Item} data.
-     *
-     * @return an {@code Item} object corresponding to the given specs.
-     */
-    private Item parseItem(List<Object> data) {
-        return null;
-    }
-
-    /**
-     * Parses the given data representing a {@code Rack}.
-     *
-     * @param data the un-parsed {@code Rack} data.
-     *
-     * @return an {@code Rack} object corresponding to the given specs.
-     */
-    private Rack parseRack(List<Object> data) {
-        return null;
-    }
-
-    /**
-     * Parses the given data representing a {@code Gate}.
-     *
-     * @param data the un-parsed {@code Gate} data.
-     *
-     * @return an {@code Gate} object corresponding to the given specs.
-     */
-    private Gate parseGate(List<Object> data) {
-        return null;
-    }
-
-    /**
-     * Parses the given data representing a charging {@code Station}.
-     *
-     * @param data the un-parsed charging {@code Station} data.
-     *
-     * @return an {@code Station} object corresponding to the given specs.
-     */
-    private Station parseChargeStation(List<Object> data) {
-        return null;
-    }
-
-    /**
-     * Parses the given data representing an {@code Order}.
-     *
-     * @param data the un-parsed {@code Order} data.
-     *
-     * @return an {@code Order} object corresponding to the given specs.
-     */
-    private Order parseOrder(List<Object> data) {
-        return null;
+    private void configureItems(JSONArray data) throws Exception {
+        for (int i = 0; i < data.length(); ++i) {
+            Item item = Item.create(data.getJSONObject(i));
+            items.put(item.getId(), item);
+        }
     }
 }

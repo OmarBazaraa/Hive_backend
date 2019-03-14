@@ -81,7 +81,7 @@ public class GuideGrid extends Grid<GuideCell> {
         int curDis = getDistance(row, col);
 
         // Get warehouse map grid
-        MapGrid map = Warehouse.getMap();
+        MapGrid map = Warehouse.getInstance().getMap();
 
         //
         // Iterate over all direction and select the ones that lead to the target

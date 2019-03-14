@@ -32,7 +32,7 @@ public class Planner {
         // Return if the agent already performed a move in this time step
         // This can only happen when a higher priority agent displaces some other lower priority agent
         // so that the higher one can move towards its desired location
-        if (agent.getLastActionTime() >= Warehouse.getTime()) {
+        if (agent.getLastActionTime() >= Warehouse.getInstance().getTime()) {
             return;
         }
 
@@ -55,7 +55,7 @@ public class Planner {
 
         // Return if this agent has already been displaced by a higher priority agent,
         // or it has been tried to displace it
-        long time = Warehouse.getTime();
+        long time = Warehouse.getInstance().getTime();
         if (agent.getLastActionTime() >= time || agent.getLastBringBlankTime() >= time) {
             return false;
         }

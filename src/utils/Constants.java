@@ -18,9 +18,36 @@ public class Constants {
     public static final String PROJ_VERSION = "0.0.1.0";
     public static final String PROJ_VERSION_DATE = "8 March 2019";
 
+    //
+    // Communication details
+    //
+
     // WebSocket server details
-    public static final String WS_SERVER_PATH = "/";
-    public static final int WS_SERVER_PORT = 8080;
+    public static final String SERVER_PATH = "/";
+    public static final int SERVER_PORT = 8080;
+
+    // Messages keys
+    public static final String MSG_KEY_TYPE = "type";
+    public static final String MSG_KEY_DATA = "data";
+    public static final String MSG_KEY_MAP = "map";
+    public static final String MSG_KEY_ITEMS = "items";
+    public static final String MSG_KEY_ID = "id";
+    public static final String MSG_KEY_GRID = "grid";
+    public static final String MSG_KEY_WIDTH = "width";
+    public static final String MSG_KEY_HEIGHT = "height";
+    public static final String MSG_KEY_WEIGHT = "weight";
+    public static final String MSG_KEY_QUANTITY = "quantity";
+    public static final String MSG_KEY_CAPACITY = "capacity";
+
+    // Messages types
+    public static final int MSG_TYPE_CONFIG = 1;
+    public static final int MSG_TYPE_ORDER = 2;
+    public static final int MSG_TYPE_CELL_EMPTY = 1;
+    public static final int MSG_TYPE_CELL_OBSTACLE = 2;
+    public static final int MSG_TYPE_CELL_RACK = 3;
+    public static final int MSG_TYPE_CELL_GATE = 4;
+    public static final int MSG_TYPE_CELL_STATION = 5;
+    public static final int MSG_TYPE_CELL_AGENT = 6;
 
     //
     // Map Grid

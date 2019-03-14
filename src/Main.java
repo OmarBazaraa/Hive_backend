@@ -1,4 +1,6 @@
 import communicator.Communicator;
+import models.HiveObject;
+import models.facilities.Station;
 
 
 /**
@@ -33,7 +35,6 @@ public class Main {
     }
 
     public static void run(String configFilename, String ordersFilename) throws Exception {
-
         Communicator.getInstance();
     }
 }
