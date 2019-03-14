@@ -1,5 +1,6 @@
 package models.tasks;
 
+import algorithms.Planner;
 import models.agents.Agent;
 import models.items.Item;
 import models.facilities.Gate;
@@ -9,6 +10,7 @@ import models.maps.GuideGrid;
 import models.orders.Order;
 
 import models.Entity;
+import models.warehouses.Warehouse;
 import utils.Constants.*;
 
 import java.util.HashMap;
@@ -283,113 +285,63 @@ public class Task extends Entity implements QuantityAddable<Item> {
      * @return the {@code GuideGrid} to reach the target.
      */
     public GuideGrid getGuideMap() {
-        if (status == TaskStatus.FETCHING || status == TaskStatus.LOADING) {
+        if (status == TaskStatus.FETCHING || status == TaskStatus.RETURNING) {
             return rack.getGuideMap();
         }
-        if (status == TaskStatus.DELIVERING || status == TaskStatus.WAITING) {
+        if (status == TaskStatus.DELIVERING) {
             return gate.getGuideMap();
-        }
-        if (status == TaskStatus.RETURNING || status == TaskStatus.OFFLOADING) {
-            return rack.getGuideMap();
         }
 
         return null;
     }
 
     /**
-     * Returns the next required action to be done by the assigned {@code Agent}.
-     *
-     * @return {@code AgentAction} to be done the next time step.
+     * Executes the next required action to be done to complete this {@code Task}.
      */
-    public AgentAction getNextAction() {
-        if (status == TaskStatus.FETCHING || status == TaskStatus.DELIVERING || status == TaskStatus.RETURNING) {
-            return AgentAction.MOVE;
-        }
-        if (status == TaskStatus.LOADING) {
-            return AgentAction.LOAD;
-        }
-        if (status == TaskStatus.WAITING) {
-            return AgentAction.WAIT;
-        }
-        if (status == TaskStatus.OFFLOADING) {
-            return AgentAction.OFFLOAD;
+    public void executeAction() throws Exception {
+        // Moving to the rack
+        if (status == TaskStatus.FETCHING) {
+            if (agent.samePosition(rack)) {
+                if (agent.bind(rack)) {
+                    status = TaskStatus.DELIVERING;
+                }
+            } else {
+                Planner.route(agent, Warehouse.getInstance().getMap());
+            }
+            return;
         }
 
-        return AgentAction.NOTHING;
-    }
-
-    /**
-     * Updates the status of this {@code Task} using the last action done by the {@code Agent}.
-     *
-     * @param action the last action done by the {@code Agent}.
-     */
-    public void updateStatus(AgentAction action) throws Exception {
-        if (status == TaskStatus.INACTIVE) {
-            throw new Exception("Invalid action done by the agent!");
-        }
-        else if (status == TaskStatus.FETCHING) {
-            if (action == AgentAction.MOVE) {
-                if (agent.getPosition() == rack.getPosition()) {
-                    status = TaskStatus.LOADING;
-                }
-            }
-            else if (action != AgentAction.NOTHING) {
-                throw new Exception("Invalid action done by the agent!");
-            }
-        }
-        else if (status == TaskStatus.LOADING) {
-            if (action == AgentAction.LOAD) {
-                status = TaskStatus.DELIVERING;
-            }
-            else if (action == AgentAction.MOVE) {
-                status = TaskStatus.FETCHING;
-            }
-            else if (action != AgentAction.NOTHING) {
-                throw new Exception("Invalid action done by the agent!");
-            }
-        }
-        else if (status == TaskStatus.DELIVERING) {
-            if (action == AgentAction.MOVE) {
-                if (agent.getPosition() == gate.getPosition()) {
-                    status = TaskStatus.WAITING;
-                }
-            }
-            else if (action != AgentAction.NOTHING) {
-                throw new Exception("Invalid action done by the agent!");
-            }
-        }
-        else if (status == TaskStatus.WAITING) {
-            if (action == AgentAction.WAIT) {
-                status = TaskStatus.RETURNING;
-            }
-            else if (action == AgentAction.MOVE) {
-                status = TaskStatus.DELIVERING;
-            }
-            else if (action != AgentAction.NOTHING) {
-                throw new Exception("Invalid action done by the agent!");
-            }
-        }
-        else if (status == TaskStatus.RETURNING) {
-            if (action == AgentAction.MOVE) {
-                if (agent.getPosition() == rack.getPosition()) {
+        // Delivering the rack to the gate
+        if (status == TaskStatus.DELIVERING) {
+            if (agent.samePosition(gate)) {
+                if (agent.bind(gate)) {
                     status = TaskStatus.OFFLOADING;
                 }
+            } else {
+                Planner.route(agent, Warehouse.getInstance().getMap());
             }
-            else if (action != AgentAction.NOTHING) {
-                throw new Exception("Invalid action done by the agent!");
-            }
+            return;
         }
-        else if (status == TaskStatus.OFFLOADING) {
-            if (action == AgentAction.OFFLOAD) {
-                status = TaskStatus.COMPLETED;
-                terminate();
-            }
-            else if (action == AgentAction.MOVE) {
+
+        // Wait until offloading the items at the gate
+        if (status == TaskStatus.OFFLOADING) {
+            if (agent.unbind(gate)) {
                 status = TaskStatus.RETURNING;
             }
-            else if (action != AgentAction.NOTHING) {
-                throw new Exception("Invalid action done by the agent!");
+            return;
+        }
+
+        // Returning the rack back to its position
+        if (status == TaskStatus.RETURNING) {
+            if (agent.samePosition(rack)) {
+                if (agent.unbind(rack)) {
+                    status = TaskStatus.COMPLETED;
+                    terminate();
+                }
+            } else {
+                Planner.route(agent, Warehouse.getInstance().getMap());
             }
+            return;
         }
     }
 }

@@ -209,7 +209,7 @@ public class Warehouse implements Order.OnFulFillListener {
             Agent agent = activeAgents.poll();
 
             // Try moving the current agent towards its target
-            Planner.step(agent, map);
+            agent.executeAction();
 
             // Re-add agent to the active queue if still active, otherwise add it to the ready queue
             if (agent.isActive()) {

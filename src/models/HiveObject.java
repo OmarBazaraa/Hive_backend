@@ -118,4 +118,15 @@ abstract public class HiveObject extends Entity {
         this.row = pos.row;
         this.col = pos.col;
     }
+
+    /**
+     * Checks whether other {@code HiveObject} has the same position of this {@code HiveObject}.
+     *
+     * @param obj the {@code HiveObject} with which to compare.
+     *
+     * @return {@code true} if both have the same position; {@code false} otherwise.
+     */
+    public boolean samePosition(HiveObject obj) {
+        return row == obj.row && col == obj.col;
+    }
 }

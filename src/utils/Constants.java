@@ -150,7 +150,6 @@ public class Constants {
     public static final int RACK_DEFAULT_INIT_WEIGHT = 100;
     public static final int RACK_DEFAULT_STORE_CAPACITY = 100;
 
-
     /**
      * Different status of a {@code Rack} during its lifecycle in the system.
      */
@@ -190,11 +189,9 @@ public class Constants {
     public enum TaskStatus {
         INACTIVE,       // The task is still pending not active yet
         FETCHING,       // Agent is moving to fetch the assigned rack
-        LOADING,        // Agent reached the rack and is currently loading it
         DELIVERING,     // Agent is moving to deliver the loaded rack to a gate
-        WAITING,        // Agent reached the gate and is currently waiting until the items is taken
+        OFFLOADING,     // Agent is offloading the needed items at the gate
         RETURNING,      // Agent is returning the rack back
-        OFFLOADING,     // Agent reached the initial rack position and is currently offloading the rack
         COMPLETED       // The task has been completed
     }
 }

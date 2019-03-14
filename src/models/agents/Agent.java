@@ -2,6 +2,7 @@ package models.agents;
 
 import models.Entity;
 import models.HiveObject;
+import models.facilities.Facility;
 import models.facilities.Rack;
 import models.maps.GuideGrid;
 import models.maps.MapCell;
@@ -13,7 +14,6 @@ import models.warehouses.Warehouse;
 
 import utils.Constants;
 import utils.Constants.*;
-import utils.Utility;
 
 import org.json.JSONObject;
 
@@ -56,13 +56,6 @@ public class Agent extends HiveObject implements TaskAssignable {
      * Needed by the planner algorithm.
      */
     private long lastActionTime;
-
-    /**
-     * The last time this {@code Agent} tried to be bring a blank location
-     * to a higher priority {@code Agent}.
-     * Needed by the planner algorithm.
-     */
-    private long lastBringBlankTime;
 
     // ===============================================================================================
     //
@@ -188,60 +181,73 @@ public class Agent extends HiveObject implements TaskAssignable {
     }
 
     /**
-     * Returns the next required action to be done by this {@code Agent}.
-     * This is to be determined by the assigned {@code Task}.
-     *
-     * @return {@code AgentAction} to be done the next time step.
+     * Executes the next required action.
      */
-    public AgentAction getNextAction() {
-        return (task != null ? task.getNextAction() : AgentAction.NOTHING);
-    }
-
-    /**
-     * Executes the given action.
-     *
-     * @param action the action to be executed.
-     * @param map    the map grid of the {@code Warehouse} where this {@code Agent} is located.
-     */
-    public void executeAction(AgentAction action, MapGrid map) throws Exception {
-        // Return if the action is nothing
-        if (action == AgentAction.NOTHING) {
+    public void executeAction() throws Exception {
+        // Return if already did an action this time step
+        if (isAlreadyMoved()) {
             return;
         }
 
-        // Switch on different actions
-        switch (action) {
-            case MOVE_UP:
-            case MOVE_RIGHT:
-            case MOVE_DOWN:
-            case MOVE_LEFT:
-                move(Utility.actionToDir(action), map);
-                break;
-            case LOAD:
-                loadRack(map);
-                break;
-            case OFFLOAD:
-                offloadRack(map);
-                break;
-            case WAIT:
-                waitOnGate(map);
-                break;
-            default:
-                throw new Exception("Invalid action!");
+        // Execute action depending on the assigned task
+        if (task != null) {
+            task.executeAction();
         }
-
-        // Set the last action time
-        updateLastActionTime();
-        task.updateStatus(action);
     }
 
     /**
-     * Moves this agent in the given direction.
+     * Binds this {@code Agent} with the given {@code Facility} available at the
+     * same current position of this {@code Agent}.
      *
-     * @param dir the direction to move along.
-     * @param map the maps's grid of the warehouse where the agent is.
+     * @param facility the {@code Facility} to bind with.
+     *
+     * @return {@code true} if managed to bind successfully; {@code false} otherwise.
      */
-    public void move(Direction dir, MapGrid map) throws Exception {
+    public boolean bind(Facility facility) throws Exception {
+        // Update action time
+        updateLastActionTime();
+
+        // Bind if possible
+        if (facility.canBind(this)) {
+            facility.bind(this);
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Unbinds this {@code Agent} from the given {@code Facility} available at the
+     * same current position of this {@code Agent}.
+     *
+     * @param facility the {@code Facility} to bind with.
+     *
+     * @return {@code true} if managed to unbind successfully; {@code false} otherwise.
+     */
+    public boolean unbind(Facility facility) throws Exception {
+        // Update action time
+        updateLastActionTime();
+
+        // Unbind if possible
+        if (facility.canUnbind(this)) {
+            facility.unbind(this);
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Moves this {@code Agent} in the given {@code Direction}.
+     *
+     * @param dir the {@code Direction} to move along.
+     *
+     * @return {@code true} if managed to move successfully; {@code false} otherwise.
+     */
+    public boolean move(Direction dir) throws Exception {
+        // Get warehouse map
+        MapGrid map = Warehouse.getInstance().getMap();
+
         // Get current position
         Position cur = getPosition();
         MapCell curCell = map.get(cur);
@@ -264,85 +270,61 @@ public class Agent extends HiveObject implements TaskAssignable {
         curCell.setAgent(null);
         nxtCell.setAgent(this);
         setPosition(nxt);
+        return true;
     }
 
     /**
      * Loads the rack above this agent.
      *
-     * @param map the maps's grid of the warehouse where the agent is.
+     * @param rack the {@code Rack} to load.
      */
-    public void loadRack(MapGrid map) throws Exception {
+    public void loadRack(Rack rack) throws Exception {
         if (isLoaded()) {
             throw new Exception("Cannot load more than one rack at a time!");
         }
 
-        // Throw exception if invalid
-        if (!checkRackValidity(map)) {
-            throw new Exception("Loading invalid rack!");
-        }
-
         // Load the rack
-        task.getRack().load();
+        rack.load();
         status = AgentStatus.ACTIVE_LOADED;
     }
 
     /**
      * Offloads the rack above this agent.
      *
-     * @param map the maps's grid of the warehouse where the agent is.
+     * @param rack the {@code Rack} to offload.
      */
-    public void offloadRack(MapGrid map) throws Exception {
+    public void offloadRack(Rack rack) throws Exception {
         if (!isLoaded()) {
             throw new Exception("No rack is available to be offloaded!");
         }
 
-        // Throw exception if invalid
-        if (!checkRackValidity(map)) {
-            throw new Exception("Offloading invalid rack!");
-        }
-
         // Offload the rack
-        task.getRack().offload();
+        rack.offload();
         status = AgentStatus.ACTIVE;
-    }
-
-    /**
-     * Checks the validity of the rack during loading/offloading actions.
-     * This methods checks the position of the rack and the identity of the assigned rack.
-     *
-     * @param map the maps's grid of the warehouse where the agent is.
-     *
-     * @return {@code true} if the rack is valid; {@code false} otherwise.
-     */
-    private boolean checkRackValidity(MapGrid map) {
-        MapCell cell = map.get(getPosition());
-
-        if (cell.getType() != CellType.RACK) {
-            return false;
-        }
-
-        Rack rack = (Rack) cell.getFacility();
-
-        if (!rack.equals(task.getRack())) {
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * Waits until the items of the task are taken at the gate.
-     *
-     * @param map the maps's grid of the warehouse where the agent is.
-     */
-    public void waitOnGate(MapGrid map) throws Exception {
-        // TODO:
     }
 
     // ===============================================================================================
     //
     // Helper Methods
     //
+
+    /**
+     * Checks whether this {@code Agent} can execute an action this time step or not.
+     *
+     * @return {@code true} if it possible to execute an action; {@code false} otherwise.
+     */
+    public boolean canMove() {
+        return lastActionTime < Warehouse.getInstance().getTime();
+    }
+
+    /**
+     * Checks whether this {@code Agent} already done an action this time step or not.
+     *
+     * @return {@code true} if already done an action; {@code false} otherwise.
+     */
+    public boolean isAlreadyMoved() {
+        return lastActionTime >= Warehouse.getInstance().getTime();
+    }
 
     /**
      * Returns the last time this {@code Agent} has performed an action.
@@ -356,22 +338,6 @@ public class Agent extends HiveObject implements TaskAssignable {
      */
     public void updateLastActionTime() {
         lastActionTime = Warehouse.getInstance().getTime();
-    }
-
-    /**
-     * Returns the last time this {@code Agent} tried to be bring a blank location
-     * to a higher priority {@code Agent}.
-     */
-    public long getLastBringBlankTime() {
-        return lastBringBlankTime;
-    }
-
-    /**
-     * Updates the last time this agent tried to be bring a blank position
-     * to a higher priority agent.
-     */
-    public void updateLastBringBlankTime() {
-        lastBringBlankTime = Warehouse.getInstance().getTime();
     }
 
     /**

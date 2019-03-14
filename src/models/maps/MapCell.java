@@ -123,7 +123,7 @@ public class MapCell extends Cell {
      * @param facility the {@code Facility} of the cell.
      * @param type     the {@code CellType} of the cell.
      */
-    public MapCell(Agent agent, Facility facility, CellType type) throws Exception {
+    public MapCell(Agent agent, Facility facility, CellType type) {
         setFacility(facility, type);
         setAgent(agent);
     }
@@ -134,7 +134,7 @@ public class MapCell extends Cell {
      * @param facility the {@code Facility} of the cell.
      * @param type     the {@code CellType} of the cell.
      */
-    public MapCell(Facility facility, CellType type) throws Exception {
+    public MapCell(Facility facility, CellType type) {
         setFacility(facility, type);
     }
 
@@ -180,11 +180,7 @@ public class MapCell extends Cell {
      * @param facility the {@code Facility} to set.
      * @param type     the {@code CellType} of {@code Facility}.
      */
-    public void setFacility(Facility facility, CellType type) throws Exception {
-        if (type == CellType.OBSTACLE && hasAgent()) {
-            throw new Exception("Invalid position to place an obstacle!");
-        }
-
+    public void setFacility(Facility facility, CellType type) {
         this.facility = facility;
         this.type = type;
     }
@@ -212,11 +208,7 @@ public class MapCell extends Cell {
      *
      * @param agent the {@code Agent} to set.
      */
-    public void setAgent(Agent agent) throws Exception {
-        if (type == CellType.OBSTACLE) {
-            throw new Exception("Invalid position to place an agent!");
-        }
-
+    public void setAgent(Agent agent) {
         this.agent = agent;
     }
 

@@ -4,11 +4,10 @@ import models.agents.Agent;
 import models.maps.GuideGrid;
 import models.maps.MapGrid;
 import models.maps.GuideCell;
-import models.warehouses.Warehouse;
-import utils.Constants.*;
 import models.maps.utils.Dimensions;
 import models.maps.utils.Position;
-import utils.Utility;
+
+import utils.Constants.*;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -21,33 +20,29 @@ import java.util.Queue;
 public class Planner {
 
     /**
-     * Performs one step forward in the path planning algorithm.
-     * <p>
-     * This function is to be called for all active agents in descending order of their priorities.
+     * Routes the given {@code Agent} one step towards its target location.
      *
-     * @param agent the {@code Agent} to be stepped.
+     * @param agent the {@code Agent} to be routed.
      * @param map   the {@code MapGrid} of the {@code Warehouse}.
      */
-    public static void step(Agent agent, MapGrid map) throws Exception {
-        // Return if the agent already performed a move in this time step
-        // This can only happen when a higher priority agent displaces some other lower priority agent
-        // so that the higher one can move towards its desired location
-        if (agent.getLastActionTime() >= Warehouse.getInstance().getTime()) {
-            return;
-        }
-
-        // Get the required action of the agent
-        AgentAction action = agent.getNextAction();
-
-        // Try to perform the required action
-        if (action == AgentAction.MOVE) {
-            route(agent, agent, map);
-        } else {
-            agent.executeAction(action, map);
-        }
+    public static boolean route(Agent agent, MapGrid map) throws Exception {
+        return route(agent, agent, map);
     }
 
-    public static boolean route(Agent agent, Agent mainAgent, MapGrid map) throws Exception {
+    /**
+     * Routes the given {@code Agent} one step towards its target location.
+     * <p>
+     * This is a recursive function that keep displacing other agents away in order for the
+     * main {@code Agent} to find its path.
+     * <p>
+     * This function is to be initially called passing the same {@code Agent} for both
+     * parameters {@code agent} and {@code mainAgent}.
+     *
+     * @param agent     the {@code Agent} to be displaced for the main {@code Agent}.
+     * @param mainAgent the main {@code Agent} to be routed.
+     * @param map       the {@code MapGrid} of the {@code Warehouse}.
+     */
+    private static boolean route(Agent agent, Agent mainAgent, MapGrid map) throws Exception {
         // Return if this agent has higher priority than the agent needed to be moved
         if (agent.compareTo(mainAgent) > 0) {
             return false;
@@ -55,13 +50,12 @@ public class Planner {
 
         // Return if this agent has already been displaced by a higher priority agent,
         // or it has been tried to displace it
-        long time = Warehouse.getInstance().getTime();
-        if (agent.getLastActionTime() >= time || agent.getLastBringBlankTime() >= time) {
+        if (agent.isAlreadyMoved()) {
             return false;
         }
 
-        // Update bring blank time
-        agent.updateLastBringBlankTime();
+        // Update agent action time to avoid infinite loop
+        agent.updateLastActionTime();
 
         // Get current agent and guide maps
         Position cur = agent.getPosition();
@@ -96,8 +90,7 @@ public class Planner {
 
             // Move the agent if free cell or we manged to get a blank in the next position
             if (nxtAgent == null || route(nxtAgent, mainAgent, map)) {
-                agent.executeAction(Utility.dirToAction(dir), map);
-                return true;
+                return agent.move(dir);
             }
         }
 

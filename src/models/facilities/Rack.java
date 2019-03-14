@@ -337,7 +337,7 @@ public class Rack extends Facility implements QuantityAddable<Item>, QuantityRes
             throw new Exception("Invalid agent binding!");
         }
 
-        agent.loadRack();
+        agent.loadRack(this);
     }
 
     /**
@@ -367,7 +367,7 @@ public class Rack extends Facility implements QuantityAddable<Item>, QuantityRes
             throw new Exception("Invalid agent unbinding!");
         }
 
-        agent.offloadRack();
+        agent.offloadRack(this);
     }
 
     /**
