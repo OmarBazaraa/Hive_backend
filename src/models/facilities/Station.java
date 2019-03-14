@@ -1,5 +1,6 @@
 package models.facilities;
 
+import models.agents.Agent;
 import org.json.JSONObject;
 
 
@@ -57,5 +58,49 @@ public class Station extends Facility {
      */
     public Station(int id) {
         super(id);
+    }
+
+    /**
+     * Checks whether its currently possible to bind the given {@code Agent} to this {@code Station}.
+     *
+     * @param agent the {@code Agent} to check.
+     *
+     * @return {@code true} if it is possible to bind; {@code false} otherwise.
+     */
+    @Override
+    public boolean canBind(Agent agent) {
+        return false;
+    }
+
+    /**
+     * Binds the given {@code Agent} with this {@code Station}.
+     *
+     * @param agent the {@code Agent} to bind.
+     */
+    @Override
+    public void bind(Agent agent) throws Exception {
+
+    }
+
+    /**
+     * Checks whether its currently possible to unbind the given {@code Agent} from this {@code Station}.
+     *
+     * @param agent the {@code Agent} to check.
+     *
+     * @return {@code true} if it is possible to bind; {@code false} otherwise.
+     */
+    @Override
+    public boolean canUnbind(Agent agent) {
+        return false;
+    }
+
+    /**
+     * Unbinds the given {@code Agent} from this {@code Station}.
+     *
+     * @param agent the {@code Agent} to unbind.
+     */
+    @Override
+    public void unbind(Agent agent) throws Exception {
+
     }
 }

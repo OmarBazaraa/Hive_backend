@@ -3,6 +3,7 @@ package models.facilities;
 import algorithms.Planner;
 
 import models.HiveObject;
+import models.agents.AgentBindable;
 import models.maps.GuideGrid;
 import models.maps.MapGrid;
 
@@ -21,7 +22,7 @@ import models.maps.MapGrid;
  * @see models.facilities.Gate Gate
  * @see models.facilities.Station Station
  */
-abstract public class Facility extends HiveObject {
+abstract public class Facility extends HiveObject implements AgentBindable {
 
     //
     // Member Variables

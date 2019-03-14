@@ -1,6 +1,7 @@
 package models.facilities;
 
 import models.agents.Agent;
+import models.agents.AgentBindable;
 import models.items.Item;
 import models.items.QuantityAddable;
 import models.items.QuantityReservable;
@@ -307,6 +308,66 @@ public class Rack extends Facility implements QuantityAddable<Item>, QuantityRes
             task = null;
             status = RackStatus.IDLE;
         }
+    }
+
+    /**
+     * Checks whether its currently possible to bind the given {@code Agent} to this {@code Rack}.
+     *
+     * @param agent the {@code Agent} to check.
+     *
+     * @return {@code true} if it is possible to bind; {@code false} otherwise.
+     */
+    @Override
+    public boolean canBind(Agent agent) {
+        if (status != RackStatus.RESERVED) {
+            return false;
+        }
+
+        return agent.equals(task.getAgent()) && agent.getPosition().equals(getPosition());
+    }
+
+    /**
+     * Binds the given {@code Agent} with this {@code Rack}.
+     *
+     * @param agent the {@code Agent} to bind.
+     */
+    @Override
+    public void bind(Agent agent) throws Exception {
+        if (!canBind(agent)) {
+            throw new Exception("Invalid agent binding!");
+        }
+
+        agent.loadRack();
+    }
+
+    /**
+     * Checks whether its currently possible to unbind the given {@code Agent} from this {@code Rack}.
+     *
+     * @param agent the {@code Agent} to check.
+     *
+     * @return {@code true} if it is possible to bind; {@code false} otherwise.
+     */
+    @Override
+    public boolean canUnbind(Agent agent) {
+        if (status != RackStatus.LOADED) {
+            return false;
+        }
+
+        return agent.equals(task.getAgent()) && agent.getPosition().equals(getPosition());
+    }
+
+    /**
+     * Unbinds the given {@code Agent} from this {@code Rack}.
+     *
+     * @param agent the {@code Agent} to unbind.
+     */
+    @Override
+    public void unbind(Agent agent) throws Exception {
+        if (!canUnbind(agent)) {
+            throw new Exception("Invalid agent unbinding!");
+        }
+
+        agent.offloadRack();
     }
 
     /**

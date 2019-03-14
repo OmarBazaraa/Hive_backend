@@ -25,32 +25,32 @@ public interface AgentBindable {
     /**
      * Checks whether its currently possible to bind the given {@code Agent} to this object.
      *
+     * @param agent the {@code Agent} to check.
+     *
      * @return {@code true} if it is possible to bind; {@code false} otherwise.
      */
-    default boolean canBind(Agent agent) {
-        return true;
-    }
+    boolean canBind(Agent agent);
 
     /**
      * Binds the given {@code Agent} with this object.
      *
      * @param agent the {@code Agent} to bind.
      */
-    void bind(Agent agent);
+    void bind(Agent agent) throws Exception;
 
     /**
      * Checks whether its currently possible to unbind the given {@code Agent} from this object.
      *
+     * @param agent the {@code Agent} to check.
+     *
      * @return {@code true} if it is possible to bind; {@code false} otherwise.
      */
-    default boolean canUnbind(Agent agent) {
-        return true;
-    }
+    boolean canUnbind(Agent agent);
 
     /**
      * Unbinds the given {@code Agent} from this object.
      *
      * @param agent the {@code Agent} to unbind.
      */
-    void unbind(Agent agent);
+    void unbind(Agent agent) throws Exception;
 }
