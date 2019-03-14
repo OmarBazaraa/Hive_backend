@@ -62,6 +62,8 @@ public class Item extends Entity implements QuantityAddable<Rack>, QuantityReser
     /**
      * Creates a new {@code Item} object from JSON data.
      *
+     * TODO: add checks and throw exceptions
+     *
      * @param data the un-parsed JSON data.
      *
      * @return an {@code Item} object.

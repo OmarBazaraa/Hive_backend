@@ -1,6 +1,7 @@
 package communicator;
 
 import models.warehouses.Warehouse;
+
 import utils.Constants;
 
 import org.json.JSONObject;
@@ -108,7 +109,7 @@ public class Communicator {
                 Warehouse.getInstance().configure(data);
                 break;
             case Constants.MSG_TYPE_ORDER:
-
+                Warehouse.getInstance().addOrder(data);
                 break;
             default:
                 System.out.println("Invalid message type!");

@@ -82,16 +82,16 @@ public class Rack extends Facility implements QuantityAddable<Item>, QuantityRes
      * TODO: add checks and throw exceptions
      *
      * @param data the un-parsed JSON data.
+     * @param row  the row position of the {@code MapCell} to create.
+     * @param col  the column position of the {@code MapCell} to create.
      *
      * @return an {@code Rack} object.
      */
-    public static Rack create(JSONObject data) throws Exception {
+    public static Rack create(JSONObject data, int row, int col) throws Exception {
         Rack ret = new Rack();
-        ret.capacity = data.getInt(Constants.MSG_KEY_CAPACITY);
 
-        if (ret.capacity < 0) {
-            throw new Exception("Invalid rack capacity!");
-        }
+        ret.setCapacity(data.getInt(Constants.MSG_KEY_CAPACITY));
+        ret.setPosition(row, col);
 
         JSONArray itemsJSON = data.getJSONArray(Constants.MSG_KEY_ITEMS);
 

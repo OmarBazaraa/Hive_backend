@@ -27,11 +27,15 @@ public class Station extends Facility {
      * Creates a new {@code Station} object from JSON data.
      *
      * @param data the un-parsed JSON data.
+     * @param row  the row position of the {@code MapCell} to create.
+     * @param col  the column position of the {@code MapCell} to create.
      *
      * @return an {@code Station} object.
      */
-    public static Station create(JSONObject data) throws Exception {
-        return new Station();
+    public static Station create(JSONObject data, int row, int col) throws Exception {
+        Station ret = new Station();
+        ret.setPosition(row, col);
+        return ret;
     }
 
     // ===============================================================================================

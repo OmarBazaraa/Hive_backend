@@ -27,11 +27,15 @@ public class Gate extends Facility {
      * Creates a new {@code Gate} object from JSON data.
      *
      * @param data the un-parsed JSON data.
+     * @param row  the row position of the {@code MapCell} to create.
+     * @param col  the column position of the {@code MapCell} to create.
      *
      * @return an {@code Gate} object.
      */
-    public static Gate create(JSONObject data) throws Exception {
-        return new Gate();
+    public static Gate create(JSONObject data, int row, int col) throws Exception {
+        Gate ret = new Gate();
+        ret.setPosition(row, col);
+        return ret;
     }
 
     // ===============================================================================================

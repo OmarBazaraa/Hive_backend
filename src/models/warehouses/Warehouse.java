@@ -324,7 +324,6 @@ public class Warehouse implements Order.OnFulFillListener {
                 Agent agent = cell.getAgent();
 
                 if (agent != null) {
-                    agent.setPosition(i, j);
                     agents.put(agent.getId(), agent);
                     readyAgents.add(agent);
                 }
@@ -332,7 +331,6 @@ public class Warehouse implements Order.OnFulFillListener {
                 Facility facility = cell.getFacility();
 
                 if (facility != null) {
-                    facility.setPosition(i, j);
                     facility.computeGuideMap(map);
 
                     switch (cell.getType()) {

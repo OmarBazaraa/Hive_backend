@@ -48,10 +48,12 @@ public class MapCell extends Cell {
      * Creates a new {@code MapCell} object from JSON data.
      *
      * @param data the un-parsed JSON data.
+     * @param row  the row position of the {@code MapCell} to create.
+     * @param col  the column position of the {@code MapCell} to create.
      *
      * @return an {@code MapCell} object.
      */
-    public static MapCell create(JSONObject data) throws Exception {
+    public static MapCell create(JSONObject data, int row, int col) throws Exception {
         MapCell ret = new MapCell();
 
         int type = data.getInt(Constants.MSG_KEY_TYPE);
@@ -64,16 +66,16 @@ public class MapCell extends Cell {
                 ret.setFacility(null, CellType.OBSTACLE);
                 break;
             case Constants.MSG_TYPE_CELL_RACK:
-                ret.setFacility(Rack.create(data), CellType.RACK);
+                ret.setFacility(Rack.create(data, row, col), CellType.RACK);
                 break;
             case Constants.MSG_TYPE_CELL_GATE:
-                ret.setFacility(Gate.create(data), CellType.GATE);
+                ret.setFacility(Gate.create(data, row, col), CellType.GATE);
                 break;
             case Constants.MSG_TYPE_CELL_STATION:
-                ret.setFacility(Station.create(data), CellType.STATION);
+                ret.setFacility(Station.create(data, row, col), CellType.STATION);
                 break;
             case Constants.MSG_TYPE_CELL_AGENT:
-                ret.setAgent(Agent.create(data));
+                ret.setAgent(Agent.create(data, row, col));
                 break;
             default:
                 throw new Exception("Unknown cell type!");

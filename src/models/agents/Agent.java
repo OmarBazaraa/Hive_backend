@@ -73,12 +73,16 @@ public class Agent extends HiveObject implements TaskAssignable {
      * Creates a new {@code Agent} object from JSON data.
      *
      * @param data the un-parsed JSON data.
+     * @param row  the row position of the {@code MapCell} to create.
+     * @param col  the column position of the {@code MapCell} to create.
      *
      * @return an {@code Agent} object.
      */
-    public static Agent create(JSONObject data) throws Exception {
+    public static Agent create(JSONObject data, int row, int col) throws Exception {
         int id = data.getInt(Constants.MSG_KEY_ID);
-        return new Agent(id);
+        Agent ret = new Agent(id);
+        ret.setPosition(row, col);
+        return ret;
     }
 
     // ===============================================================================================

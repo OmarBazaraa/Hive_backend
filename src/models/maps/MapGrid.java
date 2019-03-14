@@ -53,7 +53,7 @@ public class MapGrid extends Grid<MapCell> {
             }
 
             for (int j = 0; j < w; ++j) {
-                grid[i][j] = MapCell.create(rowJSON.getJSONObject(j));
+                grid[i][j] = MapCell.create(rowJSON.getJSONObject(j), i, j);
             }
         }
 
