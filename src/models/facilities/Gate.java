@@ -1,6 +1,7 @@
 package models.facilities;
 
 import models.agents.Agent;
+import models.tasks.Task;
 import org.json.JSONObject;
 
 
@@ -61,46 +62,57 @@ public class Gate extends Facility {
     }
 
     /**
-     * Checks whether its currently possible to bind the given {@code Agent} to this {@code Gate}.
-     *
-     * @param agent the {@code Agent} to check.
-     *
-     * @return {@code true} if it is possible to bind; {@code false} otherwise.
-     */
-    @Override
-    public boolean canBind(Agent agent) {
-        return false;
-    }
-
-    /**
-     * Binds the given {@code Agent} with this {@code Gate}.
+     * Binds this {@code Gate} with the given {@code Agent}.
+     * <p>
+     * This function should be called after checking that it is currently possible to bind
+     * the given {@code Agent}; otherwise un-expected behaviour could occur.
      *
      * @param agent the {@code Agent} to bind.
+     *
+     * @see Gate#isBound()
+     * @see Gate#canBind(Agent)
+     * @see Gate#canUnbind()
+     * @see Gate#unbind()
      */
     @Override
     public void bind(Agent agent) throws Exception {
-
+        // TODO: lock the agent
+        Task task = agent.getActiveTask();
+        Rack rack = task.getRack();
+        rack.confirmReservation(task);
+        super.bind(agent);
     }
 
     /**
-     * Checks whether its currently possible to unbind the given {@code Agent} from this {@code Gate}.
+     * Checks whether its currently possible to unbind the bound {@code Agent} from this {@code Gate}.
      *
-     * @param agent the {@code Agent} to check.
+     * @return {@code true} if it is possible to unbind; {@code false} otherwise.
      *
-     * @return {@code true} if it is possible to bind; {@code false} otherwise.
+     * @see Facility#isBound()
+     * @see Facility#canBind(Agent)
+     * @see Facility#bind(Agent)
+     * @see Facility#unbind()
      */
     @Override
-    public boolean canUnbind(Agent agent) {
-        return false;
+    public boolean canUnbind() {
+        // TODO: add extra check on time
+        return (super.canUnbind());
     }
 
     /**
-     * Unbinds the given {@code Agent} from this {@code Gate}.
+     * Unbinds the bound {@code Agent} from this {@code Gate}.
+     * <p>
+     * This function should be called after checking that it is currently possible to unbind
+     * the bound {@code Agent}; otherwise un-expected behaviour could occur.
      *
-     * @param agent the {@code Agent} to unbind.
+     * @see Gate#isBound()
+     * @see Gate#canBind(Agent)
+     * @see Gate#bind(Agent)
+     * @see Gate#canUnbind()
      */
     @Override
-    public void unbind(Agent agent) throws Exception {
-
+    public void unbind() throws Exception {
+        // TODO: unlock the bound agent
+        super.unbind();
     }
 }

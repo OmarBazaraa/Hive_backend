@@ -90,7 +90,8 @@ public class Planner {
 
             // Move the agent if free cell or we manged to get a blank in the next position
             if (nxtAgent == null || route(nxtAgent, mainAgent, map)) {
-                return agent.move(dir);
+                agent.move(dir);
+                return true;
             }
         }
 

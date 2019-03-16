@@ -39,7 +39,7 @@ import java.util.Map;
  * @see models.facilities.Station Station
  * @see models.tasks.Task Task
  */
-public class Rack extends Facility implements QuantityAddable<Item>, QuantityReservable<Item>, TaskAssignable {
+public class Rack extends Facility implements QuantityAddable<Item>, QuantityReservable<Item> {
 
     //
     // Member Variables
@@ -61,16 +61,6 @@ public class Rack extends Facility implements QuantityAddable<Item>, QuantityRes
      * The mapped value represents the quantity of this {@code Item}.
      */
     private Map<Item, Integer> items = new HashMap<>();
-
-    /**
-     * The current status of this {@code Rack}.
-     */
-    private RackStatus status = RackStatus.IDLE;
-
-    /**
-     * The assigned {@code Task} responsible of delivering this {@code Rack}.
-     */
-    private Task task;
 
     // ===============================================================================================
     //
@@ -270,125 +260,40 @@ public class Rack extends Facility implements QuantityAddable<Item>, QuantityRes
     }
 
     /**
-     * Returns the current status of this {@code Rack}.
-     *
-     * @return the {@code RackStatus} of this {@code Rack}.
-     */
-    public RackStatus getStatus() {
-        return status;
-    }
-
-    /**
-     * Assigns a new {@code Task} responsible of delivering this {@code Rack}.
-     *
-     * @param t the new {@code Task} to assign.
-     */
-    @Override
-    public void assignTask(Task t) throws Exception {
-        if (status != RackStatus.IDLE) {
-            throw new Exception("The previously assigned task has not been completed yet!");
-        }
-
-        // Reserve task items
-        reserve(t);
-
-        // Assign task
-        task = t;
-        status = RackStatus.RESERVED;
-    }
-
-    /**
-     * The callback function to be invoked when the assigned {@code Task} is completed.
-     *
-     * @param t the completed {@code Task}.
-     */
-    @Override
-    public void onTaskComplete(Task t) {
-        if (task == t) {
-            task = null;
-            status = RackStatus.IDLE;
-        }
-    }
-
-    /**
-     * Checks whether its currently possible to bind the given {@code Agent} to this {@code Rack}.
-     *
-     * @param agent the {@code Agent} to check.
-     *
-     * @return {@code true} if it is possible to bind; {@code false} otherwise.
-     */
-    @Override
-    public boolean canBind(Agent agent) {
-        if (status != RackStatus.RESERVED) {
-            return false;
-        }
-
-        return agent.equals(task.getAgent()) && agent.getPosition().equals(getPosition());
-    }
-
-    /**
-     * Binds the given {@code Agent} with this {@code Rack}.
+     * Binds this {@code Rack} with the given {@code Agent}.
+     * <p>
+     * It is preferable to allocate the {@code Rack} before binding it to an {@code Agent}.
+     * <p>
+     * This function should be called after checking that it is currently possible to bind
+     * the given {@code Agent}; otherwise un-expected behaviour could occur.
      *
      * @param agent the {@code Agent} to bind.
+     *
+     * @see Rack#isBound()
+     * @see Rack#canBind(Agent)
+     * @see Rack#canUnbind()
+     * @see Rack#unbind()
      */
     @Override
     public void bind(Agent agent) throws Exception {
-        if (!canBind(agent)) {
-            throw new Exception("Invalid agent binding!");
-        }
-
         agent.loadRack(this);
+        super.bind(agent);
     }
 
     /**
-     * Checks whether its currently possible to unbind the given {@code Agent} from this {@code Rack}.
+     * Unbinds the bound {@code Agent} from this {@code Rack}.
+     * <p>
+     * This function should be called after checking that it is currently possible to unbind
+     * the bound {@code Agent}; otherwise un-expected behaviour could occur.
      *
-     * @param agent the {@code Agent} to check.
-     *
-     * @return {@code true} if it is possible to bind; {@code false} otherwise.
+     * @see Rack#isBound()
+     * @see Rack#canBind(Agent)
+     * @see Rack#bind(Agent)
+     * @see Rack#canUnbind()
      */
     @Override
-    public boolean canUnbind(Agent agent) {
-        if (status != RackStatus.LOADED) {
-            return false;
-        }
-
-        return agent.equals(task.getAgent()) && agent.getPosition().equals(getPosition());
-    }
-
-    /**
-     * Unbinds the given {@code Agent} from this {@code Rack}.
-     *
-     * @param agent the {@code Agent} to unbind.
-     */
-    @Override
-    public void unbind(Agent agent) throws Exception {
-        if (!canUnbind(agent)) {
-            throw new Exception("Invalid agent unbinding!");
-        }
-
-        agent.offloadRack(this);
-    }
-
-    /**
-     * Loads this {@code Rack} to be delivered by an {@code Agent}.
-     */
-    public void load() throws Exception {
-        if (status != RackStatus.RESERVED) {
-            throw new Exception("Loading un-reserved rack!");
-        }
-
-        status = RackStatus.LOADED;
-    }
-
-    /**
-     * Offloads this {@code Rack} after being delivered by an {@code Agent}.
-     */
-    public void offload() throws Exception {
-        if (status != RackStatus.LOADED) {
-            throw new Exception("Offloading un-loaded rack!");
-        }
-
-        status = RackStatus.RESERVED;
+    public void unbind() throws Exception {
+        boundAgent.offloadRack(this);
+        super.unbind();
     }
 }

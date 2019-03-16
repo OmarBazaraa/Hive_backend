@@ -113,18 +113,6 @@ public class Constants {
     public static final int AGENT_DEFAULT_CHARGE_CAPACITY = 100;
 
     /**
-     * Different status of an {@code Agent} during its lifecycle in the system.
-     */
-    public enum AgentStatus {
-        IDLE,                   // Idle and doing nothing
-        ACTIVE,                 // Active performing a task
-        ACTIVE_LOADED,          // Active performing a task and also holding a rack to deliver
-        CHARGING,               // Charging at a charging station
-        MANUALLY_CONTROLLED,    // Manually controlled by the frontend
-        OUT_OF_SERVICE          // Out of service
-    }
-
-    /**
      * Different actions that can be done by an {@code Agent}.
      * Note that the first 4 values should be in the same order as in {@code Direction} enum.
      * TODO: may need to add rotation
@@ -149,15 +137,6 @@ public class Constants {
     // TODO: refactor?! :: RACK_DEFAULT_* <-> DEFAULT_RACK_*
     public static final int RACK_DEFAULT_INIT_WEIGHT = 100;
     public static final int RACK_DEFAULT_STORE_CAPACITY = 100;
-
-    /**
-     * Different status of a {@code Rack} during its lifecycle in the system.
-     */
-    public enum RackStatus {
-        IDLE,           // Idle and ready to be shipped
-        RESERVED,       // Reserved by a certain task
-        LOADED          // Loaded by an agent to be delivered
-    }
 
     //
     // Order and Task Constants

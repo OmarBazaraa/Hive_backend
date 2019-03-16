@@ -236,9 +236,9 @@ public class Task extends Entity implements QuantityAddable<Item> {
         }
 
         // Allocate task resources
-        order.assignTask(this);
-        rack.assignTask(this);
+        rack.reserve(this);
         agent.assignTask(this);
+        order.assignTask(this);
 
         // Activate the task
         status = TaskStatus.FETCHING;
@@ -252,7 +252,6 @@ public class Task extends Entity implements QuantityAddable<Item> {
      */
     private void terminate() {
         order.onTaskComplete(this);
-        rack.onTaskComplete(this);
         agent.onTaskComplete(this);
     }
 
@@ -265,7 +264,7 @@ public class Task extends Entity implements QuantityAddable<Item> {
      * @return the priority of this {@code Task}.
      */
     public int getPriority() {
-        return (order != null ? -order.getId() : Integer.MIN_VALUE);
+        return -order.getId();
     }
 
     /**
@@ -301,47 +300,38 @@ public class Task extends Entity implements QuantityAddable<Item> {
     public void executeAction() throws Exception {
         // Moving to the rack
         if (status == TaskStatus.FETCHING) {
-            if (agent.samePosition(rack)) {
-                if (agent.bind(rack)) {
-                    status = TaskStatus.DELIVERING;
-                }
+            if (rack.canBind(agent)) {
+                rack.bind(agent);
+                status = TaskStatus.DELIVERING;
             } else {
                 Planner.route(agent, Warehouse.getInstance().getMap());
             }
-            return;
         }
-
         // Delivering the rack to the gate
-        if (status == TaskStatus.DELIVERING) {
-            if (agent.samePosition(gate)) {
-                if (agent.bind(gate)) {
-                    status = TaskStatus.OFFLOADING;
-                }
+        else if (status == TaskStatus.DELIVERING) {
+            if (gate.samePosition(agent)) {
+                gate.bind(agent);
+                status = TaskStatus.OFFLOADING;
             } else {
                 Planner.route(agent, Warehouse.getInstance().getMap());
             }
-            return;
         }
-
         // Wait until offloading the items at the gate
-        if (status == TaskStatus.OFFLOADING) {
-            if (agent.unbind(gate)) {
+        else if (status == TaskStatus.OFFLOADING) {
+            if (gate.canUnbind()) {
+                gate.unbind();
                 status = TaskStatus.RETURNING;
             }
-            return;
         }
-
         // Returning the rack back to its position
-        if (status == TaskStatus.RETURNING) {
-            if (agent.samePosition(rack)) {
-                if (agent.unbind(rack)) {
-                    status = TaskStatus.COMPLETED;
-                    terminate();
-                }
+        else if (status == TaskStatus.RETURNING) {
+            if (rack.canUnbind()) {
+                rack.unbind();
+                status = TaskStatus.COMPLETED;
+                terminate();
             } else {
                 Planner.route(agent, Warehouse.getInstance().getMap());
             }
-            return;
         }
     }
 }

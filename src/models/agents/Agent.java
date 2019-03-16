@@ -2,7 +2,6 @@ package models.agents;
 
 import models.Entity;
 import models.HiveObject;
-import models.facilities.Facility;
 import models.facilities.Rack;
 import models.maps.GuideGrid;
 import models.maps.MapCell;
@@ -17,11 +16,14 @@ import utils.Constants.*;
 
 import org.json.JSONObject;
 
+import java.util.LinkedList;
+import java.util.Queue;
+
 
 /**
  * This {@code Agent} class is the model class for robot agents in our Hive System.
  * <p>
- * An {@code Agent} is responsible for carrying out {@link Task Tasks} inside a {@link models.warehouses.Warehouse Warehouse}.
+ * An {@code Agent} is responsible for carrying out {@link Task Tasks} inside a {@link Warehouse}.
  *
  * @see models.HiveObject HiveObject
  * @see models.facilities.Facility Facility
@@ -42,14 +44,14 @@ public class Agent extends HiveObject implements TaskAssignable {
     private int chargeLevel;
 
     /**
-     * The current status of this {@code Agent}.
+     * The queue of assigned tasks of this {@code Agent}.
      */
-    private AgentStatus status = AgentStatus.IDLE;
+    private Queue<Task> tasks = new LinkedList<>();
 
     /**
-     * The assigned {@code Task} of this {@code Agent}.
+     * The flag indicating whether this {@code Agent} is currently loaded by a {@code Rack}.
      */
-    private Task task;
+    private boolean loaded = false;
 
     /**
      * The last time this {@code Agent} has performed an action.
@@ -100,15 +102,6 @@ public class Agent extends HiveObject implements TaskAssignable {
     }
 
     /**
-     * Returns the current status of this {@code Agent}.
-     *
-     * @return an {@code AgentStatus} of this {@code Agent}.
-     */
-    public AgentStatus getStatus() {
-        return status;
-    }
-
-    /**
      * Checks whether this {@code Agent} is currently active or not.
      * <p>
      * An {@code Agent} is said to be active if it is currently performing a {@code Task}.
@@ -116,7 +109,7 @@ public class Agent extends HiveObject implements TaskAssignable {
      * @return {@code true} if this {@code Agent} is active; {@code false} otherwise.
      */
     public boolean isActive() {
-        return (status == AgentStatus.ACTIVE || status == AgentStatus.ACTIVE_LOADED);
+        return (tasks.size() > 0);
     }
 
     /**
@@ -125,30 +118,45 @@ public class Agent extends HiveObject implements TaskAssignable {
      * @return {@code true} if this {@code Agent} is loaded; {@code false} otherwise.
      */
     public boolean isLoaded() {
-        return (status == AgentStatus.ACTIVE_LOADED);
+        return (loaded);
+    }
+
+    /**
+     * Returns the active {@code Task} this {@code Agent} is currently executing.
+     *
+     * @return the currently active {@code Task} is exists; {@code null} otherwise.
+     */
+    public Task getActiveTask() {
+        return tasks.peek();
     }
 
     /**
      * Assigns a new {@code Task} to this {@code Agent}.
      *
-     * @param t the new {@code Task} to assign.
+     * TODO: skip returning the rack back to its place when multiple tasks are assigned with the same rack
+     *
+     * @param task the new {@code Task} to assign.
      */
     @Override
-    public void assignTask(Task t) {
-        task = t;
-        status = AgentStatus.ACTIVE;
+    public void assignTask(Task task) throws Exception {
+        if (tasks.isEmpty()) {
+            task.getRack().allocate(this);
+        }
+
+        tasks.add(task);
     }
 
     /**
-     * The callback function to be invoked when the assigned {@code Task} is completed.
+     * The callback function to be invoked when the currently active {@code Task} is completed.
      *
-     * @param t the completed {@code Task}.
+     * @param task the completed {@code Task}.
      */
     @Override
-    public void onTaskComplete(Task t) {
-        if (task == t) {
-            task = null;
-            status = AgentStatus.IDLE;
+    public void onTaskComplete(Task task) {
+        tasks.remove();
+
+        if (tasks.isEmpty()) {
+            task.getRack().deallocate();
         }
     }
 
@@ -159,24 +167,27 @@ public class Agent extends HiveObject implements TaskAssignable {
      * @return the priority of this {@code Agent}.
      */
     public int getPriority() {
+        Task task = getActiveTask();
         return (task != null ? task.getPriority() : Integer.MIN_VALUE);
     }
 
     /**
-     * Returns the estimated number of steps to finish the currently assigned {@code Task}.
+     * Returns the estimated number of steps to finish the currently active {@code Task}.
      *
      * @return the estimated number of steps.
      */
     public int getEstimatedSteps() {
+        Task task = getActiveTask();
         return (task != null ? task.getEstimatedDistance() : 0);
     }
 
     /**
-     * Returns the guide map to reach the target of the assigned {@code Task}.
+     * Returns the guide map to reach the target of the currently active {@code Task}.
      *
      * @return a {@code GuideGrid} to reach the target.
      */
     public GuideGrid getGuideMap() {
+        Task task = getActiveTask();
         return (task != null ? task.getGuideMap() : null);
     }
 
@@ -189,52 +200,12 @@ public class Agent extends HiveObject implements TaskAssignable {
             return;
         }
 
-        // Execute action depending on the assigned task
+        // Execute action depending on the currently active task
+        Task task = getActiveTask();
+
         if (task != null) {
             task.executeAction();
         }
-    }
-
-    /**
-     * Binds this {@code Agent} with the given {@code Facility} available at the
-     * same current position of this {@code Agent}.
-     *
-     * @param facility the {@code Facility} to bind with.
-     *
-     * @return {@code true} if managed to bind successfully; {@code false} otherwise.
-     */
-    public boolean bind(Facility facility) throws Exception {
-        // Update action time
-        updateLastActionTime();
-
-        // Bind if possible
-        if (facility.canBind(this)) {
-            facility.bind(this);
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * Unbinds this {@code Agent} from the given {@code Facility} available at the
-     * same current position of this {@code Agent}.
-     *
-     * @param facility the {@code Facility} to bind with.
-     *
-     * @return {@code true} if managed to unbind successfully; {@code false} otherwise.
-     */
-    public boolean unbind(Facility facility) throws Exception {
-        // Update action time
-        updateLastActionTime();
-
-        // Unbind if possible
-        if (facility.canUnbind(this)) {
-            facility.unbind(this);
-            return true;
-        }
-
-        return false;
     }
 
     /**
@@ -244,7 +215,7 @@ public class Agent extends HiveObject implements TaskAssignable {
      *
      * @return {@code true} if managed to move successfully; {@code false} otherwise.
      */
-    public boolean move(Direction dir) throws Exception {
+    public void move(Direction dir) throws Exception {
         // Get warehouse map
         MapGrid map = Warehouse.getInstance().getMap();
 
@@ -256,51 +227,39 @@ public class Agent extends HiveObject implements TaskAssignable {
         Position nxt = map.next(cur, dir);
         MapCell nxtCell = map.get(nxt);
 
-        // Ensure no agents in the next position
-        if (nxtCell.hasAgent()) {
-            throw new Exception("Moving into a another robot!");
-        }
-
-        // Ensure no racks in the next position if this agent is currently loaded
-        if (nxtCell.getType() == CellType.RACK && isLoaded()) {
-            throw new Exception("Moving into a rack while the robot is currently loaded!");
-        }
-
         // Move agent
         curCell.setAgent(null);
         nxtCell.setAgent(this);
         setPosition(nxt);
-        return true;
+
+        // Update action time
+        updateLastActionTime();
     }
 
     /**
-     * Loads the rack above this agent.
+     * Loads and lifts the given {@code Rack} above this {@code Agent}.
      *
      * @param rack the {@code Rack} to load.
      */
     public void loadRack(Rack rack) throws Exception {
-        if (isLoaded()) {
-            throw new Exception("Cannot load more than one rack at a time!");
-        }
+        // Enable loaded flag
+        loaded = true;
 
-        // Load the rack
-        rack.load();
-        status = AgentStatus.ACTIVE_LOADED;
+        // Update action time
+        updateLastActionTime();
     }
 
     /**
-     * Offloads the rack above this agent.
+     * Offloads and releases the {@code Rack} loaded by this {@code Agent}.
      *
      * @param rack the {@code Rack} to offload.
      */
     public void offloadRack(Rack rack) throws Exception {
-        if (!isLoaded()) {
-            throw new Exception("No rack is available to be offloaded!");
-        }
+        // Disable loaded flag
+        loaded = false;
 
-        // Offload the rack
-        rack.offload();
-        status = AgentStatus.ACTIVE;
+        // Update action time
+        updateLastActionTime();
     }
 
     // ===============================================================================================

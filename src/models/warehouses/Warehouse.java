@@ -198,7 +198,7 @@ public class Warehouse implements Order.OnFulFillListener {
         // Get the initial size of the queue
         int size = activeAgents.size();
 
-        // Create another queue of agent
+        // Create another queue of agents
         Queue<Agent> q = new PriorityQueue<>(size);
 
         //
@@ -206,7 +206,7 @@ public class Warehouse implements Order.OnFulFillListener {
         //
         for (int i = 0; i < size; ++i) {
             // Get current active agent
-            Agent agent = activeAgents.poll();
+            Agent agent = activeAgents.remove();
 
             // Try moving the current agent towards its target
             agent.executeAction();
