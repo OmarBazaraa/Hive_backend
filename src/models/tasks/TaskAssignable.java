@@ -10,7 +10,7 @@ import models.orders.Order;
  * <p>
  * A {@code TaskAssignable} class is a class that can be assigned a {@link Task}.
  * <p>
- * This interface is to be implemented by {@link Agent}, {@link Rack}, {@link Order}.
+ * This interface is to be implemented by {@link Agent}, {@link Order}.
  *
  * @see Task
  * @see Order

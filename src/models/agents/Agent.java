@@ -212,8 +212,6 @@ public class Agent extends HiveObject implements TaskAssignable {
      * Moves this {@code Agent} in the given {@code Direction}.
      *
      * @param dir the {@code Direction} to move along.
-     *
-     * @return {@code true} if managed to move successfully; {@code false} otherwise.
      */
     public void move(Direction dir) throws Exception {
         // Get warehouse map

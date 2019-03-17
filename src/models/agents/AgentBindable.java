@@ -23,51 +23,6 @@ import models.facilities.Station;
 public interface AgentBindable {
 
     /**
-     * Returns the {@code Agent} currently allocating this object.
-     *
-     * @return the allocating {@code Agent} if exists; {@code null} otherwise.
-     *
-     * @see AgentBindable#isAllocated()
-     * @see AgentBindable#allocate(Agent)
-     * @see AgentBindable#deallocate()
-     */
-    Agent getAllocatingAgent();
-
-    /**
-     * Checks whether this object is currently allocated by an {@code Agent} or not.
-     *
-     * @return {@code true} if this object is allocated; {@code false} otherwise.
-     *
-     * @see AgentBindable#getAllocatingAgent()
-     * @see AgentBindable#allocate(Agent)
-     * @see AgentBindable#deallocate()
-     */
-    boolean isAllocated();
-
-    /**
-     * Allocates and reserves this object to the given {@code Agent}.
-     * <p>
-     * This function should be called after checking that this object is currently
-     * un-allocated; otherwise un-expected behaviour could occur.
-     *
-     * @param agent the allocating {@code Agent}.
-     *
-     * @see AgentBindable#getAllocatingAgent()
-     * @see AgentBindable#isAllocated()
-     * @see AgentBindable#deallocate()
-     */
-    void allocate(Agent agent) throws Exception;
-
-    /**
-     * De-allocates and releases this object from the currently allocating {@code Agent}.
-     *
-     * @see AgentBindable#getAllocatingAgent()
-     * @see AgentBindable#isAllocated()
-     * @see AgentBindable#allocate(Agent)
-     */
-    void deallocate() throws Exception;
-
-    /**
      * Checks whether this object is currently bound with an {@code Agent} or not.
      *
      * @return {@code true} if this object is bound; {@code false} otherwise.

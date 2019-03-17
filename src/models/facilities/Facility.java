@@ -4,6 +4,7 @@ import algorithms.Planner;
 
 import models.HiveObject;
 import models.agents.Agent;
+import models.agents.AgentAllocatable;
 import models.agents.AgentBindable;
 import models.maps.GuideGrid;
 import models.maps.MapGrid;
@@ -23,7 +24,7 @@ import models.maps.MapGrid;
  * @see models.facilities.Gate Gate
  * @see models.facilities.Station Station
  */
-public class Facility extends HiveObject implements AgentBindable {
+public class Facility extends HiveObject implements AgentBindable, AgentAllocatable {
 
     //
     // Member Variables
