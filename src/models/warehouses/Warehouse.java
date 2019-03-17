@@ -1,7 +1,6 @@
 package models.warehouses;
 
 import algorithms.Dispatcher;
-import algorithms.Planner;
 
 import models.agents.Agent;
 import models.facilities.Facility;
@@ -11,7 +10,7 @@ import models.facilities.Station;
 import models.items.Item;
 import models.maps.MapCell;
 import models.maps.MapGrid;
-import models.orders.Order;
+import models.tasks.Order;
 
 import models.tasks.Task;
 import utils.Constants;
@@ -164,7 +163,7 @@ public class Warehouse implements Order.OnFulFillListener {
     /**
      * Adds and activates a new {@code Task} to this {@code Warehouse} after being dispatched
      * by {@link Dispatcher}.
-     * <p></p>
+     * <p>
      * This function should only be called from the {@link Dispatcher}.
      *
      * @param task the {@code Task} to add to the system.

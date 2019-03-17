@@ -1,11 +1,8 @@
-package models.orders;
+package models.tasks;
 
-import models.Entity;
 import models.facilities.Gate;
 import models.items.Item;
 import models.items.QuantityAddable;
-import models.tasks.Task;
-import models.tasks.TaskAssignable;
 import models.warehouses.Warehouse;
 
 import utils.Constants;
@@ -27,7 +24,7 @@ import java.util.*;
  * @see Item
  * @see Gate
  */
-public class Order extends Entity implements QuantityAddable<Item>, TaskAssignable {
+public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAssignable {
 
     //
     // Member Variables
@@ -249,6 +246,7 @@ public class Order extends Entity implements QuantityAddable<Item>, TaskAssignab
      * Activates this {@code Order} by reserving all the needed units of this to avoid
      * accepting infeasible orders in the future.
      */
+    @Override
     public void activate() throws Exception {
         // Skip re-activating already activated orders
         if (status != OrderStatus.INACTIVE) {
@@ -262,6 +260,20 @@ public class Order extends Entity implements QuantityAddable<Item>, TaskAssignab
 
         // Activate the order
         status = OrderStatus.ACTIVE;
+    }
+
+    /**
+     * Terminates this {@code Order} after completion.
+     * <p>
+     * A callback function to be invoked when this {@code Order} has been completed.
+     * Used to clear and finalize allocated resources.
+     *
+     * TODO: add order statistics finalization
+     */
+    @Override
+    protected void terminate() {
+        status = OrderStatus.FULFILLED;
+        super.terminate();
     }
 
     /**
@@ -294,38 +306,7 @@ public class Order extends Entity implements QuantityAddable<Item>, TaskAssignab
         subTasks.remove(task);
 
         if (isFulfilled()) {
-            status = OrderStatus.FULFILLED;
-
-            if (fulFillListener != null) {
-                fulFillListener.onOrderFulfill(this);
-            }
+            terminate();
         }
-    }
-
-    /**
-     * Sets the listener to be invoked when this {@code Order} is fulfilled.
-     *
-     * @param listener the {@code OnFulFillListener} object.
-     */
-    public void setOnFulfillListener(OnFulFillListener listener) {
-        fulFillListener = listener;
-    }
-
-    // ===============================================================================================
-    //
-    // Sub-classes & Interface
-    //
-
-    /**
-     * Interface definition for a callback to be invoked when an {@link Order} is fulfilled.
-     */
-    public interface OnFulFillListener {
-
-        /**
-         * Called when an {@code Order} has been fulfilled.
-         *
-         * @param order the fulfilled {@code Order}.
-         */
-        void onOrderFulfill(Order order);
     }
 }

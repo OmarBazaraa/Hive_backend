@@ -7,9 +7,7 @@ import models.facilities.Gate;
 import models.facilities.Rack;
 import models.items.QuantityAddable;
 import models.maps.GuideGrid;
-import models.orders.Order;
 
-import models.Entity;
 import models.warehouses.Warehouse;
 import utils.Constants.*;
 
@@ -29,7 +27,7 @@ import java.util.Map;
  * @see Rack
  * @see Gate
  */
-public class Task extends Entity implements QuantityAddable<Item> {
+public class Task extends AbstractTask implements QuantityAddable<Item> {
 
     //
     // Member Variables
@@ -69,25 +67,6 @@ public class Task extends Entity implements QuantityAddable<Item> {
 
     // ===============================================================================================
     //
-    // Static Methods
-    //
-
-    /**
-     * The number of tasks in the system so far.
-     */
-    private static int tasksCount = 0;
-
-    /**
-     * Returns the first available id for the next {@code Task} and increments.
-     *
-     * @return the first available id.
-     */
-    private static int getNextId() {
-        return tasksCount++;
-    }
-
-    // ===============================================================================================
-    //
     // Member Methods
     //
 
@@ -95,7 +74,7 @@ public class Task extends Entity implements QuantityAddable<Item> {
      * Constructs a new {@code Task} object.
      */
     public Task(Order order, Rack rack, Agent agent) {
-        super(getNextId());
+        super();
         this.order = order;
         this.gate = order.getDeliveryGate();
         this.rack = rack;
@@ -229,6 +208,7 @@ public class Task extends Entity implements QuantityAddable<Item> {
     /**
      * Activates this {@code Task} and allocates its required resources.
      */
+    @Override
     public void activate() throws Exception {
         // Skip re-activating already activated tasks
         if (status != TaskStatus.INACTIVE) {
@@ -250,9 +230,11 @@ public class Task extends Entity implements QuantityAddable<Item> {
      * A callback function to be invoked when this {@code Task} has been completed.
      * Used to clear and finalize allocated resources.
      */
-    private void terminate() {
+    @Override
+    protected void terminate() {
         order.onTaskComplete(this);
         agent.onTaskComplete(this);
+        super.terminate();
     }
 
     /**
@@ -263,6 +245,7 @@ public class Task extends Entity implements QuantityAddable<Item> {
      *
      * @return the priority of this {@code Task}.
      */
+    @Override
     public int getPriority() {
         return -order.getId();
     }

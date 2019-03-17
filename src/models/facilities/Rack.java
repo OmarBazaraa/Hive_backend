@@ -246,7 +246,7 @@ public class Rack extends Facility implements QuantityAddable<Item>, QuantityRes
     /**
      * Confirms the previously assigned reservations specified by the given
      * {@code QuantityAddable} container, and removes those reserved units from this object.
-     * <p></p>
+     * <p>
      * This function physically removes some of the reserved items and reduces the weight
      * of this {@code Rack}.
      *

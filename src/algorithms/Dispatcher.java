@@ -4,7 +4,7 @@ import models.agents.Agent;
 import models.facilities.Rack;
 import models.items.Item;
 import models.maps.GuideGrid;
-import models.orders.Order;
+import models.tasks.Order;
 import models.tasks.Task;
 import models.warehouses.Warehouse;
 

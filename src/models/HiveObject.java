@@ -34,7 +34,7 @@ abstract public class HiveObject extends Entity {
     /**
      * The number of objects in the system so far.
      */
-    protected static int count = 0;
+    protected static int sCount = 0;
 
     /**
      * Returns the first available id for the next object and increments.
@@ -42,7 +42,7 @@ abstract public class HiveObject extends Entity {
      * @return the first available id.
      */
     protected static int getNextId() {
-        return count++;
+        return sCount++;
     }
 
     // ===============================================================================================
@@ -51,7 +51,7 @@ abstract public class HiveObject extends Entity {
     //
 
     /**
-     * Constructs a new {@code HiveObject} with the given id.
+     * Constructs a new {@code HiveObject} with an incremental id.
      */
     public HiveObject() {
         super(getNextId());

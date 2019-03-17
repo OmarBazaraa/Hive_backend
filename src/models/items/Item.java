@@ -2,11 +2,10 @@ package models.items;
 
 import models.Entity;
 import models.facilities.Rack;
-import models.orders.Order;
+import models.tasks.Order;
 import models.tasks.Task;
 
 import utils.Constants;
-import utils.Constants.*;
 
 import org.json.JSONObject;
 
