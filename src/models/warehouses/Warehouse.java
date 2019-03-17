@@ -54,9 +54,9 @@ public class Warehouse implements Order.OnFulFillListener {
     private Queue<Agent> activeAgents = new PriorityQueue<>();
 
     /**
-     * The queue of all currently idle agents.
+     * The set of all currently idle agents.
      */
-    private Queue<Agent> readyAgents = new LinkedList<>();
+    private Set<Agent> readyAgents = new HashSet<>();
 
     /**
      * The map of all items in this {@code Warehouse}, indexed by their id.
