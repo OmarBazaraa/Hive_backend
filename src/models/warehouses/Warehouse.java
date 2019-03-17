@@ -13,6 +13,7 @@ import models.maps.MapCell;
 import models.maps.MapGrid;
 import models.orders.Order;
 
+import models.tasks.Task;
 import utils.Constants;
 
 import org.json.JSONArray;
@@ -160,6 +161,27 @@ public class Warehouse implements Order.OnFulFillListener {
         // TODO: send feed back to the front-end.
     }
 
+    /**
+     * Adds and activates a new {@code Task} to this {@code Warehouse} after being dispatched
+     * by {@link Dispatcher}.
+     * <p></p>
+     * This function should only be called from the {@link Dispatcher}.
+     *
+     * @param task the {@code Task} to add to the system.
+     */
+    public void addTask(Task task) throws Exception {
+        // Activate the task
+        task.fillItems();
+        task.activate();
+
+        // Update agents lists
+        Agent agent = task.getAgent();
+        if (readyAgents.contains(agent)) {
+            readyAgents.remove(agent);
+            activeAgents.add(agent);
+        }
+    }
+
     // ===============================================================================================
     //
     // Helper Methods
@@ -182,7 +204,7 @@ public class Warehouse implements Order.OnFulFillListener {
             Order order = pendingOrders.poll();
 
             // Try dispatching the current order
-            Dispatcher.dispatch(order, readyAgents, activeAgents);
+            Dispatcher.dispatch(order, readyAgents);
 
             // Re-add the order to the queue if still pending
             if (order.isPending()) {
@@ -305,7 +327,7 @@ public class Warehouse implements Order.OnFulFillListener {
 
     // ===============================================================================================
     //
-    // Parsing Methods
+    // Parsing & Initializing Methods
     //
 
     /**
