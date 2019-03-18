@@ -184,34 +184,45 @@ public class Item extends Entity implements QuantityAddable<Rack>, QuantityReser
 
     /**
      * Reserves some units of this {@code Item} specified by the given {@code QuantityAddable} container.
+     * <p>
+     * This function should only be called once per {@code Order} activation.
      *
      * @param container the {@code QuantityAddable} container.
+     *
+     * @see Item#confirmReservation(QuantityAddable)
      */
     @Override
     public void reserve(QuantityAddable<Item> container) throws Exception {
-        int reserveQuantity = container.get(this);
+        int reservedQuantity = container.get(this);
 
-        if (reserveQuantity > getAvailableUnits()) {
+        if (reservedQuantity > getAvailableUnits()) {
             throw new Exception("No enough item units to be reserved!");
         }
 
-        reservedUnits += reserveQuantity;
+        reservedUnits += reservedQuantity;
     }
 
     /**
      * Confirms the previously assigned reservations specified by the given
      * {@code QuantityAddable} container, and removes those reserved units from this object.
+     * <p>
+     * This function should be called after reserving a same or a super container first;
+     * otherwise un-expected behaviour could occur.
+     * <p>
+     * This function should only be called once per {@code Task} termination.
      *
      * @param container the {@code QuantityAddable} container.
+     *
+     * @see Item#reserve(QuantityAddable)
      */
     @Override
     public void confirmReservation(QuantityAddable<Item> container) throws Exception {
-        int reserveQuantity = container.get(this);
+        int reservedQuantity = container.get(this);
 
-        if (reserveQuantity > reservedUnits) {
+        if (reservedQuantity > reservedUnits) {
             throw new Exception("No enough item units to be reserved!");
         }
 
-        reservedUnits -= reserveQuantity;
+        reservedUnits -= reservedQuantity;
     }
 }

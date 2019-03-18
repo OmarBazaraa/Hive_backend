@@ -19,14 +19,21 @@ public interface QuantityReservable<T> {
      * Reserves some units specified by the given {@code QuantityAddable} container.
      *
      * @param container the {@code QuantityAddable} container.
+     *
+     * @see QuantityReservable#confirmReservation(QuantityAddable)
      */
     void reserve(QuantityAddable<T> container) throws Exception;
 
     /**
      * Confirms the previously assigned reservations specified by the given
      * {@code QuantityAddable} container, and removes those reserved units from this object.
+     * <p>
+     * This function should be called after reserving a same or a super container first;
+     * otherwise un-expected behaviour could occur.
      *
      * @param container the {@code QuantityAddable} container.
+     *
+     * @see QuantityReservable#reserve(QuantityAddable)
      */
     void confirmReservation(QuantityAddable<T> container) throws Exception;
 }

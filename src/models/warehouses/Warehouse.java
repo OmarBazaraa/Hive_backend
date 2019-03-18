@@ -10,6 +10,7 @@ import models.facilities.Station;
 import models.items.Item;
 import models.maps.MapCell;
 import models.maps.MapGrid;
+import models.tasks.AbstractTask;
 import models.tasks.Order;
 
 import models.tasks.Task;
@@ -26,7 +27,7 @@ import java.util.*;
  * <p>
  * It contains required functions to simulate the process inside an automated smart warehouse.
  */
-public class Warehouse implements Order.OnFulFillListener {
+public class Warehouse implements AbstractTask.OnFulFillListener {
 
     //
     // Member Variables
@@ -156,7 +157,7 @@ public class Warehouse implements Order.OnFulFillListener {
      * @param order the fulfilled {@code Order}.
      */
     @Override
-    public void onOrderFulfill(Order order) {
+    public void onOrderFulfill(AbstractTask order) {
         // TODO: send feed back to the front-end.
     }
 

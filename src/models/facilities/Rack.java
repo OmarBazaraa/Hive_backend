@@ -69,7 +69,7 @@ public class Rack extends Facility implements QuantityAddable<Item>, QuantityRes
 
     /**
      * Creates a new {@code Rack} object from JSON data.
-     *
+     * <p>
      * TODO: add checks and throw exceptions
      *
      * @param data the un-parsed JSON data.
@@ -122,7 +122,7 @@ public class Rack extends Facility implements QuantityAddable<Item>, QuantityRes
     /**
      * Constructs a new {@code Rack} object.
      *
-     * @param id  the id of the {@code Rack}.
+     * @param id the id of the {@code Rack}.
      */
     public Rack(int id) {
         super(id);
@@ -233,13 +233,26 @@ public class Rack extends Facility implements QuantityAddable<Item>, QuantityRes
      * This functions removes some items from the rack without actually reducing
      * the weight of this {@code Rack}.
      * The items are physically removed when the reservation is confirmed.
+     * <p>
+     * This function should only be called once per {@code Task} activation.
      *
      * @param container the {@code QuantityAddable} container.
+     *
+     * @see Rack#confirmReservation(QuantityAddable)
      */
     @Override
     public void reserve(QuantityAddable<Item> container) throws Exception {
         for (Map.Entry<Item, Integer> pair : container) {
-            QuantityAddable.update(items, pair.getKey(), -pair.getValue());
+            // Get item and its quantity
+            Item item = pair.getKey();
+            int quantity = pair.getValue();
+
+            // Remove the specified quantity
+            QuantityAddable.update(items, item, -quantity);
+
+            // Confirm reserved quantity the update item
+            item.confirmReservation(container);
+            item.add(this, -quantity);
         }
     }
 
@@ -249,13 +262,25 @@ public class Rack extends Facility implements QuantityAddable<Item>, QuantityRes
      * <p>
      * This function physically removes some of the reserved items and reduces the weight
      * of this {@code Rack}.
+     * <p>
+     * This function should be called after reserving a same or a super container first;
+     * otherwise un-expected behaviour could occur.
+     * <p>
+     * This function should only be called once per {@code Task} termination.
      *
      * @param container the {@code QuantityAddable} container.
+     *
+     * @see Rack#reserve(QuantityAddable)
      */
     @Override
     public void confirmReservation(QuantityAddable<Item> container) throws Exception {
         for (Map.Entry<Item, Integer> pair : container) {
-            updateWeight(-pair.getKey().getWeight() * pair.getValue());
+            // Get item and its quantity
+            Item item = pair.getKey();
+            int quantity = pair.getValue();
+
+            // Remove item weight from the rack
+            updateWeight(-item.getWeight() * quantity);
         }
     }
 
