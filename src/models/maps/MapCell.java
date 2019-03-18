@@ -56,32 +56,35 @@ public class MapCell extends Cell {
     public static MapCell create(JSONObject data, int row, int col) throws Exception {
         MapCell ret = new MapCell();
 
-        int type = data.getInt(Constants.MSG_KEY_TYPE);
-
-        switch (type) {
-            case Constants.MSG_TYPE_CELL_EMPTY:
-                ret.setFacility(null, CellType.EMPTY);
-                break;
-            case Constants.MSG_TYPE_CELL_OBSTACLE:
-                ret.setFacility(null, CellType.OBSTACLE);
-                break;
-            case Constants.MSG_TYPE_CELL_RACK:
-                ret.setFacility(Rack.create(data, row, col), CellType.RACK);
-                break;
-            case Constants.MSG_TYPE_CELL_GATE:
-                ret.setFacility(Gate.create(data, row, col), CellType.GATE);
-                break;
-            case Constants.MSG_TYPE_CELL_STATION:
-                ret.setFacility(Station.create(data, row, col), CellType.STATION);
-                break;
-            case Constants.MSG_TYPE_CELL_AGENT:
-                ret.setAgent(Agent.create(data, row, col));
-                break;
-            default:
-                throw new Exception("Unknown cell type!");
+        if (data.isEmpty()) {
+            return ret;
         }
 
-        return ret;
+        if (data.has(Constants.MSG_KEY_AGENT)) {
+            ret.setAgent(Agent.create(data, row, col));
+            return ret;
+        }
+
+        if (data.has(Constants.MSG_KEY_FACILITY)) {
+            int type = data.getInt(Constants.MSG_KEY_TYPE);
+
+            switch (type) {
+                case Constants.MSG_TYPE_CELL_OBSTACLE:
+                    ret.setFacility(null, CellType.OBSTACLE);
+                    break;
+                case Constants.MSG_TYPE_CELL_RACK:
+                    ret.setFacility(Rack.create(data, row, col), CellType.RACK);
+                    break;
+                case Constants.MSG_TYPE_CELL_GATE:
+                    ret.setFacility(Gate.create(data, row, col), CellType.GATE);
+                    break;
+                case Constants.MSG_TYPE_CELL_STATION:
+                    ret.setFacility(Station.create(data, row, col), CellType.STATION);
+                    break;
+            }
+        }
+
+        throw new Exception("Unknown cell type!");
     }
 
     /**
