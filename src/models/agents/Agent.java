@@ -11,8 +11,11 @@ import models.tasks.Task;
 import models.tasks.TaskAssignable;
 import models.warehouses.Warehouse;
 
+import server.Server;
+
 import utils.Constants;
 import utils.Constants.*;
+import utils.Utility;
 
 import org.json.JSONObject;
 
@@ -232,6 +235,9 @@ public class Agent extends HiveObject implements TaskAssignable {
 
         // Update action time
         updateLastActionTime();
+
+        // Send move to the frontend
+        Server.getInstance().sendAction(this, Utility.dirToAction(dir));
     }
 
     /**

@@ -69,7 +69,7 @@ public class Item extends Entity implements QuantityAddable<Rack>, QuantityReser
      */
     public static Item create(JSONObject data) throws Exception {
         int id = data.getInt(Constants.MSG_KEY_ID);
-        int weight = data.getInt(Constants.MSG_KEY_WEIGHT);
+        int weight = data.getInt(Constants.MSG_KEY_ITEM_WEIGHT);
         return new Item(id, weight);
     }
 

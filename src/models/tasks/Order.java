@@ -86,7 +86,7 @@ public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAs
             JSONObject itemJSON = itemsJSON.getJSONObject(i);
 
             int itemId = itemJSON.getInt(Constants.MSG_KEY_ID);
-            int quantity = itemJSON.getInt(Constants.MSG_KEY_QUANTITY);
+            int quantity = itemJSON.getInt(Constants.MSG_KEY_ITEM_QUANTITY);
             Item item = Warehouse.getInstance().getItemById(itemId);
 
             if (quantity < 0) {

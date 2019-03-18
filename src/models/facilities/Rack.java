@@ -1,13 +1,12 @@
 package models.facilities;
 
 import models.agents.Agent;
-import models.agents.AgentBindable;
 import models.items.Item;
 import models.items.QuantityAddable;
 import models.items.QuantityReservable;
-import models.tasks.Task;
-import models.tasks.TaskAssignable;
 import models.warehouses.Warehouse;
+
+import server.Server;
 
 import utils.Constants;
 import utils.Constants.*;
@@ -81,7 +80,7 @@ public class Rack extends Facility implements QuantityAddable<Item>, QuantityRes
     public static Rack create(JSONObject data, int row, int col) throws Exception {
         Rack ret = new Rack();
 
-        ret.setCapacity(data.getInt(Constants.MSG_KEY_CAPACITY));
+        ret.setCapacity(data.getInt(Constants.MSG_KEY_RACK_CAPACITY));
         ret.setPosition(row, col);
 
         JSONArray itemsJSON = data.getJSONArray(Constants.MSG_KEY_ITEMS);
@@ -90,7 +89,7 @@ public class Rack extends Facility implements QuantityAddable<Item>, QuantityRes
             JSONObject itemJSON = itemsJSON.getJSONObject(i);
 
             int itemId = itemJSON.getInt(Constants.MSG_KEY_ID);
-            int quantity = itemJSON.getInt(Constants.MSG_KEY_QUANTITY);
+            int quantity = itemJSON.getInt(Constants.MSG_KEY_ITEM_QUANTITY);
             Item item = Warehouse.getInstance().getItemById(itemId);
 
             if (quantity < 0) {
@@ -301,8 +300,12 @@ public class Rack extends Facility implements QuantityAddable<Item>, QuantityRes
      */
     @Override
     public void bind(Agent agent) throws Exception {
+        // Bind
         agent.loadRack(this);
         super.bind(agent);
+
+        // Send binding to the front frontend
+        Server.getInstance().sendAction(agent, AgentAction.BIND_RACK);
     }
 
     /**
@@ -318,7 +321,11 @@ public class Rack extends Facility implements QuantityAddable<Item>, QuantityRes
      */
     @Override
     public void unbind() throws Exception {
+        // Unbind
         boundAgent.offloadRack(this);
         super.unbind();
+
+        // Send unbinding to the front frontend
+        Server.getInstance().sendAction(boundAgent, AgentAction.UNBIND_RACK);
     }
 }
