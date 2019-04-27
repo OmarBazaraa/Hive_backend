@@ -50,7 +50,6 @@ public class Dispatcher {
      * @param readyAgent the set of all idle agents.
      * @param rack       the assigned {@code Rack}.
      * @param order      the needed {@code Order}.
-     *
      * @return the best suitable {@code Agent} from the given set of agents.
      */
     private static Agent findAgent(Set<Agent> readyAgent, Rack rack, Order order) {
@@ -79,5 +78,31 @@ public class Dispatcher {
 
         // Return the selected agent
         return ret;
+    }
+
+    /**
+     * TODO @Samir55 complete the Docs here upon function completion.
+     * Selects the best {@code Rack} according to a specific heuristic search.
+     *
+     * @param candidateRacks A list of all candidate racks.
+     * @param ordersItems
+     * @return rack the most suitable {@code Rack}s for fulfilling the order found in the list.
+     */
+    private static List<Rack> selectRack(List<Rack> candidateRacks, Map<Item, Integer> ordersItems) {
+        // Initialization.
+        Double cost = 0.0;
+
+        List<Rack> nouseRacks = new ArrayList<>();
+        List<Rack> finalRacks = new ArrayList<>();
+
+        // Calculate the maximum quantity of order items that can be taken out of each candidate rack.
+
+        // Calculate the round trip cost using Manhattan distance between each rack and the Gate position.
+
+        // Get an initial final rack list.
+
+        // Improve the final rack list.
+
+        return new ArrayList<Rack>();
     }
 }
