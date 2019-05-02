@@ -1,6 +1,5 @@
 package algorithms;
 
-import javafx.geometry.Pos;
 import models.agents.Agent;
 import models.facilities.Rack;
 import models.items.Item;
@@ -9,9 +8,7 @@ import models.maps.utils.Position;
 import models.tasks.Order;
 import models.tasks.Task;
 import models.warehouses.Warehouse;
-import utils.Pair;
 
-import java.lang.reflect.Array;
 import java.util.*;
 
 

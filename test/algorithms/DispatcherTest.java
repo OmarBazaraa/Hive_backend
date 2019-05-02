@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import algorithms.Dispatcher;
 
 public class DispatcherTest {
+
     @Test
     public void testRackSelection() {
 
@@ -14,6 +15,11 @@ public class DispatcherTest {
 
         // Test Rack Selection.
         assertTrue(true);
+    }
+
+    @Test
+    public void testExchangeRacks() {
+
     }
 
 }

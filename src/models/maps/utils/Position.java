@@ -59,4 +59,14 @@ public class Position implements Comparable<Position> {
             return row - rhs.row;
         }
     }
+
+    /**
+     * Calculates the manhattan distance with respect to another object.
+     * @param p the other object.
+     *
+     * @return the manhattan distance.
+     */
+    public int distanceTo(Position p) {
+        return Math.abs(row - p.row) + Math.abs(col - p.col);
+    }
 }

@@ -7,3 +7,6 @@ The backend of the Hive system for smart automated warehouses.
    
 2. Org Json library for JSON objects parsing  
    `org.json:json:20180813`
+   
+3. Org jgrapht library  
+    `org.jgrapht:jgrapht-core:1.3.0`
