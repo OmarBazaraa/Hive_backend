@@ -8,19 +8,6 @@ import algorithms.Dispatcher;
 
 public class DispatcherTest {
 
-    @Test
-    public void testRackSelection() {
-
-        Dispatcher dispatcher = new Dispatcher();
-
-        // Test Rack Selection.
-        assertTrue(true);
-    }
-
-    @Test
-    public void testExchangeRacks() {
-
-    }
 
 }
 
