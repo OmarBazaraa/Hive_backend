@@ -13,7 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class RobotAssigner {
+public class AgentAssigner {
 
     /**
      * Using Hungarian algorithm for solving the agent assignment problem where we should assign the agents to the
