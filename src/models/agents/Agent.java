@@ -60,7 +60,7 @@ public class Agent extends HiveObject implements TaskAssignable {
      * The last time this {@code Agent} has performed an action.
      * Needed by the planner algorithm.
      */
-    private long lastActionTime;
+    private long lastActionTime = -1;
 
     // ===============================================================================================
     //
@@ -171,7 +171,7 @@ public class Agent extends HiveObject implements TaskAssignable {
      */
     public int getPriority() {
         Task task = getActiveTask();
-        return (task != null ? task.getPriority() : Integer.MIN_VALUE);
+        return (task != null ? task.getPriority() : Short.MIN_VALUE);
     }
 
     /**
