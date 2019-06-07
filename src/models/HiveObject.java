@@ -126,7 +126,7 @@ abstract public class HiveObject extends Entity {
      *
      * @return {@code true} if both have the same position; {@code false} otherwise.
      */
-    public boolean samePosition(HiveObject obj) {
+    public boolean isCoincide(HiveObject obj) {
         return row == obj.row && col == obj.col;
     }
 }

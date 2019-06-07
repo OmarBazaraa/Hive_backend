@@ -168,7 +168,7 @@ public class Facility extends HiveObject implements AgentBindable, AgentAllocata
      */
     @Override
     public boolean canBind(Agent agent) {
-        return (agent.samePosition(this));
+        return (agent.isCoincide(this));
     }
 
     /**
@@ -203,7 +203,7 @@ public class Facility extends HiveObject implements AgentBindable, AgentAllocata
      */
     @Override
     public boolean canUnbind() {
-        return (boundAgent.samePosition(this));
+        return (boundAgent.isCoincide(this));
     }
 
     /**

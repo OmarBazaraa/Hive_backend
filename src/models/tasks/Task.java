@@ -292,7 +292,7 @@ public class Task extends AbstractTask implements QuantityAddable<Item> {
         }
         // Delivering the rack to the gate
         else if (status == TaskStatus.DELIVERING) {
-            if (gate.samePosition(agent)) {
+            if (gate.isCoincide(agent)) {
                 gate.bind(agent);
                 status = TaskStatus.OFFLOADING;
             } else {

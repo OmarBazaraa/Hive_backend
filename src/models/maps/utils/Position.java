@@ -25,6 +25,28 @@ public class Position implements Comparable<Position> {
     }
 
     /**
+     * Checks whether the given {@code Position} is adjacent to this one or not.
+     *
+     * @param pos the {@code Position} to check against.
+     *
+     * @return {@code true} if both positions are adjacent; {@code false} otherwise.
+     */
+    public boolean isAdjacent(Position pos) {
+        return distanceTo(pos) == 1;
+    }
+
+    /**
+     * Calculates the manhattan distance between this {@code Position} and the given one.
+     *
+     * @param pos the other {@code Position}.
+     *
+     * @return the manhattan distance.
+     */
+    public int distanceTo(Position pos) {
+        return Math.abs(row - pos.row) + Math.abs(col - pos.col);
+    }
+
+    /**
      * Indicates whether some other object is equal to this one.
      *
      * @param obj the reference object with which to compare.
@@ -58,15 +80,5 @@ public class Position implements Comparable<Position> {
         } else {
             return row - rhs.row;
         }
-    }
-
-    /**
-     * Calculates the manhattan distance with respect to another object.
-     * @param p the other object.
-     *
-     * @return the manhattan distance.
-     */
-    public int distanceTo(Position p) {
-        return Math.abs(row - p.row) + Math.abs(col - p.col);
     }
 }
