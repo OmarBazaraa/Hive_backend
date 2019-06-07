@@ -172,7 +172,7 @@ public class Grid<T extends Cell> {
      * @return {@code true} if the cell is inside the grid; {@code false} otherwise.
      */
     public boolean isInBound(int row, int col) {
-        return 1 <= row && row <= rows && 1 <= col && col <= cols;
+        return 0 <= row && row < rows && 0 <= col && col < cols;
     }
 
     /**
@@ -305,8 +305,8 @@ public class Grid<T extends Cell> {
     public String toString() {
         StringBuilder builder = new StringBuilder();
 
-        for (int i = 1; i <= rows; ++i) {
-            for (int j = 1; j <= cols; ++j) {
+        for (int i = 0; i < rows; ++i) {
+            for (int j = 0; j < cols; ++j) {
                 builder.append(grid[i][j].toShape());
             }
             builder.append('\n');

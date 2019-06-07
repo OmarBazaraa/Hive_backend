@@ -61,26 +61,28 @@ public class MapCell extends Cell {
         }
 
         if (data.has(Constants.MSG_KEY_AGENT)) {
+            data = data.getJSONObject(Constants.MSG_KEY_AGENT);
             ret.setAgent(Agent.create(data, row, col));
             return ret;
         }
 
         if (data.has(Constants.MSG_KEY_FACILITY)) {
+            data = data.getJSONObject(Constants.MSG_KEY_FACILITY);
             int type = data.getInt(Constants.MSG_KEY_TYPE);
 
             switch (type) {
                 case Constants.MSG_TYPE_CELL_OBSTACLE:
                     ret.setFacility(null, CellType.OBSTACLE);
-                    break;
+                    return ret;
                 case Constants.MSG_TYPE_CELL_RACK:
                     ret.setFacility(Rack.create(data, row, col), CellType.RACK);
-                    break;
+                    return ret;
                 case Constants.MSG_TYPE_CELL_GATE:
                     ret.setFacility(Gate.create(data, row, col), CellType.GATE);
-                    break;
+                    return ret;
                 case Constants.MSG_TYPE_CELL_STATION:
                     ret.setFacility(Station.create(data, row, col), CellType.STATION);
-                    break;
+                    return ret;
             }
         }
 
@@ -120,37 +122,6 @@ public class MapCell extends Cell {
     }
 
     /**
-     * Constructs a new {@code MapCell} with the given {@code Agent} and {@code Facility}.
-     *
-     * @param agent    the {@code Agent} of the cell.
-     * @param facility the {@code Facility} of the cell.
-     * @param type     the {@code CellType} of the cell.
-     */
-    public MapCell(Agent agent, Facility facility, CellType type) {
-        setFacility(facility, type);
-        setAgent(agent);
-    }
-
-    /**
-     * Constructs a new {@code MapCell} with the given {@code Facility}.
-     *
-     * @param facility the {@code Facility} of the cell.
-     * @param type     the {@code CellType} of the cell.
-     */
-    public MapCell(Facility facility, CellType type) {
-        setFacility(facility, type);
-    }
-
-    /**
-     * Constructs a new {@code MapCell} with the given {@code Agent}.
-     *
-     * @param agent the {@code Agent} of the cell.
-     */
-    public MapCell(Agent agent) throws Exception {
-        setAgent(agent);
-    }
-
-    /**
      * Returns the type of this {@code MapCell}.
      *
      * @return the {@code CellType} of this {@code MapCell}.
@@ -179,6 +150,16 @@ public class MapCell extends Cell {
 
     /**
      * Sets the existing {@code Facility} in this {@code MapCell}.
+     * <p>
+     * Note that the cell type and the facility object type should be consistent in the following manner:
+     * <ul>
+     *     <li>{@link CellType#EMPTY} type with {@code null} object.</li>
+     *     <li>{@link CellType#OBSTACLE} type with {@code null} object.</li>
+     *     <li>{@link CellType#RACK} type with {@link Rack} object.</li>
+     *     <li>{@link CellType#GATE} type with {@link Gate} object.</li>
+     *     <li>{@link CellType#STATION} type with {@link Station} object.</li>
+     *     <li>{@link CellType#UNKNOWN} type with {@code null} object.</li>
+     * </ul>
      *
      * @param facility the {@code Facility} to set.
      * @param type     the {@code CellType} of {@code Facility}.
