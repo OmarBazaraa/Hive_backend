@@ -6,12 +6,8 @@ import models.facilities.Gate;
 import models.facilities.Rack;
 import models.facilities.Station;
 
-import server.ServerConstants;
-
 import utils.Constants;
 import utils.Constants.*;
-
-import org.json.JSONObject;
 
 
 /**
@@ -45,51 +41,6 @@ public class MapCell extends Cell {
     //
     // Static Methods
     //
-
-    /**
-     * Creates a new {@code MapCell} object from JSON data.
-     *
-     * @param data the un-parsed JSON data.
-     * @param row  the row position of the {@code MapCell} to create.
-     * @param col  the column position of the {@code MapCell} to create.
-     *
-     * @return an {@code MapCell} object.
-     */
-    public static MapCell create(JSONObject data, int row, int col) throws Exception {
-        MapCell ret = new MapCell();
-
-        if (data.isEmpty()) {
-            return ret;
-        }
-
-        if (data.has(ServerConstants.MSG_KEY_AGENT)) {
-            data = data.getJSONObject(ServerConstants.MSG_KEY_AGENT);
-            ret.setAgent(Agent.create(data, row, col));
-            return ret;
-        }
-
-        if (data.has(ServerConstants.MSG_KEY_FACILITY)) {
-            data = data.getJSONObject(ServerConstants.MSG_KEY_FACILITY);
-            int type = data.getInt(ServerConstants.MSG_KEY_TYPE);
-
-            switch (type) {
-                case ServerConstants.MSG_TYPE_CELL_OBSTACLE:
-                    ret.setFacility(null, CellType.OBSTACLE);
-                    return ret;
-                case ServerConstants.MSG_TYPE_CELL_RACK:
-                    ret.setFacility(Rack.create(data, row, col), CellType.RACK);
-                    return ret;
-                case ServerConstants.MSG_TYPE_CELL_GATE:
-                    ret.setFacility(Gate.create(data, row, col), CellType.GATE);
-                    return ret;
-                case ServerConstants.MSG_TYPE_CELL_STATION:
-                    ret.setFacility(Station.create(data, row, col), CellType.STATION);
-                    return ret;
-            }
-        }
-
-        throw new Exception("Unknown cell type!");
-    }
 
     /**
      * Allocates and initializes a 2D array of {@code GuideCell}.
@@ -163,12 +114,12 @@ public class MapCell extends Cell {
      *     <li>{@link CellType#UNKNOWN} type with {@code null} object.</li>
      * </ul>
      *
-     * @param facility the {@code Facility} to set.
      * @param type     the {@code CellType} of {@code Facility}.
+     * @param facility the {@code Facility} to set.
      */
-    public void setFacility(Facility facility, CellType type) {
-        this.facility = facility;
+    public void setFacility(CellType type, Facility facility) {
         this.type = type;
+        this.facility = facility;
     }
 
     /**

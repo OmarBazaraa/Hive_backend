@@ -2,13 +2,7 @@ package models.maps;
 
 import models.maps.utils.Position;
 
-import server.ServerConstants;
-
-import utils.Constants;
 import utils.Constants.*;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -21,51 +15,6 @@ import java.util.List;
  * @see GuideGrid
  */
 public class MapGrid extends Grid<MapCell> {
-
-    //
-    // Static Methods
-    //
-
-    /**
-     * Creates a new {@code MapGrid} object from JSON data.
-     *
-     * TODO: add checks and throw exceptions
-     *
-     * @param data the un-parsed JSON data.
-     *
-     * @return an {@code MapGrid} object.
-     */
-    public static MapGrid create(JSONObject data) throws Exception {
-        int h = data.getInt(ServerConstants.MSG_KEY_HEIGHT);
-        int w = data.getInt(ServerConstants.MSG_KEY_WIDTH);
-
-        MapCell[][] grid = new MapCell[h][w];
-
-        JSONArray gridJSON = data.getJSONArray(ServerConstants.MSG_KEY_GRID);
-
-        if (gridJSON.length() != h) {
-            throw new Exception("Invalid grid dimensions");
-        }
-
-        for (int i = 0; i < h; ++i) {
-            JSONArray rowJSON = gridJSON.getJSONArray(i);
-
-            if (rowJSON.length() != w) {
-                throw new Exception("Invalid grid dimensions");
-            }
-
-            for (int j = 0; j < w; ++j) {
-                grid[i][j] = MapCell.create(rowJSON.getJSONObject(j), i, j);
-            }
-        }
-
-        return new MapGrid(grid);
-    }
-
-    // ===============================================================================================
-    //
-    // Member Methods
-    //
 
     /**
      * Constructs a new {@code MapGrid} object with the given 2D {@code MapCell} array.

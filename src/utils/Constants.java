@@ -50,21 +50,21 @@ public class Constants {
      * Directions in clockwise order.
      */
     public enum Direction {
-        UP,
         RIGHT,
-        DOWN,
-        LEFT
+        UP,
+        LEFT,
+        DOWN
     }
 
     // Direction arrays in the same order as {@code Direction} enum above
-    public static final int DIR_ROW[] = { -1, 0, 1, 0 };
-    public static final int DIR_COL[] = { 0, 1, 0, -1 };
+    public static final int DIR_ROW[] = { 0, -1, 0, 1 };
+    public static final int DIR_COL[] = { 1, 0, -1, 0 };
 
     // Direction shapes
-    public static final char SHAPE_DIR_UP = '^';
     public static final char SHAPE_DIR_RIGHT = '>';
-    public static final char SHAPE_DIR_DOWN = 'v';
+    public static final char SHAPE_DIR_UP = '^';
     public static final char SHAPE_DIR_LEFT = '<';
+    public static final char SHAPE_DIR_DOWN = 'v';
     public static final char SHAPE_DIR_STILL = '.';
     public static final char SHAPE_DIR_UNKNOWN = '?';
 
@@ -77,15 +77,15 @@ public class Constants {
      * Note that the first 4 values should be in the same order as in {@code Direction} enum.
      */
     public enum AgentAction {
-        MOVE_UP,
         MOVE_RIGHT,
-        MOVE_DOWN,
+        MOVE_UP,
         MOVE_LEFT,
+        MOVE_DOWN,
         MOVE,
         MOVE_FORWARD,
         MOVE_BACKWARD,
-        ROTATE_LEFT,
         ROTATE_RIGHT,
+        ROTATE_LEFT,
         BIND_RACK,
         UNBIND_RACK,
         BIND_GATE,

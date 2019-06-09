@@ -9,13 +9,10 @@ import models.tasks.Task;
 import models.warehouses.Warehouse;
 
 import server.Server;
-import server.ServerConstants;
 
 import utils.Constants;
-import utils.Constants.Direction;
+import utils.Constants.*;
 import utils.Utility;
-
-import org.json.JSONObject;
 
 
 /**
@@ -32,33 +29,6 @@ import org.json.JSONObject;
  * @see models.tasks.Task Task
  */
 public class Agent extends AbstractAgent {
-
-
-    // ===============================================================================================
-    //
-    // Static Methods
-    //
-
-    /**
-     * Creates a new {@code Agent} object from JSON data.
-     *
-     * @param data the un-parsed JSON data.
-     * @param row  the row position of the {@code MapCell} to create.
-     * @param col  the column position of the {@code MapCell} to create.
-     *
-     * @return an {@code Agent} object.
-     */
-    public static Agent create(JSONObject data, int row, int col) throws Exception {
-        int id = data.getInt(ServerConstants.MSG_KEY_ID);
-        Agent ret = new Agent(id, Constants.AGENT_DEFAULT_LOAD_CAPACITY, Constants.AGENT_DEFAULT_DIRECTION);
-        ret.setPosition(row, col);
-        return ret;
-    }
-
-    // ===============================================================================================
-    //
-    // Member Methods
-    //
 
     /**
      * Constructs a new {@code Agent} robot.
@@ -161,9 +131,6 @@ public class Agent extends AbstractAgent {
 
         // Update action time
         updateLastActionTime();
-
-        // Send move to the frontend
-        Server.getInstance().sendAction(this, Utility.dirToAction(dir));
     }
 
     /**

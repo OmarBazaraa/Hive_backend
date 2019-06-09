@@ -5,10 +5,7 @@ import models.tasks.Task;
 
 import server.Server;
 
-import utils.Constants;
 import utils.Constants.*;
-
-import org.json.JSONObject;
 
 
 /**
@@ -26,30 +23,6 @@ import org.json.JSONObject;
  * @see models.tasks.Task Task
  */
 public class Gate extends Facility {
-
-    //
-    // Static Methods
-    //
-
-    /**
-     * Creates a new {@code Gate} object from JSON data.
-     *
-     * @param data the un-parsed JSON data.
-     * @param row  the row position of the {@code MapCell} to create.
-     * @param col  the column position of the {@code MapCell} to create.
-     *
-     * @return an {@code Gate} object.
-     */
-    public static Gate create(JSONObject data, int row, int col) throws Exception {
-        Gate ret = new Gate();
-        ret.setPosition(row, col);
-        return ret;
-    }
-
-    // ===============================================================================================
-    //
-    // Member Methods
-    //
 
     /**
      * Constructs a new {@code Gate} object.
@@ -82,15 +55,11 @@ public class Gate extends Facility {
      */
     @Override
     public void bind(Agent agent) throws Exception {
-        // Bind
         // TODO: lock the agent
         Task task = agent.getActiveTask();
         Rack rack = task.getRack();
         rack.confirmReservation(task);
         super.bind(agent);
-
-        // Send binding to the front frontend
-        Server.getInstance().sendAction(agent, AgentAction.BIND_GATE);
     }
 
     /**
@@ -122,11 +91,7 @@ public class Gate extends Facility {
      */
     @Override
     public void unbind() throws Exception {
-        // Unbind
         // TODO: unlock the bound agent
         super.unbind();
-
-        // Send unbinding to the front frontend
-        Server.getInstance().sendAction(boundAgent, AgentAction.UNBIND_GATE);
     }
 }

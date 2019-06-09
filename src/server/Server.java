@@ -5,9 +5,7 @@ import models.tasks.Order;
 import models.tasks.Task;
 import models.warehouses.Warehouse;
 
-import utils.Constants;
 import utils.Constants.*;
-import utils.Utility;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -32,16 +30,23 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class Server {
 
     //
-    // Member Variables
+    // Enums
     //
 
+    /**
+     * Different states of the {@code Server} during its lifecycle.
+     */
     enum ServerStates {
         IDLE,
         RUNNING,
-        WAITING_ACK,
         PAUSED,
         EXIT
     }
+
+    // ===============================================================================================
+    //
+    // Member Variables
+    //
 
     /**
      * The {@code Session} with the frontend.
@@ -64,9 +69,9 @@ public class Server {
     private BlockingQueue<JSONObject> receivedQueue = new LinkedBlockingQueue<>();
 
     /**
-     * The last sent message to the frontend
+     * The updates states of the current time step to be sent to the frontend.
      */
-    private JSONObject sentMsg = getEmptySendMessage();
+    private JSONArray actions, logs, statistics;
 
     // ===============================================================================================
     //
@@ -108,14 +113,18 @@ public class Server {
     /**
      * Starts and initializes this {@code Server} object.
      */
-    public void start() {
+    public void start() throws Exception {
         Spark.init();
+
+        while (currentState != ServerStates.EXIT) {
+            run();
+        }
     }
 
     /**
      * Closes and terminates this {@code Server} object.
      */
-    public void close() {
+    public void close() throws Exception  {
         Spark.stop();
     }
 
@@ -140,212 +149,112 @@ public class Server {
     }
 
     /**
-     *
+     * Clears the update states JSON arrays of the current time step.
      */
-    public void run() throws Exception {
-        if (currentState == ServerStates.EXIT) {
-            return;
-        }
-
-        switch (currentState) {
-            case IDLE:
-                processIdleState();
-                break;
-            case PAUSED:
-                processPausedState();
-                break;
-            case RUNNING:
-                processRunningState();
-                break;
-            case WAITING_ACK:
-                processWaitingAckState();
-                break;
-        }
-    }
-
-    public void sendAction(Agent agent, AgentAction action) {
-        JSONObject data = sentMsg.getJSONObject(ServerConstants.MSG_KEY_DATA);
-        JSONArray actions = data.getJSONArray(ServerConstants.MSG_KEY_ACTIONS);
-
-        JSONObject actionObj = new JSONObject()
-                .put(ServerConstants.MSG_KEY_TYPE, ServerUtility.actionToServerType(action))
-                .put(ServerConstants.MSG_KEY_AGENT_ID, agent.getId());
-
-        actions.put(actionObj);
-    }
-
-    public void sendLog(Task task) {
-        JSONObject data = sentMsg.getJSONObject(ServerConstants.MSG_KEY_DATA);
-        JSONArray logs = data.getJSONArray(ServerConstants.MSG_KEY_ACTIONS);
-
-        JSONObject logObj = new JSONObject();
-        // TODO: add log items
-
-        logs.put(logObj);
-    }
-
-    public void sendLog(Order order) {
-        // TODO:
-    }
-
-    public void sendStatistics(Map<String, Integer> statistics) {
-        JSONObject data = sentMsg.getJSONObject(ServerConstants.MSG_KEY_DATA);
-        data.put(ServerConstants.MSG_KEY_STATISTICS, statistics);
-    }
-
-    public void flushSendBuffer() throws IOException {
-        session.getRemote().sendString(sentMsg.toString());
+    private void clearUpdateStates() {
+        actions = new JSONArray();
+        logs = new JSONArray();
+        statistics = new JSONArray();
     }
 
     /**
-     * Initializes sent message.
+     * Keeps the communication running between the backend and the frontend.
      */
-    private JSONObject getEmptySendMessage() {
-        // Create data object
-        JSONObject data = new JSONObject();
-        data.put(ServerConstants.MSG_KEY_TIME_STEP, warehouse.getTime());
-        data.put(ServerConstants.MSG_KEY_ACTIONS, new JSONArray());
-        data.put(ServerConstants.MSG_KEY_LOGS, new JSONArray());
-        data.put(ServerConstants.MSG_KEY_STATISTICS, new JSONObject());
-
-        // Create main object
-        JSONObject ret = new JSONObject();
-        ret.put(ServerConstants.MSG_KEY_TYPE, ServerConstants.MSG_TYPE_UPDATE);
-        ret.put(ServerConstants.MSG_KEY_DATA, data);
-
-        return ret;
-    }
-
-    /**
-     *
-     */
-    private void processIdleState() throws Exception {
+    private void run() throws Exception {
         // Get the first message or wait if no one is available
-        JSONObject obj = receivedQueue.take();
-
-        // Get message type and data
-        int type = obj.optInt(ServerConstants.MSG_KEY_TYPE);
-        JSONObject data = obj.optJSONObject(ServerConstants.MSG_KEY_DATA);
-
-        // Skip un-related messages
-        if (type != ServerConstants.MSG_TYPE_CONFIG) {
-            return;
-        }
-
-        // Process configuration message
-        processConfigMsg(data);
-    }
-
-    /**
-     *
-     */
-    private void processPausedState() throws Exception {
-        // Get the first message or wait if no one is available
-        JSONObject obj = receivedQueue.take();
-
-        // Get message type and data
-        int type = obj.optInt(ServerConstants.MSG_KEY_TYPE);
-        JSONObject data = obj.optJSONObject(ServerConstants.MSG_KEY_DATA);
-
-        // Handle valid messages
-        switch (type) {
-            case ServerConstants.MSG_TYPE_RUN:
-                currentState = ServerStates.RUNNING;
-                break;
-            case ServerConstants.MSG_TYPE_DEPLOY:
-                // TODO: handle later
-                break;
-            case ServerConstants.MSG_TYPE_ORDER:
-                processOrderMsg(data);
-                break;
-            case ServerConstants.MSG_TYPE_CONFIG:
-                processConfigMsg(data);
-                break;
-        }
-    }
-
-    /**
-     *
-     */
-    private void processRunningState() throws Exception {
-        warehouse.run();
-        flushSendBuffer();
-        currentState = ServerStates.WAITING_ACK;
-    }
-
-    /**
-     *
-     */
-    private void processWaitingAckState() throws Exception {
-        // Get the first message or wait if no one is available
-        JSONObject obj = receivedQueue.take();
-
-        // Get message type and data
-        int type = obj.optInt(ServerConstants.MSG_KEY_TYPE);
-        JSONObject data = obj.optJSONObject(ServerConstants.MSG_KEY_DATA);
-
-        // Handle valid messages
-        switch (type) {
-            case ServerConstants.MSG_TYPE_ACK:
-                sentMsg = getEmptySendMessage();
-                currentState = ServerStates.RUNNING;
-                break;
-            case ServerConstants.MSG_TYPE_PAUSE:
-                currentState = ServerStates.PAUSED;
-                break;
-            case ServerConstants.MSG_TYPE_STOP:
-                currentState = ServerStates.IDLE;
-                break;
-            case ServerConstants.MSG_TYPE_ORDER:
-                processOrderMsg(data);
-                break;
-            case ServerConstants.MSG_TYPE_CONFIG:
-                processConfigMsg(data);
-                break;
-        }
-    }
-
-    /**
-     *
-     * @param msg
-     */
-    private void processConfigMsg(JSONObject msg) throws Exception {
-        warehouse.configure(msg);
-        currentState = ServerStates.PAUSED;
-    }
-
-    /**
-     *
-     * @param msg
-     */
-    private void processOrderMsg(JSONObject msg) throws Exception {
-        warehouse.addOrder(msg);
-    }
-
-    /**
-     * Adds and inserts a new message from the frontend to the messages queue.
-     * <p>
-     * This function consumes messages of the following types:
-     * <ul>
-     *     <li>EXIT</li>
-     * </ul>
-     *
-     * @param message the message to add.
-     */
-    private synchronized void addMessage(String message) throws Exception {
-        // Create JSON object
-        JSONObject obj = new JSONObject(message);
+        JSONObject msg = receivedQueue.take();
 
         // Get message type
-        int type = obj.optInt(ServerConstants.MSG_KEY_TYPE);
+        int type = msg.getInt(ServerConstants.KEY_TYPE);
+        JSONObject data = msg.optJSONObject(ServerConstants.KEY_DATA);
 
-        // Consume EXIT message
-        if (type == ServerConstants.MSG_TYPE_EXIT) {
-            currentState = ServerStates.EXIT;
+        // Switch on different message types from the frontend
+        switch (type) {
+            case ServerConstants.TYPE_START:
+                processStartMsg(data);
+                break;
+            case ServerConstants.TYPE_STOP:
+                processStopMsg(data);
+                break;
+            case ServerConstants.TYPE_RESUME:
+                processResumeMsg(data);
+                break;
+            case ServerConstants.TYPE_PAUSE:
+                processPauseMsg(data);
+                break;
+            case ServerConstants.TYPE_EXIT:
+                processExistMsg(data);
+                break;
+            case ServerConstants.TYPE_ACK:
+                processAckMsg(data);
+                break;
+            case ServerConstants.TYPE_ORDER:
+                processOrderMsg(data);
+                break;
         }
+    }
 
-        // Add message to the queue
-        receivedQueue.add(obj);
+    private void processStartMsg(JSONObject data) throws Exception {
+        if (currentState == ServerStates.IDLE) {
+            warehouse.clear();
+            ServerDecoder.decodeInitConfig(data);
+            clearUpdateStates();
+            warehouse.init();
+            warehouse.run();
+            currentState = ServerStates.RUNNING;
+        }
+    }
+
+    private void processStopMsg(JSONObject data) throws Exception {
+        currentState = ServerStates.IDLE;
+    }
+
+    private void processResumeMsg(JSONObject data) throws Exception {
+        if (currentState == ServerStates.PAUSED) {
+            currentState = ServerStates.RUNNING;
+        }
+    }
+
+    private void processPauseMsg(JSONObject data) throws Exception {
+        if (currentState == ServerStates.RUNNING) {
+            currentState = ServerStates.PAUSED;
+        }
+    }
+
+    private void processExistMsg(JSONObject data) throws Exception {
+        currentState = ServerStates.EXIT;
+    }
+
+    private void processAckMsg(JSONObject data) throws Exception {
+        if (currentState == ServerStates.RUNNING) {
+            warehouse.run();
+        }
+    }
+
+    private void processOrderMsg(JSONObject data) throws Exception {
+        if (currentState == ServerStates.RUNNING) {
+            ServerDecoder.decodeOrder(data);
+        }
+    }
+
+    public void enqueueAgentAction(Agent agent, AgentAction action) {
+        actions.put(ServerEncoder.encodeAgentAction(agent, action));
+    }
+
+    public void enqueueStatistics(int key, double value) {
+        actions.put(ServerEncoder.encodeStatistics(key, value));
+    }
+
+    private void sendUpdateMsg() throws Exception {
+        send(ServerEncoder.encodeUpdateMsg(warehouse.getTime(), actions, logs, statistics));
+    }
+
+    private void sendAckMsg(int type, int status, String msg) throws Exception {
+        send(ServerEncoder.encodeAckMsg(type, status, msg));
+    }
+
+    private void send(JSONObject msg) throws Exception {
+        session.getRemote().sendString(msg.toString());
     }
 
     /**
@@ -379,7 +288,7 @@ public class Server {
 
         @OnWebSocketMessage
         public void onMessage(Session client, String message) throws Exception {
-            addMessage(message);
+            receivedQueue.add(new JSONObject(message));
         }
     }
 }

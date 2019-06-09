@@ -3,12 +3,6 @@ package models.tasks;
 import models.facilities.Gate;
 import models.items.Item;
 import models.items.QuantityAddable;
-import models.warehouses.Warehouse;
-
-import server.ServerConstants;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.util.*;
 
@@ -72,47 +66,6 @@ public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAs
      * The current status of this {@code Order}.
      */
     private OrderStatus status = OrderStatus.INACTIVE;
-
-    // ===============================================================================================
-    //
-    // Static Methods
-    //
-
-    /**
-     * Creates a new {@code Order} object from JSON data.
-     *
-     * TODO: add checks and throw exceptions
-     *
-     * @param data the un-parsed JSON data.
-     *
-     * @return an {@code Order} object.
-     */
-    public static Order create(JSONObject data) throws Exception {
-        int id = data.getInt(ServerConstants.MSG_KEY_ID);
-        JSONArray itemsJSON = data.getJSONArray(ServerConstants.MSG_KEY_ITEMS);
-
-        Order ret = new Order(id);
-
-        for (int i = 0; i < itemsJSON.length(); ++i) {
-            JSONObject itemJSON = itemsJSON.getJSONObject(i);
-
-            int itemId = itemJSON.getInt(ServerConstants.MSG_KEY_ID);
-            int quantity = itemJSON.getInt(ServerConstants.MSG_KEY_ITEM_QUANTITY);
-            Item item = Warehouse.getInstance().getItemById(itemId);
-
-            if (quantity < 0) {
-                throw new Exception("Invalid quantity to add to the order!");
-            }
-
-            if (item == null) {
-                throw new Exception("Invalid item to add to the order!");
-            }
-
-            ret.add(item, quantity);
-        }
-
-        return ret;
-    }
 
     // ===============================================================================================
     //
@@ -205,8 +158,6 @@ public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAs
     /**
      * Checks whether this {@code Order} is feasible of being fulfilled regarding
      * its needed items quantities.
-     *
-     * TODO: check feasibility during order construction and remove this function
      *
      * @return {@code true} if this {@code Order} is feasible; {@code false} otherwise.
      */

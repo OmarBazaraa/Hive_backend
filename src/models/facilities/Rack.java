@@ -4,16 +4,11 @@ import models.agents.Agent;
 import models.items.Item;
 import models.items.QuantityAddable;
 import models.items.QuantityReservable;
-import models.warehouses.Warehouse;
 
 import server.Server;
-import server.ServerConstants;
 
 import utils.Constants;
 import utils.Constants.*;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -66,51 +61,6 @@ public class Rack extends Facility implements QuantityAddable<Item>, QuantityRes
      * The mapped value represents the quantity of this {@code Item}.
      */
     private Map<Item, Integer> items = new HashMap<>();
-
-    // ===============================================================================================
-    //
-    // Static Methods
-    //
-
-    /**
-     * Creates a new {@code Rack} object from JSON data.
-     * <p>
-     * TODO: add checks and throw exceptions
-     *
-     * @param data the un-parsed JSON data.
-     * @param row  the row position of the {@code MapCell} to create.
-     * @param col  the column position of the {@code MapCell} to create.
-     *
-     * @return an {@code Rack} object.
-     */
-    public static Rack create(JSONObject data, int row, int col) throws Exception {
-        Rack ret = new Rack();
-
-        ret.capacity = data.getInt(ServerConstants.MSG_KEY_RACK_CAPACITY);
-        ret.setPosition(row, col);
-
-        JSONArray itemsJSON = data.getJSONArray(ServerConstants.MSG_KEY_ITEMS);
-
-        for (int i = 0; i < itemsJSON.length(); ++i) {
-            JSONObject itemJSON = itemsJSON.getJSONObject(i);
-
-            int itemId = itemJSON.getInt(ServerConstants.MSG_KEY_ID);
-            int quantity = itemJSON.getInt(ServerConstants.MSG_KEY_ITEM_QUANTITY);
-            Item item = Warehouse.getInstance().getItemById(itemId);
-
-            if (quantity < 0) {
-                throw new Exception("Invalid quantity to add to the rack!");
-            }
-
-            if (item == null) {
-                throw new Exception("Invalid item to add to the rack!");
-            }
-
-            ret.add(item, quantity);
-        }
-
-        return ret;
-    }
 
     // ===============================================================================================
     //
@@ -295,12 +245,8 @@ public class Rack extends Facility implements QuantityAddable<Item>, QuantityRes
      */
     @Override
     public void bind(Agent agent) throws Exception {
-        // Bind
         agent.loadRack(this);
         super.bind(agent);
-
-        // Send binding to the front frontend
-        Server.getInstance().sendAction(agent, AgentAction.BIND_RACK);
     }
 
     /**
@@ -316,11 +262,7 @@ public class Rack extends Facility implements QuantityAddable<Item>, QuantityRes
      */
     @Override
     public void unbind() throws Exception {
-        // Unbind
         boundAgent.offloadRack(this);
         super.unbind();
-
-        // Send unbinding to the front frontend
-        Server.getInstance().sendAction(boundAgent, AgentAction.UNBIND_RACK);
     }
 }

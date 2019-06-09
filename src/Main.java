@@ -31,13 +31,8 @@ public class Main {
         // Create server object
         Server server = Server.getInstance();
 
-        // Start the server
+        // Start the server till EXIT is hit
         server.start();
-
-        // Keep running while EXIT is not hit
-        while (server.isRunning()) {
-            server.run();
-        }
 
         // Close and finalize the server
         server.close();
