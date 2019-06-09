@@ -47,12 +47,12 @@ public class Rack extends Facility implements QuantityAddable<Item>, QuantityRes
     /**
      * The maximum storing weight of the {@code Rack}.
      */
-    private int capacity;
+    private int capacity = Constants.RACK_DEFAULT_STORE_CAPACITY;
 
     /**
      * The weight of the {@code Rack} itself when being empty.
      */
-    private int containerWeight;
+    private int containerWeight = Constants.RACK_DEFAULT_CONTAINER_WEIGHT;
 
     /**
      * The total stored weight of all the items in the {@code Rack}.
@@ -155,12 +155,23 @@ public class Rack extends Facility implements QuantityAddable<Item>, QuantityRes
     }
 
     /**
-     * Returns the current stored weight in this {@code Rack}.
+     * Returns the stored weight in this {@code Rack}.
      *
-     * @return the current stored weight.
+     * @return the current stored weight of this {@code Rack}.
      */
     public int getStoredWeight() {
         return storedWeight;
+    }
+
+    /**
+     * Returns the total weight of this {@code Rack}.
+     * <p>
+     * That is, the weight of the container plus the total weight of the stored units.
+     *
+     * @return the current total weight of this {@code Rack}.
+     */
+    public int getTotalWeight() {
+        return containerWeight + storedWeight;
     }
 
     /**

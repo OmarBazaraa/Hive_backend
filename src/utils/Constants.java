@@ -148,7 +148,6 @@ public class Constants {
     //
     
     // Direction shapes
-    // TODO: refactor?! :: SHAPE_DIR_* <-> DIR_SHAPE_*
     public static final char SHAPE_DIR_UP = '^';
     public static final char SHAPE_DIR_RIGHT = '>';
     public static final char SHAPE_DIR_DOWN = 'v';
@@ -174,11 +173,6 @@ public class Constants {
     // Agent Constants
     //
 
-    // Agent default configurations
-    // TODO: refactor?! :: AGENT_DEFAULT_* <-> DEFAULT_AGENT_*
-    public static final int AGENT_DEFAULT_CAPACITY = 100;
-    public static final int AGENT_DEFAULT_CHARGE_CAPACITY = 100;
-
     /**
      * Different actions that can be done by an {@code Agent}.
      * Note that the first 4 values should be in the same order as in {@code Direction} enum.
@@ -198,4 +192,17 @@ public class Constants {
         UNBIND_STATION,
         NOTHING
     }
+
+    // Agent default configurations
+    public static final int AGENT_DEFAULT_LOAD_CAPACITY = 100;
+    public static final int AGENT_DEFAULT_CHARGE_PERCENTAGE = 70;
+    public static final Direction AGENT_DEFAULT_DIRECTION = Direction.RIGHT;
+
+    //
+    // Facility Constants
+    //
+
+    // Rack default configurations
+    public static final int RACK_DEFAULT_STORE_CAPACITY = 100;
+    public static final int RACK_DEFAULT_CONTAINER_WEIGHT = 100;
 }

@@ -48,11 +48,6 @@ public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAs
     //
 
     /**
-     * The set of sub tasks for fulfilling this {@code Order}.
-     */
-    private Set<Task> subTasks = new HashSet<>();
-
-    /**
      * The {@code Gate} where this {@code Order} must be delivered.
      */
     private Gate deliveryGate;
@@ -68,6 +63,11 @@ public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAs
      * The mapped value represents the needed quantity of this {@code Item}.
      */
     private Map<Item, Integer> items = new HashMap<>();
+
+    /**
+     * The set of sub tasks for fulfilling this {@code Order}.
+     */
+    private Set<Task> subTasks = new HashSet<>();
 
     /**
      * The current status of this {@code Order}.

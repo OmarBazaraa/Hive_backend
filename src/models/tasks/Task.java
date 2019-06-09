@@ -52,11 +52,6 @@ public class Task extends AbstractTask implements QuantityAddable<Item> {
     //
 
     /**
-     * The current status of this {@code Task}.
-     */
-    private TaskStatus status = TaskStatus.INACTIVE;
-
-    /**
      * The {@code Order} in which this {@code Task} is a part of.
      */
     private Order order;
@@ -82,6 +77,11 @@ public class Task extends AbstractTask implements QuantityAddable<Item> {
      * The mapped value represents the needed quantity of this {@code Item}.
      */
     private Map<Item, Integer> items = new HashMap<>();
+
+    /**
+     * The current status of this {@code Task}.
+     */
+    private TaskStatus status = TaskStatus.INACTIVE;
 
     // ===============================================================================================
     //
