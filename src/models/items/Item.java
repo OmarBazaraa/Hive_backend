@@ -99,15 +99,6 @@ public class Item extends Entity implements QuantityAddable<Rack>, QuantityReser
     }
 
     /**
-     * Sets the weight of one unit of this {@code Item}.
-     *
-     * @param w the weight to set.
-     */
-    public void setWeight(int w) {
-        weight = w;
-    }
-
-    /**
      * Returns the number of reserved units of this {@code Item} across
      * the racks of a {@code Warehouse}.
      *
@@ -152,19 +143,25 @@ public class Item extends Entity implements QuantityAddable<Rack>, QuantityReser
     }
 
     /**
-     * Updates the quantity of this {@code Item} in a {@code Rack}.
+     * Adds or removes some units of this {@code Item} into/from the given {@code Rack}.
      * <p>
      * This function is used to add extra units of this {@code Item} if the given
      * quantity is positive,
      * and used to remove existing units if the given quantity is negative.
-     *
-     * TODO: make this function accessible only to rack class
+     * <p>
+     * This function should be called with appropriate parameters so that:
+     * <ol>
+     * <li>no {@code Rack} exceeds the maximum capacity limit</li>
+     * <li>no {@code Item} has negative number of units</li>
+     * </ol>
+     * <p>
+     * This function should only be called from {@link Rack}.
      *
      * @param rack     the {@code Rack} to add into.
      * @param quantity the quantity to be updated with.
      */
     @Override
-    public void add(Rack rack, int quantity) throws Exception {
+    public void add(Rack rack, int quantity) {
         QuantityAddable.update(racks, rack, quantity);
         totalUnits += quantity;
     }
@@ -185,6 +182,9 @@ public class Item extends Entity implements QuantityAddable<Rack>, QuantityReser
     /**
      * Reserves some units of this {@code Item} specified by the given {@code QuantityAddable} container.
      * <p>
+     * This function should be called after ensuring that there are enough units
+     * for reservation.
+     * <p>
      * This function should only be called once per {@code Order} activation.
      *
      * @param container the {@code QuantityAddable} container.
@@ -192,13 +192,8 @@ public class Item extends Entity implements QuantityAddable<Rack>, QuantityReser
      * @see Item#confirmReservation(QuantityAddable)
      */
     @Override
-    public void reserve(QuantityAddable<Item> container) throws Exception {
+    public void reserve(QuantityAddable<Item> container) {
         int reservedQuantity = container.get(this);
-
-        if (reservedQuantity > getAvailableUnits()) {
-            throw new Exception("No enough item units to be reserved!");
-        }
-
         reservedUnits += reservedQuantity;
     }
 
@@ -216,13 +211,8 @@ public class Item extends Entity implements QuantityAddable<Rack>, QuantityReser
      * @see Item#reserve(QuantityAddable)
      */
     @Override
-    public void confirmReservation(QuantityAddable<Item> container) throws Exception {
+    public void confirmReservation(QuantityAddable<Item> container) {
         int reservedQuantity = container.get(this);
-
-        if (reservedQuantity > reservedUnits) {
-            throw new Exception("No enough item units to be reserved!");
-        }
-
         reservedUnits -= reservedQuantity;
     }
 }

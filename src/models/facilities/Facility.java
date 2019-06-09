@@ -123,12 +123,14 @@ public class Facility extends HiveObject implements AgentBindable, AgentAllocata
      * @see Facility#deallocate()
      */
     @Override
-    public void allocate(Agent agent) throws Exception {
+    public void allocate(Agent agent) {
         allocatingAgent = agent;
     }
 
     /**
      * De-allocates and releases this {@code Facility} from the currently allocating {@code Agent}.
+     * <p>
+     * This function should be called only when an {@code Agent} is already allocating this {@code Facility}.
      *
      * @see Facility#getAllocatingAgent()
      * @see Facility#isAllocated()
@@ -193,6 +195,8 @@ public class Facility extends HiveObject implements AgentBindable, AgentAllocata
 
     /**
      * Checks whether its currently possible to unbind the bound {@code Agent} from this {@code Facility}.
+     * <p>
+     * This function should be called only when an {@code Agent} is already bound to this {@code Facility}.
      *
      * @return {@code true} if it is possible to unbind; {@code false} otherwise.
      *

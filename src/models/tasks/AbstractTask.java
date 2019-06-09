@@ -62,6 +62,16 @@ abstract public class AbstractTask extends Entity {
     }
 
     /**
+     * Returns the priority of this {@code AbstractTask}.
+     * Greater value indicates higher priority.
+     *
+     * @return the priority of this {@code AbstractTask}.
+     */
+    public int getPriority() {
+        return -id;
+    }
+
+    /**
      * Sets the listener to be invoked when this {@code AbstractTask} is fulfilled.
      * <p>
      * To remove the previously assigned listener, just pass {@code null}.
@@ -73,21 +83,25 @@ abstract public class AbstractTask extends Entity {
     }
 
     /**
-     * Returns the priority of this {@code AbstractTask}.
-     * Higher value indicates higher priority.
+     * Checks whether this {@code AbstractTask} is currently active or not.
      *
-     * @return the priority of this {@code AbstractTask}.
+     * @return {@code true} if this {@code AbstractTask} is active; {@code false} otherwise.
      */
-    public int getPriority() {
-        return -id;
-    }
+    abstract public boolean isActive();
+
+    /**
+     * Checks whether this {@code AbstractTask} is fulfilled or not.
+     *
+     * @return {@code true} if this {@code AbstractTask} is fulfilled; {@code false} otherwise.
+     */
+    abstract public boolean isFulfilled();
 
     /**
      * Activates this {@code AbstractTask} and allocates its required resources.
+     * <p>
+     * This function should be called only once per {@code Task} object.
      */
-    public void activate() throws Exception {
-
-    }
+    abstract public void activate() throws Exception;
 
     /**
      * Terminates this {@code AbstractTask} after completion.
@@ -107,7 +121,7 @@ abstract public class AbstractTask extends Entity {
     //
 
     /**
-     * Interface definition for a callback to be invoked when an {@link AbstractTask} is fulfilled.
+     * Interface definition for a callback to be invoked when an {@link AbstractTask} object is fulfilled.
      */
     public interface OnFulFillListener {
 

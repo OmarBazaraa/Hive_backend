@@ -1,6 +1,5 @@
 package models.facilities;
 
-import models.agents.Agent;
 import org.json.JSONObject;
 
 
@@ -9,7 +8,7 @@ import org.json.JSONObject;
  * in our Hive Warehouse System.
  * <p>
  * A station is a location in the {@link models.warehouses.Warehouse Warehouse} grid
- * where an {@link models.agents.Agent Agent} go to re-charge its batteries.
+ * where an {@link models.agents.Agent Agent} goes to re-charge its batteries, be fixed, and others.
  *
  * @see models.HiveObject HiveObject
  * @see models.agents.Agent Agent

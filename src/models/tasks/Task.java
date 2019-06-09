@@ -30,8 +30,31 @@ import java.util.Map;
 public class Task extends AbstractTask implements QuantityAddable<Item> {
 
     //
+    // Enums
+    //
+
+    /**
+     * Different status of a {@code Task} during its lifecycle.
+     * TODO: think of a more general way to combine multiple tasks together
+     */
+    public enum TaskStatus {
+        INACTIVE,       // The task is still pending not active yet
+        FETCHING,       // Agent is moving to fetch the assigned rack
+        DELIVERING,     // Agent is moving to deliver the loaded rack to a gate
+        OFFLOADING,     // Agent is offloading the needed items at the gate
+        RETURNING,      // Agent is returning the rack back
+        FULFILLED       // The task has been completed
+    }
+
+    // ===============================================================================================
+    //
     // Member Variables
     //
+
+    /**
+     * The current status of this {@code Task}.
+     */
+    private TaskStatus status = TaskStatus.INACTIVE;
 
     /**
      * The {@code Order} in which this {@code Task} is a part of.
@@ -44,7 +67,7 @@ public class Task extends AbstractTask implements QuantityAddable<Item> {
     private Rack rack;
 
     /**
-     * The {@code Rack} to deliver the {@code Rack} at.
+     * The {@code Gate} to deliver the {@code Rack} at.
      */
     private Gate gate;
 
@@ -60,11 +83,6 @@ public class Task extends AbstractTask implements QuantityAddable<Item> {
      */
     private Map<Item, Integer> items = new HashMap<>();
 
-    /**
-     * The current status of this {@code Task}.
-     */
-    private TaskStatus status = TaskStatus.INACTIVE;
-
     // ===============================================================================================
     //
     // Member Methods
@@ -72,6 +90,10 @@ public class Task extends AbstractTask implements QuantityAddable<Item> {
 
     /**
      * Constructs a new {@code Task} object.
+     *
+     * @param order the associated {@code Order}.
+     * @param rack the assigned {@code Rack}.
+     * @param agent the assigned {@code agent}.
      */
     public Task(Order order, Rack rack, Agent agent) {
         super();
@@ -135,34 +157,16 @@ public class Task extends AbstractTask implements QuantityAddable<Item> {
      * This function is used to add extra units of the given {@code Item} if the given
      * quantity is positive,
      * and used to remove existing units if the given quantity is negative.
-     *
-     * TODO: prevent adding item after activation the order
-     * TODO: prevent adding/removing from outside this class
+     * <p>
+     * This function should be called only once with positive quantities during
+     * the construction of the {@code Task} object.
      *
      * @param item     the {@code Item} to be updated.
      * @param quantity the quantity to be updated with.
      */
     @Override
-    public void add(Item item, int quantity) throws Exception {
+    public void add(Item item, int quantity) {
         QuantityAddable.update(items, item, quantity);
-    }
-
-    /**
-     * Fills this {@code Task} with the maximum number of items needed by the
-     * associated {@code Order} that are available in the assigned {@code Rack}.
-     *
-     * This is done by taking the intersection of items in both the associated {@code Order},
-     * and the assigned {@code Rack}.
-     *
-     * TODO: call this automatically from the constructor
-     */
-    public void fillItems() {
-        items.clear();
-
-        for (Map.Entry<Item, Integer> pair : order) {
-            Item item = pair.getKey();
-            items.put(item, Math.min(rack.get(item), pair.getValue()));
-        }
     }
 
     /**
@@ -179,12 +183,19 @@ public class Task extends AbstractTask implements QuantityAddable<Item> {
     }
 
     /**
-     * Returns the current status of this {@code Task}.
+     * Fills this {@code Task} with the maximum number of items needed by the
+     * associated {@code Order} that are available in the assigned {@code Rack}.
      *
-     * @return the {@code TaskStatus} of this {@code Task}.
+     * This is done by taking the intersection of items in both the associated {@code Order},
+     * and the assigned {@code Rack}.
      */
-    public TaskStatus getStatus() {
-        return status;
+    private void fillItems() {
+        items.clear();
+
+        for (Map.Entry<Item, Integer> pair : order) {
+            Item item = pair.getKey();
+            items.put(item, Math.min(rack.get(item), pair.getValue()));
+        }
     }
 
     /**
@@ -192,28 +203,30 @@ public class Task extends AbstractTask implements QuantityAddable<Item> {
      *
      * @return {@code true} if this {@code Task} is active; {@code false} otherwise.
      */
+    @Override
     public boolean isActive() {
-        return (status != TaskStatus.INACTIVE && status != TaskStatus.COMPLETED);
+        return (status != TaskStatus.INACTIVE && status != TaskStatus.FULFILLED);
     }
 
     /**
-     * Checks whether this {@code Task} has been completed or not.
+     * Checks whether this {@code Task} is fulfilled or not.
      *
-     * @return {@code true} if this {@code Task} has been completed; {@code false} otherwise.
+     * @return {@code true} if this {@code Task} is fulfilled; {@code false} otherwise.
      */
-    public boolean isComplete() {
-        return (status == TaskStatus.COMPLETED);
+    @Override
+    public boolean isFulfilled() {
+        return (status == TaskStatus.FULFILLED);
     }
 
     /**
      * Activates this {@code Task} and allocates its required resources.
+     * <p>
+     * This function should be called only once per {@code Task} object.
      */
     @Override
     public void activate() throws Exception {
-        // Skip re-activating already activated tasks
-        if (status != TaskStatus.INACTIVE) {
-            return;
-        }
+        // Fill the items of the task
+        fillItems();
 
         // Allocate task resources
         rack.reserve(this);
@@ -229,36 +242,14 @@ public class Task extends AbstractTask implements QuantityAddable<Item> {
      * <p>
      * A callback function to be invoked when this {@code Task} has been completed.
      * Used to clear and finalize allocated resources.
+     *
+     * TODO: add task statistics finalization
      */
     @Override
     protected void terminate() {
         order.onTaskComplete(this);
         agent.onTaskComplete(this);
         super.terminate();
-    }
-
-    /**
-     * Returns the priority of this {@code Task}.
-     * Higher value indicates higher priority.
-     *
-     * TODO: add better heuristic to compute the priority
-     *
-     * @return the priority of this {@code Task}.
-     */
-    @Override
-    public int getPriority() {
-        return -order.getId();
-    }
-
-    /**
-     * Returns the estimated number of steps to finish this {@code Task}.
-     *
-     * TODO: implement if needed
-     *
-     * @return the estimated number of steps.
-     */
-    public int getEstimatedDistance() {
-        return 0;
     }
 
     /**
@@ -310,7 +301,7 @@ public class Task extends AbstractTask implements QuantityAddable<Item> {
         else if (status == TaskStatus.RETURNING) {
             if (rack.canUnbind()) {
                 rack.unbind();
-                status = TaskStatus.COMPLETED;
+                status = TaskStatus.FULFILLED;
                 terminate();
             } else {
                 Planner.route(agent, Warehouse.getInstance().getMap());

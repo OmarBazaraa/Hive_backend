@@ -6,7 +6,7 @@ import models.facilities.Rack;
 /**
  * Interface definition for all quantity reservable classes.
  * <p>
- * An {@code QuantityReservable} class is a class that can accept reserving quantities.
+ * A {@code QuantityReservable} class is a class that can accept reserving quantities.
  * <p>
  * This interface is to be implemented by {@link Rack}, {@link Item}.
  *

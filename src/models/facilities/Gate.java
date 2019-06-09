@@ -16,7 +16,7 @@ import org.json.JSONObject;
  * in our Hive Warehouse System.
  * <p>
  * A gate is a location in the {@link models.warehouses.Warehouse Warehouse} grid
- * where an {@link models.agents.Agent Agent} deliver {@link Rack} of {@link models.items.Item Items}.
+ * where an {@link models.agents.Agent Agent} delivers {@link Rack} of {@link models.items.Item Items}.
  *
  * @see models.HiveObject HiveObject
  * @see models.agents.Agent Agent

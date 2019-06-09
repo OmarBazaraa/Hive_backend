@@ -35,7 +35,7 @@ public class Warehouse implements AbstractTask.OnFulFillListener {
 
     /**
      * The current time step in this {@code Warehouse}.
-     * Needed to simulation purposes.
+     * Needed for simulation purposes.
      */
     private long time;
 
@@ -80,7 +80,7 @@ public class Warehouse implements AbstractTask.OnFulFillListener {
     private Map<Integer, Station> stations = new HashMap<>();
 
     /**
-     * The queue of pending (not fully dispatched) orders.
+     * The queue of pending and not fully dispatched orders.
      */
     private Queue<Order> pendingOrders = new LinkedList<>();
 
@@ -171,7 +171,6 @@ public class Warehouse implements AbstractTask.OnFulFillListener {
      */
     public void addTask(Task task) throws Exception {
         // Activate the task
-        task.fillItems();
         task.activate();
 
         // Update agents lists

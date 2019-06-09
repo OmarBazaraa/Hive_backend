@@ -10,7 +10,7 @@ import java.util.Map;
 /**
  * Interface definition for all quantity addable classes.
  * <p>
- * An {@code QuantityAddable} class is a class that can accept adding and removing quantities.
+ * A {@code QuantityAddable} class is a class that can accept adding and removing quantities.
  * <p>
  * This interface is to be implemented by {@link Rack}, {@link Item}, {@link Order}, {@link Task}.
  *
@@ -63,12 +63,8 @@ public interface QuantityAddable<T> extends Iterable<Map.Entry<T, Integer>> {
      * @param key      the key to be updated.
      * @param quantity the quantity to be updated with.
      */
-    static <T> void update(Map<T, Integer> map, T key, int quantity) throws Exception {
+    static <T> void update(Map<T, Integer> map, T key, int quantity) {
         int total = quantity + map.getOrDefault(key, 0);
-
-        if (total < 0) {
-            throw new Exception("No enough quantity to be removed!");
-        }
 
         if (total > 0) {
             map.put(key, total);

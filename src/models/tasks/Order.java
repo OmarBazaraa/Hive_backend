@@ -20,6 +20,9 @@ import java.util.*;
  * An order is defined by a list of needed {@link Item Items}, and a {@link Gate}
  * where the {@code Order} must be delivered.
  *
+ * TODO: enable re-filling orders
+ * TODO: enable order scheduling
+ *
  * @see Task
  * @see Item
  * @see Gate
@@ -27,8 +30,27 @@ import java.util.*;
 public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAssignable {
 
     //
+    // Enums
+    //
+
+    /**
+     * Different status of an {@code Order} during its lifecycle.
+     */
+    public enum OrderStatus {
+        INACTIVE,       // Inactive order, meaning that its item has not been reserved
+        ACTIVE,         // Active order with all its items has been reserved
+        FULFILLED       // The order has been completed
+    }
+
+    // ===============================================================================================
+    //
     // Member Variables
     //
+
+    /**
+     * The set of sub tasks for fulfilling this {@code Order}.
+     */
+    private Set<Task> subTasks = new HashSet<>();
 
     /**
      * The {@code Gate} where this {@code Order} must be delivered.
@@ -36,12 +58,12 @@ public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAs
     private Gate deliveryGate;
 
     /**
-     * The number of pending units needed by this {@code Order}.
+     * The number of pending units this {@code Order} is needing.
      */
     private int pendingUnits;
 
     /**
-     * The map of items this {@code Order} is needing.<p>
+     * The map of pending items this {@code Order} is needing.<p>
      * The key is an {@code Item}.<p>
      * The mapped value represents the needed quantity of this {@code Item}.
      */
@@ -51,16 +73,6 @@ public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAs
      * The current status of this {@code Order}.
      */
     private OrderStatus status = OrderStatus.INACTIVE;
-
-    /**
-     * The set of sub tasks for fulfilling this {@code Order}.
-     */
-    private Set<Task> subTasks = new HashSet<>();
-
-    /**
-     * The listener to be invoked when this {@code Order} has been fulfilled.
-     */
-    private OnFulFillListener fulFillListener;
 
     // ===============================================================================================
     //
@@ -138,7 +150,7 @@ public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAs
     /**
      * Returns the total number of pending units needed by this {@code Order}.
      * <p>
-     * Pending units are these units that are not assigned to be delivered yet.
+     * Pending units are these units that are not assigned to a {@code Task} yet.
      *
      * @return the number of pending units.
      */
@@ -147,26 +159,55 @@ public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAs
     }
 
     /**
-     * Checks whether this {@code Order} still has some pending items or not.
+     * Returns the pending quantity of the an {@code Item} needed by this {@code Order}.
      *
-     * @return {@code true} if this {@code Order} is still pending; {@code false} otherwise.
+     * @param item the needed {@code Item}.
+     *
+     * @return the pending quantity of the given {@code Item}.
      */
-    public boolean isPending() {
-        return (pendingUnits > 0);
+    @Override
+    public int get(Item item) {
+        return items.getOrDefault(item, 0);
     }
 
     /**
-     * Checks whether this {@code Order} is fulfilled or not.
+     * Updates the quantity of an {@code Item} in this {@code Order}.
+     * <p>
+     * This function is used to add extra units of the given {@code Item} if the given
+     * quantity is positive,
+     * and used to remove existing units if the given quantity is negative.
+     * <p>
+     * This function should be called with positive quantities only during
+     * the construction of the {@code Order} object and with negative quantities
+     * once per {@code Task} assignment.
      *
-     * @return {@code true} if this {@code Order} is fulfilled; {@code false} otherwise.
+     * @param item     the {@code Item} to be updated.
+     * @param quantity the quantity to be updated with.
      */
-    public boolean isFulfilled() {
-        return (pendingUnits <= 0 && subTasks.isEmpty());
+    @Override
+    public void add(Item item, int quantity) {
+        QuantityAddable.update(items, item, quantity);
+        pendingUnits += quantity;
+    }
+
+    /**
+     * Returns an {@code Iterator} to iterate over the pending needed items in this {@code Order}.
+     * <p>
+     * Note that this iterator should be used in read-only operations;
+     * otherwise undefined behaviour could arises.
+     *
+     * @return an {@code Iterator}.
+     */
+    @Override
+    public Iterator<Map.Entry<Item, Integer>> iterator() {
+        return items.entrySet().iterator();
     }
 
     /**
      * Checks whether this {@code Order} is feasible of being fulfilled regarding
      * its needed items quantities.
+     *
+     * TODO: check feasibility during order construction and remove this function
      *
      * @return {@code true} if this {@code Order} is feasible; {@code false} otherwise.
      */
@@ -190,69 +231,42 @@ public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAs
     }
 
     /**
-     * Returns the pending quantity of the an {@code Item} needed by this {@code Order}.
+     * Checks whether this {@code Order} still has some pending items or not.
      *
-     * @param item the needed {@code Item}.
+     * @return {@code true} if this {@code Order} is still pending; {@code false} otherwise.
+     */
+    public boolean isPending() {
+        return (pendingUnits > 0);
+    }
+
+    /**
+     * Checks whether this {@code Order} is currently active or not.
      *
-     * @return the pending quantity of the given {@code Item}.
+     * @return {@code true} if this {@code Order} is active; {@code false} otherwise.
      */
     @Override
-    public int get(Item item) {
-        return items.getOrDefault(item, 0);
+    public boolean isActive() {
+        return (status == OrderStatus.ACTIVE);
     }
 
     /**
-     * Updates the quantity of an {@code Item} in this {@code Order}.
-     * <p>
-     * This function is used to add extra units of the given {@code Item} if the given
-     * quantity is positive,
-     * and used to remove existing units if the given quantity is negative.
+     * Checks whether this {@code Order} is fulfilled or not.
      *
-     * TODO: prevent adding item after activation the order
-     * TODO: prevent adding/removing from outside this class
-     *
-     * @param item     the {@code Item} to be updated.
-     * @param quantity the quantity to be updated with.
+     * @return {@code true} if this {@code Order} is fulfilled; {@code false} otherwise.
      */
     @Override
-    public void add(Item item, int quantity) throws Exception {
-        QuantityAddable.update(items, item, quantity);
-        pendingUnits += quantity;
+    public boolean isFulfilled() {
+        return (pendingUnits <= 0 && subTasks.isEmpty());
     }
 
     /**
-     * Returns an {@code Iterator} to iterate over the pending needed items in this {@code Order}.
-     * <p>
-     * Note that this iterator should be used in read-only operations;
-     * otherwise undefined behaviour could arises.
-     *
-     * @return an {@code Iterator}.
-     */
-    @Override
-    public Iterator<Map.Entry<Item, Integer>> iterator() {
-        return items.entrySet().iterator();
-    }
-
-    /**
-     * Returns the current status of this {@code Order}.
-     *
-     * @return the {@code OrderStatus} of this {@code Order}.
-     */
-    public OrderStatus getStatus() {
-        return status;
-    }
-
-    /**
-     * Activates this {@code Order} by reserving all the needed units of this to avoid
+     * Activates this {@code Order} by reserving all the needed units to avoid
      * accepting infeasible orders in the future.
+     * <p>
+     * This function should be called only once per {@code Order} object.
      */
     @Override
-    public void activate() throws Exception {
-        // Skip re-activating already activated orders
-        if (status != OrderStatus.INACTIVE) {
-            return;
-        }
-
+    public void activate() {
         // Reserve all the needed items by the order
         for (Item item : items.keySet()) {
             item.reserve(this);
@@ -278,21 +292,19 @@ public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAs
 
     /**
      * Assigns a new sub {@code Task} for fulfilling this {@code Order}.
+     * <p>
+     * This function should be called once per {@code Task} object after activating the {@code Order}.
      *
      * @param task the new {@code Task} to assign.
      */
     @Override
-    public void assignTask(Task task) throws Exception {
-        if (status != OrderStatus.ACTIVE) {
-            throw new Exception("The order is not activated yet!");
-        }
-
+    public void assignTask(Task task) {
         // Remove task items from the pending items of the order
         for (Map.Entry<Item, Integer> pair : task) {
             add(pair.getKey(), -pair.getValue());
         }
 
-        // Add task to the list of sub tasks
+        // Add task to the set of sub tasks
         subTasks.add(task);
     }
 

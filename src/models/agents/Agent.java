@@ -165,23 +165,13 @@ public class Agent extends HiveObject implements TaskAssignable {
 
     /**
      * Returns the priority of this {@code Agent}.
-     * Higher value indicates higher priority.
+     * Greater value indicates higher priority.
      *
      * @return the priority of this {@code Agent}.
      */
     public int getPriority() {
         Task task = getActiveTask();
         return (task != null ? task.getPriority() : Short.MIN_VALUE);
-    }
-
-    /**
-     * Returns the estimated number of steps to finish the currently active {@code Task}.
-     *
-     * @return the estimated number of steps.
-     */
-    public int getEstimatedSteps() {
-        Task task = getActiveTask();
-        return (task != null ? task.getEstimatedDistance() : 0);
     }
 
     /**

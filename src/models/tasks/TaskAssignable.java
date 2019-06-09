@@ -6,7 +6,7 @@ import models.agents.Agent;
 /**
  * Interface definition for all {@link Task} assignable classes.
  * <p>
- * A {@code TaskAssignable} class is a class that can be assigned a {@link Task}.
+ * A {@code TaskAssignable} object is an object that can be assigned a {@link Task}.
  * <p>
  * This interface is to be implemented by {@link Agent}, {@link Order}.
  *

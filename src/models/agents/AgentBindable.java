@@ -9,7 +9,7 @@ import models.facilities.Station;
 /**
  * Interface definition for all {@link Agent} bindable classes.
  * <p>
- * An {@code AgentBindable} class is a class that can be bound to an {@link Agent}.
+ * An {@code AgentBindable} object is an object that can be bound to an {@link Agent}.
  * <p>
  * This interface is to be implemented by all the {@link Facility} classes:
  * {@link Rack}, {@link Gate}, and {@link Station}.
@@ -69,6 +69,8 @@ public interface AgentBindable {
 
     /**
      * Checks whether its currently possible to unbind the bound {@code Agent} from this object.
+     * <p>
+     * This function should be called only when an {@code Agent} is already bound to this object.
      *
      * @return {@code true} if it is possible to unbind; {@code false} otherwise.
      *

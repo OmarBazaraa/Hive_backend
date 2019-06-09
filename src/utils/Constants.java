@@ -198,49 +198,4 @@ public class Constants {
         UNBIND_STATION,
         NOTHING
     }
-
-    //
-    // Rack Constants
-    //
-
-    // Rack default configurations
-    // TODO: refactor?! :: RACK_DEFAULT_* <-> DEFAULT_RACK_*
-    public static final int RACK_DEFAULT_INIT_WEIGHT = 100;
-    public static final int RACK_DEFAULT_STORE_CAPACITY = 100;
-
-    //
-    // Order and Task Constants
-    //
-
-    /**
-     * Different supported types of an {@code Order}.
-     * TODO: may be another order class
-     */
-    public enum OrderType {
-        GET,            // Take from a rack to a gate
-        PUT             // Take from a gate to a rack
-    }
-
-    /**
-     * Different status of an {@code Order} during its lifecycle of the order.
-     * TODO: may be removed
-     */
-    public enum OrderStatus {
-        INACTIVE,       // Inactive order, meaning that its item has not been reserved
-        ACTIVE,         // Active order with all its items has been reserved
-        FULFILLED       // The order has been fulfilled
-    }
-
-    /**
-     * Different status of a {@code Task} during its lifecycle of the task.
-     * TODO: think of a more general way to combine multiple tasks together
-     */
-    public enum TaskStatus {
-        INACTIVE,       // The task is still pending not active yet
-        FETCHING,       // Agent is moving to fetch the assigned rack
-        DELIVERING,     // Agent is moving to deliver the loaded rack to a gate
-        OFFLOADING,     // Agent is offloading the needed items at the gate
-        RETURNING,      // Agent is returning the rack back
-        COMPLETED       // The task has been completed
-    }
 }
