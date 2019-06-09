@@ -7,6 +7,7 @@ import models.items.QuantityReservable;
 import models.warehouses.Warehouse;
 
 import server.Server;
+import server.ServerConstants;
 
 import utils.Constants;
 import utils.Constants.*;
@@ -85,16 +86,16 @@ public class Rack extends Facility implements QuantityAddable<Item>, QuantityRes
     public static Rack create(JSONObject data, int row, int col) throws Exception {
         Rack ret = new Rack();
 
-        ret.capacity = data.getInt(Constants.MSG_KEY_RACK_CAPACITY);
+        ret.capacity = data.getInt(ServerConstants.MSG_KEY_RACK_CAPACITY);
         ret.setPosition(row, col);
 
-        JSONArray itemsJSON = data.getJSONArray(Constants.MSG_KEY_ITEMS);
+        JSONArray itemsJSON = data.getJSONArray(ServerConstants.MSG_KEY_ITEMS);
 
         for (int i = 0; i < itemsJSON.length(); ++i) {
             JSONObject itemJSON = itemsJSON.getJSONObject(i);
 
-            int itemId = itemJSON.getInt(Constants.MSG_KEY_ID);
-            int quantity = itemJSON.getInt(Constants.MSG_KEY_ITEM_QUANTITY);
+            int itemId = itemJSON.getInt(ServerConstants.MSG_KEY_ID);
+            int quantity = itemJSON.getInt(ServerConstants.MSG_KEY_ITEM_QUANTITY);
             Item item = Warehouse.getInstance().getItemById(itemId);
 
             if (quantity < 0) {

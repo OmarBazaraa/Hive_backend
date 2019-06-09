@@ -12,8 +12,10 @@ import models.maps.MapCell;
 import models.maps.MapGrid;
 import models.tasks.AbstractTask;
 import models.tasks.Order;
-
 import models.tasks.Task;
+
+import server.ServerConstants;
+
 import utils.Constants;
 
 import org.json.JSONArray;
@@ -121,8 +123,8 @@ public class Warehouse implements AbstractTask.OnFulFillListener {
      * @param data the un-parsed {@code Warehouse} data.
      */
     public void configure(JSONObject data) throws Exception {
-        configureItems(data.getJSONArray(Constants.MSG_KEY_ITEMS));
-        configureWarehouse(data.getJSONObject(Constants.MSG_KEY_MAP));
+        configureItems(data.getJSONArray(ServerConstants.MSG_KEY_ITEMS));
+        configureWarehouse(data.getJSONObject(ServerConstants.MSG_KEY_MAP));
     }
 
     /**

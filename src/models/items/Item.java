@@ -5,7 +5,7 @@ import models.facilities.Rack;
 import models.tasks.Order;
 import models.tasks.Task;
 
-import utils.Constants;
+import server.ServerConstants;
 
 import org.json.JSONObject;
 
@@ -68,8 +68,8 @@ public class Item extends Entity implements QuantityAddable<Rack>, QuantityReser
      * @return an {@code Item} object.
      */
     public static Item create(JSONObject data) throws Exception {
-        int id = data.getInt(Constants.MSG_KEY_ID);
-        int weight = data.getInt(Constants.MSG_KEY_ITEM_WEIGHT);
+        int id = data.getInt(ServerConstants.MSG_KEY_ID);
+        int weight = data.getInt(ServerConstants.MSG_KEY_ITEM_WEIGHT);
         return new Item(id, weight);
     }
 

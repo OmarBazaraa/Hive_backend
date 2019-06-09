@@ -2,6 +2,8 @@ package models.maps;
 
 import models.maps.utils.Position;
 
+import server.ServerConstants;
+
 import utils.Constants;
 import utils.Constants.*;
 
@@ -34,12 +36,12 @@ public class MapGrid extends Grid<MapCell> {
      * @return an {@code MapGrid} object.
      */
     public static MapGrid create(JSONObject data) throws Exception {
-        int h = data.getInt(Constants.MSG_KEY_HEIGHT);
-        int w = data.getInt(Constants.MSG_KEY_WIDTH);
+        int h = data.getInt(ServerConstants.MSG_KEY_HEIGHT);
+        int w = data.getInt(ServerConstants.MSG_KEY_WIDTH);
 
         MapCell[][] grid = new MapCell[h][w];
 
-        JSONArray gridJSON = data.getJSONArray(Constants.MSG_KEY_GRID);
+        JSONArray gridJSON = data.getJSONArray(ServerConstants.MSG_KEY_GRID);
 
         if (gridJSON.length() != h) {
             throw new Exception("Invalid grid dimensions");

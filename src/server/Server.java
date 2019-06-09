@@ -77,7 +77,7 @@ public class Server {
      * The only instance of this {@code Server} class.
      */
     private static Server sServer =
-            new Server(Constants.SERVER_PATH, Constants.SERVER_PORT);
+            new Server(ServerConstants.SERVER_PATH, ServerConstants.SERVER_PORT);
 
     /**
      * Returns the only available instance of this {@code Server} class.
@@ -121,7 +121,7 @@ public class Server {
 
     /**
      * Checks whether this {@code Server} is still running and did not receive
-     * an EXIT message or not.
+     * an EXIT message.
      *
      * @return {@code true} if this {@code Server} did not receive an EXIT message; {@code false} otherwise.
      */
@@ -131,7 +131,7 @@ public class Server {
 
     /**
      * Checks whether this {@code Server} object is currently connected with the
-     * frontend or not.
+     * frontend.
      *
      * @return {@code true} if connected; {@code false} otherwise.
      */
@@ -164,19 +164,19 @@ public class Server {
     }
 
     public void sendAction(Agent agent, AgentAction action) {
-        JSONObject data = sentMsg.getJSONObject(Constants.MSG_KEY_DATA);
-        JSONArray actions = data.getJSONArray(Constants.MSG_KEY_ACTIONS);
+        JSONObject data = sentMsg.getJSONObject(ServerConstants.MSG_KEY_DATA);
+        JSONArray actions = data.getJSONArray(ServerConstants.MSG_KEY_ACTIONS);
 
         JSONObject actionObj = new JSONObject()
-                .put(Constants.MSG_KEY_TYPE, Utility.actionToServerType(action))
-                .put(Constants.MSG_KEY_AGENT_ID, agent.getId());
+                .put(ServerConstants.MSG_KEY_TYPE, ServerUtility.actionToServerType(action))
+                .put(ServerConstants.MSG_KEY_AGENT_ID, agent.getId());
 
         actions.put(actionObj);
     }
 
     public void sendLog(Task task) {
-        JSONObject data = sentMsg.getJSONObject(Constants.MSG_KEY_DATA);
-        JSONArray logs = data.getJSONArray(Constants.MSG_KEY_ACTIONS);
+        JSONObject data = sentMsg.getJSONObject(ServerConstants.MSG_KEY_DATA);
+        JSONArray logs = data.getJSONArray(ServerConstants.MSG_KEY_ACTIONS);
 
         JSONObject logObj = new JSONObject();
         // TODO: add log items
@@ -189,8 +189,8 @@ public class Server {
     }
 
     public void sendStatistics(Map<String, Integer> statistics) {
-        JSONObject data = sentMsg.getJSONObject(Constants.MSG_KEY_DATA);
-        data.put(Constants.MSG_KEY_STATISTICS, statistics);
+        JSONObject data = sentMsg.getJSONObject(ServerConstants.MSG_KEY_DATA);
+        data.put(ServerConstants.MSG_KEY_STATISTICS, statistics);
     }
 
     public void flushSendBuffer() throws IOException {
@@ -203,15 +203,15 @@ public class Server {
     private JSONObject getEmptySendMessage() {
         // Create data object
         JSONObject data = new JSONObject();
-        data.put(Constants.MSG_KEY_TIME_STEP, warehouse.getTime());
-        data.put(Constants.MSG_KEY_ACTIONS, new JSONArray());
-        data.put(Constants.MSG_KEY_LOGS, new JSONArray());
-        data.put(Constants.MSG_KEY_STATISTICS, new JSONObject());
+        data.put(ServerConstants.MSG_KEY_TIME_STEP, warehouse.getTime());
+        data.put(ServerConstants.MSG_KEY_ACTIONS, new JSONArray());
+        data.put(ServerConstants.MSG_KEY_LOGS, new JSONArray());
+        data.put(ServerConstants.MSG_KEY_STATISTICS, new JSONObject());
 
         // Create main object
         JSONObject ret = new JSONObject();
-        ret.put(Constants.MSG_KEY_TYPE, Constants.MSG_TYPE_UPDATE);
-        ret.put(Constants.MSG_KEY_DATA, data);
+        ret.put(ServerConstants.MSG_KEY_TYPE, ServerConstants.MSG_TYPE_UPDATE);
+        ret.put(ServerConstants.MSG_KEY_DATA, data);
 
         return ret;
     }
@@ -224,11 +224,11 @@ public class Server {
         JSONObject obj = receivedQueue.take();
 
         // Get message type and data
-        int type = obj.optInt(Constants.MSG_KEY_TYPE);
-        JSONObject data = obj.optJSONObject(Constants.MSG_KEY_DATA);
+        int type = obj.optInt(ServerConstants.MSG_KEY_TYPE);
+        JSONObject data = obj.optJSONObject(ServerConstants.MSG_KEY_DATA);
 
         // Skip un-related messages
-        if (type != Constants.MSG_TYPE_CONFIG) {
+        if (type != ServerConstants.MSG_TYPE_CONFIG) {
             return;
         }
 
@@ -244,21 +244,21 @@ public class Server {
         JSONObject obj = receivedQueue.take();
 
         // Get message type and data
-        int type = obj.optInt(Constants.MSG_KEY_TYPE);
-        JSONObject data = obj.optJSONObject(Constants.MSG_KEY_DATA);
+        int type = obj.optInt(ServerConstants.MSG_KEY_TYPE);
+        JSONObject data = obj.optJSONObject(ServerConstants.MSG_KEY_DATA);
 
         // Handle valid messages
         switch (type) {
-            case Constants.MSG_TYPE_RUN:
+            case ServerConstants.MSG_TYPE_RUN:
                 currentState = ServerStates.RUNNING;
                 break;
-            case Constants.MSG_TYPE_DEPLOY:
+            case ServerConstants.MSG_TYPE_DEPLOY:
                 // TODO: handle later
                 break;
-            case Constants.MSG_TYPE_ORDER:
+            case ServerConstants.MSG_TYPE_ORDER:
                 processOrderMsg(data);
                 break;
-            case Constants.MSG_TYPE_CONFIG:
+            case ServerConstants.MSG_TYPE_CONFIG:
                 processConfigMsg(data);
                 break;
         }
@@ -281,25 +281,25 @@ public class Server {
         JSONObject obj = receivedQueue.take();
 
         // Get message type and data
-        int type = obj.optInt(Constants.MSG_KEY_TYPE);
-        JSONObject data = obj.optJSONObject(Constants.MSG_KEY_DATA);
+        int type = obj.optInt(ServerConstants.MSG_KEY_TYPE);
+        JSONObject data = obj.optJSONObject(ServerConstants.MSG_KEY_DATA);
 
         // Handle valid messages
         switch (type) {
-            case Constants.MSG_TYPE_ACK:
+            case ServerConstants.MSG_TYPE_ACK:
                 sentMsg = getEmptySendMessage();
                 currentState = ServerStates.RUNNING;
                 break;
-            case Constants.MSG_TYPE_PAUSE:
+            case ServerConstants.MSG_TYPE_PAUSE:
                 currentState = ServerStates.PAUSED;
                 break;
-            case Constants.MSG_TYPE_STOP:
+            case ServerConstants.MSG_TYPE_STOP:
                 currentState = ServerStates.IDLE;
                 break;
-            case Constants.MSG_TYPE_ORDER:
+            case ServerConstants.MSG_TYPE_ORDER:
                 processOrderMsg(data);
                 break;
-            case Constants.MSG_TYPE_CONFIG:
+            case ServerConstants.MSG_TYPE_CONFIG:
                 processConfigMsg(data);
                 break;
         }
@@ -337,10 +337,10 @@ public class Server {
         JSONObject obj = new JSONObject(message);
 
         // Get message type
-        int type = obj.optInt(Constants.MSG_KEY_TYPE);
+        int type = obj.optInt(ServerConstants.MSG_KEY_TYPE);
 
         // Consume EXIT message
-        if (type == Constants.MSG_TYPE_EXIT) {
+        if (type == ServerConstants.MSG_TYPE_EXIT) {
             currentState = ServerStates.EXIT;
         }
 

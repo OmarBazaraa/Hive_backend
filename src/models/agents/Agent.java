@@ -9,6 +9,7 @@ import models.tasks.Task;
 import models.warehouses.Warehouse;
 
 import server.Server;
+import server.ServerConstants;
 
 import utils.Constants;
 import utils.Constants.Direction;
@@ -48,7 +49,7 @@ public class Agent extends AbstractAgent {
      * @return an {@code Agent} object.
      */
     public static Agent create(JSONObject data, int row, int col) throws Exception {
-        int id = data.getInt(Constants.MSG_KEY_ID);
+        int id = data.getInt(ServerConstants.MSG_KEY_ID);
         Agent ret = new Agent(id, Constants.AGENT_DEFAULT_LOAD_CAPACITY, Constants.AGENT_DEFAULT_DIRECTION);
         ret.setPosition(row, col);
         return ret;

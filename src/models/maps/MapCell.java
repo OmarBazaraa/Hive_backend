@@ -6,6 +6,8 @@ import models.facilities.Gate;
 import models.facilities.Rack;
 import models.facilities.Station;
 
+import server.ServerConstants;
+
 import utils.Constants;
 import utils.Constants.*;
 
@@ -60,27 +62,27 @@ public class MapCell extends Cell {
             return ret;
         }
 
-        if (data.has(Constants.MSG_KEY_AGENT)) {
-            data = data.getJSONObject(Constants.MSG_KEY_AGENT);
+        if (data.has(ServerConstants.MSG_KEY_AGENT)) {
+            data = data.getJSONObject(ServerConstants.MSG_KEY_AGENT);
             ret.setAgent(Agent.create(data, row, col));
             return ret;
         }
 
-        if (data.has(Constants.MSG_KEY_FACILITY)) {
-            data = data.getJSONObject(Constants.MSG_KEY_FACILITY);
-            int type = data.getInt(Constants.MSG_KEY_TYPE);
+        if (data.has(ServerConstants.MSG_KEY_FACILITY)) {
+            data = data.getJSONObject(ServerConstants.MSG_KEY_FACILITY);
+            int type = data.getInt(ServerConstants.MSG_KEY_TYPE);
 
             switch (type) {
-                case Constants.MSG_TYPE_CELL_OBSTACLE:
+                case ServerConstants.MSG_TYPE_CELL_OBSTACLE:
                     ret.setFacility(null, CellType.OBSTACLE);
                     return ret;
-                case Constants.MSG_TYPE_CELL_RACK:
+                case ServerConstants.MSG_TYPE_CELL_RACK:
                     ret.setFacility(Rack.create(data, row, col), CellType.RACK);
                     return ret;
-                case Constants.MSG_TYPE_CELL_GATE:
+                case ServerConstants.MSG_TYPE_CELL_GATE:
                     ret.setFacility(Gate.create(data, row, col), CellType.GATE);
                     return ret;
-                case Constants.MSG_TYPE_CELL_STATION:
+                case ServerConstants.MSG_TYPE_CELL_STATION:
                     ret.setFacility(Station.create(data, row, col), CellType.STATION);
                     return ret;
             }

@@ -5,8 +5,7 @@ import models.items.Item;
 import models.items.QuantityAddable;
 import models.warehouses.Warehouse;
 
-import utils.Constants;
-import utils.Constants.*;
+import server.ServerConstants;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -89,16 +88,16 @@ public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAs
      * @return an {@code Order} object.
      */
     public static Order create(JSONObject data) throws Exception {
-        int id = data.getInt(Constants.MSG_KEY_ID);
-        JSONArray itemsJSON = data.getJSONArray(Constants.MSG_KEY_ITEMS);
+        int id = data.getInt(ServerConstants.MSG_KEY_ID);
+        JSONArray itemsJSON = data.getJSONArray(ServerConstants.MSG_KEY_ITEMS);
 
         Order ret = new Order(id);
 
         for (int i = 0; i < itemsJSON.length(); ++i) {
             JSONObject itemJSON = itemsJSON.getJSONObject(i);
 
-            int itemId = itemJSON.getInt(Constants.MSG_KEY_ID);
-            int quantity = itemJSON.getInt(Constants.MSG_KEY_ITEM_QUANTITY);
+            int itemId = itemJSON.getInt(ServerConstants.MSG_KEY_ID);
+            int quantity = itemJSON.getInt(ServerConstants.MSG_KEY_ITEM_QUANTITY);
             Item item = Warehouse.getInstance().getItemById(itemId);
 
             if (quantity < 0) {
