@@ -14,11 +14,6 @@ import models.tasks.AbstractTask;
 import models.tasks.Order;
 import models.tasks.Task;
 
-import server.ServerConstants;
-
-import utils.Constants;
-
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.*;
@@ -29,62 +24,26 @@ import java.util.*;
  * <p>
  * It contains required functions to simulate the process inside an automated smart warehouse.
  */
-public class Warehouse implements AbstractTask.OnFulFillListener {
+public class Warehouse extends AbstractWarehouse {
 
     //
     // Member Variables
     //
 
     /**
-     * The current time step in this {@code Warehouse}.
-     * Needed for simulation purposes.
-     */
-    private long time;
-
-    /**
-     * The map grid of this {@code Warehouse}.
-     */
-    private MapGrid map;
-
-    /**
-     * The map of all agents in this {@code Warehouse}, indexed by their id.
-     */
-    private Map<Integer, Agent> agents = new HashMap<>();
-
-    /**
      * The queue of all currently active agents, sorted by their priority.
      */
-    private Queue<Agent> activeAgents = new PriorityQueue<>();
+    protected Queue<Agent> activeAgents = new PriorityQueue<>();
 
     /**
      * The set of all currently idle agents.
      */
-    private Set<Agent> readyAgents = new HashSet<>();
-
-    /**
-     * The map of all items in this {@code Warehouse}, indexed by their id.
-     */
-    private Map<Integer, Item> items = new HashMap<>();
-
-    /**
-     * The map of all racks in this {@code Warehouse}, indexed by their id.
-     */
-    private Map<Integer, Rack> racks = new HashMap<>();
-
-    /**
-     * The map of all gates in this {@code Warehouse}, indexed by their id.
-     */
-    private Map<Integer, Gate> gates = new HashMap<>();
-
-    /**
-     * The map of all charging stations in this {@code Warehouse}, indexed by their id.
-     */
-    private Map<Integer, Station> stations = new HashMap<>();
+    protected Set<Agent> readyAgents = new HashSet<>();
 
     /**
      * The queue of pending and not fully dispatched orders.
      */
-    private Queue<Order> pendingOrders = new LinkedList<>();
+    protected Queue<Order> pendingOrders = new LinkedList<>();
 
     // ===============================================================================================
     //
@@ -118,49 +77,42 @@ public class Warehouse implements AbstractTask.OnFulFillListener {
     }
 
     /**
-     * Configures the specifications of this {@code Warehouse}'s space and components.
-     *
-     * @param data the un-parsed {@code Warehouse} data.
+     * Clears the {@code Warehouse} and removes all its components.
      */
-    public void configure(JSONObject data) throws Exception {
-        configureItems(data.getJSONArray(ServerConstants.MSG_KEY_ITEMS));
-        configureWarehouse(data.getJSONObject(ServerConstants.MSG_KEY_MAP));
+    @Override
+    public void clear() {
+        super.clear();
+        activeAgents.clear();
+        readyAgents.clear();
+        pendingOrders.clear();
     }
 
     /**
-     * Performs and simulates a single time step in this {@code Warehouse}.
+     * Initializes the {@code Warehouse}, and performs any needed pre-computations.
      */
-    public void run() throws Exception {
-        dispatchPendingOrders();
-        stepActiveAgents();
-        time++;
+    @Override
+    public void init() {
+        readyAgents.addAll(agents.values());
+
+        for (Rack rack : racks.values()) {
+            rack.computeGuideMap(map);
+        }
+        for (Gate gate : gates.values()) {
+            gate.computeGuideMap(map);
+        }
+        for (Station station : stations.values()) {
+            station.computeGuideMap(map);
+        }
     }
 
     /**
      * Adds a new {@code Order} to this {@code Warehouse} to be delivered.
      *
-     * @param data the un-parsed {@code Order} data.
+     * @param order the {@code Order} to be added.
      */
-    public void addOrder(JSONObject data) throws Exception {
-        Order order = Order.create(data);
-
-        if (order.isFeasible()) {
-            order.activate();
-            order.setOnFulfillListener(this);
-            pendingOrders.add(order);
-        } else {
-            // TODO: add log message
-        }
-    }
-
-    /**
-     * The callback function to be invoked when an {@code Order} is fulfilled.
-     *
-     * @param order the fulfilled {@code Order}.
-     */
-    @Override
-    public void onOrderFulfill(AbstractTask order) {
-        // TODO: send feed back to the front-end.
+    public void addOrder(Order order) {
+        order.activate();
+        pendingOrders.add(order);
     }
 
     /**
@@ -177,23 +129,20 @@ public class Warehouse implements AbstractTask.OnFulFillListener {
 
         // Update agents lists
         Agent agent = task.getAgent();
+
         if (readyAgents.contains(agent)) {
             readyAgents.remove(agent);
             activeAgents.add(agent);
         }
     }
 
-    // ===============================================================================================
-    //
-    // Helper Methods
-    //
-
     /**
      * Dispatches the current pending orders of this {@code Warehouse}.
      *
      * TODO: check agent to rack reach-ability
      */
-    private void dispatchPendingOrders() throws Exception {
+    @Override
+    protected void dispatchPendingOrders() throws Exception {
         // Get the initial size of the queue
         int size = pendingOrders.size();
 
@@ -217,7 +166,8 @@ public class Warehouse implements AbstractTask.OnFulFillListener {
     /**
      * Moves the active agents one step towards their targets.
      */
-    private void stepActiveAgents() throws Exception {
+    @Override
+    protected void moveActiveAgents() throws Exception {
         // Get the initial size of the queue
         int size = activeAgents.size();
 
@@ -244,144 +194,5 @@ public class Warehouse implements AbstractTask.OnFulFillListener {
 
         // Update active agents queue
         activeAgents = q;
-    }
-
-    // ===============================================================================================
-    //
-    // Getter Methods
-    //
-
-    /**
-     * Returns the current time step in this {@code Warehouse} object.
-     *
-     * @return the current time step of this {@code Warehouse}.
-     */
-    public long getTime() {
-        return time;
-    }
-
-    /**
-     * Returns the map grid of this {@code Warehouse} object.
-     *
-     * TODO: prevent editing the map from outside the warehouse
-     *
-     * @return the {@code MapGrid} of this {@code Warehouse}.
-     */
-    public MapGrid getMap() {
-        return map;
-    }
-
-    /**
-     * Returns the {@code Agent} object with the given id.
-     *
-     * @param id the id of the needed {@code Agent}.
-     *
-     * @return the needed {@code Agent} if available; {@code null} otherwise.
-     */
-    public Agent getAgentById(int id) {
-        return agents.get(id);
-    }
-
-    /**
-     * Returns the {@code Rack} object with the given id.
-     *
-     * @param id the id of the needed {@code Rack}.
-     *
-     * @return the needed {@code Rack} if available; {@code null} otherwise.
-     */
-    public Rack getRackById(int id) {
-        return racks.get(id);
-    }
-
-    /**
-     * Returns the {@code Gate} object with the given id.
-     *
-     * @param id the id of the needed {@code Gate}.
-     *
-     * @return the needed {@code Gate} if available; {@code null} otherwise.
-     */
-    public Gate getGateById(int id) {
-        return gates.get(id);
-    }
-
-    /**
-     * Returns the {@code Station} object with the given id.
-     *
-     * @param id the id of the needed {@code Station}.
-     *
-     * @return the needed {@code Station} if available; {@code null} otherwise.
-     */
-    public Station getStationById(int id) {
-        return stations.get(id);
-    }
-
-    /**
-     * Returns the {@code Item} object with the given id.
-     *
-     * @param id the id of the needed {@code Item}.
-     *
-     * @return the needed {@code Item} if available; {@code null} otherwise.
-     */
-    public Item getItemById(int id) {
-        return items.get(id);
-    }
-
-    // ===============================================================================================
-    //
-    // Parsing & Initializing Methods
-    //
-
-    /**
-     * Configures the space and components of this {@code Warehouse},
-     * and updates the internal corresponding member variables.
-     *
-     * @param data the un-parsed {@code Warehouse} data.
-     */
-    private void configureWarehouse(JSONObject data) throws Exception {
-        map = MapGrid.create(data);
-
-        for (int i = 0; i < map.getRows(); ++i) {
-            for (int j = 0; j < map.getCols(); ++j) {
-                MapCell cell = map.get(i, j);
-
-                Agent agent = cell.getAgent();
-
-                if (agent != null) {
-                    agents.put(agent.getId(), agent);
-                    readyAgents.add(agent);
-                }
-
-                Facility facility = cell.getFacility();
-
-                if (facility != null) {
-                    facility.computeGuideMap(map);
-
-                    switch (cell.getType()) {
-                        case RACK:
-                            racks.put(facility.getId(), (Rack) facility);
-                            break;
-                        case GATE:
-                            gates.put(facility.getId(), (Gate) facility);
-                            break;
-                        case STATION:
-                            stations.put(facility.getId(), (Station) facility);
-                            break;
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * Configures the items of this {@code Warehouse},
-     * and updates the internal corresponding member variables.
-     *
-     * @param data the un-parsed {@code Items} data.
-     */
-    private void configureItems(JSONArray data) throws Exception {
-        for (int i = 0; i < data.length(); ++i) {
-            Item item = Item.create(data.getJSONObject(i));
-            items.put(item.getId(), item);
-        }
     }
 }
