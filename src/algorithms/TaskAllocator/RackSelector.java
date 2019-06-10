@@ -12,7 +12,7 @@ public class RackSelector {
      * TODO @Samir55 complete the Docs here upon function implementation and optimization completion.
      * TODO @Samir55, Either remove useless racks or prevent sending them at the first place.
      * TODO @Samir55 Polish, Improve & Choose better variable names.
-     *
+     * Using Paper "Optimal Selection of Movable Shelves Under Cargo to Person Picking Mode"
      * @param gatePos         todo
      * @param racksList       todo
      * @param items           todo

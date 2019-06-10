@@ -8,6 +8,5 @@ import algorithms.Dispatcher;
 
 public class DispatcherTest {
 
-
 }
 
