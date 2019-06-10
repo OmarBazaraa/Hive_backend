@@ -1,4 +1,4 @@
-package server;
+package server.utils;
 
 import models.agents.Agent;
 import models.facilities.Gate;
@@ -33,7 +33,7 @@ public class ServerDecoder {
 
     // ===============================================================================================
     //
-    // Static Methods
+    // Static Decoding Methods
     //
 
     /**

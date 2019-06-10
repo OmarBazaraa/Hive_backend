@@ -4,6 +4,10 @@ import models.agents.Agent;
 import models.warehouses.Warehouse;
 
 import server.exceptions.DataException;
+import server.utils.ServerConstants;
+import server.utils.ServerConstants.*;
+import server.utils.ServerDecoder;
+import server.utils.ServerEncoder;
 
 import utils.Constants.*;
 
@@ -28,21 +32,6 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public class Server {
 
-    //
-    // Enums
-    //
-
-    /**
-     * Different states of the {@code Server} during its lifecycle.
-     */
-    enum ServerStates {
-        IDLE,
-        RUNNING,
-        PAUSE,
-        EXIT
-    }
-
-    // ===============================================================================================
     //
     // Member Variables
     //

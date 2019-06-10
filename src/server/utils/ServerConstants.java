@@ -1,15 +1,25 @@
-package server;
+package server.utils;
 
 
 /**
  * This {@code ServerConstants} class contains some static constants values
- * to be used by the front-end server.
+ * to be used by the frontend server.
  */
 public class ServerConstants {
 
     //
     // Communication details
     //
+
+    /**
+     * Different states of the {@code Server} during its lifecycle.
+     */
+    public enum ServerStates {
+        IDLE,
+        RUNNING,
+        PAUSE,
+        EXIT
+    }
 
     // WebSocket server details
     public static final String SERVER_PATH = "/";

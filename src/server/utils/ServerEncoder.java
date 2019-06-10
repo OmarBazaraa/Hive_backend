@@ -1,8 +1,7 @@
-package server;
+package server.utils;
 
 import models.agents.Agent;
 
-import utils.Constants;
 import utils.Constants.*;
 
 import org.json.JSONArray;
@@ -14,6 +13,10 @@ import org.json.JSONObject;
  * messages from the backend to be sent to the frontend.
  */
 public class ServerEncoder {
+
+    //
+    // Static Encoding Methods
+    //
 
     public static JSONObject encodeUpdateMsg(long time, JSONArray actions, JSONArray logs, JSONArray statistics) {
         JSONObject data = new JSONObject();
@@ -29,7 +32,7 @@ public class ServerEncoder {
         data.put(ServerConstants.KEY_ID, agent.getId());
         data.put(ServerConstants.KEY_ROW, agent.getRow());
         data.put(ServerConstants.KEY_COL, agent.getCol());
-        return encodeMsg(ServerUtility.actionToServerType(action), data);
+        return encodeMsg(agentActionToType(action), data);
     }
 
     public static JSONObject encodeStatistics(int key, double value) {
@@ -51,5 +54,24 @@ public class ServerEncoder {
         ret.put(ServerConstants.KEY_TYPE, type);
         ret.put(ServerConstants.KEY_DATA, data);
         return ret;
+    }
+
+    // ===============================================================================================
+    //
+    // Static Helper Methods
+    //
+
+    public static int agentActionToType(AgentAction action) {
+        switch (action) {
+            case MOVE:
+                return ServerConstants.TYPE_AGENT_MOVE;
+            case ROTATE_RIGHT:
+                return ServerConstants.TYPE_AGENT_ROTATE_RIGHT;
+            case ROTATE_LEFT:
+                return ServerConstants.TYPE_AGENT_ROTATE_LEFT;
+            case RETREAT:
+                return ServerConstants.TYPE_AGENT_RETREAT;
+        }
+        return -1;
     }
 }
