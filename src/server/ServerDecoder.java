@@ -10,10 +10,13 @@ import models.maps.MapCell;
 import models.tasks.Order;
 import models.warehouses.Warehouse;
 
+import server.exceptions.DataException;
+
 import utils.Constants.*;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.json.JSONException;
 
 
 /**
@@ -39,7 +42,7 @@ public class ServerDecoder {
      *
      * @param data the JSON data to decode.
      */
-    public static void decodeInitConfig(JSONObject data) throws Exception {
+    public static void decodeInitConfig(JSONObject data) throws JSONException, DataException {
         int mode = data.getInt(ServerConstants.KEY_MODE);
         JSONObject stateJSON = data.getJSONObject(ServerConstants.KEY_STATE);
         JSONObject mapJSON = stateJSON.getJSONObject(ServerConstants.KEY_MAP);
@@ -54,7 +57,7 @@ public class ServerDecoder {
      *
      * @param data the JSON data to decode.
      */
-    public static void decodeWarehouseItems(JSONArray data) throws Exception {
+    public static void decodeWarehouseItems(JSONArray data) throws JSONException, DataException {
         for (int i = 0; i < data.length(); ++i) {
             decodeItem(data.getJSONObject(i));
         }
@@ -66,7 +69,7 @@ public class ServerDecoder {
      *
      * @param data the JSON data to decode.
      */
-    public static void decodeWarehouseMap(JSONObject data) throws Exception {
+    public static void decodeWarehouseMap(JSONObject data) throws JSONException, DataException {
         // Extract received properties
         int h = data.getInt(ServerConstants.KEY_HEIGHT);
         int w = data.getInt(ServerConstants.KEY_WIDTH);
@@ -76,7 +79,7 @@ public class ServerDecoder {
         // Checks
         //
         if (h < 1 || w < 1) {
-            throw new Exception("Warehouse grid with invalid dimensions: (" + h + " x " + w + ").");
+            throw new DataException("Warehouse grid with invalid dimensions: (" + h + " x " + w + ").");
         }
 
         MapCell[][] grid = new MapCell[h][w];
@@ -98,7 +101,7 @@ public class ServerDecoder {
      *
      * @param data the JSON data to decode.
      */
-    public static MapCell decodeCell(JSONObject data, int row, int col) throws Exception {
+    public static MapCell decodeCell(JSONObject data, int row, int col) throws JSONException, DataException {
         MapCell ret = new MapCell();
 
         if (data.has(ServerConstants.KEY_AGENT)) {
@@ -124,7 +127,7 @@ public class ServerDecoder {
                     ret.setFacility(CellType.STATION, decodeStation(facilityJSON, row, col));
                     break;
                 default:
-                    throw new Exception("Cell (" + row + ", " + col + ") with invalid facility type: " + type + ".");
+                    throw new DataException("Cell (" + row + ", " + col + ") with invalid facility type: " + type + ".");
             }
         }
 
@@ -132,7 +135,7 @@ public class ServerDecoder {
         // Checks
         //
         if (ret.hasAgent() && ret.hasFacility()) {
-            throw new Exception("Cell (" + row + ", " + col + ") has both agent and facility. Expecting only one.");
+            throw new DataException("Cell (" + row + ", " + col + ") has both agent and facility. Expecting only one.");
         }
 
         return ret;
@@ -144,7 +147,7 @@ public class ServerDecoder {
      *
      * @param data the JSON data to decode.
      */
-    public static Agent decodeAgent(JSONObject data, int row, int col) throws Exception {
+    public static Agent decodeAgent(JSONObject data, int row, int col) throws JSONException, DataException {
         // Extract received properties
         int id = data.getInt(ServerConstants.KEY_ID);
         int cap = data.getInt(ServerConstants.KEY_AGENT_LOAD_CAPACITY);
@@ -154,16 +157,16 @@ public class ServerDecoder {
         // Checks
         //
         if (id < 0) {
-            throw new Exception("Agent with negative id: " + id + ".");
+            throw new DataException("Agent with negative id: " + id + ".");
         }
         if (warehouse.getAgentById(id) != null) {
-            throw new Exception("Agent with duplicate id: " + id + ".");
+            throw new DataException("Agent with duplicate id: " + id + ".");
         }
         if (cap < 1) {
-            throw new Exception("Agent-" + id + " with non-positive load capacity: " + cap + ".");
+            throw new DataException("Agent-" + id + " with non-positive load capacity: " + cap + ".");
         }
         if (dir < 0 || dir > 3) {
-            throw new Exception("Agent-" + id + " with invalid direction: " + dir + ".");
+            throw new DataException("Agent-" + id + " with invalid direction: " + dir + ".");
         }
 
         // Create and add to the warehouse
@@ -179,7 +182,7 @@ public class ServerDecoder {
      *
      * @param data the JSON data to decode.
      */
-    public static Rack decodeRack(JSONObject data, int row, int col) throws Exception {
+    public static Rack decodeRack(JSONObject data, int row, int col) throws JSONException, DataException {
         // Extract received properties
         int id = data.getInt(ServerConstants.KEY_ID);
         int cap = data.getInt(ServerConstants.KEY_RACK_CAPACITY);
@@ -190,16 +193,16 @@ public class ServerDecoder {
         // Checks
         //
         if (id < 0) {
-            throw new Exception("Rack with negative id: " + id + ".");
+            throw new DataException("Rack with negative id: " + id + ".");
         }
         if (warehouse.getRackById(id) != null) {
-            throw new Exception("Rack with duplicate id: " + id + ".");
+            throw new DataException("Rack with duplicate id: " + id + ".");
         }
         if (cap < 1) {
-            throw new Exception("Rack-" + id + " with non-positive capacity: " + cap + ".");
+            throw new DataException("Rack-" + id + " with non-positive capacity: " + cap + ".");
         }
         if (weight < 0) {
-            throw new Exception("Rack-" + id + " with negative weight: " + weight + ".");
+            throw new DataException("Rack-" + id + " with negative weight: " + weight + ".");
         }
 
         // Create rack
@@ -213,7 +216,7 @@ public class ServerDecoder {
         // Checks
         //
         if (ret.getStoredWeight() > ret.getCapacity()) {
-            throw new Exception("Rack-" + id + " exceeds the maximum storage capacity: " + ret.getStoredWeight() + ".");
+            throw new DataException("Rack-" + id + " exceeds the maximum storage capacity: " + ret.getStoredWeight() + ".");
         }
 
         // Add to the warehouse
@@ -227,7 +230,7 @@ public class ServerDecoder {
      *
      * @param data the JSON data to decode.
      */
-    public static Gate decodeGate(JSONObject data, int row, int col) throws Exception {
+    public static Gate decodeGate(JSONObject data, int row, int col) throws JSONException, DataException {
         // Extract received properties
         int id = data.getInt(ServerConstants.KEY_ID);
 
@@ -235,10 +238,10 @@ public class ServerDecoder {
         // Checks
         //
         if (id < 0) {
-            throw new Exception("Gate with negative id: " + id + ".");
+            throw new DataException("Gate with negative id: " + id + ".");
         }
         if (warehouse.getGateById(id) != null) {
-            throw new Exception("Gate with duplicate id: " + id + ".");
+            throw new DataException("Gate with duplicate id: " + id + ".");
         }
 
         // Create and add to the warehouse
@@ -254,7 +257,7 @@ public class ServerDecoder {
      *
      * @param data the JSON data to decode.
      */
-    public static Station decodeStation(JSONObject data, int row, int col) throws Exception {
+    public static Station decodeStation(JSONObject data, int row, int col) throws JSONException, DataException {
         // Extract received properties
         int id = data.getInt(ServerConstants.KEY_ID);
 
@@ -262,10 +265,10 @@ public class ServerDecoder {
         // Checks
         //
         if (id < 0) {
-            throw new Exception("Station with negative id: " + id + ".");
+            throw new DataException("Station with negative id: " + id + ".");
         }
         if (warehouse.getStationById(id) != null) {
-            throw new Exception("Station with duplicate id: " + id + ".");
+            throw new DataException("Station with duplicate id: " + id + ".");
         }
 
         // Create and add to the warehouse
@@ -281,7 +284,7 @@ public class ServerDecoder {
      *
      * @param data the JSON data to decode.
      */
-    public static Item decodeItem(JSONObject data) throws Exception {
+    public static Item decodeItem(JSONObject data) throws JSONException, DataException {
         // Extract received properties
         int id = data.getInt(ServerConstants.KEY_ID);
         int weight = data.getInt(ServerConstants.KEY_ITEM_WEIGHT);
@@ -290,10 +293,10 @@ public class ServerDecoder {
         // Checks
         //
         if (id < 0) {
-            throw new Exception("Item with negative id: " + id + ".");
+            throw new DataException("Item with negative id: " + id + ".");
         }
         if (warehouse.getItemById(id) != null) {
-            throw new Exception("Item with duplicate id: " + id + ".");
+            throw new DataException("Item with duplicate id: " + id + ".");
         }
 
         // Create and add to the warehouse
@@ -308,7 +311,7 @@ public class ServerDecoder {
      *
      * @param data the JSON data to decode.
      */
-    public static Order decodeOrder(JSONObject data) throws Exception {
+    public static Order decodeOrder(JSONObject data) throws JSONException, DataException {
         // Extract received properties
         int id = data.getInt(ServerConstants.KEY_ID);
         int startTime = data.getInt(ServerConstants.KEY_ORDER_START_TIME);
@@ -323,22 +326,22 @@ public class ServerDecoder {
         // Checks
         //
         if (id < 0) {
-            throw new Exception("Order with negative id: " + id + ".");
+            throw new DataException("Order with negative id: " + id + ".");
         }
         if (warehouse.getOrderById(id) != null) {
-            throw new Exception("Order with duplicate id: " + id + ".");
+            throw new DataException("Order with duplicate id: " + id + ".");
         }
         if (startTime < 0) {
-            throw new Exception("Order-" + id + " with negative start time: " + startTime + ".");
+            throw new DataException("Order-" + id + " with negative start time: " + startTime + ".");
         }
         if (type != ServerConstants.TYPE_ORDER_COLLECT && type != ServerConstants.TYPE_ORDER_REFILL) {
-            throw new Exception("Order-" + id + " with invalid type: " + type + ".");
+            throw new DataException("Order-" + id + " with invalid type: " + type + ".");
         }
         if (gate == null) {
-            throw new Exception("Order-" + id + " is assigned invalid gate with id: " + gateId + ".");
+            throw new DataException("Order-" + id + " is assigned invalid gate with id: " + gateId + ".");
         }
         if (rack == null && type == ServerConstants.TYPE_ORDER_REFILL) {
-            throw new Exception("Order-" + id + " is assigned invalid rack with id: " + gateId + ".");
+            throw new DataException("Order-" + id + " is assigned invalid rack with id: " + gateId + ".");
         }
 
         // Create order
@@ -351,7 +354,7 @@ public class ServerDecoder {
         // Checks
         //
         if (!ret.isFeasible()) {
-            throw new Exception("Order-" + id + " is currently infeasible due to items shortage.");
+            throw new DataException("Order-" + id + " is currently infeasible due to items shortage.");
         }
 
         // Add to the warehouse
@@ -366,7 +369,7 @@ public class ServerDecoder {
      * @param cont the container to add the decode items into.
      * @param name the name of the item container.
      */
-    public static void decodeItemsList(JSONArray data, QuantityAddable<Item> cont, String name) throws Exception {
+    public static void decodeItemsList(JSONArray data, QuantityAddable<Item> cont, String name) throws JSONException, DataException {
         for (int i = 0; i < data.length(); ++i) {
             // Extract item properties
             JSONObject itemJSON = data.getJSONObject(i);
@@ -378,10 +381,10 @@ public class ServerDecoder {
             // Checks
             //
             if (item == null) {
-                throw new Exception(name + " has invalid item with id: " + itemId + ".");
+                throw new DataException(name + " has invalid item with id: " + itemId + ".");
             }
             if (quantity < 1) {
-                throw new Exception(name + " has item-" + itemId + " with non-positive quantity: " + quantity + ".");
+                throw new DataException(name + " has item-" + itemId + " with non-positive quantity: " + quantity + ".");
             }
 
             // Add to the order
