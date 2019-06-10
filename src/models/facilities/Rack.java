@@ -5,10 +5,7 @@ import models.items.Item;
 import models.items.QuantityAddable;
 import models.items.QuantityReservable;
 
-import server.Server;
-
 import utils.Constants;
-import utils.Constants.*;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -244,7 +241,7 @@ public class Rack extends Facility implements QuantityAddable<Item>, QuantityRes
      * @see Rack#unbind()
      */
     @Override
-    public void bind(Agent agent) throws Exception {
+    public void bind(Agent agent) {
         agent.loadRack(this);
         super.bind(agent);
     }
@@ -261,7 +258,7 @@ public class Rack extends Facility implements QuantityAddable<Item>, QuantityRes
      * @see Rack#canUnbind()
      */
     @Override
-    public void unbind() throws Exception {
+    public void unbind() {
         boundAgent.offloadRack(this);
         super.unbind();
     }

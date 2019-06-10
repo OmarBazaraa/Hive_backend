@@ -189,7 +189,7 @@ public class Facility extends HiveObject implements AgentBindable, AgentAllocata
      * @see Facility#unbind()
      */
     @Override
-    public void bind(Agent agent) throws Exception {
+    public void bind(Agent agent) {
         boundAgent = agent;
     }
 
@@ -222,7 +222,7 @@ public class Facility extends HiveObject implements AgentBindable, AgentAllocata
      * @see Facility#canUnbind()
      */
     @Override
-    public void unbind() throws Exception {
+    public void unbind() {
         boundAgent = null;
     }
 }

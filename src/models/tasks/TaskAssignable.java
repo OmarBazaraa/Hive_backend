@@ -20,12 +20,12 @@ public interface TaskAssignable {
      *
      * @param task the new {@code Task} to assign.
      */
-    void assignTask(Task task) throws Exception;
+    void assignTask(Task task);
 
     /**
      * Called when a {@code Task} has been completed.
      *
      * @param task the completed {@code Task}.
      */
-    void onTaskComplete(Task task) throws Exception;
+    void onTaskComplete(Task task);
 }

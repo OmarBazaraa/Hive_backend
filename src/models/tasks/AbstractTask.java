@@ -101,7 +101,7 @@ abstract public class AbstractTask extends Entity {
      * <p>
      * This function should be called only once per {@code Task} object.
      */
-    abstract public void activate() throws Exception;
+    abstract public void activate();
 
     /**
      * Terminates this {@code AbstractTask} after completion.

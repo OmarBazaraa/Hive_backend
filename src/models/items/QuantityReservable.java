@@ -22,7 +22,7 @@ public interface QuantityReservable<T> {
      *
      * @see QuantityReservable#confirmReservation(QuantityAddable)
      */
-    void reserve(QuantityAddable<T> container) throws Exception;
+    void reserve(QuantityAddable<T> container);
 
     /**
      * Confirms the previously assigned reservations specified by the given
@@ -35,5 +35,5 @@ public interface QuantityReservable<T> {
      *
      * @see QuantityReservable#reserve(QuantityAddable)
      */
-    void confirmReservation(QuantityAddable<T> container) throws Exception;
+    void confirmReservation(QuantityAddable<T> container);
 }

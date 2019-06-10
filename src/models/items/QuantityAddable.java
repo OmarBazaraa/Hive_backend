@@ -47,7 +47,7 @@ public interface QuantityAddable<T> extends Iterable<Map.Entry<T, Integer>> {
      * @param key      the key to be updated.
      * @param quantity the quantity to be updated with.
      */
-    void add(T key, int quantity) throws Exception;
+    void add(T key, int quantity);
 
     /**
      * Updates the quantity of a key in this object

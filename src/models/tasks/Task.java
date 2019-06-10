@@ -7,8 +7,8 @@ import models.facilities.Gate;
 import models.facilities.Rack;
 import models.items.QuantityAddable;
 import models.maps.GuideGrid;
-
 import models.warehouses.Warehouse;
+
 import utils.Constants.*;
 
 import java.util.HashMap;
@@ -224,7 +224,7 @@ public class Task extends AbstractTask implements QuantityAddable<Item> {
      * This function should be called only once per {@code Task} object.
      */
     @Override
-    public void activate() throws Exception {
+    public void activate() {
         // Fill the items of the task
         fillItems();
 

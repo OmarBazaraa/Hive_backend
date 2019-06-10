@@ -8,11 +8,8 @@ import models.maps.utils.Position;
 import models.tasks.Task;
 import models.warehouses.Warehouse;
 
-import server.Server;
-
 import utils.Constants;
 import utils.Constants.*;
-import utils.Utility;
 
 
 /**
@@ -140,10 +137,7 @@ public class Agent extends AbstractAgent {
      */
     @Override
     public void loadRack(Rack rack) {
-        // Enable loaded flag
         loaded = true;
-
-        // Update action time
         updateLastActionTime();
     }
 
@@ -154,10 +148,7 @@ public class Agent extends AbstractAgent {
      */
     @Override
     public void offloadRack(Rack rack) {
-        // Disable loaded flag
         loaded = false;
-
-        // Update action time
         updateLastActionTime();
     }
 }

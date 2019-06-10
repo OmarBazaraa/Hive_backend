@@ -56,7 +56,7 @@ public interface AgentAllocatable {
      * @see AgentAllocatable#isAllocated()
      * @see AgentAllocatable#deallocate()
      */
-    void allocate(Agent agent) throws Exception;
+    void allocate(Agent agent);
 
     /**
      * De-allocates and releases this object from the currently allocating {@code Agent}.
@@ -67,5 +67,5 @@ public interface AgentAllocatable {
      * @see AgentAllocatable#isAllocated()
      * @see AgentAllocatable#allocate(Agent)
      */
-    void deallocate() throws Exception;
+    void deallocate();
 }

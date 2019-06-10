@@ -47,7 +47,7 @@ public class Constants {
     //
 
     /**
-     * Directions in clockwise order.
+     * Directions in anti-clockwise order.
      */
     public enum Direction {
         RIGHT,
@@ -82,10 +82,9 @@ public class Constants {
         MOVE_LEFT,
         MOVE_DOWN,
         MOVE,
-        MOVE_FORWARD,
-        MOVE_BACKWARD,
         ROTATE_RIGHT,
         ROTATE_LEFT,
+        RETREAT,
         BIND_RACK,
         UNBIND_RACK,
         BIND_GATE,

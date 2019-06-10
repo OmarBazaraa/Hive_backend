@@ -126,7 +126,7 @@ public class Warehouse extends AbstractWarehouse {
      *
      * @param task the {@code Task} to add to the system.
      */
-    public void addTask(Task task) throws Exception {
+    public void addTask(Task task) {
         // Activate the task
         task.activate();
 

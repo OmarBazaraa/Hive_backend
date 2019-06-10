@@ -65,7 +65,7 @@ public interface AgentBindable {
      * @see AgentBindable#canUnbind()
      * @see AgentBindable#unbind()
      */
-    void bind(Agent agent) throws Exception;
+    void bind(Agent agent);
 
     /**
      * Checks whether its currently possible to unbind the bound {@code Agent} from this object.
@@ -92,5 +92,5 @@ public interface AgentBindable {
      * @see AgentBindable#bind(Agent)
      * @see AgentBindable#canUnbind()
      */
-    void unbind() throws Exception;
+    void unbind();
 }
