@@ -11,3 +11,5 @@ out/*
 
 # Other files
 *.exe
+
+lib/

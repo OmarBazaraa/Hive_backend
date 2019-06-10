@@ -1,4 +1,4 @@
-package algorithms.TaskAllocator;
+package algorithms.dispatcher;
 
 import models.HiveObject;
 import models.agents.Agent;
@@ -9,9 +9,7 @@ import org.jgrapht.alg.matching.KuhnMunkresMinimalWeightBipartitePerfectMatching
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleDirectedWeightedGraph;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class AgentAssigner {
 
@@ -24,31 +22,40 @@ public class AgentAssigner {
      * @param candidateAgents list of the candidate agents {@code agent}s
      * @return A matching solution for the assignment problem.
      */
-    public static MatchingAlgorithm.Matching<HiveObject, DefaultWeightedEdge> assignAgents(Position gatePos,
-                                                                                           List<Rack> selectedRacks,
-                                                                                           List<Agent> candidateAgents) {
-        // Create the cost bipartite graph.
+    public static Map<HiveObject, HiveObject> assignAgents(Position gatePos, List<Rack> selectedRacks, List<Agent> candidateAgents) {
+        // Create the cost bipartite graph
         SimpleDirectedWeightedGraph<HiveObject, DefaultWeightedEdge> costGraph = new
                 SimpleDirectedWeightedGraph<HiveObject, DefaultWeightedEdge>(DefaultWeightedEdge.class);
 
-        // Create the two bipartite graph sets.
+        // Create the two bipartite graph sets
         Set<HiveObject> racksSet = new HashSet<>();
         Set<HiveObject> agentsSet = new HashSet<>();
 
         for (Rack rack : selectedRacks) {
             racksSet.add(rack);
+            costGraph.addVertex(rack);
             for (Agent agent : candidateAgents) {
+                if (!costGraph.containsVertex(agent))
+                    costGraph.addVertex(agent);
                 costGraph.addEdge(rack, agent);
                 costGraph.setEdgeWeight(rack, agent, calculateOperationCost(rack.getPosition(), gatePos, agent.getPosition()));
                 agentsSet.add(agent);
             }
         }
 
-        // Run Hungarian algorithm on the current racks and the current available agents.
+        // Run Hungarian algorithm on the current racks and the current available agents
         KuhnMunkresMinimalWeightBipartitePerfectMatching<HiveObject, DefaultWeightedEdge> assigner = new
                 KuhnMunkresMinimalWeightBipartitePerfectMatching<HiveObject, DefaultWeightedEdge>(costGraph, racksSet, agentsSet);
 
-        return assigner.getMatching();
+        MatchingAlgorithm.Matching<HiveObject, DefaultWeightedEdge> matching = assigner.getMatching();
+
+        // Prepare result
+        Map<HiveObject, HiveObject> assignment = new HashMap<>();
+        for (DefaultWeightedEdge edge : matching.getEdges()) {
+            assignment.put(costGraph.getEdgeSource(edge), costGraph.getEdgeTarget(edge));
+        }
+
+        return assignment;
     }
 
     /**
@@ -62,7 +69,7 @@ public class AgentAssigner {
      */
     private static double calculateOperationCost(Position rackPos, Position gatePos, Position agentPos) {
         // TODO @Samir55 try different fixed and dynamic cost values.
-        return agentPos.distanceTo(rackPos) * 10 + agentPos.distanceTo(gatePos) * 20;
+        return agentPos.distanceTo(rackPos) * 19 + agentPos.distanceTo(gatePos) * 30 * 2;
     }
 
 }
