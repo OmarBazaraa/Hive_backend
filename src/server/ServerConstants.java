@@ -88,6 +88,7 @@ public class ServerConstants {
     public static final int TYPE_ACK_ORDER = 9;
     public static final int TYPE_ORDER = 10;
     public static final int TYPE_UPDATE = 11;
+    public static final int TYPE_MSG = 12;
 
     // TODO: to be revised
     public static final int TYPE_AGENT_DEACTIVATE = 8;
@@ -106,7 +107,7 @@ public class ServerConstants {
     public static final int TYPE_CELL_STATION = 5;
 
     // Order types
-    public static final int TYPE_ORDER_COLLECT = 1;
+    public static final int TYPE_ORDER_COLLECT = 0;
     public static final int TYPE_ORDER_REFILL = 1;
 
     // Action types
