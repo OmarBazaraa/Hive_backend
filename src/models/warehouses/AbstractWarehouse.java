@@ -7,6 +7,7 @@ import models.facilities.Station;
 import models.items.Item;
 import models.maps.MapCell;
 import models.maps.MapGrid;
+import models.tasks.Order;
 
 import java.util.*;
 
@@ -59,6 +60,11 @@ abstract public class AbstractWarehouse {
      */
     protected Map<Integer, Item> items = new HashMap<>();
 
+    /**
+     * The map of all orders in this {@code Warehouse}, indexed by their id.
+     */
+    protected Map<Integer, Order> orders = new HashMap<>();
+
     // ===============================================================================================
     //
     // Member Methods
@@ -75,6 +81,7 @@ abstract public class AbstractWarehouse {
         gates.clear();
         stations.clear();
         items.clear();
+        orders.clear();
     }
 
     /**
@@ -232,5 +239,25 @@ abstract public class AbstractWarehouse {
      */
     public void addItem(Item item) {
         items.put(item.getId(), item);
+    }
+
+    /**
+     * Returns the {@code Order} with the given id.
+     *
+     * @param id the id of the needed {@code Order}.
+     *
+     * @return the needed {@code Order} if available; {@code null} otherwise.
+     */
+    public Order getOrderById(int id) {
+        return orders.get(id);
+    }
+
+    /**
+     * Adds a new {@code Order} to the {@code Warehouse} to be delivered.
+     *
+     * @param order the {@code Order} to be added.
+     */
+    public void addOrder(Order order) {
+        orders.put(order.getId(), order);
     }
 }
