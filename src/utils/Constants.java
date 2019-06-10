@@ -85,12 +85,9 @@ public class Constants {
         ROTATE_RIGHT,
         ROTATE_LEFT,
         RETREAT,
-        BIND_RACK,
-        UNBIND_RACK,
-        BIND_GATE,
-        UNBIND_GATE,
-        BIND_STATION,
-        UNBIND_STATION,
+        LOAD,
+        OFFLOAD,
+        CHARGE,
         NOTHING
     }
 

@@ -23,26 +23,26 @@ public class ServerConstants {
     public static final String KEY_TYPE = "type";
     public static final String KEY_DATA = "data";
 
-    public static final String KEY_TIME_STEP = "timestep";
-    public static final String KEY_ACTIONS = "actions";
-    public static final String KEY_LOGS = "logs";
-    public static final String KEY_STATISTICS = "statistics";
-
     public static final String KEY_MODE = "mode";
     public static final String KEY_STATE = "state";
 
     public static final String KEY_STATUS = "status";
     public static final String KEY_MSG = "msg";
 
-    public static final String KEY_ID = "id";
-    public static final String KEY_ROW = "row";
-    public static final String KEY_COL = "col";
+    public static final String KEY_TIME_STEP = "timestep";
+    public static final String KEY_ACTIONS = "actions";
+    public static final String KEY_LOGS = "logs";
+    public static final String KEY_STATISTICS = "statistics";
 
-    // Configuration keys
+    // Warehouse-related keys
     public static final String KEY_MAP = "map";
     public static final String KEY_WIDTH = "width";
     public static final String KEY_HEIGHT = "height";
     public static final String KEY_GRID = "grid";
+
+    public static final String KEY_ID = "id";
+    public static final String KEY_ROW = "row";
+    public static final String KEY_COL = "col";
 
     public static final String KEY_FACILITY = "facility";
 
@@ -62,6 +62,8 @@ public class ServerConstants {
     public static final String KEY_AGENT_LOAD_CAPACITY = "load_cap";
     public static final String KEY_AGENT_CHARGE_PERCENTAGE = "battery_cap";
     public static final String KEY_AGENT_DIRECTION = "direction";
+    public static final String KEY_AGENT_IP = "ip";
+    public static final String KEY_AGENT_PORT = "port";
 
     public static final String KEY_ITEMS = "items";
     public static final String KEY_ITEM = "item";
@@ -76,64 +78,61 @@ public class ServerConstants {
     // Communication messages types
     //
 
-    // Control and main message types
-    public static final int TYPE_START = 1;
-    public static final int TYPE_STOP = 4;
-    public static final int TYPE_RESUME = 2;
-    public static final int TYPE_PAUSE = 3;
-    public static final int TYPE_EXIT = 5;
-    public static final int TYPE_ACK = 6;
-    public static final int TYPE_ACK_START = 7;
-    public static final int TYPE_ACK_RESUME = 8;
-    public static final int TYPE_ACK_ORDER = 9;
-    public static final int TYPE_ORDER = 10;
-    public static final int TYPE_UPDATE = 11;
-    public static final int TYPE_MSG = 12;
+    // Main message types to server
+    public static final int TYPE_START = 0;
+    public static final int TYPE_ORDER = 1;
+    public static final int TYPE_PAUSE = 2;
+    public static final int TYPE_STOP = 3;
+    public static final int TYPE_RESUME = 4;
+    public static final int TYPE_ACK = 5;
+    public static final int TYPE_EXIT = 6;
 
     // TODO: to be revised
     public static final int TYPE_AGENT_DEACTIVATE = 8;
     public static final int TYPE_AGENT_ACTIVATE = 8;
     public static final int TYPE_AGENT_BLOCKED = 8;
 
+    // Main message types from server
+    public static final int TYPE_ACK_START = 0;
+    public static final int TYPE_ACK_RESUME = 1;
+    public static final int TYPE_ACK_ORDER = 2;
+    public static final int TYPE_UPDATE = 3;
+    public static final int TYPE_MSG = 6;
+
     // Running-mode types
-    public static final int TYPE_MODE_SIMULATE = 1;
+    public static final int TYPE_MODE_SIMULATE = 0;
     public static final int TYPE_MODE_DEPLOY = 1;
 
     // Configuration types
-    public static final int TYPE_CELL_EMPTY = 1;
-    public static final int TYPE_CELL_OBSTACLE = 2;
-    public static final int TYPE_CELL_RACK = 3;
-    public static final int TYPE_CELL_GATE = 4;
-    public static final int TYPE_CELL_STATION = 5;
+    public static final int TYPE_CELL_GATE = 0;
+    public static final int TYPE_CELL_AGENT = 1;
+    public static final int TYPE_CELL_RACK = 2;
+    public static final int TYPE_CELL_STATION = 3;
+    public static final int TYPE_CELL_OBSTACLE = 4;
 
     // Order types
     public static final int TYPE_ORDER_COLLECT = 0;
     public static final int TYPE_ORDER_REFILL = 1;
 
     // Action types
-    public static final int TYPE_AGENT_MOVE_UP = 100;
-    public static final int TYPE_AGENT_MOVE_RIGHT = 101;
-    public static final int TYPE_AGENT_MOVE_DOWN = 102;
-    public static final int TYPE_AGENT_MOVE_LEFT = 103;
-    public static final int TYPE_AGENT_BIND_RACK = 104;
-    public static final int TYPE_AGENT_UNBIND_RACK = 105;
-    public static final int TYPE_AGENT_BIND_GATE = 106;
-    public static final int TYPE_AGENT_UNBIND_GATE = 107;
-    public static final int TYPE_AGENT_BIND_STATION = 108;
-    public static final int TYPE_AGENT_UNBIND_STATION = 109;
+    public static final int TYPE_AGENT_MOVE = 0;
+    public static final int TYPE_AGENT_ROTATE_RIGHT = 1;
+    public static final int TYPE_AGENT_ROTATE_LEFT = 2;
+    public static final int TYPE_AGENT_RETREAT = 3;
+    public static final int TYPE_AGENT_BIND = 4;
+    public static final int TYPE_AGENT_UNBIND = 5;
 
     // Log types
-    public static final int TYPE_TASK_ASSIGNED = 200;
-    public static final int TYPE_TASK_COMPLETED = 200;
-    public static final int TYPE_ORDER_ISSUED = 200;
-    public static final int TYPE_ORDER_FULFILLED = 202;
-    public static final int TYPE_ITEM_DELIVERED = 201;
-    public static final int TYPE_RACK_ADJUSTED = 201;
+    public static final int TYPE_TASK_ASSIGNED = 0;
+    public static final int TYPE_TASK_COMPLETED = 1;
+    public static final int TYPE_ORDER_ISSUED = 2;
+    public static final int TYPE_ORDER_FULFILLED = 3;
 
     // Statistics types
+    // TODO
 
     // Other types
-    public static final int TYPE_OK = 1;
-    public static final int TYPE_INFO = 1;
+    public static final int TYPE_OK = 0;
+    public static final int TYPE_INFO = 0;
     public static final int TYPE_ERROR = 1;
 }
