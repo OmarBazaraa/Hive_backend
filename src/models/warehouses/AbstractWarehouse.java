@@ -7,6 +7,7 @@ import models.facilities.Station;
 import models.items.Item;
 import models.maps.MapCell;
 import models.maps.MapGrid;
+import models.maps.TimeCell;
 import models.tasks.Order;
 
 import java.util.*;
@@ -41,6 +42,16 @@ abstract public class AbstractWarehouse {
     protected Map<Integer, Agent> agents = new HashMap<>();
 
     /**
+     * The queue of all currently active agents, sorted by their priority.
+     */
+    protected Queue<Agent> activeAgents = new PriorityQueue<>();
+
+    /**
+     * The set of all currently idle agents.
+     */
+    protected Set<Agent> readyAgents = new HashSet<>();
+
+    /**
      * The map of all racks in this {@code Warehouse}, indexed by their id.
      */
     protected Map<Integer, Rack> racks = new HashMap<>();
@@ -65,6 +76,11 @@ abstract public class AbstractWarehouse {
      */
     protected Map<Integer, Order> orders = new HashMap<>();
 
+    /**
+     * The queue of pending and not fully dispatched orders.
+     */
+    protected Queue<Order> pendingOrders = new LinkedList<>();
+
     // ===============================================================================================
     //
     // Member Methods
@@ -77,11 +93,14 @@ abstract public class AbstractWarehouse {
         time = 0;
         map = null;
         agents.clear();
+        activeAgents.clear();
+        readyAgents.clear();
         racks.clear();
         gates.clear();
         stations.clear();
         items.clear();
         orders.clear();
+        pendingOrders.clear();
     }
 
     /**
@@ -159,6 +178,7 @@ abstract public class AbstractWarehouse {
      */
     public void addAgent(Agent agent) {
         agents.put(agent.getId(), agent);
+        readyAgents.add(agent);
     }
 
     /**
@@ -259,5 +279,6 @@ abstract public class AbstractWarehouse {
      */
     public void addOrder(Order order) {
         orders.put(order.getId(), order);
+        pendingOrders.add(order);
     }
 }

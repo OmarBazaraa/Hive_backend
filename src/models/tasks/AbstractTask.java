@@ -102,21 +102,13 @@ abstract public class AbstractTask extends Entity {
     }
 
     /**
-     * Checks whether this {@code AbstractTask} is currently active or not.
+     * Returns the current status of this {@code AbstractTask}.
+     * Whether it is inactive, active, or fulfilled.
      *
-     * @return {@code true} if this {@code AbstractTask} is active; {@code false} otherwise.
+     * @return the current status of this {@code AbstractTask}.
      */
-    public boolean isActive() {
-        return (status == TaskStatus.ACTIVE);
-    }
-
-    /**
-     * Checks whether this {@code AbstractTask} is fulfilled or not.
-     *
-     * @return {@code true} if this {@code AbstractTask} is fulfilled; {@code false} otherwise.
-     */
-    public boolean isFulfilled() {
-        return (status == TaskStatus.FULFILLED);
+    public TaskStatus getStatus() {
+        return status;
     }
 
     /**

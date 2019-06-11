@@ -353,6 +353,9 @@ public class ServerDecoder {
         //
         // Checks
         //
+        if (!ret.isPending()) {
+            throw new DataException("Order-" + id + " has no assigned items.");
+        }
         if (!ret.isFeasible()) {
             throw new DataException("Order-" + id + " is currently infeasible due to items shortage.");
         }

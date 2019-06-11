@@ -5,6 +5,7 @@ import models.agents.Agent;
 import models.facilities.Gate;
 import models.facilities.Rack;
 import models.facilities.Station;
+import models.maps.TimeCell;
 import models.tasks.Order;
 import models.tasks.Task;
 
@@ -18,26 +19,6 @@ import java.util.*;
  */
 public class Warehouse extends AbstractWarehouse {
 
-    //
-    // Member Variables
-    //
-
-    /**
-     * The queue of all currently active agents, sorted by their priority.
-     */
-    protected Queue<Agent> activeAgents = new PriorityQueue<>();
-
-    /**
-     * The set of all currently idle agents.
-     */
-    protected Set<Agent> readyAgents = new HashSet<>();
-
-    /**
-     * The queue of pending and not fully dispatched orders.
-     */
-    protected Queue<Order> pendingOrders = new LinkedList<>();
-
-    // ===============================================================================================
     //
     // Static Methods
     //
@@ -69,21 +50,11 @@ public class Warehouse extends AbstractWarehouse {
     }
 
     /**
-     * Clears the {@code Warehouse} and removes all its components.
-     */
-    @Override
-    public void clear() {
-        super.clear();
-        activeAgents.clear();
-        readyAgents.clear();
-        pendingOrders.clear();
-    }
-
-    /**
      * Initializes the {@code Warehouse}, and performs any needed pre-computations.
      */
     @Override
     public void init() {
+        // Initializes the guide maps
         for (Rack rack : racks.values()) {
             rack.computeGuideMap(map);
         }
@@ -96,17 +67,6 @@ public class Warehouse extends AbstractWarehouse {
     }
 
     /**
-     * Adds a new {@code Agent} object to the {@code Warehouse}.
-     *
-     * @param agent the new {@code Agent} to add.
-     */
-    @Override
-    public void addAgent(Agent agent) {
-        super.addAgent(agent);
-        readyAgents.add(agent);
-    }
-
-    /**
      * Adds a new {@code Order} to this {@code Warehouse} to be delivered.
      *
      * @param order the {@code Order} to be added.
@@ -115,7 +75,6 @@ public class Warehouse extends AbstractWarehouse {
     public void addOrder(Order order) {
         super.addOrder(order);
         order.activate();
-        pendingOrders.add(order);
     }
 
     /**
