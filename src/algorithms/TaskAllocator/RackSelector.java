@@ -1,4 +1,4 @@
-package algorithms.TaskAllocator;
+package algorithms.dispatcher;
 
 import models.facilities.Rack;
 import models.items.Item;
@@ -12,14 +12,14 @@ public class RackSelector {
      * TODO @Samir55 complete the Docs here upon function implementation and optimization completion.
      * TODO @Samir55, Either remove useless racks or prevent sending them at the first place.
      * TODO @Samir55 Polish, Improve & Choose better variable names.
-     * Using Paper "Optimal Selection of Movable Shelves Under Cargo to Person Picking Mode"
+     *
      * @param gatePos         todo
      * @param racksList       todo
      * @param items           todo
      * @param itemsQuantities todo
      * @return rack the most suitable {@code Rack}s for fulfilling the order found in the list.
      */
-    private static List<Rack> selectRacks(Position gatePos, List<Rack> racksList, List<Item> items, int[] itemsQuantities) {
+    public static List<Rack> selectRacks(Position gatePos, List<Rack> racksList, List<Item> items, int[] itemsQuantities) {
         int itemsCount = items.size();
 
         Map<Rack, Integer> candidateRacks = new HashMap<>(); // Map of candidate racks and their round trip cost
@@ -31,7 +31,7 @@ public class RackSelector {
 
         // Calculate the round trip cost using Manhattan distance between each rack and the Gate position
         for (Rack rack : racksList)
-            candidateRacks.put(rack, 2 * (Math.abs(rack.getPosition().row - gatePos.row) +
+            candidateRacks.put(rack, (Math.abs(rack.getPosition().row - gatePos.row) +
                     Math.abs(rack.getPosition().col - gatePos.col)));
 
         int[] quantities = itemsQuantities.clone();
@@ -56,6 +56,7 @@ public class RackSelector {
                 if (rackTotalItemSupply == 0) {
                     ignoredRacks.put(rack, rackEntry.getValue());
                     candidateRacks.remove(rack);
+                    continue;
                 }
 
                 // Calculate the rate of this rack
@@ -88,12 +89,17 @@ public class RackSelector {
         // Stage 2. Delete Redundant racks from the final set
         removeRedundantRack(acceptedRacks, candidateRacks, items, acceptedRacksItemsQuantities, itemsQuantities,
                 true);
+        estCost = 0;
+        for (Rack rack : acceptedRacks.keySet()) {
+            estCost += acceptedRacks.get(rack);
+        }
 
         // Stage 3. Improve the final rack list; Exchange strategy
         Map<Rack, Integer> tmpCandidateRacks = new HashMap<>();
-        estCost = exchangeRacks(candidateRacks, acceptedRacks, tmpCandidateRacks, acceptedRacksItemsQuantities, items,
-                itemsQuantities, estCost);
+
         estCost = exchangeRacks(ignoredRacks, acceptedRacks, tmpCandidateRacks, acceptedRacksItemsQuantities, items,
+                itemsQuantities, estCost);
+        estCost = exchangeRacks(candidateRacks, acceptedRacks, tmpCandidateRacks, acceptedRacksItemsQuantities, items,
                 itemsQuantities, estCost);
 
         return new ArrayList<>(acceptedRacks.keySet());
@@ -126,11 +132,14 @@ public class RackSelector {
                 continue;
 
             // Check whether it's worth updating
+            acceptedRacks.put(rack, rackEntry.getValue());
             int savedCost = removeRedundantRack(acceptedRacks, tmpCandidateRacks, items, q, orderQuantities, false); // FIXME @Samir55
 
             if (savedCost > rackEntry.getValue()) {
                 removeRedundantRack(acceptedRacks, tmpCandidateRacks, items, q, orderQuantities, true);
                 estCost = estCost + rackEntry.getValue() - savedCost;
+            } else {
+                acceptedRacks.remove(rack);
             }
 
         }
@@ -153,8 +162,9 @@ public class RackSelector {
      */
     private static int removeRedundantRack(Map<Rack, Integer> src, Map<Rack, Integer> dest, List<Item> items, int[] currRacksQuantities, int[] orderQuantities, boolean updateMaps) {
         int savedCost = 0;
-
-        for (Map.Entry<Rack, Integer> rackEntry : src.entrySet()) {
+        Iterator<Map.Entry<Rack, Integer>> rackEntriesIterator = src.entrySet().iterator();
+        while (rackEntriesIterator.hasNext()) {
+            Map.Entry<Rack, Integer> rackEntry = rackEntriesIterator.next();
             Rack rack = rackEntry.getKey();
 
             boolean redundant = true;
@@ -166,9 +176,14 @@ public class RackSelector {
 
             if (redundant) {
                 savedCost += rackEntry.getValue();
+
+                for (int j = 0; j < orderQuantities.length; j++) {
+                    currRacksQuantities[j] -= rack.get(items.get(j));
+                }
+
                 if (updateMaps) {
                     dest.put(rack, rackEntry.getValue());
-                    src.remove(rack);
+                    rackEntriesIterator.remove();
                 }
             }
         }
@@ -188,6 +203,14 @@ public class RackSelector {
 
         for (int j = 0; j < items.size(); j++)
             ret[j] = Math.min(orderQuantities[j], rack.get(items.get(j)));
+
+        return ret;
+    }
+
+    private static Map<Rack, Integer> getTripCosts(List<Rack> racksList, Position gatePos) {
+        Map<Rack, Integer> ret = new HashMap<>();
+
+
 
         return ret;
     }
