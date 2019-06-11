@@ -2,7 +2,11 @@ package algorithms.dispatcher;
 
 import models.facilities.Rack;
 import models.items.Item;
+import models.maps.MapGrid;
 import models.maps.utils.Position;
+import models.warehouses.Warehouse;
+import utils.Constants.*;
+import utils.Pair;
 
 import java.util.*;
 
@@ -30,9 +34,12 @@ public class RackSelector {
         int estCost = 0;
 
         // Calculate the round trip cost using Manhattan distance between each rack and the Gate position
-        for (Rack rack : racksList)
-            candidateRacks.put(rack, (Math.abs(rack.getPosition().row - gatePos.row) +
-                    Math.abs(rack.getPosition().col - gatePos.col)));
+        for (Rack rack : racksList) {
+//            candidateRacks.put(rack, (Math.abs(rack.getPosition().row - gatePos.row) +
+//                    Math.abs(rack.getPosition().col - gatePos.col)));
+
+            candidateRacks.put(rack, getRoundTripCost(rack.getPosition(), gatePos));
+        }
 
         int[] quantities = itemsQuantities.clone();
         int totalQuantities = Arrays.stream(quantities).sum();
@@ -207,12 +214,35 @@ public class RackSelector {
         return ret;
     }
 
-    private static Map<Rack, Integer> getTripCosts(List<Rack> racksList, Position gatePos) {
-        Map<Rack, Integer> ret = new HashMap<>();
+    /**
+     * Get the estimated round trip cost between a rack and a certain gate.
+     *
+     * @param rackPos {@code Position} the position of the rack in question.
+     * @param gatePos {@code Position} the position of the gate in question.
+     * @return the estimated round trip cost
+     */
+    private static Integer getRoundTripCost(Position rackPos, Position gatePos) {
+        // Get warehouse map
+        MapGrid map = Warehouse.getInstance().getMap();
 
+        Queue<Pair<Position, Integer>> q = new LinkedList<>();
+        q.add(new Pair<>(rackPos, 1));
 
+        while (!q.isEmpty()) {
+            Pair<Position, Integer> u = q.remove();
 
-        return ret;
+            if (u.key.equals(gatePos)) {
+                return u.val * 2;
+            }
+
+            // Get empty directions
+            List<Direction> dirs = map.getEmptyDirections(u.key);
+
+            for (Direction dir : dirs) {
+                q.add(new Pair<>(map.next(u.key, dir), u.val + 1));
+            }
+        }
+        return Integer.MAX_VALUE;
     }
 
 }

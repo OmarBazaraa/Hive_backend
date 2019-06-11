@@ -105,7 +105,6 @@ public class Planner {
      * @param map         the map grid to compute upon.
      * @param dst         the destination position.
      * @param accessTypes the accessible {@code CellType} to set.
-     *
      * @return a 2D {@code GuideCell} array representing the guide map to reach the destination.
      */
     public static GuideCell[][] bfs(MapGrid map, Position dst, CellType... accessTypes) {
