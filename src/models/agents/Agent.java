@@ -89,7 +89,7 @@ public class Agent extends AbstractAgent {
      * Executes the next required action.
      */
     @Override
-    public void executeAction() throws Exception {
+    public void executeAction() {
         // Return if already did an action this time step
         if (isAlreadyMoved()) {
             return;

@@ -25,7 +25,7 @@ public class Planner {
      * @param agent the {@code Agent} to be routed.
      * @param map   the {@code MapGrid} of the {@code Warehouse}.
      */
-    public static boolean route(Agent agent, MapGrid map) throws Exception {
+    public static boolean route(Agent agent, MapGrid map) {
         return route(agent, agent, map);
     }
 
@@ -42,7 +42,7 @@ public class Planner {
      * @param mainAgent the main {@code Agent} to be routed.
      * @param map       the {@code MapGrid} of the {@code Warehouse}.
      */
-    private static boolean route(Agent agent, Agent mainAgent, MapGrid map) throws Exception {
+    private static boolean route(Agent agent, Agent mainAgent, MapGrid map) {
         // Return if this agent has higher priority than the agent needed to be moved
         if (agent.compareTo(mainAgent) > 0) {
             return false;

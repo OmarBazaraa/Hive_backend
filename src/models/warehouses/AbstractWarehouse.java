@@ -117,7 +117,7 @@ abstract public class AbstractWarehouse {
     /**
      * Performs and simulates a single time step in this {@code Warehouse}.
      */
-    public void run() throws Exception {
+    public void run() {
         dispatchPendingOrders();
         moveActiveAgents();
         time++;
@@ -126,12 +126,12 @@ abstract public class AbstractWarehouse {
     /**
      * Dispatches the current pending orders of this {@code Warehouse}.
      */
-    abstract protected void dispatchPendingOrders() throws Exception;
+    abstract protected void dispatchPendingOrders();
 
     /**
      * Moves the active agents one step towards their targets.
      */
-    abstract protected void moveActiveAgents() throws Exception;
+    abstract protected void moveActiveAgents();
 
     // ===============================================================================================
     //

@@ -249,7 +249,7 @@ public class Task extends AbstractTask implements QuantityAddable<Item> {
      * <p>
      * This function should be called only when this {@code Task} is active.
      */
-    public void executeAction() throws Exception {
+    public void executeAction() {
         TaskAction action = actions.element().key;
         Facility facility = actions.element().val;
 

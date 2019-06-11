@@ -159,7 +159,7 @@ public class Server {
     /**
      * Closes and terminates this {@code Server} object.
      */
-    public void close() throws Exception {
+    public void close() {
         Spark.stop();
     }
 

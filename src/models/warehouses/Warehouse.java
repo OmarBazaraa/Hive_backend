@@ -134,7 +134,7 @@ public class Warehouse extends AbstractWarehouse {
      * Moves the active agents one step towards their targets.
      */
     @Override
-    protected void moveActiveAgents() throws Exception {
+    protected void moveActiveAgents() {
         // Get the initial size of the queue
         int size = activeAgents.size();
 
