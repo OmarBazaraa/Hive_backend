@@ -37,6 +37,11 @@ abstract public class AbstractWarehouse {
     protected MapGrid map;
 
     /**
+     * The timeline map of the {@code Warehouse}.
+     */
+    protected TimeCell[][] timeMap;
+
+    /**
      * The map of all agents in this {@code Warehouse}, indexed by their id.
      */
     protected Map<Integer, Agent> agents = new HashMap<>();
@@ -92,6 +97,7 @@ abstract public class AbstractWarehouse {
     public void clear() {
         time = 0;
         map = null;
+        timeMap = null;
         agents.clear();
         activeAgents.clear();
         readyAgents.clear();
@@ -158,6 +164,15 @@ abstract public class AbstractWarehouse {
      */
     public void updateMap(MapCell[][] grid) {
         map = new MapGrid(grid);
+    }
+
+    /**
+     * Returns the timeline map of this {@code Warehouse} object.
+     *
+     * @return the timeline map of this {@code Warehouse}.
+     */
+    public TimeCell[][] getTimeMap() {
+        return timeMap;
     }
 
     /**

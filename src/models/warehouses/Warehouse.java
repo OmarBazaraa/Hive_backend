@@ -54,6 +54,9 @@ public class Warehouse extends AbstractWarehouse {
      */
     @Override
     public void init() {
+        // Initializes the time map
+        timeMap = TimeCell.allocate2D(map.getRows(), map.getCols());
+
         // Initializes the guide maps
         for (Rack rack : racks.values()) {
             rack.computeGuideMap(map);
