@@ -1,5 +1,6 @@
 package algorithms;
 
+import algorithms.TaskAllocator.RackSelector;
 import models.agents.Agent;
 import models.facilities.Rack;
 import models.items.Item;
@@ -29,6 +30,9 @@ public class Dispatcher {
         // there are still idle robots
         //
         while (order.isPending() && !readyAgents.isEmpty()) {
+            // Select the most suitable racks
+//            List<Rack> selectedRacks = RackSelector.selectRacks(order);
+
             // Get current needed item in the order
             Item item = order.getFirst().getKey();
 
