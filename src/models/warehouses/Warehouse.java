@@ -145,7 +145,7 @@ public class Warehouse extends AbstractWarehouse {
      * TODO: check agent to rack reach-ability
      */
     @Override
-    protected void dispatchPendingOrders() throws Exception {
+    protected void dispatchPendingOrders() {
         // Get the initial size of the queue
         int size = pendingOrders.size();
 
@@ -154,12 +154,14 @@ public class Warehouse extends AbstractWarehouse {
         //
         for (int i = 0; i < size && !readyAgents.isEmpty(); ++i) {
             // Get the current order
-            Order order = pendingOrders.poll();
+            Order order = pendingOrders.remove();
 
-            // Try dispatching the current order
-            Dispatcher.dispatch(order, readyAgents);
+            // Try dispatching the current order if its time comes
+            if (time >= order.getStartTime()) {
+                Dispatcher.dispatch(order, readyAgents);
+            }
 
-            // Re-add the order to the queue if still pending
+            // Re-add the order to the end of the queue if still pending
             if (order.isPending()) {
                 pendingOrders.add(order);
             }

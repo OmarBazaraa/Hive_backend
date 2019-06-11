@@ -147,10 +147,8 @@ public class Server {
                 process();
             } catch (JSONException ex) {
                 sendAckMsg(ServerConstants.TYPE_MSG, ServerConstants.TYPE_ERROR, "Invalid message format.");
-                currentState = ServerStates.IDLE;
             } catch (DataException ex) {
                 sendAckMsg(ServerConstants.TYPE_MSG, ServerConstants.TYPE_ERROR, ex.getMessage());
-                currentState = ServerStates.IDLE;
             } catch (Exception ex) {
                 sendAckMsg(ServerConstants.TYPE_MSG, ServerConstants.TYPE_ERROR, "Unknown error.");
                 currentState = ServerStates.IDLE;
@@ -232,9 +230,9 @@ public class Server {
 
         try {
             warehouse.clear();
-            clearUpdateStates();
             ServerDecoder.decodeInitConfig(data);
             warehouse.init();
+            clearUpdateStates();
             warehouse.run();
             currentState = ServerStates.RUNNING;
             sendAckMsg(ServerConstants.TYPE_ACK_START, ServerConstants.TYPE_OK, "");
@@ -304,6 +302,7 @@ public class Server {
             throw new DataException("Received ACK message while the server is not in RUNNING state.");
         }
 
+        clearUpdateStates();
         warehouse.run();
     }
 
