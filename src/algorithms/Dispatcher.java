@@ -4,7 +4,6 @@ import models.agents.Agent;
 import models.facilities.Rack;
 import models.items.Item;
 import models.maps.GuideGrid;
-import models.maps.utils.Position;
 import models.tasks.Order;
 import models.tasks.Task;
 import models.warehouses.Warehouse;
@@ -24,7 +23,7 @@ public class Dispatcher {
      * @param order       the {@code Order} needed to be dispatched.
      * @param readyAgents the set of ready agents.
      */
-    public static void dispatch(Order order, Set<Agent> readyAgents) throws Exception {
+    public static void dispatch(Order order, Set<Agent> readyAgents) {
         //
         // Keep dispatching while the order is still pending and
         // there are still idle robots
@@ -38,6 +37,11 @@ public class Dispatcher {
 
             // Find a suitable agent
             Agent agent = findAgent(readyAgents, rack, order);
+
+            // Return if no agent is found
+            if (agent == null) {
+                return;
+            }
 
             // Create task and add it to the warehouse
             Task task = new Task(order, rack, agent);
@@ -68,6 +72,12 @@ public class Dispatcher {
 
         // Find the nearest agent
         for (Agent agent : readyAgent) {
+            // Skip agent if it cannot hold that rack
+            if (agent.getLoadCapacity() < rack.getTotalWeight()) {
+                continue;
+            }
+
+            // Calculate distance from the agent to the rack
             int dis = guide.getDistance(agent.getPosition());
 
             // Select the current agent if it is nearer to the rack
