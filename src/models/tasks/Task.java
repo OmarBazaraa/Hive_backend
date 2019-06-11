@@ -2,6 +2,7 @@ package models.tasks;
 
 import algorithms.Planner;
 import models.agents.Agent;
+import models.facilities.Facility;
 import models.items.Item;
 import models.facilities.Gate;
 import models.facilities.Rack;
@@ -9,11 +10,9 @@ import models.items.QuantityAddable;
 import models.maps.GuideGrid;
 import models.warehouses.Warehouse;
 
-import utils.Constants.*;
+import utils.Pair;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 
 /**
@@ -34,16 +33,11 @@ public class Task extends AbstractTask implements QuantityAddable<Item> {
     //
 
     /**
-     * Different status of a {@code Task} during its lifecycle.
-     * TODO: think of a more general way to combine multiple tasks together
+     * Different actions to be done by a {@code Task} during its lifecycle.
      */
-    public enum TaskStatus {
-        INACTIVE,       // The task is still pending not active yet
-        FETCHING,       // Agent is moving to fetch the assigned rack
-        DELIVERING,     // Agent is moving to deliver the loaded rack to a gate
-        OFFLOADING,     // Agent is offloading the needed items at the gate
-        RETURNING,      // Agent is returning the rack back
-        FULFILLED       // The task has been completed
+    public enum TaskAction {
+        BIND,
+        UNBIND
     }
 
     // ===============================================================================================
@@ -79,9 +73,9 @@ public class Task extends AbstractTask implements QuantityAddable<Item> {
     private Map<Item, Integer> items = new HashMap<>();
 
     /**
-     * The current status of this {@code Task}.
+     * The queue of actions to be done by the assigned {@code Agent} to complete this {@code Task}.
      */
-    private TaskStatus status = TaskStatus.INACTIVE;
+    private Queue<Pair<TaskAction, Facility>> actions = new LinkedList<>();
 
     // ===============================================================================================
     //
@@ -199,26 +193,6 @@ public class Task extends AbstractTask implements QuantityAddable<Item> {
     }
 
     /**
-     * Checks whether this {@code Task} is currently active or not.
-     *
-     * @return {@code true} if this {@code Task} is active; {@code false} otherwise.
-     */
-    @Override
-    public boolean isActive() {
-        return (status != TaskStatus.INACTIVE && status != TaskStatus.FULFILLED);
-    }
-
-    /**
-     * Checks whether this {@code Task} is fulfilled or not.
-     *
-     * @return {@code true} if this {@code Task} is fulfilled; {@code false} otherwise.
-     */
-    @Override
-    public boolean isFulfilled() {
-        return (status == TaskStatus.FULFILLED);
-    }
-
-    /**
      * Activates this {@code Task} and allocates its required resources.
      * <p>
      * This function should be called only once per {@code Task} object.
@@ -233,8 +207,14 @@ public class Task extends AbstractTask implements QuantityAddable<Item> {
         agent.assignTask(this);
         order.assignTask(this);
 
+        // Add actions
+        actions.add(new Pair<>(TaskAction.BIND, rack));    // 1. Load the rack
+        actions.add(new Pair<>(TaskAction.BIND, gate));    // 2. Bind with the gate
+        actions.add(new Pair<>(TaskAction.UNBIND, gate));  // 3. Unbind with the gate
+        actions.add(new Pair<>(TaskAction.UNBIND, rack));  // 4. Offload the rack
+
         // Activate the task
-        status = TaskStatus.FETCHING;
+        super.activate();
     }
 
     /**
@@ -254,58 +234,49 @@ public class Task extends AbstractTask implements QuantityAddable<Item> {
 
     /**
      * Returns the guide map to reach the target of this {@code Task}.
+     * <p>
+     * This function should be called only when this {@code Task} is active.
      *
      * @return the {@code GuideGrid} to reach the target.
      */
     public GuideGrid getGuideMap() {
-        if (status == TaskStatus.FETCHING || status == TaskStatus.RETURNING) {
-            return rack.getGuideMap();
-        }
-        if (status == TaskStatus.DELIVERING) {
-            return gate.getGuideMap();
-        }
-
-        return null;
+        Facility facility = actions.element().val;
+        return facility.getGuideMap();
     }
 
     /**
      * Executes the next required action to be done to complete this {@code Task}.
+     * <p>
+     * This function should be called only when this {@code Task} is active.
      */
     public void executeAction() throws Exception {
-        // Moving to the rack
-        if (status == TaskStatus.FETCHING) {
-            if (rack.canBind(agent)) {
-                rack.bind(agent);
-                status = TaskStatus.DELIVERING;
+        TaskAction action = actions.element().key;
+        Facility facility = actions.element().val;
+
+        // Bind action
+        if (action == TaskAction.BIND) {
+            if (facility.canBind(agent)) {
+                facility.bind(agent);
+                actions.remove();
             } else {
                 Planner.route(agent, Warehouse.getInstance().getMap());
             }
         }
-        // Delivering the rack to the gate
-        else if (status == TaskStatus.DELIVERING) {
-            if (gate.canBind(agent)) {
-                gate.bind(agent);
-                status = TaskStatus.OFFLOADING;
+
+        // Unbind action
+        if (action == TaskAction.UNBIND) {
+            if (facility.canUnbind()) {
+                facility.unbind();
+                actions.remove();
             } else {
                 Planner.route(agent, Warehouse.getInstance().getMap());
             }
         }
-        // Wait until offloading the items at the gate
-        else if (status == TaskStatus.OFFLOADING) {
-            if (gate.canUnbind()) {
-                gate.unbind();
-                status = TaskStatus.RETURNING;
-            }
-        }
-        // Returning the rack back to its position
-        else if (status == TaskStatus.RETURNING) {
-            if (rack.canUnbind()) {
-                rack.unbind();
-                status = TaskStatus.FULFILLED;
-                terminate();
-            } else {
-                Planner.route(agent, Warehouse.getInstance().getMap());
-            }
+
+        // Check if all actions are completed
+        if (actions.isEmpty()) {
+            status = TaskStatus.FULFILLED;
+            terminate();
         }
     }
 }

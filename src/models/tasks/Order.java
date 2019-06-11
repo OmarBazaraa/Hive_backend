@@ -23,20 +23,6 @@ import java.util.*;
 public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAssignable {
 
     //
-    // Enums
-    //
-
-    /**
-     * Different status of an {@code Order} during its lifecycle.
-     */
-    public enum OrderStatus {
-        INACTIVE,       // Inactive order, meaning that its item has not been reserved
-        ACTIVE,         // Active order with all its items has been reserved
-        FULFILLED       // The order has been completed
-    }
-
-    // ===============================================================================================
-    //
     // Member Variables
     //
 
@@ -66,11 +52,6 @@ public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAs
      * The set of sub tasks for fulfilling this {@code Order}.
      */
     private Set<Task> subTasks = new HashSet<>();
-
-    /**
-     * The current status of this {@code Order}.
-     */
-    private OrderStatus status = OrderStatus.INACTIVE;
 
     // ===============================================================================================
     //
@@ -215,26 +196,6 @@ public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAs
     }
 
     /**
-     * Checks whether this {@code Order} is currently active or not.
-     *
-     * @return {@code true} if this {@code Order} is active; {@code false} otherwise.
-     */
-    @Override
-    public boolean isActive() {
-        return (status == OrderStatus.ACTIVE);
-    }
-
-    /**
-     * Checks whether this {@code Order} is fulfilled or not.
-     *
-     * @return {@code true} if this {@code Order} is fulfilled; {@code false} otherwise.
-     */
-    @Override
-    public boolean isFulfilled() {
-        return (pendingUnits <= 0 && subTasks.isEmpty());
-    }
-
-    /**
      * Activates this {@code Order} by reserving all the needed units to avoid
      * accepting infeasible orders in the future.
      * <p>
@@ -248,7 +209,7 @@ public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAs
         }
 
         // Activate the order
-        status = OrderStatus.ACTIVE;
+        super.activate();
     }
 
     /**
@@ -256,12 +217,10 @@ public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAs
      * <p>
      * A callback function to be invoked when this {@code Order} has been completed.
      * Used to clear and finalize allocated resources.
-     *
-     * TODO: add order statistics finalization
      */
     @Override
     protected void terminate() {
-        status = OrderStatus.FULFILLED;
+        // TODO: add order statistics finalization
         super.terminate();
     }
 
@@ -290,9 +249,11 @@ public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAs
      */
     @Override
     public void onTaskComplete(Task task) {
+        // Remove completed task
         subTasks.remove(task);
 
-        if (isFulfilled()) {
+        // Check if no more pending units and all running tasks have been completed
+        if (pendingUnits == 0 && subTasks.isEmpty()) {
             terminate();
         }
     }

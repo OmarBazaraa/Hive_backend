@@ -13,8 +13,27 @@ import models.Entity;
 abstract public class AbstractTask extends Entity {
 
     //
+    // Enums
+    //
+
+    /**
+     * Different status of an {@code Order} during its lifecycle.
+     */
+    public enum TaskStatus {
+        INACTIVE,       // Inactive order, meaning that its item has not been reserved
+        ACTIVE,         // Active order with all its items has been reserved
+        FULFILLED       // The order has been completed
+    }
+
+    // ===============================================================================================
+    //
     // Member Variables
     //
+
+    /**
+     * The current status of this {@code AbstractTask}.
+     */
+    protected TaskStatus status = TaskStatus.INACTIVE;
 
     /**
      * The listener to be invoked when this {@code AbstractTask} has been fulfilled.
@@ -87,21 +106,27 @@ abstract public class AbstractTask extends Entity {
      *
      * @return {@code true} if this {@code AbstractTask} is active; {@code false} otherwise.
      */
-    abstract public boolean isActive();
+    public boolean isActive() {
+        return (status == TaskStatus.ACTIVE);
+    }
 
     /**
      * Checks whether this {@code AbstractTask} is fulfilled or not.
      *
      * @return {@code true} if this {@code AbstractTask} is fulfilled; {@code false} otherwise.
      */
-    abstract public boolean isFulfilled();
+    public boolean isFulfilled() {
+        return (status == TaskStatus.FULFILLED);
+    }
 
     /**
      * Activates this {@code AbstractTask} and allocates its required resources.
      * <p>
      * This function should be called only once per {@code Task} object.
      */
-    abstract public void activate();
+    public void activate() {
+        status = TaskStatus.ACTIVE;
+    }
 
     /**
      * Terminates this {@code AbstractTask} after completion.
@@ -110,6 +135,8 @@ abstract public class AbstractTask extends Entity {
      * Used to clear and finalize allocated resources.
      */
     protected void terminate() {
+        status = TaskStatus.FULFILLED;
+
         if (fulFillListener != null) {
             fulFillListener.onOrderFulfill(this);
         }

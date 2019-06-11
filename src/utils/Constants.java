@@ -87,6 +87,8 @@ public class Constants {
         RETREAT,
         LOAD,
         OFFLOAD,
+        BIND,
+        UNBIND,
         CHARGE,
         NOTHING
     }
