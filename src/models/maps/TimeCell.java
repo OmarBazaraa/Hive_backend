@@ -6,11 +6,10 @@ import java.util.TreeMap;
 
 
 /**
- * This {@code TimeCell} class represents the timeline of the passing {@link Agent agents}
- * through a cell in the {@link models.warehouses.Warehouse Warehouse}.
+ * This {@code TimeCell} class represents a timeline cell used by {@link TimeGrid} class.
  * <p>
- * A time cell guides an {@link Agent} towards its associated target,
- * typically a {@link models.facilities.Facility Facility}.
+ * A time cell represents the timeline of the passing {@link Agent agents}
+ * through a cell in the {@link models.warehouses.Warehouse Warehouse}.
  */
 public class TimeCell extends Cell {
 
@@ -63,6 +62,8 @@ public class TimeCell extends Cell {
     /**
      * Returns the {@code Agent} passing though this {@code TimeCell} at the given time.
      *
+     * @param time the time to get at.
+     *
      * @return the {@code Agent} if exists; {@code null} otherwise.
      */
     public Agent getAgentAt(long time) {
@@ -72,7 +73,7 @@ public class TimeCell extends Cell {
     /**
      * Sets the {@code Agent} passing though this {@code TimeCell} at the given time.
      *
-     * @param time the time of passing.
+     * @param time the time to set at.
      * @param agent the passing {@code Agent}.
      */
     public void setAgentAt(long time, Agent agent) {
@@ -91,6 +92,8 @@ public class TimeCell extends Cell {
     /**
      * Checks whether this {@code TimeCell} is empty from agents at the given time or not.
      *
+     * @param time the time to check at.
+     *
      * @return {@code true} if the cell is empty; {@code false} otherwise.
      */
     public boolean isEmptyAt(long time) {
@@ -99,6 +102,8 @@ public class TimeCell extends Cell {
 
     /**
      * Checks whether this {@code TimeCell} is occupied by an {@code Agent} at the given time or not.
+     *
+     * @param time the time to check at.
      *
      * @return {@code true} if the cell is occupied; {@code false} otherwise.
      */

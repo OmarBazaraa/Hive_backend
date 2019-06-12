@@ -12,9 +12,6 @@ import utils.Constants.*;
 
 /**
  * This {@code MapCell} class represents a map grid cell used by {@link MapGrid} class.
- *
- * @see Cell
- * @see GuideCell
  */
 public class MapCell extends Cell {
 
@@ -159,6 +156,15 @@ public class MapCell extends Cell {
      */
     public boolean isEmpty() {
         return (type == CellType.EMPTY);
+    }
+
+    /**
+     * Checks whether this {@code MapCell} is an obstacle or not.
+     *
+     * @return {@code true} if this cell is an obstacle; {@code false} otherwise.
+     */
+    public boolean isObstacle() {
+        return (type == CellType.OBSTACLE);
     }
 
     /**

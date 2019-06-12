@@ -8,6 +8,7 @@ import utils.Constants;
  *
  * @see MapCell
  * @see GuideCell
+ * @see TimeCell
  */
 public class Cell {
 

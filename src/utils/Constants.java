@@ -77,10 +77,6 @@ public class Constants {
      * Note that the first 4 values should be in the same order as in {@code Direction} enum.
      */
     public enum AgentAction {
-        MOVE_RIGHT,
-        MOVE_UP,
-        MOVE_LEFT,
-        MOVE_DOWN,
         MOVE,
         ROTATE_RIGHT,
         ROTATE_LEFT,

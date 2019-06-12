@@ -14,15 +14,22 @@ import java.util.List;
  * <p>
  * A guide map guides an {@link models.agents.Agent Agent} towards its associated target,
  * typically a {@link models.facilities.Facility Facility}.
- *
- * @see Grid
- * @see MapGrid
  */
 public class GuideGrid extends Grid<GuideCell> {
 
     //
     // Member Methods
     //
+
+    /**
+     * Constructs a new empty {@code GuideGrid} object with the given dimensions.
+     *
+     * @param rows the number of rows.
+     * @param cols the number of columns.
+     */
+    public GuideGrid(int rows, int cols) {
+        super(GuideCell.allocate2D(rows, cols));
+    }
 
     /**
      * Constructs a new {@code GuideMap} object with the given 2D {@code GuideCell} array.

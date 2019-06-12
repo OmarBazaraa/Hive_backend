@@ -10,11 +10,18 @@ import java.util.List;
 
 /**
  * This {@code MapGrid} class represents the map grid of our Hive Warehouse System.
- *
- * @see Grid
- * @see GuideGrid
  */
 public class MapGrid extends Grid<MapCell> {
+
+    /**
+     * Constructs a new empty {@code MapGrid} object with the given dimensions.
+     *
+     * @param rows the number of rows.
+     * @param cols the number of columns.
+     */
+    public MapGrid(int rows, int cols) {
+        super(MapCell.allocate2D(rows, cols));
+    }
 
     /**
      * Constructs a new {@code MapGrid} object with the given 2D {@code MapCell} array.
@@ -52,6 +59,29 @@ public class MapGrid extends Grid<MapCell> {
      */
     public boolean isEmpty(Position pos) {
         return isEmpty(pos.row, pos.col);
+    }
+
+    /**
+     * Checks whether a {@code MapCell} in this {@code MapGrid} is an obstacle or not.
+     *
+     * @param row the row position of the cell to check.
+     * @param col the column position of the cell to check.
+     *
+     * @return {@code true} if this cell is an obstacle; {@code false} otherwise.
+     */
+    public boolean isObstacle(int row, int col) {
+        return !isInBound(row, col) || grid[row][col].isObstacle();
+    }
+
+    /**
+     * Checks whether a {@code MapCell} in this {@code MapGrid} is an obstacle or not.
+     *
+     * @param pos the {@code Position} of the cell to check.
+     *
+     * @return {@code true} if this cell is an obstacle; {@code false} otherwise.
+     */
+    public boolean isObstacle(Position pos) {
+        return isObstacle(pos.row, pos.col);
     }
 
     /**

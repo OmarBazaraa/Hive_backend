@@ -6,9 +6,6 @@ package models.maps;
  * <p>
  * A guide cell guides an {@link models.agents.Agent Agent} towards its associated target,
  * typically a {@link models.facilities.Facility Facility}.
- *
- * @see Cell
- * @see MapCell
  */
 public class GuideCell extends Cell {
 

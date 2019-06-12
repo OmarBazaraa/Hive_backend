@@ -12,6 +12,7 @@ import utils.Constants.*;
  *
  * @see MapGrid
  * @see GuideGrid
+ * @see TimeCell
  */
 public class Grid<T extends Cell> {
 
@@ -220,7 +221,7 @@ public class Grid<T extends Cell> {
      * from a given current cell.
      * (i.e. position(current) + dir = position(next)).
      *
-     * @param pos the {@code Position} of the current cell .
+     * @param pos the {@code Position} of the current cell.
      * @param dir the {@code Direction} to move along.
      *
      * @return the {@code Position} corresponding to the next cell.
@@ -269,7 +270,7 @@ public class Grid<T extends Cell> {
      * from a given current cell.
      * (i.e. position(previous) + dir = position(current)).
      *
-     * @param pos the {@code Position} of the current cell .
+     * @param pos the {@code Position} of the current cell.
      * @param dir the {@code Direction} to move along.
      *
      * @return the {@code Position} corresponding to the previous cell.

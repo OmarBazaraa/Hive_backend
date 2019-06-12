@@ -7,7 +7,7 @@ import models.facilities.Station;
 import models.items.Item;
 import models.maps.MapCell;
 import models.maps.MapGrid;
-import models.maps.TimeCell;
+import models.maps.TimeGrid;
 import models.tasks.Order;
 
 import java.util.*;
@@ -39,7 +39,7 @@ abstract public class AbstractWarehouse {
     /**
      * The timeline map of the {@code Warehouse}.
      */
-    protected TimeCell[][] timeMap;
+    protected TimeGrid timeMap;
 
     /**
      * The map of all agents in this {@code Warehouse}, indexed by their id.
@@ -171,7 +171,7 @@ abstract public class AbstractWarehouse {
      *
      * @return the timeline map of this {@code Warehouse}.
      */
-    public TimeCell[][] getTimeMap() {
+    public TimeGrid getTimeMap() {
         return timeMap;
     }
 
