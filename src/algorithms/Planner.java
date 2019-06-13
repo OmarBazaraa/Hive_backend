@@ -167,10 +167,15 @@ public class Planner {
         MapGrid map = warehouse.getMap();
         TimeGrid timeMap = warehouse.getTimeMap();
         PlanNode.initializes(map.getRows(), map.getCols(), 4, dst);
-        PriorityQueue<PlanNode> q = new PriorityQueue<>();
 
-        // Add the initial state
-        q.add(new PlanNode(agent.getPosition(), agent.getDirection(), AgentAction.MOVE, warehouse.getTime()));
+        // Create the planning queue and add the initial state
+        PriorityQueue<PlanNode> q = new PriorityQueue<>();
+        q.add(new PlanNode(
+                agent.getPosition(),
+                agent.getDirection(),
+                AgentAction.MOVE,       // The initial action is not significant but it cannot be AgentAction.NOTHING
+                warehouse.getTime()
+        ));
 
         //
         // Keep exploring states until the target is found
@@ -237,10 +242,10 @@ public class Planner {
      * @return a sequence of {@code AgentAction} to reach the given state.
      */
     private static Stack<AgentAction> constructPlan(Agent agent, PlanNode node) {
-        Stack<AgentAction> ret = new Stack<>();
-
-        // Get the timeline map of the warehouse
         TimeGrid timeMap = Warehouse.getInstance().getTimeMap();
+
+        // Prepare the stack of actions
+        Stack<AgentAction> ret = new Stack<>();
 
         //
         // Keep moving backward until reaching the position of the agent
@@ -279,6 +284,30 @@ public class Planner {
      * @param actions the plan of the agent.
      */
     public static void dropPlan(Agent agent, Stack<AgentAction> actions) {
+        TimeGrid timeMap = Warehouse.getInstance().getTimeMap();
 
+        // Create a node with the current state of the agent
+        PlanNode node = new PlanNode(
+                agent.getPosition(),
+                agent.getDirection(),
+                AgentAction.MOVE,
+                Warehouse.getInstance().getTime()
+        );
+
+        //
+        // Keep dropping the plan one action at a time
+        //
+        while (true) {
+            // Clear the time slot of the agent in the current state
+            timeMap.clearAt(node.pos, node.time);
+
+            // Stop when no further actions in the plan
+            if (actions.isEmpty()) {
+                break;
+            }
+
+            // Go to the next state in the plan
+            node = node.next(actions.pop());
+        }
     }
 }
