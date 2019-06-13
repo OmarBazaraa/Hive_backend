@@ -228,7 +228,8 @@ public class Planner {
 
     /**
      * Constructs the sequence of actions leading to the target after
-     * finishing the planning.
+     * finishing the planning, and update the timeline map of the {@code Warehouse}
+     * in accordance.
      *
      * @param agent the {@code Agent} to plan for.
      * @param node  the target state {@code PlanNode}.
@@ -244,7 +245,7 @@ public class Planner {
         //
         // Keep moving backward until reaching the position of the agent
         //
-        while (!agent.getPosition().equals(node.pos)) {
+        while (true) {
             // Get the agent that is planned to be in this state
             Agent a = timeMap.getAgentAt(node.pos, node.time);
 
@@ -254,7 +255,15 @@ public class Planner {
                 a.dropPlan();
             }
 
-            // Add the action and proceed
+            // Update timeline
+            timeMap.setAgentAt(node.pos, node.time, agent);
+
+            // Stop when reaching the initial position of the agent
+            if (agent.getPosition().equals(node.pos)) {
+                break;
+            }
+
+            // Add the action and proceed to previous state
             ret.add(node.action);
             node = node.previous(node.action);
         }
@@ -270,7 +279,6 @@ public class Planner {
      * @param actions the plan of the agent.
      */
     public static void dropPlan(Agent agent, Stack<AgentAction> actions) {
-
 
     }
 }

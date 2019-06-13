@@ -73,7 +73,7 @@ public class TimeCell extends Cell {
     /**
      * Sets the {@code Agent} passing though this {@code TimeCell} at the given time.
      *
-     * @param time the time to set at.
+     * @param time  the time to set at.
      * @param agent the passing {@code Agent}.
      */
     public void setAgentAt(long time, Agent agent) {

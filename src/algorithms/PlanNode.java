@@ -29,6 +29,8 @@ public class PlanNode implements Comparable<PlanNode> {
 
     /**
      * Initializes the planning state.
+     * <p>
+     * This function should be called once before running the planning algorithm.
      */
     public static void initializes(int rows, int cols, int dirs, Position dst) {
         par = new AgentAction[rows][cols][dirs];
