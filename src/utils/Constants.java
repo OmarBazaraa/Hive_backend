@@ -89,6 +89,11 @@ public class Constants {
         NOTHING
     }
 
+    /**
+     * The array of move actions that can be done by an {@code Agent}.
+     */
+    public static final AgentAction MOVE_ACTIONS[] = {AgentAction.MOVE, AgentAction.ROTATE_RIGHT, AgentAction.ROTATE_LEFT};
+
     // Agent default configurations
     public static final int AGENT_DEFAULT_LOAD_CAPACITY = 500;
     public static final int AGENT_DEFAULT_CHARGE_PERCENTAGE = 70;

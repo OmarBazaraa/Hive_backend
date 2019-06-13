@@ -259,7 +259,7 @@ public class Task extends AbstractTask implements QuantityAddable<Item> {
                 facility.bind(agent);
                 actions.remove();
             } else {
-                Planner.route(agent, Warehouse.getInstance().getMap());
+                agent.reach(facility);
             }
         }
 
@@ -269,7 +269,7 @@ public class Task extends AbstractTask implements QuantityAddable<Item> {
                 facility.unbind();
                 actions.remove();
             } else {
-                Planner.route(agent, Warehouse.getInstance().getMap());
+                agent.reach(facility);
             }
         }
 

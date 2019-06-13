@@ -1,5 +1,8 @@
 package models.agents;
 
+import algorithms.Planner;
+
+import models.facilities.Facility;
 import models.facilities.Rack;
 import models.maps.GuideGrid;
 import models.maps.MapCell;
@@ -8,8 +11,10 @@ import models.maps.utils.Position;
 import models.tasks.Task;
 import models.warehouses.Warehouse;
 
-import utils.Constants;
 import utils.Constants.*;
+import utils.Utility;
+
+import java.util.Stack;
 
 
 /**
@@ -26,6 +31,27 @@ import utils.Constants.*;
  * @see models.tasks.Task Task
  */
 public class Agent extends AbstractAgent {
+
+    //
+    // Member Variables
+    //
+
+    /**
+     * The current destination of this {@code Agent}; or {@code null} if not available.
+     * This variable is to be managed by the currently active assigned {@code Task}.
+     */
+    private Facility target;
+
+    /**
+     * The plan of this {@code Agent} to reach its destination.
+     * That is, a sequence of actions to be done to reach the target.
+     */
+    private Stack<AgentAction> plan;
+
+    // ===============================================================================================
+    //
+    // Member Methods
+    //
 
     /**
      * Constructs a new {@code Agent} robot.
@@ -53,6 +79,33 @@ public class Agent extends AbstractAgent {
     public GuideGrid getGuideMap() {
         Task task = getActiveTask();
         return (task != null ? task.getGuideMap() : null);
+    }
+
+    /**
+     * Plans the sequence of actions to reach the given target {@code Facility}.
+     * <p>
+     * This function should be called with new destination only when the previous
+     * plan has been reached.
+     *
+     * @param dst the target to reach.
+     */
+    public void plan(Facility dst) {
+        // Return if already planned
+        if (target.equals(dst)) {
+            return;
+        }
+
+        // Set the destination and plan the path
+        target = dst;
+        plan = Planner.plan(this, dst.getPosition());
+    }
+
+    /**
+     * Drops and cancels the current plan of this {@code Agent}.
+     */
+    public void dropPlan() {
+        target = null;
+        Planner.dropPlan(this, plan);
     }
 
     /**
@@ -86,7 +139,8 @@ public class Agent extends AbstractAgent {
     }
 
     /**
-     * Executes the next required action.
+     * Executes the next required action as specified by the currently
+     * active assigned {@code Task}.
      */
     @Override
     public void executeAction() {
@@ -101,6 +155,37 @@ public class Agent extends AbstractAgent {
         if (task != null) {
             task.executeAction();
         }
+    }
+
+    /**
+     * Moves a single step to reach the given {@code Facility}.
+     *
+     * @param dst the target to reach.
+     */
+    @Override
+    public void reach(Facility dst) {
+        plan(dst);
+        move(plan.pop());
+    }
+
+    /**
+     * Moves this {@code Agent} according to the given action.
+     * <p>
+     * The allowed actions are only:
+     * {@code AgentAction.ROTATE_RIGHT}, {@code AgentAction.ROTATE_LEFT}, and
+     * {@code AgentAction.MOVE}.
+     *
+     * @param action the {@code AgentAction} to move with.
+     */
+    @Override
+    public void move(AgentAction action) {
+        if (action == AgentAction.MOVE) {
+            setPosition(Utility.nextPos(getPosition(), direction));
+        } else {
+            direction = Utility.nextDir(direction, action);
+        }
+
+        updateLastActionTime();
     }
 
     /**

@@ -1,23 +1,22 @@
 package algorithms;
 
 import models.agents.Agent;
-import models.maps.GuideGrid;
-import models.maps.MapGrid;
-import models.maps.GuideCell;
+import models.maps.*;
 import models.maps.utils.Dimensions;
 import models.maps.utils.Position;
 
+import models.warehouses.Warehouse;
+import utils.Constants;
 import utils.Constants.*;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
+import java.util.*;
 
 
 /**
  * This {@code Planner} class contains some static method for multi-agent path planning algorithms.
  */
 public class Planner {
+
 
     /**
      * Routes the given {@code Agent} one step towards its target location.
@@ -105,6 +104,7 @@ public class Planner {
      * @param map         the map grid to compute upon.
      * @param dst         the destination position.
      * @param accessTypes the accessible {@code CellType} to set.
+     *
      * @return a 2D {@code GuideCell} array representing the guide map to reach the destination.
      */
     public static GuideCell[][] bfs(MapGrid map, Position dst, CellType... accessTypes) {
@@ -117,7 +117,7 @@ public class Planner {
         q.add(dst);
         ret[dst.row][dst.col].setDistance(0);
 
-        // Keep expanding all cell in the maps
+        // Keep expanding all cells in the maps
         while (!q.isEmpty()) {
             // Get current node and its distance to the destination
             Position cur = q.poll();
@@ -145,5 +145,48 @@ public class Planner {
         }
 
         return ret;
+    }
+
+
+
+
+    public static boolean route(Agent agent, AgentAction action) {
+        return false;
+    }
+
+    /**
+     * Plans a sequence of actions to be done by the given {@code Agent} to reach
+     * its target.
+     *
+     * @param agent the {@code Agent} to plan for.
+     * @param dst   the target position of the {@code Agent}.
+     *
+     * @return a sequence of {@code AgentAction}; or {@code null} if currently unreachable.
+     */
+    public static Stack<AgentAction> plan(Agent agent, Position dst) {
+        return null;
+    }
+
+    /**
+     * Constructs the sequence of actions after finishing planning.
+     *
+     * @param node the target state.
+     *
+     * @return a sequence of {@code AgentAction} to reach the given state.
+     */
+    private static Stack<AgentAction> constructPath(Agent agent, PlanNode node) {
+        return null;
+    }
+
+    /**
+     * Drops the current plan of the given {@code Agent} and updates the
+     * timeline map of the {@code Warehouse} in accordance.
+     *
+     * @param agent   the {@code Agent} to drop its plan.
+     * @param actions the plan of the agent.
+     */
+    public static void dropPlan(Agent agent, Stack<AgentAction> actions) {
+
+
     }
 }

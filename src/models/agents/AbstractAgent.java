@@ -2,6 +2,7 @@ package models.agents;
 
 import models.Entity;
 import models.HiveObject;
+import models.facilities.Facility;
 import models.facilities.Rack;
 import models.tasks.Task;
 import models.tasks.TaskAssignable;
@@ -42,11 +43,6 @@ abstract public class AbstractAgent extends HiveObject implements TaskAssignable
     protected Direction direction = Constants.AGENT_DEFAULT_DIRECTION;
 
     /**
-     * The queue of assigned tasks for this {@code Agent}.
-     */
-    protected Queue<Task> tasks = new LinkedList<>();
-
-    /**
      * The flag indicating whether this {@code Agent} is currently loaded by a {@code Rack}.
      */
     protected boolean loaded = false;
@@ -56,6 +52,11 @@ abstract public class AbstractAgent extends HiveObject implements TaskAssignable
      * Needed by the planner algorithm.
      */
     protected long lastActionTime = -1;
+
+    /**
+     * The queue of assigned tasks for this {@code Agent}.
+     */
+    protected Queue<Task> tasks = new LinkedList<>();
 
     // ===============================================================================================
     //
@@ -110,6 +111,31 @@ abstract public class AbstractAgent extends HiveObject implements TaskAssignable
     }
 
     /**
+     * Checks whether this {@code Agent} is currently loaded by a {@code Rack} or not.
+     *
+     * @return {@code true} if this {@code Agent} is loaded; {@code false} otherwise.
+     */
+    public boolean isLoaded() {
+        return loaded;
+    }
+
+    /**
+     * Checks whether this {@code Agent} already done an action this time step or not.
+     *
+     * @return {@code true} if already done an action; {@code false} otherwise.
+     */
+    public boolean isAlreadyMoved() {
+        return lastActionTime >= Warehouse.getInstance().getTime();
+    }
+
+    /**
+     * Sets the last time this {@code Agent} has performed an action.
+     */
+    public void updateLastActionTime() {
+        lastActionTime = Warehouse.getInstance().getTime();
+    }
+
+    /**
      * Returns the priority of this {@code Agent}.
      * Greater value indicates higher priority.
      *
@@ -132,15 +158,6 @@ abstract public class AbstractAgent extends HiveObject implements TaskAssignable
     }
 
     /**
-     * Checks whether this {@code Agent} is currently loaded by a {@code Rack} or not.
-     *
-     * @return {@code true} if this {@code Agent} is loaded; {@code false} otherwise.
-     */
-    public boolean isLoaded() {
-        return loaded;
-    }
-
-    /**
      * Returns the active {@code Task} this {@code Agent} is currently executing.
      *
      * @return the currently active {@code Task} is exists; {@code null} otherwise.
@@ -150,34 +167,28 @@ abstract public class AbstractAgent extends HiveObject implements TaskAssignable
     }
 
     /**
-     * Checks whether this {@code Agent} can execute an action this time step or not.
-     *
-     * @return {@code true} if it possible to execute an action; {@code false} otherwise.
-     */
-    public boolean canMove() {
-        return lastActionTime < Warehouse.getInstance().getTime();
-    }
-
-    /**
-     * Checks whether this {@code Agent} already done an action this time step or not.
-     *
-     * @return {@code true} if already done an action; {@code false} otherwise.
-     */
-    public boolean isAlreadyMoved() {
-        return lastActionTime >= Warehouse.getInstance().getTime();
-    }
-
-    /**
-     * Sets the last time this {@code Agent} has performed an action.
-     */
-    public void updateLastActionTime() {
-        lastActionTime = Warehouse.getInstance().getTime();
-    }
-
-    /**
-     * Executes the next required action.
+     * Executes the next required action as specified by the currently
+     * active assigned {@code Task}.
      */
     abstract public void executeAction() throws Exception;
+
+    /**
+     * Moves a single step to reach the given {@code Facility}.
+     *
+     * @param dst the target to reach.
+     */
+    abstract public void reach(Facility dst);
+
+    /**
+     * Moves this {@code Agent} according to the given action.
+     * <p>
+     * The allowed actions are only:
+     * {@code AgentAction.ROTATE_RIGHT}, {@code AgentAction.ROTATE_LEFT}, and
+     * {@code AgentAction.MOVE}.
+     *
+     * @param action the {@code AgentAction} to move with.
+     */
+    abstract public void move(AgentAction action);
 
     /**
      * Moves this {@code Agent} in the given {@code Direction}.
