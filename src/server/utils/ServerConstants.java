@@ -58,17 +58,25 @@ public class ServerConstants {
 
     public static final String KEY_RACK = "rack";
     public static final String KEY_RACK_ID = "rack_id";
+    public static final String KEY_RACK_ROW = "rack_row";
+    public static final String KEY_RACK_COL = "rack_col";
     public static final String KEY_RACK_CAPACITY = "capacity";
     public static final String KEY_RACK_CONTAINER_WEIGHT = "container_weight";
 
     public static final String KEY_GATE = "gate";
     public static final String KEY_GATE_ID = "gate_id";
+    public static final String KEY_GATE_ROW = "gate_row";
+    public static final String KEY_GATE_COL = "gate_col";
 
     public static final String KEY_STATION = "station";
     public static final String KEY_STATION_ID = "station_id";
+    public static final String KEY_STATION_ROW = "station_row";
+    public static final String KEY_STATION_COL = "station_col";
 
     public static final String KEY_AGENT = "robot";
     public static final String KEY_AGENT_ID = "robot_id";
+    public static final String KEY_AGENT_ROW = "robot_row";
+    public static final String KEY_AGENT_COL = "robot_col";
     public static final String KEY_AGENT_LOAD_CAPACITY = "load_cap";
     public static final String KEY_AGENT_CHARGE_PERCENTAGE = "battery_cap";
     public static final String KEY_AGENT_DIRECTION = "direction";
@@ -129,8 +137,10 @@ public class ServerConstants {
     public static final int TYPE_AGENT_ROTATE_RIGHT = 1;
     public static final int TYPE_AGENT_ROTATE_LEFT = 2;
     public static final int TYPE_AGENT_RETREAT = 3;
-    public static final int TYPE_AGENT_BIND = 4;
-    public static final int TYPE_AGENT_UNBIND = 5;
+    public static final int TYPE_AGENT_LOAD = 4;
+    public static final int TYPE_AGENT_OFFLOAD = 5;
+    public static final int TYPE_AGENT_BIND = 6;
+    public static final int TYPE_AGENT_UNBIND = 7;
 
     // Log types
     public static final int TYPE_TASK_ASSIGNED = 0;

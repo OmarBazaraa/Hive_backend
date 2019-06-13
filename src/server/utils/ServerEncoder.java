@@ -2,10 +2,17 @@ package server.utils;
 
 import models.agents.Agent;
 
+import models.facilities.Rack;
+import models.items.Item;
+import models.tasks.Order;
+import models.tasks.Task;
+
 import utils.Constants.*;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+
+import java.util.Map;
 
 
 /**
@@ -33,6 +40,54 @@ public class ServerEncoder {
         data.put(ServerConstants.KEY_ROW, agent.getRow());
         data.put(ServerConstants.KEY_COL, agent.getCol());
         return encodeMsg(agentActionToType(action), data);
+    }
+
+    public static JSONObject encodeTaskAssignedLog(Task task) {
+        Agent agent = task.getAgent();
+        Rack rack = task.getRack();
+
+        JSONObject data = new JSONObject();
+        data.put(ServerConstants.KEY_AGENT_ID, agent.getId());
+        data.put(ServerConstants.KEY_AGENT_ROW, agent.getRow());
+        data.put(ServerConstants.KEY_AGENT_COL, agent.getCol());
+        data.put(ServerConstants.KEY_RACK_ID, rack.getId());
+        data.put(ServerConstants.KEY_RACK_ROW, rack.getRow());
+        data.put(ServerConstants.KEY_RACK_COL, rack.getCol());
+        return encodeMsg(ServerConstants.TYPE_TASK_ASSIGNED, data);
+    }
+
+    public static JSONObject encodeTaskCompletedLog(Task task) {
+        Agent agent = task.getAgent();
+        Rack rack = task.getRack();
+        Order order = task.getOrder();
+
+        JSONArray items = new JSONArray();
+
+        for (Map.Entry<Item, Integer> pair : task) {
+            JSONObject item = new JSONObject();
+            item.put(ServerConstants.KEY_ID, pair.getKey().getId());
+            item.put(ServerConstants.KEY_ITEM_QUANTITY, pair.getValue());
+            items.put(item);
+        }
+
+        JSONObject data = new JSONObject();
+        data.put(ServerConstants.KEY_AGENT_ID, agent.getId());
+        data.put(ServerConstants.KEY_AGENT_ROW, agent.getRow());
+        data.put(ServerConstants.KEY_AGENT_COL, agent.getCol());
+        data.put(ServerConstants.KEY_RACK_ID, rack.getId());
+        data.put(ServerConstants.KEY_RACK_ROW, rack.getRow());
+        data.put(ServerConstants.KEY_RACK_COL, rack.getCol());
+        data.put(ServerConstants.KEY_ORDER_ID, order.getId());
+        data.put(ServerConstants.KEY_ITEMS, items);
+
+        return encodeMsg(ServerConstants.TYPE_TASK_COMPLETED, data);
+    }
+
+    public static JSONObject encodeOrderLog(int type, Order order) {
+        JSONObject ret = new JSONObject();
+        ret.put(ServerConstants.KEY_TYPE, type);
+        ret.put(ServerConstants.KEY_DATA, order.getId());
+        return ret;
     }
 
     public static JSONObject encodeStatistics(int key, double value) {
@@ -71,6 +126,14 @@ public class ServerEncoder {
                 return ServerConstants.TYPE_AGENT_ROTATE_LEFT;
             case RETREAT:
                 return ServerConstants.TYPE_AGENT_RETREAT;
+            case LOAD:
+                return ServerConstants.TYPE_AGENT_LOAD;
+            case OFFLOAD:
+                return ServerConstants.TYPE_AGENT_OFFLOAD;
+            case BIND:
+                return ServerConstants.TYPE_AGENT_BIND;
+            case UNBIND:
+                return ServerConstants.TYPE_AGENT_UNBIND;
         }
         return -1;
     }

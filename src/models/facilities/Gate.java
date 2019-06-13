@@ -3,6 +3,11 @@ package models.facilities;
 import models.agents.Agent;
 import models.tasks.Task;
 
+import server.Server;
+
+import utils.Constants;
+import utils.Constants.*;
+
 
 /**
  * This {@code Gate} class is a one of the {@link Facility} components
@@ -51,6 +56,8 @@ public class Gate extends Facility {
      */
     @Override
     public void bind(Agent agent) {
+        Server.getInstance().enqueueAgentAction(boundAgent, AgentAction.BIND);
+
         // TODO: lock the agent
         Task task = agent.getActiveTask();
         Rack rack = task.getRack();
@@ -63,10 +70,10 @@ public class Gate extends Facility {
      *
      * @return {@code true} if it is possible to unbind; {@code false} otherwise.
      *
-     * @see Facility#isBound()
-     * @see Facility#canBind(Agent)
-     * @see Facility#bind(Agent)
-     * @see Facility#unbind()
+     * @see Gate#isBound()
+     * @see Gate#canBind(Agent)
+     * @see Gate#bind(Agent)
+     * @see Gate#unbind()
      */
     @Override
     public boolean canUnbind() {
@@ -87,6 +94,8 @@ public class Gate extends Facility {
      */
     @Override
     public void unbind() {
+        Server.getInstance().enqueueAgentAction(boundAgent, AgentAction.UNBIND);
+
         // TODO: unlock the bound agent
         super.unbind();
     }

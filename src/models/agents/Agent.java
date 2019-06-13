@@ -11,6 +11,8 @@ import models.maps.utils.Position;
 import models.tasks.Task;
 import models.warehouses.Warehouse;
 
+import server.Server;
+
 import utils.Constants.*;
 import utils.Utility;
 
@@ -185,6 +187,7 @@ public class Agent extends AbstractAgent {
         }
 
         updateLastActionTime();
+        Server.getInstance().enqueueAgentAction(this, action);
     }
 
     /**
@@ -223,6 +226,7 @@ public class Agent extends AbstractAgent {
     public void loadRack(Rack rack) {
         loaded = true;
         updateLastActionTime();
+        Server.getInstance().enqueueAgentAction(this, AgentAction.LOAD);
     }
 
     /**
@@ -234,5 +238,6 @@ public class Agent extends AbstractAgent {
     public void offloadRack(Rack rack) {
         loaded = false;
         updateLastActionTime();
+        Server.getInstance().enqueueAgentAction(this, AgentAction.OFFLOAD);
     }
 }

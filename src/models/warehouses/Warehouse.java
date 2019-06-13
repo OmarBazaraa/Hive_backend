@@ -8,6 +8,7 @@ import models.facilities.Station;
 import models.maps.TimeGrid;
 import models.tasks.Order;
 import models.tasks.Task;
+import server.Server;
 
 import java.util.*;
 
@@ -102,6 +103,15 @@ public class Warehouse extends AbstractWarehouse {
     }
 
     /**
+     * Performs and simulates a single time step in this {@code Warehouse}.
+     */
+    public void run() {
+        dispatchPendingOrders();
+        advanceActiveAgents();
+        time++;
+    }
+
+    /**
      * Dispatches the current pending orders of this {@code Warehouse}.
      *
      * TODO: check agent to rack reach-ability
@@ -134,7 +144,7 @@ public class Warehouse extends AbstractWarehouse {
      * Moves the active agents one step towards their targets.
      */
     @Override
-    protected void moveActiveAgents() {
+    protected void advanceActiveAgents() {
         // Get the initial size of the queue
         int size = activeAgents.size();
 

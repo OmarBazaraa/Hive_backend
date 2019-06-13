@@ -1,6 +1,8 @@
 package server;
 
 import models.agents.Agent;
+import models.tasks.Order;
+import models.tasks.Task;
 import models.warehouses.Warehouse;
 
 import server.exceptions.DataException;
@@ -121,7 +123,7 @@ public class Server {
     /**
      * Clears the update states JSON arrays of the current time step.
      */
-    private void clearUpdateStates() {
+    public void clearUpdateStates() {
         actions = new JSONArray();
         logs = new JSONArray();
         statistics = new JSONArray();
@@ -229,13 +231,19 @@ public class Server {
         }
 
         try {
+            // Clear then re-configure the warehouse
             warehouse.clear();
             ServerDecoder.decodeInitConfig(data);
             warehouse.init();
-            clearUpdateStates();
-            warehouse.run();
+
+            // Update server state and send ACK if no errors
             currentState = ServerStates.RUNNING;
             sendAckMsg(ServerConstants.TYPE_ACK_START, ServerConstants.TYPE_OK, "");
+
+            // Initialize and run the system
+            clearUpdateStates();
+            warehouse.run();
+            sendUpdateMsg();
         } catch (JSONException ex) {
             sendAckMsg(ServerConstants.TYPE_ACK_START, ServerConstants.TYPE_ERROR, "Invalid START message format.");
         } catch (DataException ex) {
@@ -304,6 +312,7 @@ public class Server {
 
         clearUpdateStates();
         warehouse.run();
+        sendUpdateMsg();
     }
 
     /**
@@ -331,20 +340,78 @@ public class Server {
     // Backend -> Frontend
     //
 
+    /**
+     * Sends an acknowledge message to the frontend.
+     *
+     * @param type   the type of acknowledgement.
+     * @param status the status of the acknowledgement.
+     * @param msg    the piggybacked message if needed.
+     */
+    private void sendAckMsg(int type, int status, String msg) throws Exception {
+        send(ServerEncoder.encodeAckMsg(type, status, msg));
+    }
+
+    /**
+     * Enqueues an {@code AgentAction} to be sent in the next update message.
+     *
+     * @param agent  the updated {@code Agent}.
+     * @param action the performed action.
+     */
     public void enqueueAgentAction(Agent agent, AgentAction action) {
         actions.put(ServerEncoder.encodeAgentAction(agent, action));
     }
 
+    /**
+     * Enqueues a log about a newly assigned {@code Task} to be sent in the next update message.
+     *
+     * @param task the newly assigned {@code Task}.
+     */
+    public void enqueueTaskAssignedLog(Task task) {
+        logs.put(ServerEncoder.encodeTaskAssignedLog(task));
+    }
+
+    /**
+     * Enqueues a log about a newly completed {@code Task} to be sent in the next update message.
+     *
+     * @param task the newly assigned {@code Task}.
+     */
+    public void enqueueTaskCompletedLog(Task task) {
+        logs.put(ServerEncoder.encodeTaskCompletedLog(task));
+    }
+
+    /**
+     * Enqueues a log about a newly issued {@code Order} to be sent in the next update message.
+     *
+     * @param order the newly issued {@code Order}.
+     */
+    public void enqueueOrderIssuedLog(Order order) {
+        logs.put(ServerEncoder.encodeOrderLog(ServerConstants.TYPE_ORDER_ISSUED, order));
+    }
+
+    /**
+     * Enqueues a log about a newly fulfilled {@code Order} to be sent in the next update message.
+     *
+     * @param order the newly issued {@code Order}.
+     */
+    public void enqueueOrderFulfilledLog(Order order) {
+        logs.put(ServerEncoder.encodeOrderLog(ServerConstants.TYPE_ORDER_FULFILLED, order));
+    }
+
+    /**
+     * Enqueues a new statistic to be sent in the next update message.
+     *
+     * @param key   the statistic type.
+     * @param value the value of the statistic.
+     */
     public void enqueueStatistics(int key, double value) {
         actions.put(ServerEncoder.encodeStatistics(key, value));
     }
 
-    private void sendUpdateMsg() throws Exception {
+    /**
+     * Sends the current update message to the frontend.
+     */
+    public void sendUpdateMsg() throws Exception {
         send(ServerEncoder.encodeUpdateMsg(warehouse.getTime(), actions, logs, statistics));
-    }
-
-    private void sendAckMsg(int type, int status, String msg) throws Exception {
-        send(ServerEncoder.encodeAckMsg(type, status, msg));
     }
 
     // ===============================================================================================
