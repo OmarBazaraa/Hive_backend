@@ -3,6 +3,7 @@ package algorithms;
 import models.maps.utils.Position;
 
 import utils.Constants;
+import utils.Constants.*;
 import utils.Utility;
 
 
@@ -19,21 +20,28 @@ public class PlanNode implements Comparable<PlanNode> {
     /**
      * Array holding the action leading to any state.
      */
-    private static Constants.AgentAction[][][] par;
+    private static AgentAction[][][] par;
+
+    /**
+     * The target position in the search tree.
+     */
+    private static Position target;
 
     /**
      * Initializes the planning state.
      */
-    public static void initializes(int rows, int cols, int dirs) {
-        par = new Constants.AgentAction[rows][cols][dirs];
+    public static void initializes(int rows, int cols, int dirs, Position dst) {
+        par = new AgentAction[rows][cols][dirs];
 
         for (int i = 0; i < rows; ++i) {
             for (int j = 0; j < cols; ++j) {
                 for (int k = 0; k < dirs; ++k) {
-                    par[i][j][k] = Constants.AgentAction.NOTHING;
+                    par[i][j][k] = AgentAction.NOTHING;
                 }
             }
         }
+
+        target = dst;
     }
 
     // ===============================================================================================
@@ -49,12 +57,12 @@ public class PlanNode implements Comparable<PlanNode> {
     /**
      * The {@code Direction} of the {@code Agent} in the cell.
      */
-    public Constants.Direction dir;
+    public Direction dir;
 
     /**
      * The action leading to this state.
      */
-    public Constants.AgentAction action;
+    public AgentAction action;
 
     /**
      * The time at which the {@code Agent} will be in this state.
@@ -74,7 +82,7 @@ public class PlanNode implements Comparable<PlanNode> {
      * @param action the action leading to this state.
      * @param time   the time at which the {@code Agent} will be in this state.
      */
-    public PlanNode(Position pos, Constants.Direction dir, Constants.AgentAction action, long time) {
+    public PlanNode(Position pos, Direction dir, AgentAction action, long time) {
         this.pos = pos;
         this.dir = dir;
         this.action = action;
@@ -87,7 +95,7 @@ public class PlanNode implements Comparable<PlanNode> {
      * @return {@code true} if already visited; {@code false} otherwise.
      */
     public boolean isVisited() {
-        return (par[pos.row][pos.col][dir.ordinal()] != Constants.AgentAction.NOTHING);
+        return (par[pos.row][pos.col][dir.ordinal()] != AgentAction.NOTHING);
     }
 
     /**
@@ -108,8 +116,8 @@ public class PlanNode implements Comparable<PlanNode> {
      *
      * @return the next state {@code PlanNode}.
      */
-    public PlanNode next(Constants.AgentAction action) {
-        if (action == Constants.AgentAction.MOVE) {
+    public PlanNode next(AgentAction action) {
+        if (action == AgentAction.MOVE) {
             return new PlanNode(Utility.nextPos(pos, dir), dir, action, time + 1);
         } else {
             return new PlanNode(pos, Utility.nextDir(dir, action), action, time + 1);
@@ -127,12 +135,22 @@ public class PlanNode implements Comparable<PlanNode> {
      *
      * @return the previous state {@code PlanNode}.
      */
-    public PlanNode previous(Constants.AgentAction action) {
-        if (action == Constants.AgentAction.MOVE) {
+    public PlanNode previous(AgentAction action) {
+        if (action == AgentAction.MOVE) {
             return new PlanNode(Utility.prevPos(pos, dir), dir, action, time - 1);
         } else {
             return new PlanNode(pos, Utility.prevDir(dir, action), action, time - 1);
         }
+    }
+
+    /**
+     * Calculates the heuristic score to reach the target state.
+     *
+     * @return the heuristic score.
+     */
+    public int heuristic() {
+        // Return the manhattan distance to the target
+        return pos.distanceTo(target);
     }
 
     /**
@@ -141,13 +159,17 @@ public class PlanNode implements Comparable<PlanNode> {
      * @param obj the reference object with which to compare.
      *
      * @return a negative integer, zero, or a positive integer as this object
-     * is less than, equal to, or greater than the specified object.
+     *         is less than, equal to, or greater than the specified object.
      */
     @Override
     public int compareTo(PlanNode obj) {
-        if (time == obj.time) {
+        long lhs = time + heuristic();
+        long rhs = obj.time + obj.heuristic();
+
+        if (lhs == rhs) {
             return 0;
         }
-        return time < obj.time ? -1 : +1;
+
+        return lhs < rhs ? -1 : +1;
     }
 }
