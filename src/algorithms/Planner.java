@@ -164,6 +164,67 @@ public class Planner {
      * @return a sequence of {@code AgentAction}; or {@code null} if currently unreachable.
      */
     public static Stack<AgentAction> plan(Agent agent, Position dst) {
+        // Initialize planning algorithm
+        Warehouse warehouse = Warehouse.getInstance();
+        MapGrid map = warehouse.getMap();
+        TimeGrid timeMap = warehouse.getTimeMap();
+        PlanNode.initializes(map.getRows(), map.getCols(), 4, dst);
+        PriorityQueue<PlanNode> q = new PriorityQueue<>();
+
+        // Add the initial state
+        q.add(new PlanNode(agent.getPosition(), agent.getDirection(), AgentAction.MOVE, warehouse.getTime()));
+
+        //
+        // Keep exploring states until the target is found
+        //
+        while (!q.isEmpty()) {
+            // Get the current best node in the queue
+            PlanNode cur = q.remove();
+
+            // Skip visited states
+            if (cur.isVisited()) {
+                continue;
+            }
+
+            // Mark current state as visited
+            cur.visit();
+
+            //
+            // Try exploring further states by trying all possible actions
+            //
+            for (AgentAction action : Constants.MOVE_ACTIONS) {
+                // Get next state after doing the current action
+                PlanNode nxt = cur.next(action);
+
+                // Skip out of bound or visited states
+                if (!map.isInBound(nxt.pos) || nxt.isVisited()) {
+                    continue;
+                }
+
+                // Get the agent that is planned to be in this state
+                Agent a = timeMap.getAgentAt(nxt.pos, nxt.time);
+
+                // If there is an agent with higher priority then skip this state as well
+                if (a != null && agent.getPriority() < a.getPriority()) {
+                    continue;
+                }
+
+                // Check if target has been reached
+                if (dst.equals(nxt.pos)) {
+                    return constructPath(agent, nxt);
+                }
+
+                // Skip states having facilities
+                if (!map.isEmpty(nxt.pos)) {
+                    continue;
+                }
+
+                // Add expanded state
+                q.add(nxt);
+            }
+        }
+
+        // No path has been found
         return null;
     }
 
