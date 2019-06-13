@@ -1,4 +1,4 @@
-package algorithms.dispatcher;
+package algorithms.TaskAllocator;
 
 import models.HiveObject;
 import models.agents.Agent;
@@ -10,6 +10,7 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleDirectedWeightedGraph;
 
 import java.util.*;
+
 
 public class AgentAssigner {
 

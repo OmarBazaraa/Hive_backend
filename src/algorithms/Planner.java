@@ -170,7 +170,7 @@ public class Planner {
         // Rotation actions are easy
         if (action != AgentAction.MOVE) {
             timeMap.clearAt(curPos, time);
-            agent.rotate(action);
+            agent.move(action);
             return true;
         }
 
@@ -185,7 +185,7 @@ public class Planner {
             curCell.setAgent(null);
             nxtCell.setAgent(agent);
             agent.setPosition(nxtPos);
-            agent.move();
+            agent.move(action);
             return true;
         }
 

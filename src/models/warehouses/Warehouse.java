@@ -20,7 +20,7 @@ import java.util.*;
 public class Warehouse extends AbstractWarehouse {
 
     //
-    // Static Methods
+    // Static Variables & Methods
     //
 
     /**

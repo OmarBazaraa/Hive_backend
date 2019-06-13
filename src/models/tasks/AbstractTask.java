@@ -42,7 +42,7 @@ abstract public class AbstractTask extends Entity {
 
     // ===============================================================================================
     //
-    // Static Methods
+    // Static Variables & Methods
     //
 
     /**

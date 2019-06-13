@@ -28,7 +28,7 @@ abstract public class HiveObject extends Entity {
 
     // ===============================================================================================
     //
-    // Static Methods
+    // Static Variables Methods
     //
 
     /**

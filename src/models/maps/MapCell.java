@@ -103,12 +103,12 @@ public class MapCell extends Cell {
      * <p>
      * Note that the cell type and the facility object type should be consistent in the following manner:
      * <ul>
-     *     <li>{@link CellType#EMPTY} type with {@code null} object.</li>
-     *     <li>{@link CellType#OBSTACLE} type with {@code null} object.</li>
-     *     <li>{@link CellType#RACK} type with {@link Rack} object.</li>
-     *     <li>{@link CellType#GATE} type with {@link Gate} object.</li>
-     *     <li>{@link CellType#STATION} type with {@link Station} object.</li>
-     *     <li>{@link CellType#UNKNOWN} type with {@code null} object.</li>
+     * <li>{@link CellType#EMPTY} type with {@code null} object.</li>
+     * <li>{@link CellType#OBSTACLE} type with {@code null} object.</li>
+     * <li>{@link CellType#RACK} type with {@link Rack} object.</li>
+     * <li>{@link CellType#GATE} type with {@link Gate} object.</li>
+     * <li>{@link CellType#STATION} type with {@link Station} object.</li>
+     * <li>{@link CellType#UNKNOWN} type with {@code null} object.</li>
      * </ul>
      *
      * @param type     the {@code CellType} of {@code Facility}.

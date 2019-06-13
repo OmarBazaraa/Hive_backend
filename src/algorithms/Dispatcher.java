@@ -31,7 +31,7 @@ public class Dispatcher {
         //
         while (order.isPending() && !readyAgents.isEmpty()) {
             // Select the most suitable racks
-//            List<Rack> selectedRacks = RackSelector.selectRacks(order);
+            // List<Rack> selectedRacks = RackSelector.selectRacks(order);
 
             // Get current needed item in the order
             Item item = order.getFirst().getKey();
@@ -59,6 +59,7 @@ public class Dispatcher {
      * @param readyAgent the set of all idle agents.
      * @param rack       the assigned {@code Rack}.
      * @param order      the needed {@code Order}.
+     *
      * @return the best suitable {@code Agent} from the given set of agents.
      */
     private static Agent findAgent(Set<Agent> readyAgent, Rack rack, Order order) {

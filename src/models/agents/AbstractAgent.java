@@ -180,19 +180,15 @@ abstract public class AbstractAgent extends HiveObject implements TaskAssignable
     abstract public void reach(Facility dst);
 
     /**
-     * Moves this {@code Agent} forward in its current {@code Direction}.
-     */
-    abstract public void move();
-
-    /**
-     * Rotates this {@code Agent} according to the given rotation action.
+     * Moves this {@code Agent} according to the given action.
      * <p>
      * The allowed actions are only:
-     * {@code AgentAction.ROTATE_RIGHT}, {@code AgentAction.ROTATE_LEFT}.
+     * {@code AgentAction.ROTATE_RIGHT}, {@code AgentAction.ROTATE_LEFT}, and
+     * {@code AgentAction.MOVE}.
      *
-     * @param action the {@code AgentAction} to rotate with.
+     * @param action the {@code AgentAction} to move with.
      */
-    abstract public void rotate(AgentAction action);
+    abstract public void move(AgentAction action);
 
     /**
      * Moves this {@code Agent} in the given {@code Direction}.

@@ -169,26 +169,21 @@ public class Agent extends AbstractAgent {
     }
 
     /**
-     * Moves this {@code Agent} forward in its current {@code Direction}.
-     */
-    @Override
-    public void move() {
-        // Setting the new position is done by the routing function
-        // setPosition(Utility.nextPos(getPosition(), direction));
-        updateLastActionTime();
-    }
-
-    /**
-     * Rotates this {@code Agent} according to the given rotation action.
+     * Moves this {@code Agent} according to the given action.
      * <p>
      * The allowed actions are only:
-     * {@code AgentAction.ROTATE_RIGHT}, {@code AgentAction.ROTATE_LEFT}.
+     * {@code AgentAction.ROTATE_RIGHT}, {@code AgentAction.ROTATE_LEFT}, and
+     * {@code AgentAction.MOVE}.
      *
-     * @param action the {@code AgentAction} to rotate with.
+     * @param action the {@code AgentAction} to move with.
      */
-    @Override
-    public void rotate(AgentAction action) {
-        direction = Utility.nextDir(direction, action);
+    public void move(AgentAction action) {
+        if (action == AgentAction.MOVE) {
+            // Setting the new position is done by the routing function
+        } else {
+            direction = Utility.nextDir(direction, action);
+        }
+
         updateLastActionTime();
     }
 
