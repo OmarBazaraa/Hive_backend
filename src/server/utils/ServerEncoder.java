@@ -2,7 +2,6 @@ package server.utils;
 
 import models.agents.Agent;
 
-import models.facilities.Rack;
 import models.items.Item;
 import models.tasks.Order;
 import models.tasks.Task;
@@ -37,30 +36,17 @@ public class ServerEncoder {
     public static JSONObject encodeAgentAction(Agent agent, AgentAction action) {
         JSONObject data = new JSONObject();
         data.put(ServerConstants.KEY_ID, agent.getId());
-        data.put(ServerConstants.KEY_ROW, agent.getRow());
-        data.put(ServerConstants.KEY_COL, agent.getCol());
         return encodeMsg(agentActionToType(action), data);
     }
 
     public static JSONObject encodeTaskAssignedLog(Task task) {
-        Agent agent = task.getAgent();
-        Rack rack = task.getRack();
-
         JSONObject data = new JSONObject();
-        data.put(ServerConstants.KEY_AGENT_ID, agent.getId());
-        data.put(ServerConstants.KEY_AGENT_ROW, agent.getRow());
-        data.put(ServerConstants.KEY_AGENT_COL, agent.getCol());
-        data.put(ServerConstants.KEY_RACK_ID, rack.getId());
-        data.put(ServerConstants.KEY_RACK_ROW, rack.getRow());
-        data.put(ServerConstants.KEY_RACK_COL, rack.getCol());
+        data.put(ServerConstants.KEY_AGENT_ID, task.getAgent().getId());
+        data.put(ServerConstants.KEY_RACK_ID, task.getRack().getId());
         return encodeMsg(ServerConstants.TYPE_TASK_ASSIGNED, data);
     }
 
     public static JSONObject encodeTaskCompletedLog(Task task) {
-        Agent agent = task.getAgent();
-        Rack rack = task.getRack();
-        Order order = task.getOrder();
-
         JSONArray items = new JSONArray();
 
         for (Map.Entry<Item, Integer> pair : task) {
@@ -71,13 +57,8 @@ public class ServerEncoder {
         }
 
         JSONObject data = new JSONObject();
-        data.put(ServerConstants.KEY_AGENT_ID, agent.getId());
-        data.put(ServerConstants.KEY_AGENT_ROW, agent.getRow());
-        data.put(ServerConstants.KEY_AGENT_COL, agent.getCol());
-        data.put(ServerConstants.KEY_RACK_ID, rack.getId());
-        data.put(ServerConstants.KEY_RACK_ROW, rack.getRow());
-        data.put(ServerConstants.KEY_RACK_COL, rack.getCol());
-        data.put(ServerConstants.KEY_ORDER_ID, order.getId());
+        data.put(ServerConstants.KEY_ORDER_ID, task.getOrder().getId());
+        data.put(ServerConstants.KEY_RACK_ID, task.getRack().getId());
         data.put(ServerConstants.KEY_ITEMS, items);
 
         return encodeMsg(ServerConstants.TYPE_TASK_COMPLETED, data);
