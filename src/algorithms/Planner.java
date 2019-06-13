@@ -148,8 +148,6 @@ public class Planner {
     }
 
 
-
-
     public static boolean route(Agent agent, AgentAction action) {
         return false;
     }
@@ -211,7 +209,7 @@ public class Planner {
 
                 // Check if target has been reached
                 if (dst.equals(nxt.pos)) {
-                    return constructPath(agent, nxt);
+                    return constructPlan(agent, nxt);
                 }
 
                 // Skip states having facilities
@@ -229,14 +227,39 @@ public class Planner {
     }
 
     /**
-     * Constructs the sequence of actions after finishing planning.
+     * Constructs the sequence of actions leading to the target after
+     * finishing the planning.
      *
-     * @param node the target state.
+     * @param agent the {@code Agent} to plan for.
+     * @param node  the target state {@code PlanNode}.
      *
      * @return a sequence of {@code AgentAction} to reach the given state.
      */
-    private static Stack<AgentAction> constructPath(Agent agent, PlanNode node) {
-        return null;
+    private static Stack<AgentAction> constructPlan(Agent agent, PlanNode node) {
+        Stack<AgentAction> ret = new Stack<>();
+
+        // Get the timeline map of the warehouse
+        TimeGrid timeMap = Warehouse.getInstance().getTimeMap();
+
+        //
+        // Keep moving backward until reaching the position of the agent
+        //
+        while (!agent.getPosition().equals(node.pos)) {
+            // Get the agent that is planned to be in this state
+            Agent a = timeMap.getAgentAt(node.pos, node.time);
+
+            // If there is an agent then it must be with lower priority
+            // So drop its plan for now
+            if (a != null) {
+                a.dropPlan();
+            }
+
+            // Add the action and proceed
+            ret.add(node.action);
+            node = node.previous(node.action);
+        }
+
+        return ret;
     }
 
     /**
