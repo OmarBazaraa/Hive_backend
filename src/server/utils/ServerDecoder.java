@@ -125,6 +125,8 @@ public class ServerDecoder {
         int id = data.getInt(ServerConstants.KEY_ID);
         int cap = data.getInt(ServerConstants.KEY_AGENT_LOAD_CAPACITY);
         int dir = data.getInt(ServerConstants.KEY_AGENT_DIRECTION);
+        int port = data.getInt(ServerConstants.KEY_AGENT_PORT);
+        String ip = data.getString(ServerConstants.KEY_AGENT_IP);
 
         //
         // Checks
@@ -144,6 +146,8 @@ public class ServerDecoder {
 
         // Create and add to the warehouse
         Agent ret = new Agent(id, cap, decodeDirection(dir));
+        ret.setIpAddress(ip);
+        ret.setPortNumber(port);
         ret.setPosition(row, col);
         warehouse.addAgent(ret);
         return ret;

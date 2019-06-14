@@ -48,6 +48,16 @@ abstract public class AbstractAgent extends HiveObject implements TaskAssignable
     protected boolean loaded = false;
 
     /**
+     * The ip address of this {@code Agent} needed for communication.
+     */
+    protected String ip;
+
+    /**
+     * The port number of this {@code Agent} needed for communication.
+     */
+    protected int port;
+
+    /**
      * The last time this {@code Agent} has performed an action.
      * Needed by the planner algorithm.
      */
@@ -117,6 +127,42 @@ abstract public class AbstractAgent extends HiveObject implements TaskAssignable
      */
     public boolean isLoaded() {
         return loaded;
+    }
+
+    /**
+     * Returns the ip address of this {@code Agent} needed for communication.
+     *
+     * @return the ip address of this {@code Agent}.
+     */
+    public String getIpAddress() {
+        return ip;
+    }
+
+    /**
+     * Sets the ip address of this {@code Agent} needed for communication.
+     *
+     * @param ipAddr the new ip address to set.
+     */
+    public void setIpAddress(String ipAddr) {
+        ip = ipAddr;
+    }
+
+    /**
+     * Returns the port number of this {@code Agent} needed for communication.
+     *
+     * @return the port number of this {@code Agent}.
+     */
+    public String getPortNumber() {
+        return ip;
+    }
+
+    /**
+     * Sets the port number of this {@code Agent} needed for communication.
+     *
+     * @param portNum the new port number to set.
+     */
+    public void setPortNumber(int portNum) {
+        port = portNum;
     }
 
     /**
@@ -217,7 +263,7 @@ abstract public class AbstractAgent extends HiveObject implements TaskAssignable
      * @param obj the reference object with which to compare.
      *
      * @return a negative integer, zero, or a positive integer as this object
-     *         is less than, equal to, or greater than the specified object.
+     * is less than, equal to, or greater than the specified object.
      */
     @Override
     public int compareTo(Entity obj) {

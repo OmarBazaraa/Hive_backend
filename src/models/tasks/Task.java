@@ -1,6 +1,5 @@
 package models.tasks;
 
-import algorithms.Planner;
 import models.agents.Agent;
 import models.facilities.Facility;
 import models.items.Item;
@@ -8,7 +7,6 @@ import models.facilities.Gate;
 import models.facilities.Rack;
 import models.items.QuantityAddable;
 import models.maps.GuideGrid;
-import models.warehouses.Warehouse;
 
 import utils.Pair;
 
@@ -182,6 +180,8 @@ public class Task extends AbstractTask implements QuantityAddable<Item> {
      *
      * This is done by taking the intersection of items in both the associated {@code Order},
      * and the assigned {@code Rack}.
+     *
+     * TODO: support refill order
      */
     private void fillItems() {
         items.clear();
