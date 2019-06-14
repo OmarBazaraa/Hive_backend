@@ -26,10 +26,6 @@ public interface AgentAllocatable {
      * Returns the {@code Agent} currently allocating this object.
      *
      * @return the allocating {@code Agent} if exists; {@code null} otherwise.
-     *
-     * @see AgentAllocatable#isAllocated()
-     * @see AgentAllocatable#allocate(Agent)
-     * @see AgentAllocatable#deallocate()
      */
     Agent getAllocatingAgent();
 
@@ -37,10 +33,6 @@ public interface AgentAllocatable {
      * Checks whether this object is currently allocated by an {@code Agent} or not.
      *
      * @return {@code true} if this object is allocated; {@code false} otherwise.
-     *
-     * @see AgentAllocatable#getAllocatingAgent()
-     * @see AgentAllocatable#allocate(Agent)
-     * @see AgentAllocatable#deallocate()
      */
     boolean isAllocated();
 
@@ -51,10 +43,6 @@ public interface AgentAllocatable {
      * un-allocated; otherwise un-expected behaviour could occur.
      *
      * @param agent the allocating {@code Agent}.
-     *
-     * @see AgentAllocatable#getAllocatingAgent()
-     * @see AgentAllocatable#isAllocated()
-     * @see AgentAllocatable#deallocate()
      */
     void allocate(Agent agent);
 
@@ -62,10 +50,6 @@ public interface AgentAllocatable {
      * De-allocates and releases this object from the currently allocating {@code Agent}.
      * <p>
      * This function should be called only when an {@code Agent} is already allocating this object.
-     *
-     * @see AgentAllocatable#getAllocatingAgent()
-     * @see AgentAllocatable#isAllocated()
-     * @see AgentAllocatable#allocate(Agent)
      */
     void deallocate();
 }

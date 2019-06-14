@@ -257,4 +257,24 @@ public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAs
             terminate();
         }
     }
+
+    /**
+     * Returns a string representation of this {@code Order}.
+     * In general, the toString method returns a string that "textually represents" this object.
+     *
+     * @return a string representation of this {@code Order}.
+     */
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+
+        builder
+                .append("Order: {")
+                .append(" id: ").append(id).append(",")
+                .append(" gate_id: ").append(deliveryGate.getId()).append(",")
+                .append(" items: ").append(items.size())
+                .append(" }");
+
+        return builder.toString();
+    }
 }

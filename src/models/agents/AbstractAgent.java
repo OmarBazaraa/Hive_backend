@@ -231,4 +231,25 @@ abstract public class AbstractAgent extends HiveObject implements TaskAssignable
         }
         return cmp;
     }
+
+    /**
+     * Returns a string representation of this {@code Agent}.
+     * In general, the toString method returns a string that "textually represents" this object.
+     *
+     * @return a string representation of this {@code Agent}.
+     */
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+
+        builder
+                .append("Agent: {")
+                .append(" id: ").append(id).append(",")
+                .append(" pos: ").append("(").append(row).append("x").append(col).append(")")
+                .append(" load capacity: ").append(loadCapacity).append(",")
+                .append(" direction: ").append(direction)
+                .append(" }");
+
+        return builder.toString();
+    }
 }

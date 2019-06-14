@@ -24,7 +24,7 @@ import models.maps.MapGrid;
  * @see models.facilities.Gate Gate
  * @see models.facilities.Station Station
  */
-public class Facility extends HiveObject implements AgentBindable, AgentAllocatable {
+abstract public class Facility extends HiveObject implements AgentBindable, AgentAllocatable {
 
     //
     // Member Variables
@@ -88,10 +88,6 @@ public class Facility extends HiveObject implements AgentBindable, AgentAllocata
      * Returns the {@code Agent} currently allocating this {@code Facility}.
      *
      * @return the allocating {@code Agent} if exists; {@code null} otherwise.
-     *
-     * @see Facility#isAllocated()
-     * @see Facility#allocate(Agent)
-     * @see Facility#deallocate()
      */
     public Agent getAllocatingAgent() {
         return allocatingAgent;
@@ -101,10 +97,6 @@ public class Facility extends HiveObject implements AgentBindable, AgentAllocata
      * Checks whether this {@code Facility} is currently allocated by an {@code Agent} or not.
      *
      * @return {@code true} if this {@code Facility} is allocated; {@code false} otherwise.
-     *
-     * @see Facility#getAllocatingAgent()
-     * @see Facility#allocate(Agent)
-     * @see Facility#deallocate()
      */
     public boolean isAllocated() {
         return (allocatingAgent != null);
@@ -117,10 +109,6 @@ public class Facility extends HiveObject implements AgentBindable, AgentAllocata
      * un-allocated; otherwise un-expected behaviour could occur.
      *
      * @param agent the allocating {@code Agent}.
-     *
-     * @see Facility#getAllocatingAgent()
-     * @see Facility#isAllocated()
-     * @see Facility#deallocate()
      */
     @Override
     public void allocate(Agent agent) {
@@ -131,10 +119,6 @@ public class Facility extends HiveObject implements AgentBindable, AgentAllocata
      * De-allocates and releases this {@code Facility} from the currently allocating {@code Agent}.
      * <p>
      * This function should be called only when an {@code Agent} is already allocating this {@code Facility}.
-     *
-     * @see Facility#getAllocatingAgent()
-     * @see Facility#isAllocated()
-     * @see Facility#allocate(Agent)
      */
     public void deallocate() {
         allocatingAgent = null;
@@ -144,11 +128,6 @@ public class Facility extends HiveObject implements AgentBindable, AgentAllocata
      * Checks whether this {@code Facility} is currently bound with an {@code Agent} or not.
      *
      * @return {@code true} if this {@code Facility} is bound; {@code false} otherwise.
-     *
-     * @see Facility#canBind(Agent)
-     * @see Facility#bind(Agent)
-     * @see Facility#canUnbind()
-     * @see Facility#unbind()
      */
     public boolean isBound() {
         return (boundAgent != null);
@@ -162,11 +141,6 @@ public class Facility extends HiveObject implements AgentBindable, AgentAllocata
      * @param agent the {@code Agent} to check.
      *
      * @return {@code true} if it is possible to bind; {@code false} otherwise.
-     *
-     * @see Facility#isBound()
-     * @see Facility#bind(Agent)
-     * @see Facility#canUnbind()
-     * @see Facility#unbind()
      */
     @Override
     public boolean canBind(Agent agent) {
@@ -182,11 +156,6 @@ public class Facility extends HiveObject implements AgentBindable, AgentAllocata
      * the given {@code Agent}; otherwise un-expected behaviour could occur.
      *
      * @param agent the {@code Agent} to bind.
-     *
-     * @see Facility#isBound()
-     * @see Facility#canBind(Agent)
-     * @see Facility#canUnbind()
-     * @see Facility#unbind()
      */
     @Override
     public void bind(Agent agent) {
@@ -199,11 +168,6 @@ public class Facility extends HiveObject implements AgentBindable, AgentAllocata
      * This function should be called only when an {@code Agent} is already bound to this {@code Facility}.
      *
      * @return {@code true} if it is possible to unbind; {@code false} otherwise.
-     *
-     * @see Facility#isBound()
-     * @see Facility#canBind(Agent)
-     * @see Facility#bind(Agent)
-     * @see Facility#unbind()
      */
     @Override
     public boolean canUnbind() {
@@ -215,11 +179,6 @@ public class Facility extends HiveObject implements AgentBindable, AgentAllocata
      * <p>
      * This function should be called after checking that it is currently possible to unbind
      * the bound {@code Agent}; otherwise un-expected behaviour could occur.
-     *
-     * @see Facility#isBound()
-     * @see Facility#canBind(Agent)
-     * @see Facility#bind(Agent)
-     * @see Facility#canUnbind()
      */
     @Override
     public void unbind() {

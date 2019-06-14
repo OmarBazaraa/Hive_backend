@@ -292,4 +292,63 @@ abstract public class AbstractWarehouse {
         orders.put(order.getId(), order);
         pendingOrders.add(order);
     }
+
+    // ===============================================================================================
+    //
+    // Helper Methods
+    //
+
+    /**
+     * Returns a string representation of this {@code Warehouse}.
+     * In general, the toString method returns a string that "textually represents" this object.
+     *
+     * @return a string representation of this {@code Warehouse}.
+     */
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+
+        // Print the grid
+        builder.append("Warehouse of size: ")
+                .append(map.getRows()).append("x").append(map.getCols())
+                .append("\n").append("\n")
+                .append(map)
+                .append("\n");
+
+        // Print the list of agents
+        builder.append("Agents: ").append(agents.size()).append("\n");
+        for (Agent agent : agents.values()) {
+            builder.append("    > ").append(agent).append("\n");
+        }
+        builder.append("\n");
+
+        // Print the list of racks
+        builder.append("Racks: ").append(racks.size()).append("\n");
+        for (Rack rack : racks.values()) {
+            builder.append("    > ").append(rack).append("\n");
+        }
+        builder.append("\n");
+
+        // Print the list of gates
+        builder.append("Gates: ").append(gates.size()).append("\n");
+        for (Gate gate : gates.values()) {
+            builder.append("    > ").append(gate).append("\n");
+        }
+        builder.append("\n");
+
+        // Print the list of stations
+        builder.append("Stations: ").append(stations.size()).append("\n");
+        for (Station station : stations.values()) {
+            builder.append("    > ").append(station).append("\n");
+        }
+        builder.append("\n");
+
+        // Print the list of items
+        builder.append("Items: ").append(items.size()).append("\n");
+        for (Item item : items.values()) {
+            builder.append("    > ").append(item).append("\n");
+        }
+
+        return builder.toString();
+    }
 }

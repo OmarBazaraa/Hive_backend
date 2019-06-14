@@ -48,11 +48,6 @@ public class Gate extends Facility {
      * the given {@code Agent}; otherwise un-expected behaviour could occur.
      *
      * @param agent the {@code Agent} to bind.
-     *
-     * @see Gate#isBound()
-     * @see Gate#canBind(Agent)
-     * @see Gate#canUnbind()
-     * @see Gate#unbind()
      */
     @Override
     public void bind(Agent agent) {
@@ -69,11 +64,6 @@ public class Gate extends Facility {
      * Checks whether its currently possible to unbind the bound {@code Agent} from this {@code Gate}.
      *
      * @return {@code true} if it is possible to unbind; {@code false} otherwise.
-     *
-     * @see Gate#isBound()
-     * @see Gate#canBind(Agent)
-     * @see Gate#bind(Agent)
-     * @see Gate#unbind()
      */
     @Override
     public boolean canUnbind() {
@@ -86,11 +76,6 @@ public class Gate extends Facility {
      * <p>
      * This function should be called after checking that it is currently possible to unbind
      * the bound {@code Agent}; otherwise un-expected behaviour could occur.
-     *
-     * @see Gate#isBound()
-     * @see Gate#canBind(Agent)
-     * @see Gate#bind(Agent)
-     * @see Gate#canUnbind()
      */
     @Override
     public void unbind() {
@@ -98,5 +83,24 @@ public class Gate extends Facility {
 
         // TODO: unlock the bound agent
         super.unbind();
+    }
+
+    /**
+     * Returns a string representation of this {@code Gate}.
+     * In general, the toString method returns a string that "textually represents" this object.
+     *
+     * @return a string representation of this {@code Gate}.
+     */
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+
+        builder
+                .append("Gate: {")
+                .append(" id: ").append(id).append(",")
+                .append(" pos: ").append("(").append(row).append("x").append(col).append(")")
+                .append(" }");
+
+        return builder.toString();
     }
 }

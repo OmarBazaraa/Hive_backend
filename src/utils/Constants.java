@@ -37,7 +37,7 @@ public class Constants {
     public static final char SHAPE_CELL_EMPTY = '.';
     public static final char SHAPE_CELL_OBSTACLE = '#';
     public static final char SHAPE_CELL_GATE = 'G';
-    public static final char SHAPE_CELL_RACK = '$';
+    public static final char SHAPE_CELL_RACK = 'R';
     public static final char SHAPE_CELL_AGENT = '@';
     public static final char SHAPE_CELL_STATION = 'S';
     public static final char SHAPE_CELL_UNKNOWN = '?';

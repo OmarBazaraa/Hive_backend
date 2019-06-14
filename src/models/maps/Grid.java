@@ -297,10 +297,10 @@ public class Grid<T extends Cell> {
     }
 
     /**
-     * Returns a string representation of object.
+     * Returns a string representation of this {@code Grid}.
      * In general, the toString method returns a string that "textually represents" this object.
      *
-     * @return a string representation of object.
+     * @return a string representation of this {@code Grid}.
      */
     @Override
     public String toString() {

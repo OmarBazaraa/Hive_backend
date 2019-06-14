@@ -49,11 +49,6 @@ public class Station extends Facility {
      * the given {@code Agent}; otherwise un-expected behaviour could occur.
      *
      * @param agent the {@code Agent} to bind.
-     *
-     * @see Station#isBound()
-     * @see Station#canBind(Agent)
-     * @see Station#canUnbind()
-     * @see Station#unbind()
      */
     @Override
     public void bind(Agent agent) {
@@ -66,15 +61,29 @@ public class Station extends Facility {
      * <p>
      * This function should be called after checking that it is currently possible to unbind
      * the bound {@code Agent}; otherwise un-expected behaviour could occur.
-     *
-     * @see Station#isBound()
-     * @see Station#canBind(Agent)
-     * @see Station#bind(Agent)
-     * @see Station#canUnbind()
      */
     @Override
     public void unbind() {
         Server.getInstance().enqueueAgentAction(boundAgent, AgentAction.UNBIND);
         super.unbind();
+    }
+
+    /**
+     * Returns a string representation of this {@code Station}.
+     * In general, the toString method returns a string that "textually represents" this object.
+     *
+     * @return a string representation of this {@code Station}.
+     */
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+
+        builder
+                .append("Station: {")
+                .append(" id: ").append(id).append(",")
+                .append(" pos: ").append("(").append(row).append("x").append(col).append(")")
+                .append(" }");
+
+        return builder.toString();
     }
 }

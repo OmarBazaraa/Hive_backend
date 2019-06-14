@@ -191,4 +191,23 @@ public class Item extends Entity implements QuantityAddable<Rack>, QuantityReser
         int reservedQuantity = container.get(this);
         reservedUnits -= reservedQuantity;
     }
+
+    /**
+     * Returns a string representation of this {@code Item}.
+     * In general, the toString method returns a string that "textually represents" this object.
+     *
+     * @return a string representation of this {@code Item}.
+     */
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+
+        builder
+                .append("Item: {")
+                .append(" id: ").append(id).append(",")
+                .append(" weight: ").append(weight)
+                .append(" }");
+
+        return builder.toString();
+    }
 }

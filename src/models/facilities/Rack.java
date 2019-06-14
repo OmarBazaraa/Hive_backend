@@ -234,11 +234,6 @@ public class Rack extends Facility implements QuantityAddable<Item>, QuantityRes
      * the given {@code Agent}; otherwise un-expected behaviour could occur.
      *
      * @param agent the {@code Agent} to bind.
-     *
-     * @see Rack#isBound()
-     * @see Rack#canBind(Agent)
-     * @see Rack#canUnbind()
-     * @see Rack#unbind()
      */
     @Override
     public void bind(Agent agent) {
@@ -251,15 +246,32 @@ public class Rack extends Facility implements QuantityAddable<Item>, QuantityRes
      * <p>
      * This function should be called after checking that it is currently possible to unbind
      * the bound {@code Agent}; otherwise un-expected behaviour could occur.
-     *
-     * @see Rack#isBound()
-     * @see Rack#canBind(Agent)
-     * @see Rack#bind(Agent)
-     * @see Rack#canUnbind()
      */
     @Override
     public void unbind() {
         boundAgent.offloadRack(this);
         super.unbind();
+    }
+
+    /**
+     * Returns a string representation of this {@code Rack}.
+     * In general, the toString method returns a string that "textually represents" this object.
+     *
+     * @return a string representation of this {@code Rack}.
+     */
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+
+        builder
+                .append("Rack: {")
+                .append(" id: ").append(id).append(",")
+                .append(" pos: ").append("(").append(row).append("x").append(col).append(")")
+                .append(" capacity: ").append(capacity).append(",")
+                .append(" weight: ").append(containerWeight).append(",")
+                .append(" items: ").append(items.size())
+                .append(" }");
+
+        return builder.toString();
     }
 }

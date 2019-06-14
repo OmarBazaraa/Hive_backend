@@ -26,11 +26,6 @@ public interface AgentBindable {
      * Checks whether this object is currently bound with an {@code Agent} or not.
      *
      * @return {@code true} if this object is bound; {@code false} otherwise.
-     *
-     * @see AgentBindable#canBind(Agent)
-     * @see AgentBindable#bind(Agent)
-     * @see AgentBindable#canUnbind()
-     * @see AgentBindable#unbind()
      */
     boolean isBound();
 
@@ -42,11 +37,6 @@ public interface AgentBindable {
      * @param agent the {@code Agent} to check.
      *
      * @return {@code true} if it is possible to bind; {@code false} otherwise.
-     *
-     * @see AgentBindable#isBound()
-     * @see AgentBindable#bind(Agent)
-     * @see AgentBindable#canUnbind()
-     * @see AgentBindable#unbind()
      */
     boolean canBind(Agent agent);
 
@@ -59,11 +49,6 @@ public interface AgentBindable {
      * the given {@code Agent}; otherwise un-expected behaviour could occur.
      *
      * @param agent the {@code Agent} to bind.
-     *
-     * @see AgentBindable#isBound()
-     * @see AgentBindable#canBind(Agent)
-     * @see AgentBindable#canUnbind()
-     * @see AgentBindable#unbind()
      */
     void bind(Agent agent);
 
@@ -73,11 +58,6 @@ public interface AgentBindable {
      * This function should be called only when an {@code Agent} is already bound to this object.
      *
      * @return {@code true} if it is possible to unbind; {@code false} otherwise.
-     *
-     * @see AgentBindable#isBound()
-     * @see AgentBindable#canBind(Agent)
-     * @see AgentBindable#bind(Agent)
-     * @see AgentBindable#unbind()
      */
     boolean canUnbind();
 
@@ -86,11 +66,6 @@ public interface AgentBindable {
      * <p>
      * This function should be called after checking that it is currently possible to unbind
      * the bound {@code Agent}; otherwise un-expected behaviour could occur.
-     *
-     * @see AgentBindable#isBound()
-     * @see AgentBindable#canBind(Agent)
-     * @see AgentBindable#bind(Agent)
-     * @see AgentBindable#canUnbind()
      */
     void unbind();
 }
