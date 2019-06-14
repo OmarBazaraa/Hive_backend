@@ -8,6 +8,7 @@ import models.items.Item;
 import models.items.QuantityAddable;
 import models.maps.MapCell;
 import models.tasks.Order;
+import models.tasks.Order.OrderType;
 import models.warehouses.Warehouse;
 
 import server.exceptions.DataException;
@@ -33,15 +34,9 @@ public class ServerDecoder {
 
     // ===============================================================================================
     //
-    // Static Decoding Methods
+    // Static Main Methods
     //
 
-    /**
-     * Decodes the incoming initial configuration message from the frontend,
-     * and updates the {@code Warehouse} in accordance.
-     *
-     * @param data the JSON data to decode.
-     */
     public static void decodeInitConfig(JSONObject data) throws JSONException, DataException {
         int mode = data.getInt(ServerConstants.KEY_MODE);
         // TODO: remove extra stringify from the frontend and update this line
@@ -53,24 +48,12 @@ public class ServerDecoder {
         decodeWarehouseMap(mapJSON);
     }
 
-    /**
-     * Decodes the incoming items from the frontend,
-     * and updates the {@code Warehouse} in accordance.
-     *
-     * @param data the JSON data to decode.
-     */
     public static void decodeWarehouseItems(JSONArray data) throws JSONException, DataException {
         for (int i = 0; i < data.length(); ++i) {
             decodeItem(data.getJSONObject(i));
         }
     }
 
-    /**
-     * Decodes the incoming map grid from the frontend,
-     * and updates the {@code Warehouse} in accordance.
-     *
-     * @param data the JSON data to decode.
-     */
     public static void decodeWarehouseMap(JSONObject data) throws JSONException, DataException {
         // Extract received properties
         int h = data.getInt(ServerConstants.KEY_HEIGHT);
@@ -97,12 +80,6 @@ public class ServerDecoder {
         warehouse.updateMap(grid);
     }
 
-    /**
-     * Decodes the incoming grid cell from the frontend,
-     * and updates the {@code Warehouse} in accordance.
-     *
-     * @param data the JSON data to decode.
-     */
     public static MapCell decodeMapCell(JSONObject data, int row, int col) throws JSONException, DataException {
         MapCell ret = new MapCell();
 
@@ -143,12 +120,6 @@ public class ServerDecoder {
         return ret;
     }
 
-    /**
-     * Decodes the incoming {@code Agent} from the frontend,
-     * and updates the {@code Warehouse} in accordance.
-     *
-     * @param data the JSON data to decode.
-     */
     public static Agent decodeAgent(JSONObject data, int row, int col) throws JSONException, DataException {
         // Extract received properties
         int id = data.getInt(ServerConstants.KEY_ID);
@@ -172,18 +143,12 @@ public class ServerDecoder {
         }
 
         // Create and add to the warehouse
-        Agent ret = new Agent(id, cap, Direction.values()[dir]);
+        Agent ret = new Agent(id, cap, decodeDirection(dir));
         ret.setPosition(row, col);
         warehouse.addAgent(ret);
         return ret;
     }
 
-    /**
-     * Decodes the incoming {@code Rack} from the frontend,
-     * and updates the {@code Warehouse} in accordance.
-     *
-     * @param data the JSON data to decode.
-     */
     public static Rack decodeRack(JSONObject data, int row, int col) throws JSONException, DataException {
         // Extract received properties
         int id = data.getInt(ServerConstants.KEY_ID);
@@ -226,12 +191,6 @@ public class ServerDecoder {
         return ret;
     }
 
-    /**
-     * Decodes the incoming {@code Gate} from the frontend,
-     * and updates the {@code Warehouse} in accordance.
-     *
-     * @param data the JSON data to decode.
-     */
     public static Gate decodeGate(JSONObject data, int row, int col) throws JSONException, DataException {
         // Extract received properties
         int id = data.getInt(ServerConstants.KEY_ID);
@@ -253,12 +212,6 @@ public class ServerDecoder {
         return ret;
     }
 
-    /**
-     * Decodes the incoming {@code Station} from the frontend,
-     * and updates the {@code Warehouse} in accordance.
-     *
-     * @param data the JSON data to decode.
-     */
     public static Station decodeStation(JSONObject data, int row, int col) throws JSONException, DataException {
         // Extract received properties
         int id = data.getInt(ServerConstants.KEY_ID);
@@ -280,12 +233,6 @@ public class ServerDecoder {
         return ret;
     }
 
-    /**
-     * Decodes the incoming {@code Item} from the frontend,
-     * and updates the {@code Warehouse} in accordance.
-     *
-     * @param data the JSON data to decode.
-     */
     public static Item decodeItem(JSONObject data) throws JSONException, DataException {
         // Extract received properties
         int id = data.getInt(ServerConstants.KEY_ID);
@@ -307,21 +254,12 @@ public class ServerDecoder {
         return ret;
     }
 
-    /**
-     * Decodes the incoming {@code Order} from the frontend,
-     * and updates the {@code Warehouse} in accordance.
-     *
-     * @param data the JSON data to decode.
-     */
     public static Order decodeOrder(JSONObject data) throws JSONException, DataException {
         // Extract received properties
         int id = data.getInt(ServerConstants.KEY_ID);
-        int startTime = data.getInt(ServerConstants.KEY_ORDER_START_TIME);
         int type = data.getInt(ServerConstants.KEY_TYPE);
         int gateId = data.getInt(ServerConstants.KEY_GATE_ID);
-        int rackId = data.optInt(ServerConstants.KEY_RACK_ID);
         Gate gate = warehouse.getGateById(gateId);
-        Gate rack = warehouse.getGateById(rackId);
         JSONArray itemsJSON = data.getJSONArray(ServerConstants.KEY_ITEMS);
 
         //
@@ -333,21 +271,15 @@ public class ServerDecoder {
         if (warehouse.getOrderById(id) != null) {
             throw new DataException("Order with duplicate id: " + id + ".");
         }
-        if (startTime < 0) {
-            throw new DataException("Order-" + id + " with negative start time: " + startTime + ".");
-        }
         if (type != ServerConstants.TYPE_ORDER_COLLECT && type != ServerConstants.TYPE_ORDER_REFILL) {
             throw new DataException("Order-" + id + " with invalid type: " + type + ".");
         }
         if (gate == null) {
             throw new DataException("Order-" + id + " is assigned invalid gate with id: " + gateId + ".");
         }
-        if (rack == null && type == ServerConstants.TYPE_ORDER_REFILL) {
-            throw new DataException("Order-" + id + " is assigned invalid rack with id: " + gateId + ".");
-        }
 
         // Create order
-        Order ret = new Order(id, gate);
+        Order ret = new Order(id, decodeOrderType(type), gate);
 
         // Extract items
         decodeItemsList(itemsJSON, ret, "Order-" + id);
@@ -359,7 +291,11 @@ public class ServerDecoder {
             throw new DataException("Order-" + id + " has no assigned items.");
         }
         if (!ret.isFeasible()) {
-            throw new DataException("Order-" + id + " is currently infeasible due to item shortage.");
+            if (type == ServerConstants.TYPE_ORDER_COLLECT) {
+                throw new DataException("Order-" + id + " is currently infeasible due to item shortage.");
+            } else {
+                throw new DataException("Order-" + id + " is infeasible due to low storage space.");
+            }
         }
 
         // Add to the warehouse
@@ -367,13 +303,23 @@ public class ServerDecoder {
         return ret;
     }
 
-    /**
-     * Decodes the incoming array of items and adds them to the given container.
-     *
-     * @param data a JSON array of items to be decoded.
-     * @param cont the container to add the decode items into.
-     * @param name the name of the item container.
-     */
+    // ===============================================================================================
+    //
+    // Static Helper Methods
+    //
+
+    public static Direction decodeDirection(int dir) {
+        return Direction.values()[dir];
+    }
+
+    public static OrderType decodeOrderType(int type) {
+        if (type == ServerConstants.TYPE_ORDER_COLLECT) {
+            return OrderType.COLLECT;
+        } else {
+            return OrderType.REFILL;
+        }
+    }
+
     public static void decodeItemsList(JSONArray data, QuantityAddable<Item> cont, String name) throws JSONException, DataException {
         for (int i = 0; i < data.length(); ++i) {
             // Extract item properties

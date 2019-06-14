@@ -12,9 +12,8 @@ import java.util.*;
  * <p>
  * An order is defined by a list of needed {@link Item Items}, and a {@link Gate}
  * where the {@code Order} must be delivered.
- *
+ * <p>
  * TODO: enable re-filling orders
- * TODO: enable order scheduling
  *
  * @see Task
  * @see Item
@@ -23,8 +22,26 @@ import java.util.*;
 public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAssignable {
 
     //
+    // Enums
+    //
+
+    /**
+     * Different {@code Order} types.
+     */
+    public enum OrderType {
+        COLLECT,
+        REFILL
+    }
+
+    // ===============================================================================================
+    //
     // Member Variables
     //
+
+    /**
+     * The type of this {@code Order}.
+     */
+    private OrderType type;
 
     /**
      * The {@code Gate} where this {@code Order} must be delivered.
@@ -56,11 +73,23 @@ public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAs
     /**
      * Constructs a new {@code Order} object.
      *
-     * @param id the id of the {@code Order}.
+     * @param id           the id of the {@code Order}.
+     * @param type         the type of the {@code Order}.
+     * @param deliveryGate the delivery {@code Gate} of the {@code Order}.
      */
-    public Order(int id, Gate deliveryGate) {
+    public Order(int id, OrderType type, Gate deliveryGate) {
         super(id);
+        this.type = type;
         this.deliveryGate = deliveryGate;
+    }
+
+    /**
+     * Returns the type of this {@code Order}. Either collect or refill order type.
+     *
+     * @return the type of this {@code Order}.
+     */
+    public OrderType getType() {
+        return type;
     }
 
     /**
@@ -73,7 +102,9 @@ public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAs
     }
 
     /**
-     * Returns the total number of pending units needed by this {@code Order}.
+     * Returns the number of pending units of this {@code Order} to be delivered
+     * to the {@code Gate}. A negative number represents a refill order, where these units
+     * should be taken from the {@code Gate} to the racks of the {@code Warehouse}.
      * <p>
      * Pending units are these units that are not assigned to a {@code Task} yet.
      *
@@ -84,7 +115,18 @@ public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAs
     }
 
     /**
-     * Returns the pending quantity of the an {@code Item} needed by this {@code Order}.
+     * Checks whether this {@code Order} still has some pending items or not.
+     *
+     * @return {@code true} if this {@code Order} is still pending; {@code false} otherwise.
+     */
+    public boolean isPending() {
+        return (pendingUnits != 0);
+    }
+
+    /**
+     * Returns the pending quantity of the an {@code Item} of this {@code Order}.
+     * A negative quantity represents a refill order, where these quantity
+     * should be taken from the {@code Gate} to the racks of the {@code Warehouse}.
      *
      * @param item the needed {@code Item}.
      *
@@ -98,8 +140,8 @@ public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAs
     /**
      * Updates the quantity of an {@code Item} in this {@code Order}.
      * <p>
-     * This function is used to add extra units of the given {@code Item} if the given
-     * quantity is positive,
+     * This function is used to add extra units of the given {@code Item}
+     * in the {@code Order} if the given quantity is positive,
      * and used to remove existing units if the given quantity is negative.
      * <p>
      * This function should be called with positive quantities only during
@@ -111,6 +153,10 @@ public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAs
      */
     @Override
     public void add(Item item, int quantity) {
+        if (type == OrderType.REFILL) {
+            quantity -= quantity;
+        }
+
         QuantityAddable.update(items, item, quantity);
         pendingUnits += quantity;
     }
@@ -132,6 +178,10 @@ public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAs
      * Checks whether this {@code Order} is feasible of being fulfilled regarding
      * its needed items quantities.
      *
+     * TODO: check agent to rack reach-ability
+     * TODO: check agents availability
+     * TODO: check REFILL order feasibility
+     *
      * @return {@code true} if this {@code Order} is feasible; {@code false} otherwise.
      */
     public boolean isFeasible() {
@@ -151,15 +201,6 @@ public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAs
         }
 
         return true;
-    }
-
-    /**
-     * Checks whether this {@code Order} still has some pending items or not.
-     *
-     * @return {@code true} if this {@code Order} is still pending; {@code false} otherwise.
-     */
-    public boolean isPending() {
-        return (pendingUnits > 0);
     }
 
     /**

@@ -21,6 +21,8 @@ public class Dispatcher {
      * Dispatches the given {@code Order} into a set of specific tasks assigned
      * to a set of agents.
      *
+     * TODO: support refill orders
+     *
      * @param order       the {@code Order} needed to be dispatched.
      * @param readyAgents the set of ready agents.
      */

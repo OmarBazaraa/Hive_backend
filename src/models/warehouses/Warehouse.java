@@ -93,7 +93,9 @@ public class Warehouse extends AbstractWarehouse {
         // Activate the task
         task.activate();
 
+        //
         // Update agents lists
+        //
         Agent agent = task.getAgent();
 
         if (readyAgents.contains(agent)) {
@@ -113,8 +115,6 @@ public class Warehouse extends AbstractWarehouse {
 
     /**
      * Dispatches the current pending orders of this {@code Warehouse}.
-     *
-     * TODO: check agent to rack reach-ability
      */
     @Override
     protected void dispatchPendingOrders() {

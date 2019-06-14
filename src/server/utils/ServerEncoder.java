@@ -21,7 +21,7 @@ import java.util.Map;
 public class ServerEncoder {
 
     //
-    // Static Encoding Methods
+    // Static Main Methods
     //
 
     public static JSONObject encodeUpdateMsg(long time, JSONArray actions, JSONArray logs, JSONArray statistics) {
@@ -36,7 +36,7 @@ public class ServerEncoder {
     public static JSONObject encodeAgentAction(Agent agent, AgentAction action) {
         JSONObject data = new JSONObject();
         data.put(ServerConstants.KEY_ID, agent.getId());
-        return encodeMsg(agentActionToType(action), data);
+        return encodeMsg(encodeAgentAction(action), data);
     }
 
     public static JSONObject encodeTaskAssignedLog(Task task) {
@@ -97,7 +97,7 @@ public class ServerEncoder {
     // Static Helper Methods
     //
 
-    public static int agentActionToType(AgentAction action) {
+    public static int encodeAgentAction(AgentAction action) {
         switch (action) {
             case MOVE:
                 return ServerConstants.TYPE_AGENT_MOVE;

@@ -173,9 +173,12 @@ public class Rack extends Facility implements QuantityAddable<Item>, QuantityRes
     /**
      * Reserves some units specified by the given {@code QuantityAddable} container.
      * <p>
-     * This functions removes some items from the rack without actually reducing
-     * the weight of this {@code Rack}.
-     * The items are physically removed when the reservation is confirmed.
+     * This functions removes/adds some items from/to the {@code Rack} without
+     * actually changing its weight.
+     * The items are physically removed/added when the reservation is confirmed.
+     * <p>
+     * Positive quantities means the items are to be taken from the {@code Rack}.
+     * While negative quantities means the items are to be added into the {@code Rack}.
      * <p>
      * This function should only be called once per {@code Task} activation.
      *
@@ -197,10 +200,13 @@ public class Rack extends Facility implements QuantityAddable<Item>, QuantityRes
 
     /**
      * Confirms the previously assigned reservations specified by the given
-     * {@code QuantityAddable} container, and removes those reserved units from this object.
+     * {@code QuantityAddable} container.
      * <p>
-     * This function physically removes some of the reserved items and reduces the weight
-     * of this {@code Rack}.
+     * This function physically removes/adds some of the reserved items and
+     * change the weight of the {@code Rack} in accordance.
+     * <p>
+     * Positive quantities means the items are to be taken from the {@code Rack}.
+     * While negative quantities means the items are to be added into the {@code Rack}.
      * <p>
      * This function should be called after reserving a same or a super container first;
      * otherwise un-expected behaviour could occur.

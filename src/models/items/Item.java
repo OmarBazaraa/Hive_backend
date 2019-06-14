@@ -175,7 +175,7 @@ public class Item extends Entity implements QuantityAddable<Rack>, QuantityReser
 
     /**
      * Confirms the previously assigned reservations specified by the given
-     * {@code QuantityAddable} container, and removes those reserved units from this object.
+     * {@code QuantityAddable} container.
      * <p>
      * This function should be called after reserving a same or a super container first;
      * otherwise un-expected behaviour could occur.
