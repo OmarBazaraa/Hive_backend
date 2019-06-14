@@ -27,11 +27,6 @@ public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAs
     //
 
     /**
-     * The time after which this {@code Order} should begin being scheduled.
-     */
-    private long startTime;
-
-    /**
      * The {@code Gate} where this {@code Order} must be delivered.
      */
     private Gate deliveryGate;
@@ -63,28 +58,9 @@ public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAs
      *
      * @param id the id of the {@code Order}.
      */
-    public Order(int id, long startTime, Gate deliveryGate) {
+    public Order(int id, Gate deliveryGate) {
         super(id);
-        this.startTime = startTime;
         this.deliveryGate = deliveryGate;
-    }
-
-    /**
-     * Returns the time after which this {@code Order} should begin being scheduled.
-     *
-     * @return the start time of this {@code Order}.
-     */
-    public long getStartTime() {
-        return startTime;
-    }
-
-    /**
-     * Sets the time after which this {@code Order} should begin being scheduled.
-     *
-     * @param time the start time of this {@code Order}.
-     */
-    public void setStartTime(long time) {
-        startTime = time;
     }
 
     /**
@@ -94,15 +70,6 @@ public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAs
      */
     public Gate getDeliveryGate() {
         return deliveryGate;
-    }
-
-    /**
-     * Sets the {@code Gate} where this {@code Order} must be delivered.
-     *
-     * @param gate the delivery {@code Gate} of this {@code Order}.
-     */
-    public void setDeliveryGate(Gate gate) {
-        deliveryGate = gate;
     }
 
     /**

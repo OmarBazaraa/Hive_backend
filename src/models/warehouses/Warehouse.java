@@ -133,10 +133,8 @@ public class Warehouse extends AbstractWarehouse {
             // Get the current order
             Order order = pendingOrders.remove();
 
-            // Try dispatching the current order if its time comes
-            if (time >= order.getStartTime()) {
-                Dispatcher.dispatch(order, readyAgents);
-            }
+            // Try dispatching the current order
+            Dispatcher.dispatch(order, readyAgents);
 
             // Re-add the order to the end of the queue if still pending
             if (order.isPending()) {

@@ -24,6 +24,7 @@ public class Main {
             run();
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
+            ex.printStackTrace();
         }
     }
 

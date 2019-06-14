@@ -347,7 +347,7 @@ public class ServerDecoder {
         }
 
         // Create order
-        Order ret = new Order(id, startTime, gate);
+        Order ret = new Order(id, gate);
 
         // Extract items
         decodeItemsList(itemsJSON, ret, "Order-" + id);
