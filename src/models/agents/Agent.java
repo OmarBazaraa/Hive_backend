@@ -93,7 +93,7 @@ public class Agent extends AbstractAgent {
      */
     public void plan(Facility dst) {
         // Return if already planned
-        if (target.equals(dst)) {
+        if (target != null && target.equals(dst)) {
             return;
         }
 

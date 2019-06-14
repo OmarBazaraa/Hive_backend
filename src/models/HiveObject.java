@@ -101,7 +101,7 @@ abstract public class HiveObject extends Entity {
      * of the {@code Warehouse}.
      *
      * @param row the row position of this {@code HiveObject}.
-     * @param col the column position of this {@code HiveObject}t.
+     * @param col the column position of this {@code HiveObject}.
      */
     public void setPosition(int row, int col) {
         this.row = row;

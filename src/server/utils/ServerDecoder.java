@@ -39,9 +39,7 @@ public class ServerDecoder {
 
     public static void decodeInitConfig(JSONObject data) throws JSONException, DataException {
         int mode = data.getInt(ServerConstants.KEY_MODE);
-        // TODO: remove extra stringify from the frontend and update this line
-        // JSONObject stateJSON = data.getJSONObject(ServerConstants.KEY_STATE);
-        JSONObject stateJSON = new JSONObject(data.getString(ServerConstants.KEY_STATE));
+        JSONObject stateJSON = data.getJSONObject(ServerConstants.KEY_STATE);
         JSONObject mapJSON = stateJSON.getJSONObject(ServerConstants.KEY_MAP);
         JSONArray itemsJSON = stateJSON.getJSONArray(ServerConstants.KEY_ITEMS);
         decodeWarehouseItems(itemsJSON);
@@ -125,8 +123,8 @@ public class ServerDecoder {
         int id = data.getInt(ServerConstants.KEY_ID);
         int cap = data.getInt(ServerConstants.KEY_AGENT_LOAD_CAPACITY);
         int dir = data.getInt(ServerConstants.KEY_AGENT_DIRECTION);
-        int port = data.getInt(ServerConstants.KEY_AGENT_PORT);
         String ip = data.getString(ServerConstants.KEY_AGENT_IP);
+        String port = data.getString(ServerConstants.KEY_AGENT_PORT);
 
         //
         // Checks

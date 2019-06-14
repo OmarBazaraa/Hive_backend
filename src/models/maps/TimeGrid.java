@@ -58,7 +58,6 @@ public class TimeGrid extends Grid<TimeCell> {
         return getAgentAt(pos.row, pos.col, time);
     }
 
-
     /**
      * Sets the {@code Agent} passing though a {@code TimeCell} at the given time.
      *

@@ -55,7 +55,7 @@ abstract public class AbstractAgent extends HiveObject implements TaskAssignable
     /**
      * The port number of this {@code Agent} needed for communication.
      */
-    protected int port;
+    protected String port;
 
     /**
      * The last time this {@code Agent} has performed an action.
@@ -153,7 +153,7 @@ abstract public class AbstractAgent extends HiveObject implements TaskAssignable
      * @return the port number of this {@code Agent}.
      */
     public String getPortNumber() {
-        return ip;
+        return port;
     }
 
     /**
@@ -161,7 +161,7 @@ abstract public class AbstractAgent extends HiveObject implements TaskAssignable
      *
      * @param portNum the new port number to set.
      */
-    public void setPortNumber(int portNum) {
+    public void setPortNumber(String portNum) {
         port = portNum;
     }
 
