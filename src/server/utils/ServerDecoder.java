@@ -44,7 +44,9 @@ public class ServerDecoder {
      */
     public static void decodeInitConfig(JSONObject data) throws JSONException, DataException {
         int mode = data.getInt(ServerConstants.KEY_MODE);
-        JSONObject stateJSON = data.getJSONObject(ServerConstants.KEY_STATE);
+        // TODO: remove extra stringify from the frontend and update this line
+        // JSONObject stateJSON = data.getJSONObject(ServerConstants.KEY_STATE);
+        JSONObject stateJSON = new JSONObject(data.getString(ServerConstants.KEY_STATE));
         JSONObject mapJSON = stateJSON.getJSONObject(ServerConstants.KEY_MAP);
         JSONArray itemsJSON = stateJSON.getJSONArray(ServerConstants.KEY_ITEMS);
         decodeWarehouseItems(itemsJSON);
@@ -87,7 +89,7 @@ public class ServerDecoder {
         for (int i = 0; i < h; ++i) {
             JSONArray rowJSON = gridJSON.getJSONArray(i);
             for (int j = 0; j < w; ++j) {
-                grid[i][j] = decodeCell(rowJSON.getJSONObject(j), i, j);
+                grid[i][j] = decodeMapCell(rowJSON.getJSONObject(j), i, j);
             }
         }
 
@@ -101,30 +103,30 @@ public class ServerDecoder {
      *
      * @param data the JSON data to decode.
      */
-    public static MapCell decodeCell(JSONObject data, int row, int col) throws JSONException, DataException {
+    public static MapCell decodeMapCell(JSONObject data, int row, int col) throws JSONException, DataException {
         MapCell ret = new MapCell();
 
-        if (data.has(ServerConstants.KEY_AGENT)) {
-            JSONObject agentJSON = data.getJSONObject(ServerConstants.KEY_AGENT);
-            ret.setAgent(decodeAgent(agentJSON, row, col));
-        }
+        JSONArray objects = data.getJSONArray(ServerConstants.KEY_OBJECTS);
 
-        if (data.has(ServerConstants.KEY_FACILITY)) {
-            JSONObject facilityJSON = data.getJSONObject(ServerConstants.KEY_FACILITY);
-            int type = data.getInt(ServerConstants.KEY_TYPE);
+        for (int i = 0; i < objects.length(); ++i) {
+            JSONObject obj = objects.getJSONObject(i);
+            int type = obj.getInt(ServerConstants.KEY_TYPE);
 
             switch (type) {
+                case ServerConstants.TYPE_CELL_AGENT:
+                    ret.setAgent(decodeAgent(obj, row, col));
+                    break;
                 case ServerConstants.TYPE_CELL_OBSTACLE:
                     ret.setFacility(CellType.OBSTACLE, null);
                     break;
                 case ServerConstants.TYPE_CELL_RACK:
-                    ret.setFacility(CellType.RACK, decodeRack(facilityJSON, row, col));
+                    ret.setFacility(CellType.RACK, decodeRack(obj, row, col));
                     break;
                 case ServerConstants.TYPE_CELL_GATE:
-                    ret.setFacility(CellType.GATE, decodeGate(facilityJSON, row, col));
+                    ret.setFacility(CellType.GATE, decodeGate(obj, row, col));
                     break;
                 case ServerConstants.TYPE_CELL_STATION:
-                    ret.setFacility(CellType.STATION, decodeStation(facilityJSON, row, col));
+                    ret.setFacility(CellType.STATION, decodeStation(obj, row, col));
                     break;
                 default:
                     throw new DataException("Cell (" + row + ", " + col + ") with invalid facility type: " + type + ".");
@@ -357,7 +359,7 @@ public class ServerDecoder {
             throw new DataException("Order-" + id + " has no assigned items.");
         }
         if (!ret.isFeasible()) {
-            throw new DataException("Order-" + id + " is currently infeasible due to items shortage.");
+            throw new DataException("Order-" + id + " is currently infeasible due to item shortage.");
         }
 
         // Add to the warehouse

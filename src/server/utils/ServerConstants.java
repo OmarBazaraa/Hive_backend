@@ -23,7 +23,7 @@ public class ServerConstants {
 
     // WebSocket server details
     public static final String SERVER_PATH = "/";
-    public static final int SERVER_PORT = 8080;
+    public static final int SERVER_PORT = 1337;
 
     //
     // Communication messages keys
@@ -54,6 +54,8 @@ public class ServerConstants {
     public static final String KEY_ROW = "row";
     public static final String KEY_COL = "col";
 
+    public static final String KEY_OBJECTS = "objects";
+
     public static final String KEY_FACILITY = "facility";
 
     public static final String KEY_RACK = "rack";
@@ -61,7 +63,7 @@ public class ServerConstants {
     public static final String KEY_RACK_ROW = "rack_row";
     public static final String KEY_RACK_COL = "rack_col";
     public static final String KEY_RACK_CAPACITY = "capacity";
-    public static final String KEY_RACK_CONTAINER_WEIGHT = "container_weight";
+    public static final String KEY_RACK_CONTAINER_WEIGHT = "weight";
 
     public static final String KEY_GATE = "gate";
     public static final String KEY_GATE_ID = "gate_id";

@@ -118,6 +118,11 @@ public class Warehouse extends AbstractWarehouse {
      */
     @Override
     protected void dispatchPendingOrders() {
+        // Skip if no pending orders
+        if (pendingOrders.isEmpty()) {
+            return;
+        }
+
         // Get the initial size of the queue
         int size = pendingOrders.size();
 
@@ -145,6 +150,11 @@ public class Warehouse extends AbstractWarehouse {
      */
     @Override
     protected void advanceActiveAgents() {
+        // Skip if no active agents
+        if (activeAgents.isEmpty()) {
+            return;
+        }
+
         // Get the initial size of the queue
         int size = activeAgents.size();
 

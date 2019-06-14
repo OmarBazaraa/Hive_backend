@@ -149,11 +149,23 @@ public class Server {
                 process();
             } catch (JSONException ex) {
                 sendAckMsg(ServerConstants.TYPE_MSG, ServerConstants.TYPE_ERROR, "Invalid message format.");
+
+                // DEBUG
+                System.out.println(ex.getMessage());
+                ex.printStackTrace();
             } catch (DataException ex) {
                 sendAckMsg(ServerConstants.TYPE_MSG, ServerConstants.TYPE_ERROR, ex.getMessage());
+
+                // DEBUG
+                System.out.println(ex.getMessage());
+                ex.printStackTrace();
             } catch (Exception ex) {
                 sendAckMsg(ServerConstants.TYPE_MSG, ServerConstants.TYPE_ERROR, "Unknown error.");
                 currentState = ServerStates.IDLE;
+
+                // DEBUG
+                System.out.println(ex.getMessage());
+                ex.printStackTrace();
             }
         }
     }
@@ -171,6 +183,10 @@ public class Server {
      * @param msg the message to sent.
      */
     private void send(JSONObject msg) throws Exception {
+        // DEBUG
+        System.out.println("Sending ...");
+        System.out.println(msg.toString(4));
+
         session.getRemote().sendString(msg.toString());
     }
 
@@ -236,6 +252,9 @@ public class Server {
             ServerDecoder.decodeInitConfig(data);
             warehouse.init();
 
+            // DEBUG
+            System.out.println(warehouse);
+
             // Update server state and send ACK if no errors
             currentState = ServerStates.RUNNING;
             sendAckMsg(ServerConstants.TYPE_ACK_START, ServerConstants.TYPE_OK, "");
@@ -246,8 +265,16 @@ public class Server {
             sendUpdateMsg();
         } catch (JSONException ex) {
             sendAckMsg(ServerConstants.TYPE_ACK_START, ServerConstants.TYPE_ERROR, "Invalid START message format.");
+
+            // DEBUG
+            System.out.println(ex.getMessage());
+            ex.printStackTrace();
         } catch (DataException ex) {
             sendAckMsg(ServerConstants.TYPE_ACK_START, ServerConstants.TYPE_ERROR, ex.getMessage());
+
+            // DEBUG
+            System.out.println(ex.getMessage());
+            ex.printStackTrace();
         }
     }
 
@@ -326,12 +353,24 @@ public class Server {
         }
 
         try {
-            ServerDecoder.decodeOrder(data);
+            Order order = ServerDecoder.decodeOrder(data);
             sendAckMsg(ServerConstants.TYPE_ACK_ORDER, ServerConstants.TYPE_OK, "");
+
+            // DEBUG
+            System.out.println("Order received:");
+            System.out.println("    > " + order);
         } catch (JSONException ex) {
             sendAckMsg(ServerConstants.TYPE_ACK_START, ServerConstants.TYPE_ERROR, "Invalid ORDER message format.");
+
+            // DEBUG
+            System.out.println(ex.getMessage());
+            ex.printStackTrace();
         } catch (DataException ex) {
             sendAckMsg(ServerConstants.TYPE_ACK_ORDER, ServerConstants.TYPE_ERROR, ex.getMessage());
+
+            // DEBUG
+            System.out.println(ex.getMessage());
+            ex.printStackTrace();
         }
     }
 
