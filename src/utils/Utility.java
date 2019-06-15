@@ -3,12 +3,57 @@ package utils;
 import models.maps.utils.Position;
 import utils.Constants.*;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+
 
 /**
  * This {@code Utility} class is a collection of a static utility functions
  * to be used across the entire project modules.
  */
 public class Utility {
+
+    /**
+     * Reads the given file and returns its content.
+     *
+     * @param path the path of the file to read.
+     *
+     * @return the content of the file.
+     */
+    public static String readFile(String path) throws IOException {
+        BufferedReader reader = new BufferedReader(new FileReader(path));
+
+        String line;
+        StringBuilder builder = new StringBuilder();
+
+        while ((line = reader.readLine()) != null) {
+            builder.append(line);
+        }
+
+        return builder.toString();
+    }
+
+    /**
+     * Converts the given {@code Direction} into its visual representative character.
+     *
+     * @param dir the {@code Direction} to convert.
+     *
+     * @return the symbol representing the given {@code Direction}.
+     */
+    public static char dirToShape(Direction dir) {
+        switch (dir) {
+            case RIGHT:
+                return Constants.SHAPE_DIR_RIGHT;
+            case UP:
+                return Constants.SHAPE_DIR_UP;
+            case LEFT:
+                return Constants.SHAPE_DIR_LEFT;
+            case DOWN:
+                return Constants.SHAPE_DIR_DOWN;
+        }
+        return Constants.SHAPE_DIR_UNKNOWN;
+    }
 
     /**
      * Calculates the remainder of {@code a} after dividing by {@code m}.
