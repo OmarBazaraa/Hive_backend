@@ -107,7 +107,7 @@ public class ServerDecoder {
                     ret.setFacility(CellType.STATION, decodeStation(obj, row, col));
                     break;
                 default:
-                    throw new DataException("Cell (" + row + ", " + col + ") with invalid facility type: " + type + ".");
+                    throw new DataException("Cell (" + row + ", " + col + ") with invalid facilities type: " + type + ".");
             }
         }
 
@@ -115,7 +115,7 @@ public class ServerDecoder {
         // Checks
         //
         if (ret.hasAgent() && ret.hasFacility()) {
-            throw new DataException("Cell (" + row + ", " + col + ") has both agent and facility. Expecting only one.");
+            throw new DataException("Cell (" + row + ", " + col + ") has both agent and facilities. Expecting only one.");
         }
 
         return ret;

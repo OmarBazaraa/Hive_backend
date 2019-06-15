@@ -101,7 +101,7 @@ public class MapCell extends Cell {
     /**
      * Sets the existing {@code Facility} in this {@code MapCell}.
      * <p>
-     * Note that the cell type and the facility object type should be consistent in the following manner:
+     * Note that the cell type and the facilities object type should be consistent in the following manner:
      * <ul>
      * <li>{@link CellType#EMPTY} type with {@code null} object.</li>
      * <li>{@link CellType#OBSTACLE} type with {@code null} object.</li>

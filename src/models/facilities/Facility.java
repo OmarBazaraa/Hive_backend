@@ -11,12 +11,12 @@ import models.maps.MapGrid;
 
 
 /**
- * This {@code Facility} class is the base class of all the facility components
+ * This {@code Facility} class is the base class of all the facilities components
  * in our Hive Warehouse System.
  * <p>
- * A facility component is an object in the {@link models.warehouses.Warehouse Warehouse} grid
+ * A facilities component is an object in the {@link models.warehouses.Warehouse Warehouse} grid
  * that provide services and functions to either an {@link models.agents.Agent Agent} or to a client.
- * A facility component is typically a static object with fixed location in the warehouse's grid.
+ * A facilities component is typically a static object with fixed location in the warehouse's grid.
  *
  * @see models.HiveObject HiveObject
  * @see models.agents.Agent Agent

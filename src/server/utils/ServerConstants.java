@@ -56,7 +56,7 @@ public class ServerConstants {
 
     public static final String KEY_OBJECTS = "objects";
 
-    public static final String KEY_FACILITY = "facility";
+    public static final String KEY_FACILITY = "facilities";
 
     public static final String KEY_RACK = "rack";
     public static final String KEY_RACK_ID = "rack_id";
