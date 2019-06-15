@@ -1,6 +1,6 @@
 package models.agents;
 
-import algorithms.Planner;
+import algorithms.planner.Planner;
 
 import models.facilities.Facility;
 import models.facilities.Rack;

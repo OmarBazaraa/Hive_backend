@@ -1,8 +1,7 @@
-package algorithms;
+package algorithms.planner;
 
 import models.maps.utils.Position;
 
-import utils.Constants;
 import utils.Constants.*;
 import utils.Utility;
 

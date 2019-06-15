@@ -1,4 +1,4 @@
-package algorithms;
+package algorithms.planner;
 
 import models.agents.Agent;
 import models.maps.*;

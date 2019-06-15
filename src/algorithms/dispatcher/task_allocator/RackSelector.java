@@ -1,4 +1,4 @@
-package algorithms.TaskAllocator;
+package algorithms.dispatcher.task_allocator;
 
 import models.facilities.Rack;
 import models.items.Item;

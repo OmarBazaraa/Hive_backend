@@ -1,6 +1,6 @@
 package models.warehouses;
 
-import algorithms.Dispatcher;
+import algorithms.dispatcher.Dispatcher;
 import models.agents.Agent;
 import models.facilities.Gate;
 import models.facilities.Rack;
@@ -8,7 +8,6 @@ import models.facilities.Station;
 import models.maps.TimeGrid;
 import models.tasks.Order;
 import models.tasks.Task;
-import server.Server;
 
 import java.util.*;
 

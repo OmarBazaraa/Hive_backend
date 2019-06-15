@@ -1,6 +1,6 @@
 package models.facilities;
 
-import algorithms.Planner;
+import algorithms.planner.Planner;
 
 import models.HiveObject;
 import models.agents.Agent;
