@@ -119,12 +119,27 @@ public class Server {
     }
 
     /**
-     * Sets the frontend {@code Session}.
+     * Opens a {@code Session} with the frontend.
      *
-     * @param sess the frontend {@code Session} to set.
+     * TODO: force only one the frontend client
+     *
+     * @param sess the frontend {@code Session} to open.
      */
-    private synchronized void setSession(Session sess) {
+    private synchronized void openSession(Session sess) {
         session = sess;
+        currentState = ServerStates.IDLE;
+    }
+
+    /**
+     * Closes the {@code Session} with the frontend.
+     *
+     * TODO: force only one the frontend client
+     *
+     * @param sess the frontend {@code Session} to close.
+     */
+    private synchronized void closeSession(Session sess) {
+        session = null;
+        currentState = ServerStates.IDLE;
     }
 
     /**
@@ -180,9 +195,23 @@ public class Server {
         if (receivedAck) {
             clearUpdateStates();
 
-            if (warehouse.run()) {
-                sendUpdateMsg();        // Send updates only in the case of actual change in the warehouse
-                receivedAck = false;    // Consume the ACK
+            try {
+                if (warehouse.run()) {
+                    sendUpdateMsg();        // Send updates only in the case of actual change in the warehouse
+                    receivedAck = false;    // Consume the ACK
+                }
+            }
+            // Handle communication exceptions (probably the frontend is down)
+            catch (IOException ex) {
+                currentState = ServerStates.IDLE;
+                System.out.println(ex.getMessage());
+            }
+            // Handle internal server exceptions
+            catch (Exception ex) {
+                sendAckMsg(ServerConstants.TYPE_MSG, ServerConstants.TYPE_ERROR, "Internal server error.");
+                currentState = ServerStates.IDLE;
+                System.out.println(ex.getMessage());
+                ex.printStackTrace();
             }
         }
     }
@@ -202,16 +231,27 @@ public class Server {
     private synchronized void process(String msg) throws Exception {
         try {
             process(new JSONObject(msg));
-        } catch (JSONException ex) {
+        }
+        // Handle invalid message format
+        catch (JSONException ex) {
             sendAckMsg(ServerConstants.TYPE_MSG, ServerConstants.TYPE_ERROR, "Invalid message format.");
             System.out.println(ex.getMessage());
             ex.printStackTrace();
-        } catch (DataException ex) {
+        }
+        // Handle data inconsistency exceptions
+        catch (DataException ex) {
             sendAckMsg(ServerConstants.TYPE_MSG, ServerConstants.TYPE_ERROR, ex.getMessage());
             System.out.println(ex.getMessage());
             ex.printStackTrace();
-        } catch (Exception ex) {
-            sendAckMsg(ServerConstants.TYPE_MSG, ServerConstants.TYPE_ERROR, "Unknown error.");
+        }
+        // Handle communication exceptions (probably the frontend is down)
+        catch (IOException ex) {
+            System.out.println(ex.getMessage());
+            currentState = ServerStates.IDLE;
+        }
+        // Handle internal server exceptions
+        catch (Exception ex) {
+            sendAckMsg(ServerConstants.TYPE_MSG, ServerConstants.TYPE_ERROR, "Internal server error.");
             currentState = ServerStates.IDLE;
             System.out.println(ex.getMessage());
             ex.printStackTrace();
@@ -359,8 +399,12 @@ public class Server {
      * @param data the received JSON data part of the message.
      */
     private synchronized void processUpdateAckMsg(JSONObject data) throws Exception {
-        if (currentState != ServerStates.RUNNING) {
-            throw new DataException("Received ACK message while the server is not in RUNNING state.");
+        if (currentState == ServerStates.IDLE) {
+            throw new DataException("Received ACK message while the server is IDLE state.");
+        }
+
+        if (receivedAck) {
+            throw new DataException("Received multiple ACK messages.");
         }
 
         receivedAck = true;
@@ -494,13 +538,13 @@ public class Server {
 
         @OnWebSocketConnect
         public void onConnect(Session client) throws Exception {
-            // TODO: force only one client, the frontend
-            setSession(client);
+            openSession(client);
             System.out.println("Frontend connected!");
         }
 
         @OnWebSocketClose
         public void onClose(Session client, int statusCode, String reason) {
+            closeSession(client);
             System.out.println("Frontend connection closed with status code: " + statusCode);
         }
 
