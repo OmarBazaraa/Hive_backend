@@ -1,0 +1,229 @@
+{
+  "map": {
+    "height": 5,
+    "width": 10,
+    "grid": [
+      [
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        }
+      ],
+      [
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        }
+      ],
+      [
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": [
+            {
+              "type": 1,
+              "id": 1,
+              "color": "#FF0000",
+              "direction": 0,
+              "load_cap": 100,
+              "ip": "",
+              "port": "",
+              "deactivated": false
+            }
+          ]
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": [
+            {
+              "type": 2,
+              "id": 1,
+              "capacity": 250,
+              "weight": 50,
+              "items": [
+                {
+                  "id": 1,
+                  "quantity": 1
+                }
+              ],
+              "color": "#bababa"
+            }
+          ]
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": [
+            {
+              "type": 0,
+              "id": 1,
+              "color": "#bababa"
+            }
+          ]
+        },
+        {
+          "objects": []
+        }
+      ],
+      [
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        }
+      ],
+      [
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        }
+      ]
+    ],
+    "objects": {
+      "1,1": [
+        2,
+        2
+      ],
+      "1,0": [
+        2,
+        8
+      ],
+      "1,2": [
+        2,
+        5
+      ]
+    }
+  },
+  "items": [
+    {
+      "id": 1,
+      "weight": 1,
+      "name": "1"
+    }
+  ],
+  "nextIDs": {
+    "gate": 2,
+    "robot": 2,
+    "rack": 2,
+    "station": 1,
+    "obstacle": 1,
+    "item": 2
+  },
+  "timestep": 0
+}
