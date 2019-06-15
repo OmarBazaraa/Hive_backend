@@ -51,13 +51,13 @@ public class Gate extends Facility {
      */
     @Override
     public void bind(Agent agent) {
-        Server.getInstance().enqueueAgentAction(boundAgent, AgentAction.BIND);
-
+        super.bind(agent);
         // TODO: lock the agent
         Task task = agent.getActiveTask();
         Rack rack = task.getRack();
         rack.confirmReservation(task);
-        super.bind(agent);
+
+        Server.getInstance().enqueueAgentAction(boundAgent, AgentAction.BIND);
     }
 
     /**
@@ -79,9 +79,8 @@ public class Gate extends Facility {
      */
     @Override
     public void unbind() {
-        Server.getInstance().enqueueAgentAction(boundAgent, AgentAction.UNBIND);
-
         // TODO: unlock the bound agent
+        Server.getInstance().enqueueAgentAction(boundAgent, AgentAction.UNBIND);
         super.unbind();
     }
 

@@ -52,8 +52,8 @@ public class Station extends Facility {
      */
     @Override
     public void bind(Agent agent) {
-        Server.getInstance().enqueueAgentAction(boundAgent, AgentAction.BIND);
         super.bind(agent);
+        Server.getInstance().enqueueAgentAction(boundAgent, AgentAction.BIND);
     }
 
     /**

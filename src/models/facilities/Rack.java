@@ -243,8 +243,8 @@ public class Rack extends Facility implements QuantityAddable<Item>, QuantityRes
      */
     @Override
     public void bind(Agent agent) {
-        agent.loadRack(this);
         super.bind(agent);
+        agent.loadRack(this);
     }
 
     /**
