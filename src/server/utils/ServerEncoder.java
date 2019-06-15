@@ -41,9 +41,10 @@ public class ServerEncoder {
 
     public static JSONObject encodeTaskAssignedLog(Task task) {
         JSONObject data = new JSONObject();
+        data.put(ServerConstants.KEY_ORDER_ID, task.getOrder().getId());
         data.put(ServerConstants.KEY_AGENT_ID, task.getAgent().getId());
         data.put(ServerConstants.KEY_RACK_ID, task.getRack().getId());
-        return encodeMsg(ServerConstants.TYPE_TASK_ASSIGNED, data);
+        return encodeMsg(ServerConstants.TYPE_LOG_TASK_ASSIGNED, data);
     }
 
     public static JSONObject encodeTaskCompletedLog(Task task) {
@@ -52,16 +53,17 @@ public class ServerEncoder {
         for (Map.Entry<Item, Integer> pair : task) {
             JSONObject item = new JSONObject();
             item.put(ServerConstants.KEY_ID, pair.getKey().getId());
-            item.put(ServerConstants.KEY_ITEM_QUANTITY, pair.getValue());
+            item.put(ServerConstants.KEY_ITEM_QUANTITY, -pair.getValue());
             items.put(item);
         }
 
         JSONObject data = new JSONObject();
         data.put(ServerConstants.KEY_ORDER_ID, task.getOrder().getId());
+        data.put(ServerConstants.KEY_AGENT_ID, task.getAgent().getId());
         data.put(ServerConstants.KEY_RACK_ID, task.getRack().getId());
         data.put(ServerConstants.KEY_ITEMS, items);
 
-        return encodeMsg(ServerConstants.TYPE_TASK_COMPLETED, data);
+        return encodeMsg(ServerConstants.TYPE_LOG_TASK_COMPLETED, data);
     }
 
     public static JSONObject encodeOrderLog(int type, Order order) {

@@ -145,10 +145,10 @@ public class ServerConstants {
     public static final int TYPE_AGENT_UNBIND = 7;
 
     // Log types
-    public static final int TYPE_TASK_ASSIGNED = 0;
-    public static final int TYPE_TASK_COMPLETED = 1;
-    public static final int TYPE_ORDER_ISSUED = 2;
-    public static final int TYPE_ORDER_FULFILLED = 3;
+    public static final int TYPE_LOG_TASK_ASSIGNED = 0;
+    public static final int TYPE_LOG_TASK_COMPLETED = 1;
+    public static final int TYPE_LOG_ORDER_FULFILLED = 2;
+    public static final int TYPE_LOG_ORDER_ISSUED = 3;
 
     // Statistics types
     // TODO

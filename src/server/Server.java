@@ -508,7 +508,7 @@ public class Server {
      * @param order the newly issued {@code Order}.
      */
     public synchronized void enqueueOrderIssuedLog(Order order) {
-        logs.put(ServerEncoder.encodeOrderLog(ServerConstants.TYPE_ORDER_ISSUED, order));
+        logs.put(ServerEncoder.encodeOrderLog(ServerConstants.TYPE_LOG_ORDER_ISSUED, order));
     }
 
     /**
@@ -517,7 +517,7 @@ public class Server {
      * @param order the newly issued {@code Order}.
      */
     public synchronized void enqueueOrderFulfilledLog(Order order) {
-        logs.put(ServerEncoder.encodeOrderLog(ServerConstants.TYPE_ORDER_FULFILLED, order));
+        logs.put(ServerEncoder.encodeOrderLog(ServerConstants.TYPE_LOG_ORDER_FULFILLED, order));
     }
 
     /**

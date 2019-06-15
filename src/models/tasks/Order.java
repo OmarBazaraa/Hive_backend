@@ -3,6 +3,8 @@ package models.tasks;
 import models.facilities.Gate;
 import models.items.Item;
 import models.items.QuantityAddable;
+import models.warehouses.Warehouse;
+import server.Server;
 
 import java.util.*;
 
@@ -12,8 +14,6 @@ import java.util.*;
  * <p>
  * An order is defined by a list of needed {@link Item Items}, and a {@link Gate}
  * where the {@code Order} must be delivered.
- * <p>
- * TODO: enable re-filling orders
  *
  * @see Task
  * @see Item
@@ -65,6 +65,21 @@ public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAs
      */
     private Set<Task> subTasks = new HashSet<>();
 
+    /**
+     * The time when this {@code Order} has been received.
+     */
+    private long timeReceived = -1;
+
+    /**
+     * The time when this {@code Order} has been issued.
+     */
+    private long timeIssued = -1;
+
+    /**
+     * The time when this {@code Order} has been completed.
+     */
+    private long timeCompleted = -1;
+
     // ===============================================================================================
     //
     // Member Methods
@@ -81,6 +96,7 @@ public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAs
         super(id);
         this.type = type;
         this.deliveryGate = deliveryGate;
+        this.timeReceived = Warehouse.getInstance().getTime();
     }
 
     /**
@@ -228,8 +244,14 @@ public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAs
      */
     @Override
     protected void terminate() {
-        // TODO: add order statistics finalization
+        // Basic termination
         super.terminate();
+
+        // TODO: add order statistics finalization
+        timeCompleted = Warehouse.getInstance().getTime();
+
+        // Inform the frontend
+        Server.getInstance().enqueueOrderFulfilledLog(this);
     }
 
     /**
@@ -248,6 +270,15 @@ public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAs
 
         // Add task to the set of sub tasks
         subTasks.add(task);
+
+        // Check if this is the first assigned task
+        if (timeIssued == -1) {
+            timeIssued = Warehouse.getInstance().getTime();
+            Server.getInstance().enqueueOrderIssuedLog(this);
+        }
+
+        // Inform the frontend
+        Server.getInstance().enqueueTaskAssignedLog(task);
     }
 
     /**
@@ -257,6 +288,9 @@ public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAs
      */
     @Override
     public void onTaskComplete(Task task) {
+        // Inform the frontend
+        Server.getInstance().enqueueTaskCompletedLog(task);
+
         // Remove completed task
         subTasks.remove(task);
 
