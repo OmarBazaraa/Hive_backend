@@ -1,10 +1,10 @@
 package models.warehouse;
 
-import org.json.JSONObject;
 import server.utils.ServerDecoder;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
+import utils.Utility;
+
+import org.json.JSONObject;
 
 
 public class WarehouseHelper {
@@ -15,17 +15,7 @@ public class WarehouseHelper {
      * @param path the path of the configuration file.
      */
     public static void configureWarehouse(String path) throws Exception {
-        BufferedReader reader = new BufferedReader(new FileReader(path));
-
-        String line;
-        StringBuilder builder = new StringBuilder();
-
-        while ((line = reader.readLine()) != null) {
-            builder.append(line);
-        }
-
-        String config = builder.toString();
-
+        String config = Utility.readFile(path);
         ServerDecoder.decodeInitConfig(new JSONObject(config));
     }
 }
