@@ -51,9 +51,10 @@ public class Entity implements Comparable<Entity> {
     @Override
     public boolean equals(Object obj) {
         // Not the same object type
-        if (!(obj instanceof Entity)) {
+        if (getClass() != obj.getClass()) {
             return false;
         }
+
         // Cast, then compare coordinates
         Entity rhs = (Entity) obj;
         return (id == rhs.id);
