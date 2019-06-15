@@ -116,8 +116,10 @@ abstract public class AbstractWarehouse {
 
     /**
      * Performs and simulates a single time step in this {@code Warehouse}.
+     *
+     * @return {@code true} if a change has happen in the {@code Warehouse}; {@code false} otherwise.
      */
-    abstract public void run();
+    abstract public boolean run();
 
     /**
      * Dispatches the current pending orders of this {@code Warehouse}.

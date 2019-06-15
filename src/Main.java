@@ -32,8 +32,13 @@ public class Main {
         // Create server object
         Server server = Server.getInstance();
 
-        // Start the server till EXIT is hit
+        // Start the server and allocate the port
         server.start();
+
+        // Keep running till EXIT is hit
+        while (server.isRunning()) {
+            server.run();
+        }
 
         // Close and finalize the server
         server.close();

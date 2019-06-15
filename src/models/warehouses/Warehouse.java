@@ -106,11 +106,20 @@ public class Warehouse extends AbstractWarehouse {
 
     /**
      * Performs and simulates a single time step in this {@code Warehouse}.
+     *
+     * @return {@code true} if a change has happen in the {@code Warehouse}; {@code false} otherwise.
      */
-    public void run() {
+    public boolean run() {
+        // Skip if warehouse is currently idle
+        if (pendingOrders.isEmpty() && activeAgents.isEmpty()) {
+            return false;
+        }
+
+        // Do a single run and increment time
         dispatchPendingOrders();
         advanceActiveAgents();
         time++;
+        return true;
     }
 
     /**

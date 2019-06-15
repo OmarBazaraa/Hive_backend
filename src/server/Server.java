@@ -22,8 +22,7 @@ import org.eclipse.jetty.websocket.api.annotations.*;
 
 import spark.Spark;
 
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.io.IOException;
 
 
 /**
@@ -54,14 +53,19 @@ public class Server {
     private ServerStates currentState = ServerStates.IDLE;
 
     /**
-     * The queue of received messages from the frontend.
+     * Whether ACK is received on the last update message.
      */
-    private BlockingQueue<String> receivedQueue = new LinkedBlockingQueue<>();
+    private boolean receivedAck = false;
 
     /**
      * The updates states of the current time step to be sent to the frontend.
      */
     private JSONArray actions, logs, statistics;
+
+    /**
+     * Object used to lock thread from updating the {@code Warehouse} simultaneously.
+     */
+    private final Object lock = new Object();
 
     // ===============================================================================================
     //
@@ -101,32 +105,17 @@ public class Server {
     }
 
     /**
-     * Checks whether this {@code Server} object is currently connected with the
-     * frontend.
-     *
-     * @return {@code true} if connected; {@code false} otherwise.
+     * Starts and initializes this {@code Server} object.
      */
-    public boolean isConnected() {
-        return (session != null && session.isOpen());
+    public void start() {
+        Spark.init();
     }
 
     /**
-     * Checks whether this {@code Server} is still running and did not process
-     * an EXIT message.
-     *
-     * @return {@code true} if this {@code Server} did not process an EXIT message; {@code false} otherwise.
+     * Closes and terminates this {@code Server} object.
      */
-    public boolean isRunning() {
-        return (currentState != ServerStates.EXIT);
-    }
-
-    /**
-     * Clears the update states JSON arrays of the current time step.
-     */
-    public void clearUpdateStates() {
-        actions = new JSONArray();
-        logs = new JSONArray();
-        statistics = new JSONArray();
+    public void close() {
+        Spark.stop();
     }
 
     /**
@@ -139,55 +128,63 @@ public class Server {
     }
 
     /**
-     * Starts and initializes this {@code Server} object.
-     */
-    public void start() throws Exception {
-        Spark.init();
-
-        while (currentState != ServerStates.EXIT) {
-            try {
-                process();
-            } catch (JSONException ex) {
-                sendAckMsg(ServerConstants.TYPE_MSG, ServerConstants.TYPE_ERROR, "Invalid message format.");
-
-                // DEBUG
-                System.out.println(ex.getMessage());
-                ex.printStackTrace();
-            } catch (DataException ex) {
-                sendAckMsg(ServerConstants.TYPE_MSG, ServerConstants.TYPE_ERROR, ex.getMessage());
-
-                // DEBUG
-                System.out.println(ex.getMessage());
-                ex.printStackTrace();
-            } catch (Exception ex) {
-                sendAckMsg(ServerConstants.TYPE_MSG, ServerConstants.TYPE_ERROR, "Unknown error.");
-                currentState = ServerStates.IDLE;
-
-                // DEBUG
-                System.out.println(ex.getMessage());
-                ex.printStackTrace();
-            }
-        }
-    }
-
-    /**
-     * Closes and terminates this {@code Server} object.
-     */
-    public void close() {
-        Spark.stop();
-    }
-
-    /**
      * Sends the give JSON message to the frontend.
      *
      * @param msg the message to sent.
      */
-    private void send(JSONObject msg) throws Exception {
+    private void send(JSONObject msg) throws IOException {
         // DEBUG
         System.out.println("Sending ...");
         System.out.println(msg.toString(4));
 
         session.getRemote().sendString(msg.toString());
+    }
+
+    /**
+     * Checks whether this {@code Server} object is currently connected with the
+     * frontend.
+     *
+     * @return {@code true} if connected; {@code false} otherwise.
+     */
+    public synchronized boolean isConnected() {
+        return (session != null && session.isOpen());
+    }
+
+    /**
+     * Checks whether this {@code Server} is still running and did not process
+     * an EXIT message.
+     *
+     * @return {@code true} if this {@code Server} did not process an EXIT message; {@code false} otherwise.
+     */
+    public synchronized boolean isRunning() {
+        return (currentState != ServerStates.EXIT);
+    }
+
+    // ===============================================================================================
+    //
+    // Running Methods
+    //
+
+    /**
+     * Performs a single run step in the {@code Warehouse}.
+     * <p>
+     * This function is to be called from the main thread.
+     */
+    public synchronized void run() throws Exception {
+        // Must be in RUNNING state
+        if (currentState != ServerStates.RUNNING) {
+            return;
+        }
+
+        // Check if last update message has been acknowledged
+        if (receivedAck) {
+            clearUpdateStates();
+
+            if (warehouse.run()) {
+                sendUpdateMsg();        // Send updates only in the case of actual change in the warehouse
+                receivedAck = false;    // Consume the ACK
+            }
+        }
     }
 
     // ===============================================================================================
@@ -196,14 +193,39 @@ public class Server {
     //
 
     /**
-     * Processes the first incoming message in the queue from the frontend.
+     * Processes the incoming messages from the frontend.
      * <p>
-     * If no incoming message yet, the thread gets blocked till a new message comes.
+     * This function is to be called from server threads no the main thread.
+     *
+     * @param msg the raw message as received from the frontend.
      */
-    private void process() throws Exception {
-        // Get the first message or wait if no one is available
-        JSONObject msg = new JSONObject(receivedQueue.take());
+    private synchronized void process(String msg) throws Exception {
+        try {
+            process(new JSONObject(msg));
+        } catch (JSONException ex) {
+            sendAckMsg(ServerConstants.TYPE_MSG, ServerConstants.TYPE_ERROR, "Invalid message format.");
+            System.out.println(ex.getMessage());
+            ex.printStackTrace();
+        } catch (DataException ex) {
+            sendAckMsg(ServerConstants.TYPE_MSG, ServerConstants.TYPE_ERROR, ex.getMessage());
+            System.out.println(ex.getMessage());
+            ex.printStackTrace();
+        } catch (Exception ex) {
+            sendAckMsg(ServerConstants.TYPE_MSG, ServerConstants.TYPE_ERROR, "Unknown error.");
+            currentState = ServerStates.IDLE;
+            System.out.println(ex.getMessage());
+            ex.printStackTrace();
+        }
+    }
 
+    /**
+     * Processes the incoming messages from the frontend.
+     * <p>
+     * Note that this function is not being called from the main thread.
+     *
+     * @param msg the message as from the frontend after JSON parsing.
+     */
+    private synchronized void process(JSONObject msg) throws Exception {
         // Get message type
         int type = msg.getInt(ServerConstants.KEY_TYPE);
         JSONObject data = msg.optJSONObject(ServerConstants.KEY_DATA);
@@ -225,8 +247,8 @@ public class Server {
             case ServerConstants.TYPE_EXIT:
                 processExistMsg(data);
                 break;
-            case ServerConstants.TYPE_ACK:
-                processAckMsg(data);
+            case ServerConstants.TYPE_ACK_UPDATE:
+                processUpdateAckMsg(data);
                 break;
             case ServerConstants.TYPE_ORDER:
                 processOrderMsg(data);
@@ -238,41 +260,31 @@ public class Server {
 
     /**
      * Processes the START message from the frontend.
+     * <p>
+     * START message is used to configure the {@code Warehouse} and starts
+     * its dynamics.
      *
      * @param data the received JSON data part of the message.
      */
-    private void processStartMsg(JSONObject data) throws Exception {
+    private synchronized void processStartMsg(JSONObject data) throws Exception {
         if (currentState != ServerStates.IDLE) {
             throw new DataException("Received START message while the server is not in IDLE state.");
         }
 
         try {
-            // Clear then re-configure the warehouse
-            warehouse.clear();
             ServerDecoder.decodeInitConfig(data);
-            warehouse.init();
+            sendAckMsg(ServerConstants.TYPE_ACK_START, ServerConstants.TYPE_OK, "");
+            currentState = ServerStates.RUNNING;
+            receivedAck = true;
 
             // DEBUG
             System.out.println(warehouse);
-
-            // Update server state and send ACK if no errors
-            currentState = ServerStates.RUNNING;
-            sendAckMsg(ServerConstants.TYPE_ACK_START, ServerConstants.TYPE_OK, "");
-
-            // Initialize and run the system
-            clearUpdateStates();
-            warehouse.run();
-            sendUpdateMsg();
         } catch (JSONException ex) {
             sendAckMsg(ServerConstants.TYPE_ACK_START, ServerConstants.TYPE_ERROR, "Invalid START message format.");
-
-            // DEBUG
             System.out.println(ex.getMessage());
             ex.printStackTrace();
         } catch (DataException ex) {
             sendAckMsg(ServerConstants.TYPE_ACK_START, ServerConstants.TYPE_ERROR, ex.getMessage());
-
-            // DEBUG
             System.out.println(ex.getMessage());
             ex.printStackTrace();
         }
@@ -280,10 +292,13 @@ public class Server {
 
     /**
      * Processes the STOP message from the frontend.
+     * <p>
+     * STOP message is used to stop the running of the {@code Warehouse}
+     * and set the server back to its idle state.
      *
      * @param data the received JSON data part of the message.
      */
-    private void processStopMsg(JSONObject data) throws Exception {
+    private synchronized void processStopMsg(JSONObject data) throws Exception {
         if (currentState == ServerStates.IDLE) {
             throw new DataException("Received STOP message while the server is in IDLE state.");
         }
@@ -292,25 +307,14 @@ public class Server {
     }
 
     /**
-     * Processes the RESUME message from the frontend.
-     *
-     * @param data the received JSON data part of the message.
-     */
-    private void processResumeMsg(JSONObject data) throws Exception {
-        if (currentState != ServerStates.PAUSE) {
-            throw new DataException("Received RESUME message while the server is not in PAUSE state.");
-        }
-
-        currentState = ServerStates.RUNNING;
-        sendAckMsg(ServerConstants.TYPE_ACK_RESUME, ServerConstants.TYPE_OK, "");
-    }
-
-    /**
      * Processes the PAUSE message from the frontend.
+     * <p>
+     * PAUSE message is used to pause the dynamics of the {@code Warehouse}
+     * till RESUME is received.
      *
      * @param data the received JSON data part of the message.
      */
-    private void processPauseMsg(JSONObject data) throws Exception {
+    private synchronized void processPauseMsg(JSONObject data) throws Exception {
         if (currentState != ServerStates.RUNNING) {
             throw new DataException("Received PAUSE message while the server is not in RUNNING state.");
         }
@@ -319,35 +323,57 @@ public class Server {
     }
 
     /**
-     * Processes the EXIT message from the frontend.
+     * Processes the RESUME message from the frontend.
+     * <p>
+     * RESUME message is used to resume the dynamics of the {@code Warehouse}
+     * from the same state before receiving PAUSE.
      *
      * @param data the received JSON data part of the message.
      */
-    private void processExistMsg(JSONObject data) throws Exception {
+    private synchronized void processResumeMsg(JSONObject data) throws Exception {
+        if (currentState != ServerStates.PAUSE) {
+            throw new DataException("Received RESUME message while the server is not in PAUSE state.");
+        }
+
+        sendAckMsg(ServerConstants.TYPE_ACK_RESUME, ServerConstants.TYPE_OK, "");
+        currentState = ServerStates.RUNNING;
+    }
+
+    /**
+     * Processes the EXIT message from the frontend.
+     * <p>
+     * EXIT message is used to close the server completely.
+     *
+     * @param data the received JSON data part of the message.
+     */
+    private synchronized void processExistMsg(JSONObject data) throws Exception {
         currentState = ServerStates.EXIT;
     }
 
     /**
-     * Processes the ACK message from the frontend.
+     * Processes the ACK_UPDATE message from the frontend.
+     * <p>
+     * ACK_UPDATE message is used to acknowledge the server of that last update message
+     * has been received successfully.
      *
      * @param data the received JSON data part of the message.
      */
-    private void processAckMsg(JSONObject data) throws Exception {
+    private synchronized void processUpdateAckMsg(JSONObject data) throws Exception {
         if (currentState != ServerStates.RUNNING) {
             throw new DataException("Received ACK message while the server is not in RUNNING state.");
         }
 
-        clearUpdateStates();
-        warehouse.run();
-        sendUpdateMsg();
+        receivedAck = true;
     }
 
     /**
      * Processes the ORDER message from the frontend.
+     * <p>
+     * ORDER message is used to add a new {@code Order} to the {@code Warehouse}.
      *
      * @param data the received JSON data part of the message.
      */
-    private void processOrderMsg(JSONObject data) throws Exception {
+    private synchronized void processOrderMsg(JSONObject data) throws Exception {
         if (currentState != ServerStates.RUNNING) {
             throw new DataException("Received ORDER message while the server is not in RUNNING state.");
         }
@@ -361,14 +387,10 @@ public class Server {
             System.out.println("    > " + order);
         } catch (JSONException ex) {
             sendAckMsg(ServerConstants.TYPE_ACK_START, ServerConstants.TYPE_ERROR, "Invalid ORDER message format.");
-
-            // DEBUG
             System.out.println(ex.getMessage());
             ex.printStackTrace();
         } catch (DataException ex) {
             sendAckMsg(ServerConstants.TYPE_ACK_ORDER, ServerConstants.TYPE_ERROR, ex.getMessage());
-
-            // DEBUG
             System.out.println(ex.getMessage());
             ex.printStackTrace();
         }
@@ -380,13 +402,22 @@ public class Server {
     //
 
     /**
+     * Clears the update states JSON arrays of the current time step.
+     */
+    private synchronized void clearUpdateStates() {
+        actions = new JSONArray();
+        logs = new JSONArray();
+        statistics = new JSONArray();
+    }
+
+    /**
      * Sends an acknowledge message to the frontend.
      *
      * @param type   the type of acknowledgement.
      * @param status the status of the acknowledgement.
      * @param msg    the piggybacked message if needed.
      */
-    private void sendAckMsg(int type, int status, String msg) throws Exception {
+    private synchronized void sendAckMsg(int type, int status, String msg) throws Exception {
         send(ServerEncoder.encodeAckMsg(type, status, msg));
     }
 
@@ -396,7 +427,7 @@ public class Server {
      * @param agent  the updated {@code Agent}.
      * @param action the performed action.
      */
-    public void enqueueAgentAction(Agent agent, AgentAction action) {
+    public synchronized void enqueueAgentAction(Agent agent, AgentAction action) {
         actions.put(ServerEncoder.encodeAgentAction(agent, action));
     }
 
@@ -405,7 +436,7 @@ public class Server {
      *
      * @param task the newly assigned {@code Task}.
      */
-    public void enqueueTaskAssignedLog(Task task) {
+    public synchronized void enqueueTaskAssignedLog(Task task) {
         logs.put(ServerEncoder.encodeTaskAssignedLog(task));
     }
 
@@ -414,7 +445,7 @@ public class Server {
      *
      * @param task the newly assigned {@code Task}.
      */
-    public void enqueueTaskCompletedLog(Task task) {
+    public synchronized void enqueueTaskCompletedLog(Task task) {
         logs.put(ServerEncoder.encodeTaskCompletedLog(task));
     }
 
@@ -423,7 +454,7 @@ public class Server {
      *
      * @param order the newly issued {@code Order}.
      */
-    public void enqueueOrderIssuedLog(Order order) {
+    public synchronized void enqueueOrderIssuedLog(Order order) {
         logs.put(ServerEncoder.encodeOrderLog(ServerConstants.TYPE_ORDER_ISSUED, order));
     }
 
@@ -432,7 +463,7 @@ public class Server {
      *
      * @param order the newly issued {@code Order}.
      */
-    public void enqueueOrderFulfilledLog(Order order) {
+    public synchronized void enqueueOrderFulfilledLog(Order order) {
         logs.put(ServerEncoder.encodeOrderLog(ServerConstants.TYPE_ORDER_FULFILLED, order));
     }
 
@@ -442,14 +473,14 @@ public class Server {
      * @param key   the statistic type.
      * @param value the value of the statistic.
      */
-    public void enqueueStatistics(int key, double value) {
+    public synchronized void enqueueStatistics(int key, double value) {
         actions.put(ServerEncoder.encodeStatistics(key, value));
     }
 
     /**
      * Sends the current update message to the frontend.
      */
-    public void sendUpdateMsg() throws Exception {
+    public synchronized void sendUpdateMsg() throws Exception {
         send(ServerEncoder.encodeUpdateMsg(warehouse.getTime(), actions, logs, statistics));
     }
 
@@ -475,7 +506,7 @@ public class Server {
 
         @OnWebSocketMessage
         public void onMessage(Session client, String message) throws Exception {
-            receivedQueue.add(message);
+            process(message);
         }
     }
 }

@@ -104,7 +104,7 @@ public class ServerConstants {
     public static final int TYPE_PAUSE = 2;
     public static final int TYPE_STOP = 3;
     public static final int TYPE_RESUME = 4;
-    public static final int TYPE_ACK = 5;
+    public static final int TYPE_ACK_UPDATE = 5;
     public static final int TYPE_EXIT = 6;
 
     // TODO: to be revised

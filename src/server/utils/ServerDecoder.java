@@ -42,8 +42,11 @@ public class ServerDecoder {
         JSONObject stateJSON = data.getJSONObject(ServerConstants.KEY_STATE);
         JSONObject mapJSON = stateJSON.getJSONObject(ServerConstants.KEY_MAP);
         JSONArray itemsJSON = stateJSON.getJSONArray(ServerConstants.KEY_ITEMS);
+
+        warehouse.clear();
         decodeWarehouseItems(itemsJSON);
         decodeWarehouseMap(mapJSON);
+        warehouse.init();
     }
 
     public static void decodeWarehouseItems(JSONArray data) throws JSONException, DataException {
