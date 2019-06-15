@@ -45,8 +45,8 @@ public class Warehouse extends AbstractWarehouse {
     /**
      * Constructs a new {@code Warehouse} object.
      */
-    private Warehouse() {
-        // Private constructor to ensure a singleton object.
+    protected Warehouse() {
+        // Protected constructor to ensure a singleton object.
     }
 
     /**

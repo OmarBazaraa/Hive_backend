@@ -59,4 +59,15 @@ public class Dimensions implements Comparable<Dimensions> {
             return rows - rhs.rows;
         }
     }
+
+    /**
+     * Returns a string representation of this {@code Dimensions}.
+     * In general, the toString method returns a string that "textually represents" this object.
+     *
+     * @return a string representation of this {@code Dimensions}.
+     */
+    @Override
+    public String toString() {
+        return "(" + rows + "x" + cols + ")";
+    }
 }

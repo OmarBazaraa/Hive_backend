@@ -310,12 +310,23 @@ abstract public class AbstractWarehouse {
     public String toString() {
         StringBuilder builder = new StringBuilder();
 
-        // Print the grid
         builder.append("Warehouse of size: ")
                 .append(map.getRows()).append("x").append(map.getCols())
-                .append("\n").append("\n")
-                .append(map)
-                .append("\n");
+                .append(" @time: ").append(time).append("\n")
+                .append(map);
+
+        return builder.toString();
+    }
+
+    /**
+     * Prints a visual representation of this {@code Warehouse} along with
+     * all its components.
+     */
+    public void print() {
+        StringBuilder builder = new StringBuilder();
+
+        // Print the grid
+        builder.append(this).append("\n");
 
         // Print the list of agents
         builder.append("Agents: ").append(agents.size()).append("\n");
@@ -351,6 +362,7 @@ abstract public class AbstractWarehouse {
             builder.append("    > ").append(item).append("\n");
         }
 
-        return builder.toString();
+        // Print to standard output
+        System.out.println(builder);
     }
 }

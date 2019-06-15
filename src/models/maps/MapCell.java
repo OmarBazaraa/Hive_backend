@@ -8,6 +8,7 @@ import models.facilities.Station;
 
 import utils.Constants;
 import utils.Constants.*;
+import utils.Utility;
 
 
 /**
@@ -199,7 +200,7 @@ public class MapCell extends Cell {
     @Override
     public char toShape() {
         if (hasAgent()) {
-            return Constants.SHAPE_CELL_AGENT;
+            return Utility.dirToShape(agent.getDirection());
         }
 
         switch (type) {

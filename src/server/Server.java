@@ -98,10 +98,12 @@ public class Server {
      * @param path the endpoint path of the communicator.
      * @param port the port number.
      */
-    private Server(String path, int port) {
-        // Private constructor to ensure a singleton object.
+    protected Server(String path, int port) {
+        // Protected constructor to ensure a singleton object.
         Spark.port(port);
         Spark.webSocket(path, new WebSocketHandler());
+
+        clearUpdateStates();
     }
 
     /**
@@ -151,6 +153,7 @@ public class Server {
         // DEBUG
         System.out.println("Sending ...");
         System.out.println(msg.toString(4));
+        System.out.println();
 
         session.getRemote().sendString(msg.toString());
     }
@@ -199,6 +202,9 @@ public class Server {
                 if (warehouse.run()) {
                     sendUpdateMsg();        // Send updates only in the case of actual change in the warehouse
                     receivedAck = false;    // Consume the ACK
+
+                    // DEBUG
+                    System.out.println(warehouse);
                 }
             }
             // Handle communication exceptions (probably the frontend is down)
@@ -321,7 +327,7 @@ public class Server {
             receivedAck = true;
 
             // DEBUG
-            System.out.println(warehouse);
+            warehouse.print();
         } catch (JSONException ex) {
             sendAckMsg(ServerConstants.TYPE_ACK_START, ServerConstants.TYPE_ERROR, "Invalid START message format.");
             System.out.println(ex.getMessage());
@@ -542,13 +548,19 @@ public class Server {
         @OnWebSocketConnect
         public void onConnect(Session client) throws Exception {
             openSession(client);
+
+            System.out.println();
             System.out.println("Frontend connected!");
+            System.out.println();
         }
 
         @OnWebSocketClose
         public void onClose(Session client, int statusCode, String reason) {
             closeSession(client);
+
+            System.out.println();
             System.out.println("Frontend connection closed with status code: " + statusCode);
+            System.out.println();
         }
 
         @OnWebSocketMessage

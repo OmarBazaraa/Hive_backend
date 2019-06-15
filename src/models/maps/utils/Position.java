@@ -81,4 +81,15 @@ public class Position implements Comparable<Position> {
             return row - rhs.row;
         }
     }
+
+    /**
+     * Returns a string representation of this {@code Position}.
+     * In general, the toString method returns a string that "textually represents" this object.
+     *
+     * @return a string representation of this {@code Position}.
+     */
+    @Override
+    public String toString() {
+        return "(" + row + ", " + col + ")";
+    }
 }
