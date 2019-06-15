@@ -325,7 +325,7 @@ public class Planner {
 
             // Add the action and proceed to previous state
             ret.add(node.action);
-            node = node.previous(node.action);
+            node = node.previous();
         }
 
         return ret;

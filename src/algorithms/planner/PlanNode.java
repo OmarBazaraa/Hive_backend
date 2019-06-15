@@ -126,22 +126,23 @@ public class PlanNode implements Comparable<PlanNode> {
     }
 
     /**
-     * Calculates the previous state if applying the given action in reverse manner.
-     * <p>
-     * The allowed actions are only:
-     * {@code AgentAction.ROTATE_RIGHT}, {@code AgentAction.ROTATE_LEFT}, and
-     * {@code AgentAction.MOVE}.
-     *
-     * @param action the action to apply in reverse.
+     * Calculates the previous state if applying the best calculated action
+     * of the planning algorithm in reverse manner.
      *
      * @return the previous state {@code PlanNode}.
      */
-    public PlanNode previous(AgentAction action) {
+    public PlanNode previous() {
+        PlanNode ret;
+
         if (action == AgentAction.MOVE) {
-            return new PlanNode(Utility.prevPos(pos, dir), dir, action, time - 1);
+            ret = new PlanNode(Utility.prevPos(pos, dir), dir, action, time - 1);
         } else {
-            return new PlanNode(pos, Utility.prevDir(dir, action), action, time - 1);
+            ret = new PlanNode(pos, Utility.prevDir(dir, action), action, time - 1);
         }
+
+        ret.action = par[ret.pos.row][ret.pos.col][ret.dir.ordinal()];
+
+        return ret;
     }
 
     /**
