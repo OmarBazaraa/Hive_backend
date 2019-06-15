@@ -312,7 +312,10 @@ public class Server {
         }
 
         try {
-            ServerDecoder.decodeInitConfig(data);
+            int mode = data.getInt(ServerConstants.KEY_MODE);
+            JSONObject state = data.getJSONObject(ServerConstants.KEY_STATE);
+
+            ServerDecoder.decodeInitConfig(state);
             sendAckMsg(ServerConstants.TYPE_ACK_START, ServerConstants.TYPE_OK, "");
             currentState = ServerStates.RUNNING;
             receivedAck = true;

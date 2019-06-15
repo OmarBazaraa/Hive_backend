@@ -38,10 +38,8 @@ public class ServerDecoder {
     //
 
     public static void decodeInitConfig(JSONObject data) throws JSONException, DataException {
-        int mode = data.getInt(ServerConstants.KEY_MODE);
-        JSONObject stateJSON = data.getJSONObject(ServerConstants.KEY_STATE);
-        JSONObject mapJSON = stateJSON.getJSONObject(ServerConstants.KEY_MAP);
-        JSONArray itemsJSON = stateJSON.getJSONArray(ServerConstants.KEY_ITEMS);
+        JSONObject mapJSON = data.getJSONObject(ServerConstants.KEY_MAP);
+        JSONArray itemsJSON = data.getJSONArray(ServerConstants.KEY_ITEMS);
 
         warehouse.clear();
         decodeWarehouseItems(itemsJSON);
