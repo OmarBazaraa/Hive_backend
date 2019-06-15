@@ -319,7 +319,7 @@ public class Planner {
             timeMap.setAgentAt(node.pos, node.time, agent);
 
             // Stop when reaching the initial position of the agent
-            if (agent.getPosition().equals(node.pos)) {
+            if (agent.getPosition().equals(node.pos) && agent.getDirection() == node.dir) {
                 break;
             }
 
