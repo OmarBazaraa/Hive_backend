@@ -288,9 +288,17 @@ public class Planner {
             return false;
         }
 
+        // Get cell
+        MapCell cell = map.get(nxt.pos);
+
+        // Skip obstacle cells
+        if (cell.isObstacle()) {
+            return false;
+        }
+
         // If there is a facility then we can only explore it
         // when it is either the source or destination position
-        if (map.get(nxt.pos).hasFacility()) {
+        if (cell.hasFacility()) {
             return agent.getPosition().equals(nxt.pos) || dst.equals(nxt.pos);
         }
 
