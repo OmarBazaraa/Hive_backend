@@ -254,16 +254,8 @@ public class Planner {
                 // Get next state after doing the current action
                 PlanNode nxt = cur.next(action);
 
-                // Skip out of bound or visited states
-                if (!map.isInBound(nxt.pos) || nxt.isVisited()) {
-                    continue;
-                }
-
-                // Get the agent that is planned to be in this state
-                Agent a = timeMap.getAgentAt(nxt.pos, nxt.time);
-
-                // If there is an agent with higher priority then skip this state as well
-                if (a != null && agent.getPriority() < a.getPriority()) {
+                // Skip invalid states
+                if (!canExplore(nxt, agent, dst, map, timeMap)) {
                     continue;
                 }
 
@@ -272,18 +264,38 @@ public class Planner {
                     return constructPlan(agent, nxt);
                 }
 
-                // Skip states having facilities
-                if (!map.isEmpty(nxt.pos)) {
-                    continue;
-                }
-
-                // Add expanded state
+                // Add state for further exploration
                 q.add(nxt);
             }
         }
 
         // No path has been found
         return null;
+    }
+
+
+    private static boolean canExplore(PlanNode nxt, Agent agent, Position dst, MapGrid map, TimeGrid timeMap) {
+        // Skip out of bound or visited states
+        if (!map.isInBound(nxt.pos) || nxt.isVisited()) {
+            return false;
+        }
+
+        // Get the agent that is planned to be in this state
+        Agent a = timeMap.getAgentAt(nxt.pos, nxt.time);
+
+        // If there is an agent with higher priority then skip this state as well
+        if (a != null && agent.getPriority() < a.getPriority()) {
+            return false;
+        }
+
+        // If there is a facility then we can only explore it
+        // when it is either the source or destination position
+        if (map.get(nxt.pos).hasFacility()) {
+            return agent.getPosition().equals(nxt.pos) || dst.equals(nxt.pos);
+        }
+
+        // The state is empty so we can explore it
+        return true;
     }
 
     /**
