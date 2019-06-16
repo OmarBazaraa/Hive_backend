@@ -118,8 +118,11 @@ public class Dispatcher {
             Item neededItem = pair.getKey();
             int neededQuantity = pair.getValue();
             int availableQuantity = rack.get(neededItem);
+            int plannedQuantity = Math.min(neededQuantity, availableQuantity);
 
-            ret.put(neededItem, Math.min(neededQuantity, availableQuantity));
+            if (plannedQuantity != 0) {
+                ret.put(neededItem, plannedQuantity);
+            }
         }
 
         return ret;
