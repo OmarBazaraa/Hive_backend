@@ -18,86 +18,6 @@ import java.util.*;
  */
 public class Planner {
 
-
-    /**
-     * Routes the given {@code Agent} one step towards its target location.
-     *
-     * @param agent the {@code Agent} to be routed.
-     * @param map   the {@code MapGrid} of the {@code Warehouse}.
-     */
-    public static boolean route(Agent agent, MapGrid map) {
-        return route(agent, agent, map);
-    }
-
-    /**
-     * Routes the given {@code Agent} one step towards its target location.
-     * <p>
-     * This is a recursive function that keep displacing other agents away in order for the
-     * main {@code Agent} to find its path.
-     * <p>
-     * This function is to be initially called passing the same {@code Agent} for both
-     * parameters {@code agent} and {@code mainAgent}.
-     *
-     * @param agent     the {@code Agent} to be displaced for the main {@code Agent}.
-     * @param mainAgent the main {@code Agent} to be routed.
-     * @param map       the {@code MapGrid} of the {@code Warehouse}.
-     */
-    private static boolean route(Agent agent, Agent mainAgent, MapGrid map) {
-        // Return if this agent has higher priority than the agent needed to be moved
-        if (agent.compareTo(mainAgent) > 0) {
-            return false;
-        }
-
-        // Return if this agent has already been displaced by a higher priority agent,
-        // or it has been tried to displace it
-        if (agent.isAlreadyMoved()) {
-            return false;
-        }
-
-        // Update agent action time to avoid infinite loop
-        agent.updateLastActionTime();
-
-        // Get current agent and guide maps
-        Position cur = agent.getPosition();
-        GuideGrid guide = agent.getGuideMap();
-
-        // Get list of valid directions
-        List<Direction> dirs;
-
-        if (guide != null) {
-            dirs = guide.getGuideDirections(cur);
-        } else {
-            dirs = map.getEmptyDirections(cur);
-        }
-
-        //
-        // Iterate over all guide directions
-        //
-        for (Direction dir : dirs) {
-            // Get next position
-            Position nxt = map.next(cur, dir);
-
-            // Skip moving away from the target if this is our main agent
-            if (agent == mainAgent) {
-                // Guide map should never be null here
-                if (guide != null && guide.getDistance(nxt) >= guide.getDistance(cur)) {
-                    continue;
-                }
-            }
-
-            // Get agent in the next cell
-            Agent nxtAgent = map.get(nxt).getAgent();
-
-            // Move the agent if free cell or we manged to get a blank in the next position
-            if (nxtAgent == null || route(nxtAgent, mainAgent, map)) {
-                agent.move(dir);
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     /**
      * Runs a BFS algorithms on the given grid to compute the guide maps
      * to the given destination position.
@@ -105,9 +25,9 @@ public class Planner {
      * @param map         the map grid to compute upon.
      * @param dst         the destination position.
      *
-     * @return a 2D {@code GuideCell} array representing the guide map to reach the destination.
+     * @return the computed guide map to reach the destination.
      */
-    public static GuideCell[][] bfs(MapGrid map, Position dst) {
+    public static GuideGrid computeGuideMap(MapGrid map, Position dst) {
         // Initialize BFS algorithm requirements
         GuideCell[][] ret = GuideCell.allocate2D(map.getRows(), map.getCols());
 
@@ -142,7 +62,7 @@ public class Planner {
             }
         }
 
-        return ret;
+        return new GuideGrid(ret);
     }
 
 

@@ -6,7 +6,6 @@ import models.items.Item;
 import models.facilities.Gate;
 import models.facilities.Rack;
 import models.items.QuantityAddable;
-import models.maps.GuideGrid;
 
 import utils.Pair;
 
@@ -231,18 +230,6 @@ public class Task extends AbstractTask implements QuantityAddable<Item> {
     protected void terminate() {
         agent.onTaskComplete(this);
         super.terminate();
-    }
-
-    /**
-     * Returns the guide map to reach the target of this {@code Task}.
-     * <p>
-     * This function should be called only when this {@code Task} is active.
-     *
-     * @return the {@code GuideGrid} to reach the target.
-     */
-    public GuideGrid getGuideMap() {
-        Facility facility = actions.element().val;
-        return facility.getGuideMap();
     }
 
     /**

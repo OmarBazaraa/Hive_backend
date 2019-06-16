@@ -74,16 +74,6 @@ public class Agent extends AbstractAgent {
     }
 
     /**
-     * Returns the guide map to reach the target of the currently active {@code Task}.
-     *
-     * @return a {@code GuideGrid} to reach the target.
-     */
-    public GuideGrid getGuideMap() {
-        Task task = getActiveTask();
-        return (task != null ? task.getGuideMap() : null);
-    }
-
-    /**
      * Plans the sequence of actions to reach the given target {@code Facility}.
      * <p>
      * This function should be called with new destination only when the previous
@@ -188,33 +178,6 @@ public class Agent extends AbstractAgent {
 
         updateLastActionTime();
         Server.getInstance().enqueueAgentAction(this, action);
-    }
-
-    /**
-     * Moves this {@code Agent} in the given {@code Direction}.
-     *
-     * @param dir the {@code Direction} to move along.
-     */
-    @Override
-    public void move(Direction dir) {
-        // Get warehouse map
-        MapGrid map = Warehouse.getInstance().getMap();
-
-        // Get current position
-        Position cur = getPosition();
-        MapCell curCell = map.get(cur);
-
-        // Get next position
-        Position nxt = map.next(cur, dir);
-        MapCell nxtCell = map.get(nxt);
-
-        // Move agent
-        curCell.setAgent(null);
-        nxtCell.setAgent(this);
-        setPosition(nxt);
-
-        // Update action time
-        updateLastActionTime();
     }
 
     /**

@@ -237,13 +237,6 @@ abstract public class AbstractAgent extends HiveObject implements TaskAssignable
     abstract public void move(AgentAction action);
 
     /**
-     * Moves this {@code Agent} in the given {@code Direction}.
-     *
-     * @param dir the {@code Direction} to move along.
-     */
-    abstract public void move(Direction dir);
-
-    /**
      * Loads and lifts the given {@code Rack} above this {@code Agent}.
      *
      * @param rack the {@code Rack} to load.

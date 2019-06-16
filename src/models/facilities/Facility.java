@@ -81,7 +81,7 @@ abstract public class Facility extends HiveObject implements AgentBindable, Agen
      * @param map the {@code MapGrid} of the {@code Warehouse} where this {@code Facility} is located in.
      */
     public void computeGuideMap(MapGrid map) {
-        guideMap = new GuideGrid(Planner.bfs(map, getPosition()));
+        guideMap = Planner.computeGuideMap(map, getPosition());
     }
 
     /**
