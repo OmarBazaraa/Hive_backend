@@ -417,6 +417,10 @@ public class Server {
         }
 
         receivedAck = true;
+
+        // DEBUG
+        System.out.println("Received ACK");
+        System.out.println();
     }
 
     /**
@@ -438,6 +442,7 @@ public class Server {
             // DEBUG
             System.out.println("Order received:");
             System.out.println("    > " + order);
+            System.out.println();
         } catch (JSONException ex) {
             sendAckMsg(ServerConstants.TYPE_ACK_START, ServerConstants.TYPE_ERROR, "Invalid ORDER message format.");
             System.out.println(ex.getMessage());
