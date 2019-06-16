@@ -69,10 +69,9 @@ public class ServerEncoder {
     }
 
     public static JSONObject encodeOrderLog(int type, Order order) {
-        JSONObject ret = new JSONObject();
-        ret.put(ServerConstants.KEY_TYPE, type);
-        ret.put(ServerConstants.KEY_DATA, order.getId());
-        return ret;
+        JSONObject data = new JSONObject();
+        data.put(ServerConstants.KEY_ID, order.getId());
+        return encodeMsg(type, data);
     }
 
     public static JSONObject encodeStatistics(int key, double value) {
