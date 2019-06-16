@@ -19,7 +19,7 @@ public class Dispatcher {
     /**
      * Dispatches the given {@code Order} into a set of specific tasks assigned
      * to a set of agents.
-     *
+     * <p>
      * TODO: support refill orders
      *
      * @param order       the {@code Order} needed to be dispatched.
@@ -30,15 +30,15 @@ public class Dispatcher {
         // Keep dispatching while the order is still pending and
         // there are still idle robots
         //
-        while (order.isPending() && !readyAgents.isEmpty()) {
+        while (order.isPending() && readyAgents.size() > 0) {
             // Select the most suitable racks
             // List<Rack> selectedRacks = RackSelector.selectRacks(order);
 
             // Get current needed item in the order
-            Item item = order.getFirst().getKey();
+            Item item = order.iterator().next().getKey();
 
             // Get current rack having the item
-            Rack rack = item.getFirst().getKey();
+            Rack rack = item.iterator().next();
 
             // Find a suitable agent
             Agent agent = findAgent(readyAgents, rack, order);
@@ -48,8 +48,12 @@ public class Dispatcher {
                 return;
             }
 
+            // Plan the items to collect
+            Map<Item, Integer> plannedItems = planCollectOrderItems(agent, rack, order);
+
             // Create task and add it to the warehouse
-            Task task = new Task(order, rack, agent);
+            Task task = new Task(rack, agent);
+            task.addOrder(order, plannedItems);
             Warehouse.getInstance().addTask(task);
         }
     }
@@ -95,5 +99,44 @@ public class Dispatcher {
 
         // Return the selected agent
         return ret;
+    }
+
+    /**
+     * Plans the best collection of units to collect from the given {@code Rack}
+     * based on the given {@code Order}.
+     *
+     * @param agent the selected {@code Agent}.
+     * @param rack  the selected {@code Rack}.
+     * @param order the needed {@code Order}.
+     *
+     * @return the best {@code Item} collection.
+     */
+    private static Map<Item, Integer> planCollectOrderItems(Agent agent, Rack rack, Order order) {
+        Map<Item, Integer> ret = new HashMap<>();
+
+        for (Map.Entry<Item, Integer> pair : order) {
+            Item neededItem = pair.getKey();
+            int neededQuantity = pair.getValue();
+            int availableQuantity = rack.get(neededItem);
+
+            ret.put(neededItem, Math.min(neededQuantity, availableQuantity));
+        }
+
+        return ret;
+    }
+
+    /**
+     * Plans the best collection of units to refill the given {@code Rack}
+     * based on the given {@code Order}.
+     *
+     * @param agent the selected {@code Agent}.
+     * @param rack  the selected {@code Rack}.
+     * @param order the needed {@code Order}.
+     *
+     * @return the best {@code Item} collection.
+     */
+    private static Map<Item, Integer> planRefillOrderItems(Agent agent, Rack rack, Order order) {
+        // TODO
+        return null;
     }
 }

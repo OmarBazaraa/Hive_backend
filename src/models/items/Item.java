@@ -21,7 +21,7 @@ import java.util.Map;
  * @see Order
  * @see Task
  */
-public class Item extends Entity implements QuantityAddable<Rack>, QuantityReservable<Item> {
+public class Item extends Entity implements QuantityAddable<Rack>, Iterable<Rack> {
 
     //
     // Member Variables
@@ -143,6 +143,20 @@ public class Item extends Entity implements QuantityAddable<Rack>, QuantityReser
     }
 
     /**
+     * Reserves some units of this {@code Item} specified by the given quantity.
+     * Reservation can be conformed or undone by passing negative quantities.
+     * <p>
+     * This function should be called after ensuring that reservation is possible.
+     * <p>
+     * This function should only be called once per {@code Order} activation.
+     *
+     * @param quantity the quantity to reserve.
+     */
+    public void reserve(int quantity) {
+        reservedUnits += quantity;
+    }
+
+    /**
      * Returns an {@code Iterator} to iterate over all {@code Racks} storing this {@code Item}.
      * <p>
      * Note that this iterator should be used in read-only operations;
@@ -151,45 +165,8 @@ public class Item extends Entity implements QuantityAddable<Rack>, QuantityReser
      * @return an {@code Iterator}.
      */
     @Override
-    public Iterator<Map.Entry<Rack, Integer>> iterator() {
-        return racks.entrySet().iterator();
-    }
-
-    /**
-     * Reserves some units of this {@code Item} specified by the given {@code QuantityAddable} container.
-     * <p>
-     * This function should be called after ensuring that there are enough units
-     * for reservation.
-     * <p>
-     * This function should only be called once per {@code Order} activation.
-     *
-     * @param container the {@code QuantityAddable} container.
-     *
-     * @see Item#confirmReservation(QuantityAddable)
-     */
-    @Override
-    public void reserve(QuantityAddable<Item> container) {
-        int reservedQuantity = container.get(this);
-        reservedUnits += reservedQuantity;
-    }
-
-    /**
-     * Confirms the previously assigned reservations specified by the given
-     * {@code QuantityAddable} container.
-     * <p>
-     * This function should be called after reserving a same or a super container first;
-     * otherwise un-expected behaviour could occur.
-     * <p>
-     * This function should only be called once per {@code Task} termination.
-     *
-     * @param container the {@code QuantityAddable} container.
-     *
-     * @see Item#reserve(QuantityAddable)
-     */
-    @Override
-    public void confirmReservation(QuantityAddable<Item> container) {
-        int reservedQuantity = container.get(this);
-        reservedUnits -= reservedQuantity;
+    public Iterator<Rack> iterator() {
+        return racks.keySet().iterator();
     }
 
     /**

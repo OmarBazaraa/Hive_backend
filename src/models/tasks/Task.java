@@ -5,7 +5,6 @@ import models.facilities.Facility;
 import models.items.Item;
 import models.facilities.Gate;
 import models.facilities.Rack;
-import models.items.QuantityAddable;
 
 import utils.Pair;
 
@@ -23,7 +22,7 @@ import java.util.*;
  * @see Rack
  * @see Gate
  */
-public class Task extends AbstractTask implements QuantityAddable<Item> {
+public class Task extends AbstractTask {
 
     //
     // Enums
@@ -33,9 +32,9 @@ public class Task extends AbstractTask implements QuantityAddable<Item> {
      * Different actions to be done by a {@code Task} during its lifecycle.
      */
     public enum TaskAction {
-        BIND,       // Go and bind with a facility
-        UNBIND,     // Go and unbind with a facility
-        DELIVERED   // Items of the task has been delivered
+        BIND,           // Go and bind with a facility
+        UNBIND,         // Go and unbind with a facility
+        SELECT_ORDER,   // Select one of the associated orders to deliver
     }
 
     // ===============================================================================================
@@ -44,19 +43,9 @@ public class Task extends AbstractTask implements QuantityAddable<Item> {
     //
 
     /**
-     * The {@code Order} in which this {@code Task} is a part of.
-     */
-    private Order order;
-
-    /**
      * The {@code Rack} needed to be delivered.
      */
     private Rack rack;
-
-    /**
-     * The {@code Gate} to deliver the {@code Rack} at.
-     */
-    private Gate gate;
 
     /**
      * The {@code Agent} assigned for this {@code Task}.
@@ -64,16 +53,26 @@ public class Task extends AbstractTask implements QuantityAddable<Item> {
     private Agent agent;
 
     /**
-     * The map of items this {@code Task} is needing.<p>
-     * The key is an {@code Item}.<p>
-     * The mapped value represents the needed quantity of this {@code Item}.
+     * The currently active {@code Order} by this {@code Task}.
      */
-    private Map<Item, Integer> items = new HashMap<>();
+    private Order activeOrder;
+
+    /**
+     * The list of associated orders in which this {@code Task} is a part of.
+     */
+    private LinkedList<Order> orders = new LinkedList<>();
+
+    /**
+     * The map of reserved items by this {@code Task} for the associated orders.<p>
+     * The key is an {@code Order}.<p>
+     * The mapped value represents a map of the reserved items for this {@code Order}.
+     */
+    private Map<Order, Map<Item, Integer>> ordersReservedItems = new HashMap<>();
 
     /**
      * The queue of actions to be done by the assigned {@code Agent} to complete this {@code Task}.
      */
-    private Queue<Pair<TaskAction, Facility>> actions = new LinkedList<>();
+    private Deque<Pair<TaskAction, Facility>> actions = new LinkedList<>();
 
     // ===============================================================================================
     //
@@ -83,34 +82,18 @@ public class Task extends AbstractTask implements QuantityAddable<Item> {
     /**
      * Constructs a new {@code Task} object.
      *
-     * @param order the associated {@code Order}.
-     * @param rack the assigned {@code Rack}.
+     * @param rack  the assigned {@code Rack}.
      * @param agent the assigned {@code agent}.
      */
-    public Task(Order order, Rack rack, Agent agent) {
+    public Task(Rack rack, Agent agent) {
         super();
-        this.order = order;
-        this.gate = order.getDeliveryGate();
         this.rack = rack;
         this.agent = agent;
-    }
 
-    /**
-     * Returns the associated {@code Order} with this {@code Task}.
-     *
-     * @return the associated {@code Order}.
-     */
-    public Order getOrder() {
-        return order;
-    }
-
-    /**
-     * Returns the {@code Gate} where this {@code Task} must be delivered.
-     *
-     * @return the delivery {@code Gate}.
-     */
-    public Gate getDeliveryGate() {
-        return gate;
+        // Add initial basic actions
+        actions.add(new Pair<>(TaskAction.BIND, rack));             // Go and load the rack
+        actions.add(new Pair<>(TaskAction.SELECT_ORDER, null));     // Select an order to deliver
+        actions.add(new Pair<>(TaskAction.UNBIND, rack));           // Go and offload the rack back
     }
 
     /**
@@ -132,64 +115,36 @@ public class Task extends AbstractTask implements QuantityAddable<Item> {
     }
 
     /**
-     * Returns the quantity of the an {@code Item} needed by this {@code Task}.
+     * Returns the currently active {@code Order} by this {@code Task}.
      *
-     * @param item the needed {@code Item}.
-     *
-     * @return the pending quantity of the given {@code Item}.
+     * @return the currently active {@code Order}.
      */
-    @Override
-    public int get(Item item) {
-        return items.getOrDefault(item, 0);
+    public Order getActiveOrder() {
+        return activeOrder;
     }
 
     /**
-     * Updates the quantity of an {@code Item} in this {@code Order}.
-     * <p>
-     * This function is used to add extra units of the given {@code Item} if the given
-     * quantity is positive,
-     * and used to remove existing units if the given quantity is negative.
-     * <p>
-     * This function should be called only once with positive quantities during
-     * the construction of the {@code Task} object.
+     * Adds a new {@code Order} to be partially fulfilled by this {@code Task}.
      *
-     * @param item     the {@code Item} to be updated.
-     * @param quantity the quantity to be updated with.
+     * @param order the new {@code Order} to add.
+     * @param items a map of reserved items for the given {@code Order}.
      */
-    @Override
-    public void add(Item item, int quantity) {
-        QuantityAddable.update(items, item, quantity);
+    public void addOrder(Order order, Map<Item, Integer> items) {
+        orders.addLast(order);
+        ordersReservedItems.put(order, items);
+        order.assignTask(this);
     }
 
     /**
-     * Returns an {@code Iterator} to iterate over the needed items in this {@code Task}.
-     * <p>
-     * Note that this iterator should be used in read-only operations;
-     * otherwise undefined behaviour could arises.
+     * Returns the map of reserved items for the given {@code Order}
+     * by this {@code Task}.
      *
-     * @return an {@code Iterator}.
+     * @param order the {@code Order} to get its reserved items.
+     *
+     * @return the map of reserved items.
      */
-    @Override
-    public Iterator<Map.Entry<Item, Integer>> iterator() {
-        return items.entrySet().iterator();
-    }
-
-    /**
-     * Fills this {@code Task} with the maximum number of items needed by the
-     * associated {@code Order} that are available in the assigned {@code Rack}.
-     *
-     * This is done by taking the intersection of items in both the associated {@code Order},
-     * and the assigned {@code Rack}.
-     *
-     * TODO: support refill order
-     */
-    private void fillItems() {
-        items.clear();
-
-        for (Map.Entry<Item, Integer> pair : order) {
-            Item item = pair.getKey();
-            items.put(item, Math.min(rack.get(item), pair.getValue()));
-        }
+    public Map<Item, Integer> getReservedItems(Order order) {
+        return ordersReservedItems.get(order);
     }
 
     /**
@@ -199,22 +154,8 @@ public class Task extends AbstractTask implements QuantityAddable<Item> {
      */
     @Override
     public void activate() {
-        // Fill the items of the task
-        fillItems();
-
-        // Allocate task resources
-        rack.reserve(this);
+        rack.allocate(agent);
         agent.assignTask(this);
-        order.assignTask(this);
-
-        // Add actions
-        actions.add(new Pair<>(TaskAction.BIND, rack));         // 1. Load the rack
-        actions.add(new Pair<>(TaskAction.BIND, gate));         // 2. Bind with the gate
-        actions.add(new Pair<>(TaskAction.UNBIND, gate));       // 3. Unbind with the gate
-        actions.add(new Pair<>(TaskAction.DELIVERED, null));    // 4. Items has been added/removed
-        actions.add(new Pair<>(TaskAction.UNBIND, rack));       // 5. Offload the rack
-
-        // Activate the task
         super.activate();
     }
 
@@ -223,11 +164,11 @@ public class Task extends AbstractTask implements QuantityAddable<Item> {
      * <p>
      * A callback function to be invoked when this {@code Task} has been completed.
      * Used to clear and finalize allocated resources.
-     *
-     * TODO: add task statistics finalization
      */
     @Override
     protected void terminate() {
+        // TODO: add task statistics finalization
+        rack.deallocate();
         agent.onTaskComplete(this);
         super.terminate();
     }
@@ -238,38 +179,81 @@ public class Task extends AbstractTask implements QuantityAddable<Item> {
      * This function should be called only when this {@code Task} is active.
      */
     public void executeAction() {
+        // Select a new order to deliver
+        if (actions.getFirst().key == TaskAction.SELECT_ORDER) {
+            selectOrder();
+        }
+
         TaskAction action = actions.element().key;
         Facility facility = actions.element().val;
 
         // Bind action
         if (action == TaskAction.BIND) {
-            if (facility.canBind(agent)) {
-                facility.bind(agent);
-                actions.remove();
-            } else {
-                agent.reach(facility);
-            }
+            executeBind(facility);
         }
-
         // Unbind action
         if (action == TaskAction.UNBIND) {
-            if (facility.canUnbind()) {
-                facility.unbind();
-                actions.remove();
-            } else {
-                agent.reach(facility);
-            }
+            executeUnbind(facility);
         }
 
         // Check if all actions are completed
         if (actions.isEmpty()) {
-            status = TaskStatus.FULFILLED;
             terminate();
         }
-        // Check if items has been delivered to inform the order object
-        else if (actions.element().key == TaskAction.DELIVERED) {
-            order.onTaskComplete(this);
-            actions.remove();
+    }
+
+    /**
+     * Called when the delivery of {@code Rack} to the active {@code Gate} has been completed.
+     * That is, when the currently active {@code Order} has been partially
+     * fulfilled by this {@code Task}.
+     * <p>
+     * This function should be called from the {@code Gate} after collecting/refilling
+     * the needed items.
+     */
+    public void deliveryCompleted() {
+        activeOrder.onTaskComplete(this);
+        activeOrder = null;
+    }
+
+    /**
+     * Selects the next {@code Order} to be delivered by this {@code Task}.
+     */
+    private void selectOrder() {
+        if (orders.isEmpty()) {
+            actions.removeFirst();
+            return;
+        }
+
+        activeOrder = orders.removeFirst();
+        actions.addFirst(new Pair<>(TaskAction.UNBIND, activeOrder.getDeliveryGate()));
+        actions.addFirst(new Pair<>(TaskAction.BIND, activeOrder.getDeliveryGate()));
+    }
+
+    /**
+     * Reaches and binds with the given {@code Facility}.
+     *
+     * @param facility the {@code Facility} to bind with.
+     */
+    private void executeBind(Facility facility) {
+        if (facility.canBind(agent)) {
+            facility.bind(agent);
+            actions.removeFirst();
+        } else {
+            agent.reach(facility);
+        }
+    }
+
+    /**
+     * Reaches and unbinds from the given {@code Facility}.
+     *
+     * @param facility the {@code Facility} to unbind from.
+     */
+    private void executeUnbind(Facility facility) {
+        if (facility.canUnbind()) {
+            facility.unbind();
+            actions.removeFirst();
+        } else {
+            agent.reach(facility);
         }
     }
 }

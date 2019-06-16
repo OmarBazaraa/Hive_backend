@@ -1,6 +1,7 @@
 package models.tasks;
 
 import models.facilities.Gate;
+import models.facilities.Rack;
 import models.items.Item;
 import models.items.QuantityAddable;
 import models.warehouses.Warehouse;
@@ -19,7 +20,7 @@ import java.util.*;
  * @see Item
  * @see Gate
  */
-public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAssignable {
+public class Order extends AbstractTask implements TaskAssignable, QuantityAddable<Item>, Iterable<Map.Entry<Item, Integer>> {
 
     //
     // Enums
@@ -193,7 +194,7 @@ public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAs
     /**
      * Checks whether this {@code Order} is feasible of being fulfilled regarding
      * its needed items quantities.
-     *
+     * <p>
      * TODO: check agent to rack reach-ability
      * TODO: check agents availability
      * TODO: check REFILL order feasibility
@@ -227,12 +228,7 @@ public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAs
      */
     @Override
     public void activate() {
-        // Reserve all the needed items by the order
-        for (Item item : items.keySet()) {
-            item.reserve(this);
-        }
-
-        // Activate the order
+        reserveItems();
         super.activate();
     }
 
@@ -244,14 +240,8 @@ public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAs
      */
     @Override
     protected void terminate() {
-        // Basic termination
-        super.terminate();
-
         // TODO: add order statistics finalization
-        timeCompleted = Warehouse.getInstance().getTime();
-
-        // Inform the frontend
-        Server.getInstance().enqueueOrderFulfilledLog(this);
+        super.terminate();
     }
 
     /**
@@ -263,12 +253,11 @@ public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAs
      */
     @Override
     public void assignTask(Task task) {
-        // Remove task items from the pending items of the order
-        for (Map.Entry<Item, Integer> pair : task) {
-            add(pair.getKey(), -pair.getValue());
-        }
+        // Inform the frontend
+        Server.getInstance().enqueueTaskAssignedLog(task, this);
 
         // Add task to the set of sub tasks
+        allocateItemsInRack(task);
         subTasks.add(task);
 
         // Check if this is the first assigned task
@@ -276,9 +265,6 @@ public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAs
             timeIssued = Warehouse.getInstance().getTime();
             Server.getInstance().enqueueOrderIssuedLog(this);
         }
-
-        // Inform the frontend
-        Server.getInstance().enqueueTaskAssignedLog(task);
     }
 
     /**
@@ -289,14 +275,66 @@ public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAs
     @Override
     public void onTaskComplete(Task task) {
         // Inform the frontend
-        Server.getInstance().enqueueTaskCompletedLog(task);
+        Server.getInstance().enqueueTaskCompletedLog(task, this);
 
         // Remove completed task
+        acquireAllocatedItemsInRack(task);
         subTasks.remove(task);
 
         // Check if no more pending units and all running tasks have been completed
         if (pendingUnits == 0 && subTasks.isEmpty()) {
+            timeCompleted = Warehouse.getInstance().getTime();
+            Server.getInstance().enqueueOrderFulfilledLog(this);
             terminate();
+        }
+    }
+
+    /**
+     * Reserves the needed number of units in the {@code Warehouse} so as not to
+     * accept infeasible orders in the future.
+     * <p>
+     * This function just reserve the needed number of units, not specific units
+     * in a specific racks.
+     */
+    private void reserveItems() {
+        for (Map.Entry<Item, Integer> pair : items.entrySet()) {
+            pair.getKey().reserve(pair.getValue());
+        }
+    }
+
+    /**
+     * Allocates some of the items in the {@code Rack} specified by the
+     * given {@code Task} for the favor of this {@code Order}, and removes
+     * them from the {@code Order} pending items.
+     */
+    private void allocateItemsInRack(Task task) {
+        Rack rack = task.getRack();
+        Map<Item, Integer> reservedItems = task.getReservedItems(this);
+
+        for (Map.Entry<Item, Integer> pair : reservedItems.entrySet()) {
+            Item item = pair.getKey();
+            int quantity = pair.getValue();
+
+            rack.reserve(item, quantity);
+            add(item, -quantity);
+        }
+    }
+
+    /**
+     * Acquires the previously allocated items in the {@code Rack} specified by the
+     * given {@code Task} for the favor of this {@code Order}.
+     */
+    private void acquireAllocatedItemsInRack(Task task) {
+        Rack rack = task.getRack();
+        Map<Item, Integer> reservedItems = task.getReservedItems(this);
+
+        for (Map.Entry<Item, Integer> pair : reservedItems.entrySet()) {
+            Item item = pair.getKey();
+            int quantity = pair.getValue();
+
+            item.reserve(-quantity);
+            rack.reserve(item, -quantity);
+            rack.add(item, -quantity);
         }
     }
 

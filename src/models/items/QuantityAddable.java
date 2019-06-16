@@ -2,7 +2,6 @@ package models.items;
 
 import models.facilities.Rack;
 import models.tasks.Order;
-import models.tasks.Task;
 
 import java.util.Map;
 
@@ -10,23 +9,11 @@ import java.util.Map;
 /**
  * Interface definition for all quantity addable classes.
  * <p>
- * A {@code QuantityAddable} class is a class that can accept adding and removing quantities.
+ * A {@code QuantityAddable} object is an object that can accept adding and removing quantities.
  * <p>
- * This interface is to be implemented by {@link Rack}, {@link Item}, {@link Order}, {@link Task}.
- *
- * @see Item
- * @see QuantityReservable
+ * This interface is to be implemented by {@link Rack}, {@link Item}, {@link Order}.
  */
-public interface QuantityAddable<T> extends Iterable<Map.Entry<T, Integer>> {
-
-    /**
-     * Returns the first key-value pair in this object.
-     *
-     * @return the first key-value pair.
-     */
-    default Map.Entry<T, Integer> getFirst() {
-        return iterator().next();
-    }
+public interface QuantityAddable<T> {
 
     /**
      * Returns the current quantity of a key of type {@link T} in this object.

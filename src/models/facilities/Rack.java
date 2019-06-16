@@ -3,7 +3,6 @@ package models.facilities;
 import models.agents.Agent;
 import models.items.Item;
 import models.items.QuantityAddable;
-import models.items.QuantityReservable;
 
 import utils.Constants;
 
@@ -31,7 +30,7 @@ import java.util.Map;
  * @see models.facilities.Station Station
  * @see models.tasks.Task Task
  */
-public class Rack extends Facility implements QuantityAddable<Item>, QuantityReservable<Item> {
+public class Rack extends Facility implements QuantityAddable<Item>, Iterable<Item> {
 
     //
     // Member Variables
@@ -58,6 +57,13 @@ public class Rack extends Facility implements QuantityAddable<Item>, QuantityRes
      * The mapped value represents the quantity of this {@code Item}.
      */
     private Map<Item, Integer> items = new HashMap<>();
+
+    /**
+     * The map of reserved items this {@code Rack} is storing.<p>
+     * The key is an {@code Item}.<p>
+     * The mapped value represents the reserved quantity of this {@code Item}.
+     */
+    private Map<Item, Integer> reservedItems = new HashMap<>();
 
     // ===============================================================================================
     //
@@ -131,7 +137,7 @@ public class Rack extends Facility implements QuantityAddable<Item>, QuantityRes
      */
     @Override
     public int get(Item item) {
-        return items.getOrDefault(item, 0);
+        return items.getOrDefault(item, 0) - reservedItems.getOrDefault(item, 0);
     }
 
     /**
@@ -152,9 +158,24 @@ public class Rack extends Facility implements QuantityAddable<Item>, QuantityRes
      */
     @Override
     public void add(Item item, int quantity) {
+        item.add(this, quantity);
         QuantityAddable.update(items, item, quantity);
         storedWeight += quantity * item.getWeight();
-        item.add(this, quantity);
+    }
+
+    /**
+     * Reserves some units of an {@code Item} specified by the given quantity.
+     * Reservation can be conformed or undone by passing negative quantities.
+     * <p>
+     * This function should be called after ensuring that reservation is possible.
+     * <p>
+     * This function should only be called once per {@code Task} activation.
+     *
+     * @param item     the {@code Item} to reserve.
+     * @param quantity the quantity to reserve.
+     */
+    public void reserve(Item item, int quantity) {
+        QuantityAddable.update(reservedItems, item, quantity);
     }
 
     /**
@@ -166,69 +187,8 @@ public class Rack extends Facility implements QuantityAddable<Item>, QuantityRes
      * @return an {@code Iterator}.
      */
     @Override
-    public Iterator<Map.Entry<Item, Integer>> iterator() {
-        return items.entrySet().iterator();
-    }
-
-    /**
-     * Reserves some units specified by the given {@code QuantityAddable} container.
-     * <p>
-     * This functions removes/adds some items from/to the {@code Rack} without
-     * actually changing its weight.
-     * The items are physically removed/added when the reservation is confirmed.
-     * <p>
-     * Positive quantities means the items are to be taken from the {@code Rack}.
-     * While negative quantities means the items are to be added into the {@code Rack}.
-     * <p>
-     * This function should only be called once per {@code Task} activation.
-     *
-     * @param container the {@code QuantityAddable} container.
-     *
-     * @see Rack#confirmReservation(QuantityAddable)
-     */
-    @Override
-    public void reserve(QuantityAddable<Item> container) {
-        for (Map.Entry<Item, Integer> pair : container) {
-            // Get item and its quantity
-            Item item = pair.getKey();
-            int quantity = pair.getValue();
-
-            // Remove the specified quantity for the map of available items
-            QuantityAddable.update(items, item, -quantity);
-        }
-    }
-
-    /**
-     * Confirms the previously assigned reservations specified by the given
-     * {@code QuantityAddable} container.
-     * <p>
-     * This function physically removes/adds some of the reserved items and
-     * change the weight of the {@code Rack} in accordance.
-     * <p>
-     * Positive quantities means the items are to be taken from the {@code Rack}.
-     * While negative quantities means the items are to be added into the {@code Rack}.
-     * <p>
-     * This function should be called after reserving a same or a super container first;
-     * otherwise un-expected behaviour could occur.
-     * <p>
-     * This function should only be called once per {@code Task} termination.
-     *
-     * @param container the {@code QuantityAddable} container.
-     *
-     * @see Rack#reserve(QuantityAddable)
-     */
-    @Override
-    public void confirmReservation(QuantityAddable<Item> container) {
-        for (Map.Entry<Item, Integer> pair : container) {
-            // Get item and its quantity
-            Item item = pair.getKey();
-            int quantity = pair.getValue();
-
-            // Remove item units and confirm reservation
-            storedWeight -= item.getWeight() * quantity;
-            item.add(this, -quantity);
-            item.confirmReservation(container);
-        }
+    public Iterator<Item> iterator() {
+        return items.keySet().iterator();
     }
 
     /**

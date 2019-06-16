@@ -5,7 +5,6 @@ import models.tasks.Task;
 
 import server.Server;
 
-import utils.Constants;
 import utils.Constants.*;
 
 
@@ -52,12 +51,11 @@ public class Gate extends Facility {
     @Override
     public void bind(Agent agent) {
         super.bind(agent);
+        Server.getInstance().enqueueAgentAction(boundAgent, AgentAction.BIND);
+
         // TODO: lock the agent
         Task task = agent.getActiveTask();
-        Rack rack = task.getRack();
-        rack.confirmReservation(task);
-
-        Server.getInstance().enqueueAgentAction(boundAgent, AgentAction.BIND);
+        task.deliveryCompleted();
     }
 
     /**

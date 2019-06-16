@@ -102,17 +102,11 @@ public class Agent extends AbstractAgent {
 
     /**
      * Assigns a new {@code Task} to this {@code Agent}.
-     * <p>
-     * TODO: skip returning the rack back to its place when multiple tasks are assigned with the same rack
      *
      * @param task the new {@code Task} to assign.
      */
     @Override
     public void assignTask(Task task) {
-        if (tasks.isEmpty()) {
-            task.getRack().allocate(this);
-        }
-
         tasks.add(task);
     }
 
@@ -124,10 +118,6 @@ public class Agent extends AbstractAgent {
     @Override
     public void onTaskComplete(Task task) {
         tasks.remove();
-
-        if (tasks.isEmpty()) {
-            task.getRack().deallocate();
-        }
     }
 
     /**

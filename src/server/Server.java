@@ -122,7 +122,7 @@ public class Server {
 
     /**
      * Opens a {@code Session} with the frontend.
-     *
+     * <p>
      * TODO: force only one the frontend client
      *
      * @param sess the frontend {@code Session} to open.
@@ -134,7 +134,7 @@ public class Server {
 
     /**
      * Closes the {@code Session} with the frontend.
-     *
+     * <p>
      * TODO: force only one the frontend client
      *
      * @param sess the frontend {@code Session} to close.
@@ -492,19 +492,21 @@ public class Server {
     /**
      * Enqueues a log about a newly assigned {@code Task} to be sent in the next update message.
      *
-     * @param task the newly assigned {@code Task}.
+     * @param task  the newly assigned {@code Task}.
+     * @param order the associated {@code Order}.
      */
-    public synchronized void enqueueTaskAssignedLog(Task task) {
-        logs.put(ServerEncoder.encodeTaskAssignedLog(task));
+    public synchronized void enqueueTaskAssignedLog(Task task, Order order) {
+        logs.put(ServerEncoder.encodeTaskAssignedLog(task, order));
     }
 
     /**
      * Enqueues a log about a newly completed {@code Task} to be sent in the next update message.
      *
-     * @param task the newly assigned {@code Task}.
+     * @param task  the newly assigned {@code Task}.
+     * @param order the associated {@code Order}.
      */
-    public synchronized void enqueueTaskCompletedLog(Task task) {
-        logs.put(ServerEncoder.encodeTaskCompletedLog(task));
+    public synchronized void enqueueTaskCompletedLog(Task task, Order order) {
+        logs.put(ServerEncoder.encodeTaskCompletedLog(task, order));
     }
 
     /**

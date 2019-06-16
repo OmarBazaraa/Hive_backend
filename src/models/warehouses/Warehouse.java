@@ -127,7 +127,7 @@ public class Warehouse extends AbstractWarehouse {
     @Override
     protected void dispatchPendingOrders() {
         // Skip if no pending orders
-        if (pendingOrders.isEmpty()) {
+        if (pendingOrders.isEmpty() || readyAgents.isEmpty()) {
             return;
         }
 
@@ -137,7 +137,7 @@ public class Warehouse extends AbstractWarehouse {
         //
         // Iterate over every pending order and tries to dispatch it
         //
-        for (int i = 0; i < size && !readyAgents.isEmpty(); ++i) {
+        for (int i = 0; i < size && readyAgents.size() > 0; ++i) {
             // Get the current order
             Order order = pendingOrders.remove();
 
