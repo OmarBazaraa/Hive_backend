@@ -34,8 +34,9 @@ public class Task extends AbstractTask implements QuantityAddable<Item> {
      * Different actions to be done by a {@code Task} during its lifecycle.
      */
     public enum TaskAction {
-        BIND,
-        UNBIND
+        BIND,       // Go and bind with a facility
+        UNBIND,     // Go and unbind with a facility
+        DELIVERED   // Items of the task has been delivered
     }
 
     // ===============================================================================================
@@ -208,10 +209,11 @@ public class Task extends AbstractTask implements QuantityAddable<Item> {
         order.assignTask(this);
 
         // Add actions
-        actions.add(new Pair<>(TaskAction.BIND, rack));    // 1. Load the rack
-        actions.add(new Pair<>(TaskAction.BIND, gate));    // 2. Bind with the gate
-        actions.add(new Pair<>(TaskAction.UNBIND, gate));  // 3. Unbind with the gate
-        actions.add(new Pair<>(TaskAction.UNBIND, rack));  // 4. Offload the rack
+        actions.add(new Pair<>(TaskAction.BIND, rack));         // 1. Load the rack
+        actions.add(new Pair<>(TaskAction.BIND, gate));         // 2. Bind with the gate
+        actions.add(new Pair<>(TaskAction.UNBIND, gate));       // 3. Unbind with the gate
+        actions.add(new Pair<>(TaskAction.DELIVERED, null));    // 4. Items has been added/removed
+        actions.add(new Pair<>(TaskAction.UNBIND, rack));       // 5. Offload the rack
 
         // Activate the task
         super.activate();
@@ -227,7 +229,6 @@ public class Task extends AbstractTask implements QuantityAddable<Item> {
      */
     @Override
     protected void terminate() {
-        order.onTaskComplete(this);
         agent.onTaskComplete(this);
         super.terminate();
     }
@@ -277,6 +278,11 @@ public class Task extends AbstractTask implements QuantityAddable<Item> {
         if (actions.isEmpty()) {
             status = TaskStatus.FULFILLED;
             terminate();
+        }
+        // Check if items has been delivered to inform the order object
+        else if (actions.element().key == TaskAction.DELIVERED) {
+            order.onTaskComplete(this);
+            actions.remove();
         }
     }
 }
