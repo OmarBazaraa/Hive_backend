@@ -104,17 +104,15 @@ public class Planner {
      *
      * @param map         the map grid to compute upon.
      * @param dst         the destination position.
-     * @param accessTypes the accessible {@code CellType} to set.
      *
      * @return a 2D {@code GuideCell} array representing the guide map to reach the destination.
      */
-    public static GuideCell[][] bfs(MapGrid map, Position dst, CellType... accessTypes) {
+    public static GuideCell[][] bfs(MapGrid map, Position dst) {
         // Initialize BFS algorithm requirements
-        Dimensions dim = map.getDimensions();
-        Queue<Position> q = new LinkedList<>();
-        GuideCell[][] ret = GuideCell.allocate2D(dim.rows, dim.cols);
+        GuideCell[][] ret = GuideCell.allocate2D(map.getRows(), map.getCols());
 
-        // Add BFS base case
+        // Create the planning queue and add the initial state
+        Queue<Position> q = new LinkedList<>();
         q.add(dst);
         ret[dst.row][dst.col].setDistance(0);
 
@@ -126,22 +124,21 @@ public class Planner {
 
             // Expanding in all directions
             for (Direction dir : Direction.values()) {
-                // Get previous position
-                Position prv = map.previous(cur, dir);
+                // Get net position
+                Position nxt = map.next(cur, dir);
 
-                // Continue if not accessible cell
-                if (!map.isAccessible(prv, accessTypes)) {
+                // Skip if out of bound or obstacle cell or already visited
+                if (map.isObstacle(nxt) || ret[nxt.row][nxt.col].isReachable()) {
                     continue;
                 }
 
-                // Continue if already visited
-                if (ret[prv.row][prv.col].isReachable()) {
-                    continue;
-                }
+                // Set the guide value
+                ret[nxt.row][nxt.col].setDistance(dis + 1);
 
-                // Add expanded cell to the queue and update its guide values
-                q.add(prv);
-                ret[prv.row][prv.col].setDistance(dis + 1);
+                // Add expanded cell to the queue only if it is not holding a facility
+                if (!map.get(nxt).hasFacility()) {
+                    q.add(nxt);
+                }
             }
         }
 
@@ -273,7 +270,17 @@ public class Planner {
         return null;
     }
 
-
+    /**
+     * Checks whether it is possible to further explore and expand this plan node or not.
+     *
+     * @param nxt     the {@code PlanNode} to check.
+     * @param agent   the associated {@code Agent}.
+     * @param dst     the final destination of the {@code Agent}.
+     * @param map     the grid map of the {@code Warehouse}.
+     * @param timeMap the timeline map.
+     *
+     * @return {@code true} if it is possible to explore; {@code false} otherwise.
+     */
     private static boolean canExplore(PlanNode nxt, Agent agent, Position dst, MapGrid map, TimeGrid timeMap) {
         // Skip out of bound or visited states
         if (!map.isInBound(nxt.pos) || nxt.isVisited()) {
