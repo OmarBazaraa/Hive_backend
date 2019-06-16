@@ -1,5 +1,8 @@
 package algorithms.dispatcher;
 
+import algorithms.dispatcher.task_allocator.RackSelector;
+import algorithms.dispatcher.task_allocator.AgentAssigner;
+import models.HiveObject;
 import models.agents.Agent;
 import models.facilities.Rack;
 import models.items.Item;
@@ -19,7 +22,7 @@ public class Dispatcher {
     /**
      * Dispatches the given {@code Order} into a set of specific tasks assigned
      * to a set of agents.
-     *
+     * <p>
      * TODO: support refill orders
      *
      * @param order       the {@code Order} needed to be dispatched.
@@ -32,7 +35,10 @@ public class Dispatcher {
         //
         while (order.isPending() && !readyAgents.isEmpty()) {
             // Select the most suitable racks
-            // List<Rack> selectedRacks = RackSelector.selectRacks(order);
+//            List<Rack> selectedRacks = RackSelector.selectRacks(order);
+
+            // Assign agents to the selected racks
+//            Map<HiveObject, HiveObject> assignment = AgentAssigner.assignAgents(order.getDeliveryGate().getPosition(), selectedRacks, readyAgents);
 
             // Get current needed item in the order
             Item item = order.getFirst().getKey();

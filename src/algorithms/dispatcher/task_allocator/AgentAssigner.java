@@ -21,10 +21,12 @@ public class AgentAssigner {
      * @param gatePos         {@code Position} the position of the gate.
      * @param selectedRacks   list of the selected {@code Rack}s.
      * @param candidateAgents list of the candidate agents {@code agent}s
+     *
      * @return A matching solution for the assignment problem.
      */
-    public static Map<HiveObject, HiveObject> assignAgents(Position gatePos, List<Rack> selectedRacks, List<Agent> candidateAgents) {
+    public static Map<HiveObject, HiveObject> assignAgents(Position gatePos, List<Rack> selectedRacks, Set<Agent> candidateAgents) {
         // Create the cost bipartite graph
+        int nRacks = selectedRacks.size();
         SimpleDirectedWeightedGraph<HiveObject, DefaultWeightedEdge> costGraph = new
                 SimpleDirectedWeightedGraph<HiveObject, DefaultWeightedEdge>(DefaultWeightedEdge.class);
 
@@ -32,14 +34,27 @@ public class AgentAssigner {
         Set<HiveObject> racksSet = new HashSet<>();
         Set<HiveObject> agentsSet = new HashSet<>();
 
-        for (Rack rack : selectedRacks) {
+        for (int i = 0; i < Math.max(nRacks, candidateAgents.size()); i++) {
+            Rack rack = null;
+            if (i < nRacks) {
+                rack = selectedRacks.get(i);
+            } else {
+                rack = new Rack();
+            }
+
             racksSet.add(rack);
             costGraph.addVertex(rack);
             for (Agent agent : candidateAgents) {
                 if (!costGraph.containsVertex(agent))
                     costGraph.addVertex(agent);
                 costGraph.addEdge(rack, agent);
-                costGraph.setEdgeWeight(rack, agent, calculateOperationCost(rack.getPosition(), gatePos, agent.getPosition()));
+
+                int cost = 0;
+                if (i < nRacks) {
+                    cost = calculateOperationCost(rack.getPosition(), gatePos, agent.getPosition());
+                }
+
+                costGraph.setEdgeWeight(rack, agent, cost);
                 agentsSet.add(agent);
             }
         }
@@ -66,9 +81,10 @@ public class AgentAssigner {
      * @param rackPos  {@code Position} of the rack.
      * @param gatePos  {@code Position} of the gate.
      * @param agentPos {@code Position} of the agent.
+     *
      * @return the estimated operational cost.
      */
-    private static double calculateOperationCost(Position rackPos, Position gatePos, Position agentPos) {
+    private static int calculateOperationCost(Position rackPos, Position gatePos, Position agentPos) {
         // TODO @Samir55 try different fixed and dynamic cost values.
         return agentPos.distanceTo(rackPos) * 19 + agentPos.distanceTo(gatePos) * 30 * 2;
     }
