@@ -1,7 +1,7 @@
 package models.items;
 
 import models.facilities.Rack;
-import models.tasks.Order;
+import models.tasks.orders.Order;
 
 import java.util.Map;
 

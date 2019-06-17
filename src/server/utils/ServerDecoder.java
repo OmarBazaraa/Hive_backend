@@ -7,8 +7,9 @@ import models.facilities.Station;
 import models.items.Item;
 import models.items.QuantityAddable;
 import models.maps.MapCell;
-import models.tasks.Order;
-import models.tasks.Order.OrderType;
+import models.tasks.orders.CollectOrder;
+import models.tasks.orders.Order;
+import models.tasks.orders.RefillOrder;
 import models.warehouses.Warehouse;
 
 import server.exceptions.DataException;
@@ -277,15 +278,25 @@ public class ServerDecoder {
         if (warehouse.getOrderById(id) != null) {
             throw new DataException("Order with duplicate id: " + id + ".");
         }
-        if (type != ServerConstants.TYPE_ORDER_COLLECT && type != ServerConstants.TYPE_ORDER_REFILL) {
-            throw new DataException("Order-" + id + " with invalid type: " + type + ".");
-        }
         if (gate == null) {
             throw new DataException("Order-" + id + " is assigned invalid gate with id: " + gateId + ".");
         }
 
+        //
         // Create order
-        Order ret = new Order(id, decodeOrderType(type), gate);
+        //
+        Order ret;
+
+        switch (type) {
+            case ServerConstants.TYPE_ORDER_COLLECT:
+                ret = decodeCollectOrder(data, id, gate);
+                break;
+            case ServerConstants.TYPE_ORDER_REFILL:
+                ret = decodeRefillOrder(data, id, gate);
+                break;
+            default:
+                throw new DataException("Order-" + id + " with invalid type: " + type + ".");
+        }
 
         // Extract items
         decodeItemsList(itemsJSON, ret, "Order-" + id);
@@ -307,12 +318,25 @@ public class ServerDecoder {
         return Direction.values()[dir];
     }
 
-    public static OrderType decodeOrderType(int type) {
-        if (type == ServerConstants.TYPE_ORDER_COLLECT) {
-            return OrderType.COLLECT;
-        } else {
-            return OrderType.REFILL;
+    public static CollectOrder decodeCollectOrder(JSONObject data, int id, Gate gate) {
+        // Create collect order
+        return new CollectOrder(id, gate);
+    }
+
+    public static RefillOrder decodeRefillOrder(JSONObject data, int id, Gate gate) throws DataException {
+        // Extract received properties
+        int rackId = data.getInt(ServerConstants.KEY_RACK_ID);
+        Rack rack = warehouse.getRackById(rackId);
+
+        //
+        // Checks
+        //
+        if (rack == null) {
+            throw new DataException("Order-" + id + " is assigned invalid rack with id: " + rackId + ".");
         }
+
+        // Create refill order
+        return new RefillOrder(id, gate, rack);
     }
 
     public static void decodeItemsList(JSONArray data, QuantityAddable<Item> cont, String name) throws JSONException, DataException {
@@ -347,7 +371,11 @@ public class ServerDecoder {
         // TODO: check agents availability
         // TODO: check agents ability to load racks of this order
 
-        if (order.getType() == OrderType.COLLECT) {
+        if (order instanceof CollectOrder) {
+            //
+            // Collect order feasibility checks
+            //
+
             List<Integer> list = new ArrayList<>();
 
             for (var pair : order) {
@@ -360,10 +388,32 @@ public class ServerDecoder {
             }
 
             if (list.size() > 0) {
-                throw new DataException("Order-" + order.getId() + " is currently infeasible due to shortage in items: " + list + ".");
+                throw new DataException("Order-" + order.getId() +
+                        " is currently infeasible due to shortage in items: " + list + ".");
             }
         } else {
-            // TODO: check REFILL order feasibility
+            //
+            // Refill order feasibility checks
+            //
+
+            int addedWeight = 0;
+
+            for (var pair : order) {
+                Item item = pair.getKey();
+                int quantity = pair.getValue();
+
+                addedWeight += item.getWeight() * quantity;
+            }
+
+            Rack rack = ((RefillOrder) order).getRefillRack();
+
+            int totWeight = rack.getStoredWeight() + addedWeight;
+
+            if (totWeight > rack.getCapacity()) {
+                throw new DataException("Order-" + order.getId() +
+                        " is currently infeasible as the stored weight of rack-" + rack.getId() +
+                        " will exceed the maximum limit by: " + (totWeight - rack.getCapacity()) + ".");
+            }
         }
     }
 }

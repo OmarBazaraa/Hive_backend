@@ -3,7 +3,7 @@ package server.utils;
 import models.agents.Agent;
 
 import models.items.Item;
-import models.tasks.Order;
+import models.tasks.orders.Order;
 import models.tasks.Task;
 
 import utils.Constants.*;
@@ -47,23 +47,21 @@ public class ServerEncoder {
         return encodeMsg(ServerConstants.TYPE_LOG_TASK_ASSIGNED, data);
     }
 
-    public static JSONObject encodeTaskCompletedLog(Task task, Order order) {
-        JSONArray items = new JSONArray();
+    public static JSONObject encodeTaskCompletedLog(Task task, Order order, Map<Item, Integer> items) {
+        JSONArray itemsJSON = new JSONArray();
 
-        Map<Item, Integer> plannedItems = task.getReservedItems(order);
-
-        for (var pair : plannedItems.entrySet()) {
+        for (var pair : items.entrySet()) {
             JSONObject item = new JSONObject();
             item.put(ServerConstants.KEY_ID, pair.getKey().getId());
             item.put(ServerConstants.KEY_ITEM_QUANTITY, -pair.getValue());
-            items.put(item);
+            itemsJSON.put(item);
         }
 
         JSONObject data = new JSONObject();
         data.put(ServerConstants.KEY_ORDER_ID, order.getId());
         data.put(ServerConstants.KEY_AGENT_ID, task.getAgent().getId());
         data.put(ServerConstants.KEY_RACK_ID, task.getRack().getId());
-        data.put(ServerConstants.KEY_ITEMS, items);
+        data.put(ServerConstants.KEY_ITEMS, itemsJSON);
 
         return encodeMsg(ServerConstants.TYPE_LOG_TASK_COMPLETED, data);
     }

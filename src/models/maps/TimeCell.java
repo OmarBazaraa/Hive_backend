@@ -8,7 +8,7 @@ import java.util.TreeMap;
 /**
  * This {@code TimeCell} class represents a timeline cell used by {@link TimeGrid} class.
  * <p>
- * A time cell represents the timeline of the passing {@link Agent agents}
+ * A time cell represents the timeline of the passing {@link Agent Agents}
  * through a cell in the {@link models.warehouses.Warehouse Warehouse}.
  */
 public class TimeCell extends Cell {

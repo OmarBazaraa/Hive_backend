@@ -8,7 +8,7 @@ import models.items.Item;
 import models.maps.MapCell;
 import models.maps.MapGrid;
 import models.maps.TimeGrid;
-import models.tasks.Order;
+import models.tasks.orders.Order;
 
 import java.util.*;
 

@@ -6,6 +6,7 @@ import models.items.Item;
 import models.facilities.Gate;
 import models.facilities.Rack;
 
+import models.tasks.orders.Order;
 import utils.Pair;
 
 import java.util.*;
@@ -61,13 +62,6 @@ public class Task extends AbstractTask {
      * The list of associated orders in which this {@code Task} is a part of.
      */
     private LinkedList<Order> orders = new LinkedList<>();
-
-    /**
-     * The map of reserved items by this {@code Task} for the associated orders.<p>
-     * The key is an {@code Order}.<p>
-     * The mapped value represents a map of the reserved items for this {@code Order}.
-     */
-    private Map<Order, Map<Item, Integer>> ordersReservedItems = new HashMap<>();
 
     /**
      * The queue of actions to be done by the assigned {@code Agent} to complete this {@code Task}.
@@ -127,24 +121,10 @@ public class Task extends AbstractTask {
      * Adds a new {@code Order} to be partially fulfilled by this {@code Task}.
      *
      * @param order the new {@code Order} to add.
-     * @param items a map of reserved items for the given {@code Order}.
      */
-    public void addOrder(Order order, Map<Item, Integer> items) {
+    public void addOrder(Order order) {
         orders.addLast(order);
-        ordersReservedItems.put(order, items);
         order.assignTask(this);
-    }
-
-    /**
-     * Returns the map of reserved items for the given {@code Order}
-     * by this {@code Task}.
-     *
-     * @param order the {@code Order} to get its reserved items.
-     *
-     * @return the map of reserved items.
-     */
-    public Map<Item, Integer> getReservedItems(Order order) {
-        return ordersReservedItems.get(order);
     }
 
     /**

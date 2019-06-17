@@ -2,7 +2,7 @@ package models.items;
 
 import models.Entity;
 import models.facilities.Rack;
-import models.tasks.Order;
+import models.tasks.orders.Order;
 import models.tasks.Task;
 import utils.Utility;
 

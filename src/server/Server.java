@@ -1,7 +1,8 @@
 package server;
 
 import models.agents.Agent;
-import models.tasks.Order;
+import models.items.Item;
+import models.tasks.orders.Order;
 import models.tasks.Task;
 import models.warehouses.Warehouse;
 
@@ -23,6 +24,7 @@ import org.eclipse.jetty.websocket.api.annotations.*;
 import spark.Spark;
 
 import java.io.IOException;
+import java.util.Map;
 
 
 /**
@@ -504,9 +506,10 @@ public class Server {
      *
      * @param task  the newly assigned {@code Task}.
      * @param order the associated {@code Order}.
+     * @param items the map of add/removed items by the completed {@code Task}.
      */
-    public synchronized void enqueueTaskCompletedLog(Task task, Order order) {
-        logs.put(ServerEncoder.encodeTaskCompletedLog(task, order));
+    public synchronized void enqueueTaskCompletedLog(Task task, Order order, Map<Item, Integer> items) {
+        logs.put(ServerEncoder.encodeTaskCompletedLog(task, order, items));
     }
 
     /**

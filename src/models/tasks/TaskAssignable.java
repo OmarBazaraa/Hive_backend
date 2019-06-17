@@ -1,6 +1,7 @@
 package models.tasks;
 
 import models.agents.Agent;
+import models.tasks.orders.Order;
 
 
 /**

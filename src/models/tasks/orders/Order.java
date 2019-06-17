@@ -1,12 +1,14 @@
-package models.tasks;
+package models.tasks.orders;
 
 import models.facilities.Gate;
 import models.facilities.Rack;
 import models.items.Item;
 import models.items.QuantityAddable;
+import models.tasks.AbstractTask;
+import models.tasks.Task;
+import models.tasks.TaskAssignable;
 import models.warehouses.Warehouse;
 import server.Server;
-import utils.Utility;
 
 import java.util.*;
 
@@ -14,73 +16,69 @@ import java.util.*;
 /**
  * This {@code Order} class represents an order in our Hive Warehousing System.
  * <p>
- * An order is defined by a list of needed {@link Item Items}, and a {@link Gate}
+ * An order is defined by a list of {@link Item Items}, and a {@link Gate}
  * where the {@code Order} must be delivered.
+ * <p>
+ * An order can be of one of the following types:
+ * <p>
+ * 1. Collect: where items are taken from the {@link Warehouse} to a {@link Gate}.
+ * 2. Refill: where items are taken from a {@link Gate} into the {@link Warehouse}.
  *
  * @see Task
  * @see Item
  * @see Gate
+ * @see CollectOrder
+ * @see RefillOrder
  */
-public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAssignable {
+abstract public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAssignable {
 
-    //
-    // Enums
-    //
-
-    /**
-     * Different {@code Order} types.
-     */
-    public enum OrderType {
-        COLLECT,
-        REFILL
-    }
-
-    // ===============================================================================================
     //
     // Member Variables
     //
 
     /**
-     * The type of this {@code Order}.
-     */
-    private OrderType type;
-
-    /**
      * The {@code Gate} where this {@code Order} must be delivered.
      */
-    private Gate deliveryGate;
+    protected Gate deliveryGate;
 
     /**
      * The number of pending units this {@code Order} is needing.
      */
-    private int pendingUnits;
+    protected int pendingUnits;
 
     /**
      * The map of pending items this {@code Order} is needing.<p>
      * The key is an {@code Item}.<p>
      * The mapped value represents the needed quantity of this {@code Item}.
      */
-    private Map<Item, Integer> items = new HashMap<>();
+    protected Map<Item, Integer> pendingItems = new HashMap<>();
+
+    /**
+     * The map of reserved items for this {@code Order} by each {@code Task}.<p>
+     * The key is a {@code Task}.<p>
+     * The mapped value represents a map of the reserved items by this {@code Order}.
+     */
+    protected Map<Task, Map<Item, Integer>> reservedItems = new HashMap<>();
 
     /**
      * The set of sub tasks for fulfilling this {@code Order}.
      */
-    private Set<Task> subTasks = new HashSet<>();
+    protected Set<Task> subTasks = new HashSet<>();
 
     /**
      * The time when this {@code Order} has been received.
      */
-    private long timeReceived = -1;
+    protected long timeReceived = -1;
 
     /**
      * The time when this {@code Order} has been issued.
      */
-    private long timeIssued = -1;
+    protected long timeIssued = -1;
 
     /**
      * The time when this {@code Order} has been completed.
      */
-    private long timeCompleted = -1;
+    protected long timeCompleted = -1;
 
     // ===============================================================================================
     //
@@ -90,24 +88,13 @@ public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAs
     /**
      * Constructs a new {@code Order} object.
      *
-     * @param id           the id of the {@code Order}.
-     * @param type         the type of the {@code Order}.
-     * @param deliveryGate the delivery {@code Gate} of the {@code Order}.
+     * @param id   the id of the {@code Order}.
+     * @param gate the delivery {@code Gate} of the {@code Order}.
      */
-    public Order(int id, OrderType type, Gate deliveryGate) {
+    public Order(int id, Gate gate) {
         super(id);
-        this.type = type;
-        this.deliveryGate = deliveryGate;
+        this.deliveryGate = gate;
         this.timeReceived = Warehouse.getInstance().getTime();
-    }
-
-    /**
-     * Returns the type of this {@code Order}. Either collect or refill order type.
-     *
-     * @return the type of this {@code Order}.
-     */
-    public OrderType getType() {
-        return type;
     }
 
     /**
@@ -152,7 +139,7 @@ public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAs
      */
     @Override
     public int get(Item item) {
-        return items.getOrDefault(item, 0);
+        return pendingItems.getOrDefault(item, 0);
     }
 
     /**
@@ -171,11 +158,7 @@ public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAs
      */
     @Override
     public void add(Item item, int quantity) {
-        if (type == OrderType.REFILL) {
-            quantity = -quantity;
-        }
-
-        QuantityAddable.update(items, item, quantity);
+        QuantityAddable.update(pendingItems, item, quantity);
         pendingUnits += quantity;
     }
 
@@ -189,7 +172,7 @@ public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAs
      */
     @Override
     public Iterator<Map.Entry<Item, Integer>> iterator() {
-        return items.entrySet().iterator();
+        return pendingItems.entrySet().iterator();
     }
 
     /**
@@ -228,7 +211,8 @@ public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAs
         // Inform the frontend
         Server.getInstance().enqueueTaskAssignedLog(task, this);
 
-        // Add task to the set of sub tasks
+        // Add task to the order
+        planItemsToReserve(task);
         reserveItemsInRack(task);
         subTasks.add(task);
 
@@ -247,9 +231,9 @@ public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAs
     @Override
     public void onTaskComplete(Task task) {
         // Inform the frontend
-        Server.getInstance().enqueueTaskCompletedLog(task, this);
+        Server.getInstance().enqueueTaskCompletedLog(task, this, reservedItems.get(task));
 
-        // Remove completed task
+        // Finalize completed task
         acquireReservedItemsInRack(task);
         subTasks.remove(task);
 
@@ -262,14 +246,22 @@ public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAs
     }
 
     /**
-     * Reserves the needed number of units in the {@code Warehouse} so as not to
+     * Plans the set of items to reserve for the favor of this {@code Order}
+     * by the given {@code Task}.
+     *
+     * @param task the {@code Task} responsible for carrying out the reservation.
+     */
+    abstract protected void planItemsToReserve(Task task);
+
+    /**
+     * Reserves the number of units in the {@code Warehouse} so as not to
      * accept infeasible orders in the future.
      * <p>
-     * This function just reserve the needed number of units, not specific units
-     * in specific racks.
+     * This function just reserve the number of units to add or remove,
+     * not specific units in specific racks.
      */
-    private void reserveItems() {
-        for (var pair : items.entrySet()) {
+    protected void reserveItems() {
+        for (var pair : pendingItems.entrySet()) {
             Item item = pair.getKey();
             int quantity = pair.getValue();
 
@@ -283,11 +275,11 @@ public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAs
      * given {@code Task} for the favor of this {@code Order}, and removes
      * them from the {@code Order} pending items.
      */
-    private void reserveItemsInRack(Task task) {
+    protected void reserveItemsInRack(Task task) {
         Rack rack = task.getRack();
-        Map<Item, Integer> reservedItems = task.getReservedItems(this);
+        Map<Item, Integer> items = reservedItems.get(task);
 
-        for (var pair : reservedItems.entrySet()) {
+        for (var pair : items.entrySet()) {
             Item item = pair.getKey();
             int quantity = pair.getValue();
 
@@ -304,36 +296,17 @@ public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAs
      * Acquires the previously Reserves items in the {@code Rack} specified by the
      * given {@code Task} for the favor of this {@code Order}.
      */
-    private void acquireReservedItemsInRack(Task task) {
+    protected void acquireReservedItemsInRack(Task task) {
         Rack rack = task.getRack();
-        Map<Item, Integer> reservedItems = task.getReservedItems(this);
+        Map<Item, Integer> items = reservedItems.get(task);
 
-        for (var pair : reservedItems.entrySet()) {
-            int quantity = pair.getValue();
+        for (var pair : items.entrySet()) {
             Item item = pair.getKey();
+            int quantity = pair.getValue();
 
             // Acquire the current item from the rack
             rack.reserve(item, -quantity);      // Confirm previous specific reservation of item units in the rack
             rack.add(item, -quantity);          // Remove items from the rack
         }
-    }
-
-    /**
-     * Returns a string representation of this {@code Order}.
-     * In general, the toString method returns a string that "textually represents" this object.
-     *
-     * @return a string representation of this {@code Order}.
-     */
-    @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder();
-
-        builder.append("Order: {");
-        builder.append(" id: ").append(id).append(",");
-        builder.append(" gate_id: ").append(deliveryGate.getId()).append(",");
-        builder.append(" items: ").append(Utility.stringifyItemQuantities(items));
-        builder.append(" }");
-
-        return builder.toString();
     }
 }

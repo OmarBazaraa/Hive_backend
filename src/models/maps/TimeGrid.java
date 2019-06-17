@@ -5,7 +5,7 @@ import models.maps.utils.Position;
 
 
 /**
- * This {@code TimeGrid} class represents a timeline map of the {@link Agent agents}
+ * This {@code TimeGrid} class represents a timeline map of the {@link Agent Agents}
  * in our Hive Warehouse System.
  */
 public class TimeGrid extends Grid<TimeCell> {

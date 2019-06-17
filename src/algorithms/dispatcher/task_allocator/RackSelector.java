@@ -4,7 +4,7 @@ import models.facilities.Rack;
 import models.items.Item;
 import models.maps.MapGrid;
 import models.maps.utils.Position;
-import models.tasks.Order;
+import models.tasks.orders.Order;
 import models.warehouses.Warehouse;
 import utils.Constants.*;
 import utils.Pair;

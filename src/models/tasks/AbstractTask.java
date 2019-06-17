@@ -1,6 +1,7 @@
 package models.tasks;
 
 import models.Entity;
+import models.tasks.orders.Order;
 
 
 /**

@@ -3,8 +3,8 @@ package models.warehouse;
 import models.facilities.Gate;
 import models.facilities.Rack;
 import models.items.Item;
-import models.tasks.Order;
-import models.tasks.Order.OrderType;
+import models.tasks.orders.CollectOrder;
+import models.tasks.orders.Order;
 import models.warehouses.Warehouse;
 
 import org.junit.Assert;
@@ -36,7 +36,7 @@ public class WarehouseTest {
         warehouse.print();
 
         // Create new order
-        Order order = new Order(1, OrderType.COLLECT, gate);
+        Order order = new CollectOrder(1, gate);
         order.add(item, 1);
         warehouse.addOrder(order);
 
@@ -81,7 +81,7 @@ public class WarehouseTest {
         warehouse.print();
 
         // Create new order
-        Order order = new Order(1, OrderType.COLLECT, gate);
+        Order order = new CollectOrder(1, gate);
         order.add(item1, 3);
         order.add(item2, 4);
         warehouse.addOrder(order);
@@ -136,11 +136,11 @@ public class WarehouseTest {
         warehouse.print();
 
         // Create new orders
-        Order order1 = new Order(1, OrderType.COLLECT, gate2);
+        Order order1 = new CollectOrder(1, gate2);
         order1.add(item1, 1);
         warehouse.addOrder(order1);
 
-        Order order2 = new Order(2, OrderType.COLLECT, gate1);
+        Order order2 = new CollectOrder(2, gate1);
         order2.add(item2, 1);
         warehouse.addOrder(order2);
 

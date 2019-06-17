@@ -6,7 +6,7 @@ import models.facilities.Gate;
 import models.facilities.Rack;
 import models.facilities.Station;
 import models.maps.TimeGrid;
-import models.tasks.Order;
+import models.tasks.orders.Order;
 import models.tasks.Task;
 
 import java.util.*;
