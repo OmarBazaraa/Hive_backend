@@ -42,7 +42,7 @@ public class RackSelector {
             double bestRank = 1e9;
             Map<Item, Integer> bestRackItemsQs = null;
 
-            for (Map.Entry<Rack, Integer> rackEntry : candidateRacks.entrySet()) {
+            for (var rackEntry : candidateRacks.entrySet()) {
                 Rack rack = rackEntry.getKey();
 
                 // Calculate the maximum needed quantity of order items that can be taken out of each candidate rack
@@ -76,7 +76,7 @@ public class RackSelector {
 
             // Update the left quantities of the orders items and the total selected racks quantities
             orderTotalQs = 0;
-            for (Map.Entry<Item, Integer> itemEntry : order) {
+            for (var itemEntry : order) {
                 Item item = itemEntry.getKey();
                 int q = itemEntry.getValue();
                 int bestRackQ = bestRackItemsQs.get(item);
@@ -122,7 +122,7 @@ public class RackSelector {
     private static int exchangeRacks(Map<Rack, Integer> rackSet, Map<Rack, Integer> selectedRacks,
                                      Map<Rack, Integer> tmpCandidateRacks,
                                      Map<Item, Integer> selectedRacksItemsQs, Order order, int estCost) {
-        for (Map.Entry<Rack, Integer> rackEntry : rackSet.entrySet()) {
+        for (var rackEntry : rackSet.entrySet()) {
             Rack rack = rackEntry.getKey();
             Map<Item, Integer> q = new HashMap<>();
 
@@ -163,9 +163,9 @@ public class RackSelector {
     private static int removeRedundantRack(Map<Rack, Integer> src, Map<Rack, Integer> dest,
                                            Map<Item, Integer> srcRacksQs, Order order, boolean updateMaps) {
         int savedCost = 0;
-        Iterator<Map.Entry<Rack, Integer>> rackEntriesIterator = src.entrySet().iterator();
+        var rackEntriesIterator = src.entrySet().iterator();
         while (rackEntriesIterator.hasNext()) {
-            Map.Entry<Rack, Integer> rackEntry = rackEntriesIterator.next();
+            var rackEntry = rackEntriesIterator.next();
             Rack rack = rackEntry.getKey();
 
             boolean redundant = true;
@@ -208,7 +208,7 @@ public class RackSelector {
         Map<Item, Integer> ret = new HashMap<>();
 
         while (orderItems.hasNext()) {
-            Map.Entry<Item, Integer> itemEntry = orderItems.next();
+            var itemEntry = orderItems.next();
             ret.put(itemEntry.getKey(), Math.min(itemEntry.getValue(), rack.get(itemEntry.getKey())));
         }
 
@@ -266,7 +266,7 @@ public class RackSelector {
         while (itemsIterator.hasNext()) {
             Item item = itemsIterator.next().getKey();
 
-            for (Map.Entry<Rack, Integer> racks : item) {
+            for (var racks : item) {
                 ret.putIfAbsent(racks.getKey(), 0);
             }
         }

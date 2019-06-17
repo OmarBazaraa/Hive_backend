@@ -269,7 +269,7 @@ public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAs
      * in specific racks.
      */
     private void reserveItems() {
-        for (Map.Entry<Item, Integer> pair : items.entrySet()) {
+        for (var pair : items.entrySet()) {
             Item item = pair.getKey();
             int quantity = pair.getValue();
 
@@ -287,7 +287,7 @@ public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAs
         Rack rack = task.getRack();
         Map<Item, Integer> reservedItems = task.getReservedItems(this);
 
-        for (Map.Entry<Item, Integer> pair : reservedItems.entrySet()) {
+        for (var pair : reservedItems.entrySet()) {
             Item item = pair.getKey();
             int quantity = pair.getValue();
 
@@ -308,7 +308,7 @@ public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAs
         Rack rack = task.getRack();
         Map<Item, Integer> reservedItems = task.getReservedItems(this);
 
-        for (Map.Entry<Item, Integer> pair : reservedItems.entrySet()) {
+        for (var pair : reservedItems.entrySet()) {
             int quantity = pair.getValue();
             Item item = pair.getKey();
 

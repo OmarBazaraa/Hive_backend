@@ -52,7 +52,7 @@ public class Utility {
 
         builder.append("{");
 
-        for (Map.Entry<Item, Integer> pair : map.entrySet()) {
+        for (var pair : map.entrySet()) {
             if (first) {
                 first = false;
             } else {
@@ -81,7 +81,7 @@ public class Utility {
 
         builder.append("{");
 
-        for (Map.Entry<Rack, Integer> pair : map.entrySet()) {
+        for (var pair : map.entrySet()) {
             if (first) {
                 first = false;
             } else {

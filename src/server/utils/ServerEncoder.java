@@ -52,7 +52,7 @@ public class ServerEncoder {
 
         Map<Item, Integer> plannedItems = task.getReservedItems(order);
 
-        for (Map.Entry<Item, Integer> pair : plannedItems.entrySet()) {
+        for (var pair : plannedItems.entrySet()) {
             JSONObject item = new JSONObject();
             item.put(ServerConstants.KEY_ID, pair.getKey().getId());
             item.put(ServerConstants.KEY_ITEM_QUANTITY, -pair.getValue());

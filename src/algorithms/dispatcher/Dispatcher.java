@@ -120,7 +120,7 @@ public class Dispatcher {
     private static Map<Item, Integer> planCollectOrderItems(Agent agent, Rack rack, Order order) {
         Map<Item, Integer> ret = new HashMap<>();
 
-        for (Map.Entry<Item, Integer> pair : order) {
+        for (var pair : order) {
             Item neededItem = pair.getKey();
             int neededQuantity = pair.getValue();
             int availableQuantity = rack.get(neededItem);
