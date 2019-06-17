@@ -388,7 +388,7 @@ public class ServerDecoder {
             }
 
             if (list.size() > 0) {
-                throw new DataException("Order-" + order.getId() +
+                throw new DataException("Collect order-" + order.getId() +
                         " is currently infeasible due to shortage in items: " + list + ".");
             }
         } else {
@@ -410,9 +410,9 @@ public class ServerDecoder {
             int totWeight = rack.getStoredWeight() + addedWeight;
 
             if (totWeight > rack.getCapacity()) {
-                throw new DataException("Order-" + order.getId() +
-                        " is currently infeasible as the stored weight of rack-" + rack.getId() +
-                        " will exceed the maximum limit by: " + (totWeight - rack.getCapacity()) + ".");
+                throw new DataException("Refill order-" + order.getId() +
+                        " items weight exceed rack-" + rack.getId() + " capacity by: " +
+                        (totWeight - rack.getCapacity()) + ".");
             }
         }
     }
