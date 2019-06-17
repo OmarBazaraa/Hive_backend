@@ -172,7 +172,7 @@ public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAs
     @Override
     public void add(Item item, int quantity) {
         if (type == OrderType.REFILL) {
-            quantity -= quantity;
+            quantity = -quantity;
         }
 
         QuantityAddable.update(items, item, quantity);
