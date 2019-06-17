@@ -400,7 +400,7 @@ public class ServerDecoder {
 
             for (var pair : order) {
                 Item item = pair.getKey();
-                int quantity = pair.getValue();
+                int quantity = -pair.getValue();
 
                 addedWeight += item.getWeight() * quantity;
             }
