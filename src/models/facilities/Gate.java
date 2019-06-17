@@ -92,11 +92,10 @@ public class Gate extends Facility {
     public String toString() {
         StringBuilder builder = new StringBuilder();
 
-        builder
-                .append("Gate: {")
-                .append(" id: ").append(id).append(",")
-                .append(" pos: ").append("(").append(row).append("x").append(col).append(")")
-                .append(" }");
+        builder.append("Gate: {");
+        builder.append(" id: ").append(id).append(",");
+        builder.append(" pos: ").append("(").append(row).append("x").append(col).append(")");
+        builder.append(" }");
 
         return builder.toString();
     }

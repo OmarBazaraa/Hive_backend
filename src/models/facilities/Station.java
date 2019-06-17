@@ -78,11 +78,10 @@ public class Station extends Facility {
     public String toString() {
         StringBuilder builder = new StringBuilder();
 
-        builder
-                .append("Station: {")
-                .append(" id: ").append(id).append(",")
-                .append(" pos: ").append("(").append(row).append("x").append(col).append(")")
-                .append(" }");
+        builder.append("Station: {");
+        builder.append(" id: ").append(id).append(",");
+        builder.append(" pos: ").append("(").append(row).append("x").append(col).append(")");
+        builder.append(" }");
 
         return builder.toString();
     }

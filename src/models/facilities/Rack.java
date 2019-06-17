@@ -6,6 +6,7 @@ import models.items.QuantityAddable;
 import models.items.QuantityReservable;
 
 import utils.Constants;
+import utils.Utility;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -232,21 +233,7 @@ public class Rack extends Facility implements QuantityAddable<Item>, QuantityRes
         builder.append(" capacity: ").append(capacity).append(",");
         builder.append(" weight: ").append(containerWeight).append(",");
         builder.append(" stored_weight: ").append(storedWeight).append(",");
-        builder.append(" items: {");
-
-        boolean first = true;
-
-        for (Map.Entry<Item, Integer> pair : items.entrySet()) {
-            if (first) {
-                first = false;
-            } else {
-                builder.append(", ");
-            }
-
-            builder.append("item-").append(pair.getKey().getId()).append(": ").append(pair.getValue());
-        }
-
-        builder.append("}");
+        builder.append(" items: ").append(Utility.stringifyItemQuantities(items));
         builder.append(" }");
 
         return builder.toString();

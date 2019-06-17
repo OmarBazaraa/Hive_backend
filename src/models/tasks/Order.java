@@ -6,6 +6,7 @@ import models.items.Item;
 import models.items.QuantityAddable;
 import models.warehouses.Warehouse;
 import server.Server;
+import utils.Utility;
 
 import java.util.*;
 
@@ -356,12 +357,11 @@ public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAs
     public String toString() {
         StringBuilder builder = new StringBuilder();
 
-        builder
-                .append("Order: {")
-                .append(" id: ").append(id).append(",")
-                .append(" gate_id: ").append(deliveryGate.getId()).append(",")
-                .append(" items: ").append(items.size())
-                .append(" }");
+        builder.append("Order: {");
+        builder.append(" id: ").append(id).append(",");
+        builder.append(" gate_id: ").append(deliveryGate.getId()).append(",");
+        builder.append(" items: ").append(Utility.stringifyItemQuantities(items));
+        builder.append(" }");
 
         return builder.toString();
     }

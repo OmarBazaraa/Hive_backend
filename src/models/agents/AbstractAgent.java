@@ -281,13 +281,12 @@ abstract public class AbstractAgent extends HiveObject implements TaskAssignable
     public String toString() {
         StringBuilder builder = new StringBuilder();
 
-        builder
-                .append("Agent: {")
-                .append(" id: ").append(id).append(",")
-                .append(" pos: ").append("(").append(row).append("x").append(col).append(")")
-                .append(" load capacity: ").append(loadCapacity).append(",")
-                .append(" direction: ").append(direction)
-                .append(" }");
+        builder.append("Agent: {");
+        builder.append(" id: ").append(id).append(",");
+        builder.append(" pos: ").append("(").append(row).append("x").append(col).append(")");
+        builder.append(" load_capacity: ").append(loadCapacity).append(",");
+        builder.append(" direction: ").append(direction);
+        builder.append(" }");
 
         return builder.toString();
     }

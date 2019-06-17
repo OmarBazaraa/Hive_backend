@@ -1,11 +1,15 @@
 package utils;
 
+import models.facilities.Rack;
+import models.items.Item;
 import models.maps.utils.Position;
+
 import utils.Constants.*;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Map;
 
 
 /**
@@ -30,6 +34,64 @@ public class Utility {
         while ((line = reader.readLine()) != null) {
             builder.append(line);
         }
+
+        return builder.toString();
+    }
+
+    /**
+     * Converts the given item-quantity map into a visual representative string.
+     *
+     * @param map     the items map to stringify.
+     *
+     * @return the visual representation of the map.
+     */
+    public static String stringifyItemQuantities(Map<Item, Integer> map) {
+        StringBuilder builder = new StringBuilder();
+
+        boolean first = true;
+
+        builder.append("{");
+
+        for (Map.Entry<Item, Integer> pair : map.entrySet()) {
+            if (first) {
+                first = false;
+            } else {
+                builder.append(", ");
+            }
+
+            builder.append("item-").append(pair.getKey().getId()).append(": ").append(pair.getValue());
+        }
+
+        builder.append("}");
+
+        return builder.toString();
+    }
+
+    /**
+     * Converts the given rack-quantity map into a visual representative string.
+     *
+     * @param map     the racks map to stringify.
+     *
+     * @return the visual representation of the map.
+     */
+    public static String stringifyRackQuantities(Map<Rack, Integer> map) {
+        StringBuilder builder = new StringBuilder();
+
+        boolean first = true;
+
+        builder.append("{");
+
+        for (Map.Entry<Rack, Integer> pair : map.entrySet()) {
+            if (first) {
+                first = false;
+            } else {
+                builder.append(", ");
+            }
+
+            builder.append("rack-").append(pair.getKey().getId()).append(": ").append(pair.getValue());
+        }
+
+        builder.append("}");
 
         return builder.toString();
     }

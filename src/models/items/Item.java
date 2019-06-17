@@ -4,6 +4,7 @@ import models.Entity;
 import models.facilities.Rack;
 import models.tasks.Order;
 import models.tasks.Task;
+import utils.Utility;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -203,21 +204,7 @@ public class Item extends Entity implements QuantityAddable<Rack>, QuantityReser
         builder.append(" id: ").append(id).append(",");
         builder.append(" weight: ").append(weight).append(",");
         builder.append(" tot_units: ").append(totalUnits).append(",");
-        builder.append(" racks: {");
-
-        boolean first = true;
-
-        for (Map.Entry<Rack, Integer> pair : racks.entrySet()) {
-            if (first) {
-                first = false;
-            } else {
-                builder.append(", ");
-            }
-
-            builder.append("rack-").append(pair.getKey().getId()).append(": ").append(pair.getValue());
-        }
-
-        builder.append("}");
+        builder.append(" racks: ").append(Utility.stringifyRackQuantities(racks));
         builder.append(" }");
 
         return builder.toString();

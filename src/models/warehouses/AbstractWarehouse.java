@@ -310,10 +310,10 @@ abstract public class AbstractWarehouse {
     public String toString() {
         StringBuilder builder = new StringBuilder();
 
-        builder.append("Warehouse of size: ")
-                .append(map.getRows()).append("x").append(map.getCols())
-                .append(" @time: ").append(time).append("\n")
-                .append(map);
+        builder.append("Warehouse of size: ");
+        builder.append(map.getRows()).append("x").append(map.getCols());
+        builder.append(" @time: ").append(time).append("\n");
+        builder.append(map);
 
         return builder.toString();
     }
