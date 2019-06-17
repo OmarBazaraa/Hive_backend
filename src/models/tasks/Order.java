@@ -298,7 +298,11 @@ public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAs
      */
     private void reserveItems() {
         for (Map.Entry<Item, Integer> pair : items.entrySet()) {
-            pair.getKey().reserve(pair.getValue());
+            Item item = pair.getKey();
+            int quantity = pair.getValue();
+
+            // General reservation of needed item units
+            item.reserve(quantity);
         }
     }
 
@@ -315,9 +319,9 @@ public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAs
             Item item = pair.getKey();
             int quantity = pair.getValue();
 
-            // Specify the reservation of the current item
-            item.reserve(-quantity);                // Confirm portion of the general reservation of item units
-            rack.reserveItems(item, quantity);      // Reserve items in the current specific rack
+            // Specific the reservation of the current item
+            item.reserve(-quantity);            // Confirm previous general reservation of item units
+            rack.reserve(item, quantity);       // Reserve items in the current rack
 
             // Remove those reserved items of this order
             add(item, -quantity);
@@ -333,12 +337,12 @@ public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAs
         Map<Item, Integer> reservedItems = task.getReservedItems(this);
 
         for (Map.Entry<Item, Integer> pair : reservedItems.entrySet()) {
-            Item item = pair.getKey();
             int quantity = pair.getValue();
+            Item item = pair.getKey();
 
             // Acquire the current item from the rack
-            rack.reserveItems(item, -quantity);     // Confirm previous reservation
-            rack.add(item, -quantity);              // Remove items from the rack
+            rack.reserve(item, -quantity);      // Confirm previous specific reservation of item units in the rack
+            rack.add(item, -quantity);          // Remove items from the rack
         }
     }
 

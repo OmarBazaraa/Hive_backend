@@ -21,7 +21,7 @@ import java.util.Map;
  * @see Order
  * @see Task
  */
-public class Item extends Entity implements QuantityAddable<Rack> {
+public class Item extends Entity implements QuantityAddable<Rack>, QuantityReservable<Rack> {
 
     //
     // Member Variables
@@ -45,7 +45,7 @@ public class Item extends Entity implements QuantityAddable<Rack> {
     /**
      * The map of racks storing this {@code Item}.<p>
      * The key is a {@code Rack}.<p>
-     * The mapped value represents the quantity of this {@code Item}.
+     * The mapped value represents the available quantity of this {@code Item}.
      */
     private Map<Rack, Integer> racks = new HashMap<>();
 
@@ -107,7 +107,8 @@ public class Item extends Entity implements QuantityAddable<Rack> {
     }
 
     /**
-     * Returns the current quantity of this {@code Item} in the given {@code Rack}.
+     * Returns the current available number of this {@code Item} units
+     * in the given {@code Rack}.
      *
      * @param rack the specified {@code Rack}.
      *
@@ -143,8 +144,27 @@ public class Item extends Entity implements QuantityAddable<Rack> {
     }
 
     /**
-     * Reserves some units of this {@code Item} specified by the given quantity.
-     * Reservation can be conformed or undone by passing negative quantities.
+     * Reserves some number of units of this {@code Item} in the given {@code Rack}.
+     * Reservation can be confirmed or undone by passing negative quantities.
+     * <p>
+     * This function should be called after ensuring that reservation is possible.
+     * <p>
+     * This function should only be called once per {@code Task} activation.
+     * <p>
+     * This function should only be called from {@link Rack}.
+     *
+     * @param rack     the {@code rack} to reserve its units.
+     * @param quantity the quantity to reserve.
+     */
+    @Override
+    public void reserve(Rack rack, int quantity) {
+        reservedUnits += quantity;
+        QuantityAddable.update(racks, rack, -quantity);
+    }
+
+    /**
+     * Reserves a general reservation of some number of units of this {@code Item}.
+     * Reservation can be confirmed or undone by passing negative quantities.
      * <p>
      * This function should be called after ensuring that reservation is possible.
      * <p>

@@ -3,6 +3,7 @@ package models.facilities;
 import models.agents.Agent;
 import models.items.Item;
 import models.items.QuantityAddable;
+import models.items.QuantityReservable;
 
 import utils.Constants;
 
@@ -30,7 +31,7 @@ import java.util.Map;
  * @see models.facilities.Station Station
  * @see models.tasks.Task Task
  */
-public class Rack extends Facility implements QuantityAddable<Item> {
+public class Rack extends Facility implements QuantityAddable<Item>, QuantityReservable<Item> {
 
     //
     // Member Variables
@@ -54,7 +55,7 @@ public class Rack extends Facility implements QuantityAddable<Item> {
     /**
      * The map of available items this {@code Rack} is storing.<p>
      * The key is an {@code Item}.<p>
-     * The mapped value represents the quantity of this {@code Item}.
+     * The mapped value represents the available quantity of this {@code Item}.
      */
     private Map<Item, Integer> items = new HashMap<>();
 
@@ -122,7 +123,8 @@ public class Rack extends Facility implements QuantityAddable<Item> {
     }
 
     /**
-     * Returns the current quantity of an {@code Item} in this {@code Rack}.
+     * Returns the current available number of an {@code Item} units
+     * in this {@code Rack}.
      *
      * @param item the {@code Item} to get its quantity.
      *
@@ -158,6 +160,7 @@ public class Rack extends Facility implements QuantityAddable<Item> {
 
     /**
      * Reserves some number of units of the given {@code Item} in this {@code Rack}.
+     * Reservation can be confirmed or undone by passing negative quantities.
      * <p>
      * This function should be called after ensuring that reservation is possible.
      * <p>
@@ -166,8 +169,9 @@ public class Rack extends Facility implements QuantityAddable<Item> {
      * @param item     the {@code Item} to reserve.
      * @param quantity the quantity to reserve.
      */
-    public void reserveItems(Item item, int quantity) {
-        item.add(this, -quantity);
+    @Override
+    public void reserve(Item item, int quantity) {
+        item.reserve(this, quantity);
         QuantityAddable.update(items, item, -quantity);
     }
 
