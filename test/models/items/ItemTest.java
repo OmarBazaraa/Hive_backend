@@ -143,17 +143,17 @@ public class ItemTest {
         item1.reserve(2);
         item2.reserve(3);
 
-        // item1
+        // Item 1
         Assert.assertEquals(item1.getReservedUnits(), 2);
         Assert.assertEquals(item1.getTotalUnits(), 13);
         Assert.assertEquals(item1.getAvailableUnits(), 13 - 2);
 
-        // item2
+        // Item 2
         Assert.assertEquals(item2.getReservedUnits(), 3);
         Assert.assertEquals(item2.getTotalUnits(), 9);
         Assert.assertEquals(item2.getAvailableUnits(), 9 - 3);
 
-        // item3
+        // Item 3
         Assert.assertEquals(item3.getReservedUnits(), 0);
         Assert.assertEquals(item3.getTotalUnits(), 7);
         Assert.assertEquals(item3.getAvailableUnits(), 7);
@@ -167,14 +167,14 @@ public class ItemTest {
         rack1.reserve(item1, 2);
         rack2.reserve(item2, 3);
 
-        // item1
+        // Item 1
         Assert.assertEquals(item1.getReservedUnits(), 2);
         Assert.assertEquals(item1.getTotalUnits(), 13);
         Assert.assertEquals(item1.getAvailableUnits(), 13 - 2);
         Assert.assertEquals(item1.get(rack1), 5 - 2);
         Assert.assertEquals(rack1.get(item1), 5 - 2);
 
-        // item2
+        // Item 2
         Assert.assertEquals(item2.getReservedUnits(), 3);
         Assert.assertEquals(item2.getTotalUnits(), 9);
         Assert.assertEquals(item2.getAvailableUnits(), 9 - 3);
@@ -189,14 +189,14 @@ public class ItemTest {
         rack1.add(item1, -2);
         rack2.add(item2, -3);
 
-        // item1
+        // Item 1
         Assert.assertEquals(item1.getReservedUnits(), 0);
         Assert.assertEquals(item1.getTotalUnits(), 13 - 2);
         Assert.assertEquals(item1.getAvailableUnits(), 13 - 2);
         Assert.assertEquals(item1.get(rack1), 5 - 2);
         Assert.assertEquals(rack1.get(item1), 5 - 2);
 
-        // item2
+        // Item 2
         Assert.assertEquals(item2.getReservedUnits(), 0);
         Assert.assertEquals(item2.getTotalUnits(), 9 - 3);
         Assert.assertEquals(item2.getAvailableUnits(), 9 - 3);

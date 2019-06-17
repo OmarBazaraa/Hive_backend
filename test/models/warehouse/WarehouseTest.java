@@ -1,11 +1,13 @@
 package models.warehouse;
 
 import models.facilities.Gate;
+import models.facilities.Rack;
 import models.items.Item;
 import models.tasks.Order;
 import models.tasks.Order.OrderType;
 import models.warehouses.Warehouse;
 
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -26,6 +28,7 @@ public class WarehouseTest {
 
         // Get components
         Warehouse warehouse = Warehouse.getInstance();
+        Rack rack = warehouse.getRackById(1);
         Gate gate = warehouse.getGateById(1);
         Item item = warehouse.getItemById(1);
 
@@ -37,6 +40,11 @@ public class WarehouseTest {
         order.add(item, 1);
         warehouse.addOrder(order);
 
+        //
+        // Initial checks
+        //
+        Assert.assertEquals(item.getReservedUnits(), 1);
+
         // Run till no changes occur
         while (warehouse.run()) {
             System.out.println(warehouse);
@@ -44,6 +52,17 @@ public class WarehouseTest {
 
         // Print final warehouse
         warehouse.print();
+
+        //
+        // Final checks
+        //
+
+        // Item 1
+        Assert.assertEquals(item.getReservedUnits(), 0);
+        Assert.assertEquals(item.getTotalUnits(), 0);
+        Assert.assertEquals(item.getAvailableUnits(), 0);
+        Assert.assertEquals(item.get(rack), 0);
+        Assert.assertEquals(rack.get(item), 0);
     }
 
     @Test
@@ -52,6 +71,8 @@ public class WarehouseTest {
 
         // Get components
         Warehouse warehouse = Warehouse.getInstance();
+        Rack rack1 = warehouse.getRackById(1);
+        Rack rack2 = warehouse.getRackById(2);
         Gate gate = warehouse.getGateById(1);
         Item item1 = warehouse.getItemById(1);
         Item item2 = warehouse.getItemById(2);
@@ -65,6 +86,12 @@ public class WarehouseTest {
         order.add(item2, 4);
         warehouse.addOrder(order);
 
+        //
+        // Initial checks
+        //
+        Assert.assertEquals(item1.getReservedUnits(), 3);
+        Assert.assertEquals(item2.getReservedUnits(), 4);
+
         // Run till no changes occur
         while (warehouse.run()) {
             System.out.println(warehouse);
@@ -72,6 +99,24 @@ public class WarehouseTest {
 
         // Print final warehouse
         warehouse.print();
+
+        //
+        // Final checks
+        //
+
+        // Item 1
+        Assert.assertEquals(item1.getReservedUnits(), 0);
+        Assert.assertEquals(item1.getTotalUnits(), 2);
+        Assert.assertEquals(item1.getAvailableUnits(), 2);
+        Assert.assertEquals(item1.get(rack1), 2);
+        Assert.assertEquals(rack1.get(item1), 2);
+
+        // Item 2
+        Assert.assertEquals(item2.getReservedUnits(), 0);
+        Assert.assertEquals(item2.getTotalUnits(), 1);
+        Assert.assertEquals(item2.getAvailableUnits(), 1);
+        Assert.assertEquals(item2.get(rack2), 1);
+        Assert.assertEquals(rack2.get(item2), 1);
     }
 
     @Test
@@ -80,6 +125,8 @@ public class WarehouseTest {
 
         // Get components
         Warehouse warehouse = Warehouse.getInstance();
+        Rack rack1 = warehouse.getRackById(1);
+        Rack rack2 = warehouse.getRackById(2);
         Gate gate1 = warehouse.getGateById(1);
         Gate gate2 = warehouse.getGateById(2);
         Item item1 = warehouse.getItemById(1);
@@ -97,6 +144,12 @@ public class WarehouseTest {
         order2.add(item2, 1);
         warehouse.addOrder(order2);
 
+        //
+        // Initial checks
+        //
+        Assert.assertEquals(item1.getReservedUnits(), 1);
+        Assert.assertEquals(item2.getReservedUnits(), 1);
+
         // Run till no changes occur
         while (warehouse.run()) {
             System.out.println(warehouse);
@@ -104,5 +157,23 @@ public class WarehouseTest {
 
         // Print final warehouse
         warehouse.print();
+
+        //
+        // Final checks
+        //
+
+        // Item 1
+        Assert.assertEquals(item1.getReservedUnits(), 0);
+        Assert.assertEquals(item1.getTotalUnits(), 4);
+        Assert.assertEquals(item1.getAvailableUnits(), 4);
+        Assert.assertEquals(item1.get(rack1), 4);
+        Assert.assertEquals(rack1.get(item1), 4);
+
+        // Item 2
+        Assert.assertEquals(item2.getReservedUnits(), 0);
+        Assert.assertEquals(item2.getTotalUnits(), 4);
+        Assert.assertEquals(item2.getAvailableUnits(), 4);
+        Assert.assertEquals(item2.get(rack2), 4);
+        Assert.assertEquals(rack2.get(item2), 4);
     }
 }
