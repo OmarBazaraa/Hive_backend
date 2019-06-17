@@ -350,10 +350,6 @@ public class Server {
      * @param data the received JSON data part of the message.
      */
     private synchronized void processStopMsg(JSONObject data) throws Exception {
-        if (currentState == ServerStates.IDLE) {
-            throw new DataException("Received STOP message while the server is in IDLE state.");
-        }
-
         currentState = ServerStates.IDLE;
     }
 
