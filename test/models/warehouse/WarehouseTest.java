@@ -176,4 +176,61 @@ public class WarehouseTest {
         Assert.assertEquals(item2.get(rack2), 4);
         Assert.assertEquals(rack2.get(item2), 4);
     }
+
+    @Test
+    public void multiOrdersMergedTest() throws Exception {
+        WarehouseHelper.configureWarehouse("data/1A_1R_2G.hive");
+
+        // Get components
+        Warehouse warehouse = Warehouse.getInstance();
+        Rack rack = warehouse.getRackById(1);
+        Gate gate1 = warehouse.getGateById(1);
+        Gate gate2 = warehouse.getGateById(2);
+        Item item1 = warehouse.getItemById(1);
+        Item item2 = warehouse.getItemById(2);
+
+        // Print initial warehouse
+        warehouse.print();
+
+        // Create new order
+        Order order1 = new CollectOrder(1, gate1);
+        order1.add(item1, 1);
+        warehouse.addOrder(order1);
+
+        Order order2 = new CollectOrder(2, gate2);
+        order2.add(item2, 1);
+        warehouse.addOrder(order2);
+
+        //
+        // Initial checks
+        //
+        Assert.assertEquals(item1.getReservedUnits(), 1);
+        Assert.assertEquals(item2.getReservedUnits(), 1);
+
+        // Run till no changes occur
+        while (warehouse.run()) {
+            System.out.println(warehouse);
+        }
+
+        // Print final warehouse
+        warehouse.print();
+
+        //
+        // Final checks
+        //
+
+        // Item 1
+        Assert.assertEquals(item1.getReservedUnits(), 0);
+        Assert.assertEquals(item1.getTotalUnits(), 4);
+        Assert.assertEquals(item1.getAvailableUnits(), 4);
+        Assert.assertEquals(item1.get(rack), 4);
+        Assert.assertEquals(rack.get(item1), 4);
+
+        // Item 2
+        Assert.assertEquals(item2.getReservedUnits(), 0);
+        Assert.assertEquals(item2.getTotalUnits(), 4);
+        Assert.assertEquals(item2.getAvailableUnits(), 4);
+        Assert.assertEquals(item2.get(rack), 4);
+        Assert.assertEquals(rack.get(item2), 4);
+    }
 }

@@ -1,0 +1,618 @@
+{
+  "map": {
+    "height": 10,
+    "width": 17,
+    "grid": [
+      [
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        }
+      ],
+      [
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        }
+      ],
+      [
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": [
+            {
+              "type": 1,
+              "id": 1,
+              "color": "#FF0000",
+              "direction": 0,
+              "load_cap": 100,
+              "ip": "",
+              "port": "",
+              "deactivated": false
+            }
+          ]
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        }
+      ],
+      [
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        }
+      ],
+      [
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": [
+            {
+              "type": 2,
+              "id": 1,
+              "capacity": 250,
+              "weight": 50,
+              "items": [
+                {
+                  "id": 1,
+                  "quantity": 5
+                },
+                {
+                  "id": 2,
+                  "quantity": 5
+                }
+              ],
+              "color": "#bababa"
+            }
+          ]
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        }
+      ],
+      [
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        }
+      ],
+      [
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        }
+      ],
+      [
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": [
+            {
+              "type": 0,
+              "id": 1,
+              "color": "#bababa"
+            }
+          ]
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": [
+            {
+              "type": 0,
+              "id": 2,
+              "color": "#bababa"
+            }
+          ]
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        }
+      ],
+      [
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        }
+      ],
+      [
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        },
+        {
+          "objects": []
+        }
+      ]
+    ],
+    "objects": {
+      "1,1": [
+        2,
+        2
+      ],
+      "1,0": [
+        7,
+        11
+      ],
+      "2,0": [
+        7,
+        14
+      ],
+      "1,2": [
+        4,
+        7
+      ]
+    }
+  },
+  "items": [
+    {
+      "id": 1,
+      "weight": 2,
+      "name": "milk"
+    },
+    {
+      "id": 2,
+      "weight": 1,
+      "name": "water"
+    }
+  ],
+  "nextIDs": {
+    "gate": 3,
+    "robot": 2,
+    "rack": 2,
+    "station": 1,
+    "obstacle": 1,
+    "item": 3
+  },
+  "timestep": 0
+}
