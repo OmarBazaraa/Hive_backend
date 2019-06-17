@@ -1,5 +1,8 @@
 package algorithms.dispatcher;
 
+import algorithms.dispatcher.task_allocator.RackSelector;
+import algorithms.dispatcher.task_allocator.AgentAssigner;
+import models.HiveObject;
 import models.agents.Agent;
 import models.facilities.Rack;
 import models.items.Item;
@@ -32,7 +35,10 @@ public class Dispatcher {
         //
         while (order.isPending() && readyAgents.size() > 0) {
             // Select the most suitable racks
-            // List<Rack> selectedRacks = RackSelector.selectRacks(order);
+//            List<Rack> selectedRacks = RackSelector.selectRacks(order);
+
+            // Assign agents to the selected racks
+//            Map<HiveObject, HiveObject> assignment = AgentAssigner.assignAgents(order.getDeliveryGate().getPosition(), selectedRacks, readyAgents);
 
             // Get current needed item in the order
             Item item = order.iterator().next().getKey();
