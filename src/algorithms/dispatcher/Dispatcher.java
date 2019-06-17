@@ -26,10 +26,9 @@ public class Dispatcher {
      */
     public static void dispatch(Order order, Set<Agent> readyAgents) {
         //
-        // Keep dispatching while the order is still pending and
-        // there are still idle robots
+        // Keep dispatching while the order is still pending
         //
-        while (order.isPending() && readyAgents.size() > 0) {
+        while (order.isPending()) {
             // Select the most suitable racks
             // List<Rack> selectedRacks = RackSelector.selectRacks(order);
 
@@ -37,14 +36,19 @@ public class Dispatcher {
             // Map<HiveObject, HiveObject> assignment = AgentAssigner.assignAgents(order.getDeliveryGate().getPosition(), selectedRacks, readyAgents);
 
             // Get current rack having the item
-            Rack rack = selectRack(order);
+            Rack rack = selectRack(readyAgents, order);
+
+            // Return if no rack is found
+            if (rack == null) {
+                return;
+            }
 
             // Find a suitable agent
             Agent agent = selectAgent(readyAgents, rack);
 
-            // Skip if no agent is found
+            // Return if no agent is found
             if (agent == null) {
-                continue;
+                return;
             }
 
             //
@@ -66,24 +70,40 @@ public class Dispatcher {
     /**
      * Selects a suitable {@code Rack} to partially fulfill the given {@code Order}.
      *
-     * @param order the {@code Order} to select {@code Rack} for.
+     * @param readyAgents the set of all idle agents.
+     * @param order       the {@code Order} to select {@code Rack} for.
      *
      * @return a suitable {@code Rack}.
      */
-    private static Rack selectRack(Order order) {
+    private static Rack selectRack(Set<Agent> readyAgents, Order order) {
         // Refill orders as assigned with a rack by default
         if (order instanceof RefillOrder) {
             return ((RefillOrder) order).getRefillRack();
         }
 
-        // Get first needed item in the order
-        Item item = order.iterator().next().getKey();
+        if (readyAgents.size() > 0) {
+            // There exits idle agents to carry on the rack
+            // Select a rack storing one of the needed items of the order
+            Item item = order.iterator().next().getKey();
+            return item.iterator().next().getKey();
+        } else {
+            // There are no idle agents at the moment
+            // Select an allocated rack storing one of the needed items of the order
+            for (var i : order) {
+                Item item = i.getKey();
 
-        // Get first rack storing the item
-        Rack rack = item.iterator().next().getKey();
+                for (var r : item) {
+                    Rack rack = r.getKey();
 
-        // Return this rack
-        return rack;
+                    if (rack.isAllocated()) {
+                        return rack;
+                    }
+                }
+            }
+        }
+
+        // No rack found
+        return null;
     }
 
     /**
