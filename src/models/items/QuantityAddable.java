@@ -13,7 +13,7 @@ import java.util.Map;
  * <p>
  * This interface is to be implemented by {@link Rack}, {@link Item}, {@link Order}.
  */
-public interface QuantityAddable<T> {
+public interface QuantityAddable<T> extends Iterable<Map.Entry<T, Integer>> {
 
     /**
      * Returns the current quantity of a key of type {@link T} in this object.

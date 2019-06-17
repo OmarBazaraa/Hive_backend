@@ -266,8 +266,8 @@ public class RackSelector {
         while (itemsIterator.hasNext()) {
             Item item = itemsIterator.next().getKey();
 
-            for (Rack rack : item) {
-                ret.putIfAbsent(rack, 0);
+            for (Map.Entry<Rack, Integer> racks : item) {
+                ret.putIfAbsent(racks.getKey(), 0);
             }
         }
 
@@ -278,5 +278,4 @@ public class RackSelector {
 
         return ret;
     }
-
 }

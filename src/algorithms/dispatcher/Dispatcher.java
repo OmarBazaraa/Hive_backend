@@ -38,7 +38,7 @@ public class Dispatcher {
             Item item = order.iterator().next().getKey();
 
             // Get current rack having the item
-            Rack rack = item.iterator().next();
+            Rack rack = item.iterator().next().getKey();
 
             // Find a suitable agent
             Agent agent = findAgent(readyAgents, rack, order);

@@ -30,7 +30,7 @@ import java.util.Map;
  * @see models.facilities.Station Station
  * @see models.tasks.Task Task
  */
-public class Rack extends Facility implements QuantityAddable<Item>, Iterable<Item> {
+public class Rack extends Facility implements QuantityAddable<Item> {
 
     //
     // Member Variables
@@ -180,8 +180,8 @@ public class Rack extends Facility implements QuantityAddable<Item>, Iterable<It
      * @return an {@code Iterator}.
      */
     @Override
-    public Iterator<Item> iterator() {
-        return items.keySet().iterator();
+    public Iterator<Map.Entry<Item, Integer>> iterator() {
+        return items.entrySet().iterator();
     }
 
     /**

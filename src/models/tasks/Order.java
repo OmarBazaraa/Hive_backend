@@ -20,7 +20,7 @@ import java.util.*;
  * @see Item
  * @see Gate
  */
-public class Order extends AbstractTask implements TaskAssignable, QuantityAddable<Item>, Iterable<Map.Entry<Item, Integer>> {
+public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAssignable {
 
     //
     // Enums

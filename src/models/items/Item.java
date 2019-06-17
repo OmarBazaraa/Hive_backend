@@ -21,7 +21,7 @@ import java.util.Map;
  * @see Order
  * @see Task
  */
-public class Item extends Entity implements QuantityAddable<Rack>, Iterable<Rack> {
+public class Item extends Entity implements QuantityAddable<Rack> {
 
     //
     // Member Variables
@@ -165,8 +165,8 @@ public class Item extends Entity implements QuantityAddable<Rack>, Iterable<Rack
      * @return an {@code Iterator}.
      */
     @Override
-    public Iterator<Rack> iterator() {
-        return racks.keySet().iterator();
+    public Iterator<Map.Entry<Rack, Integer>> iterator() {
+        return racks.entrySet().iterator();
     }
 
     /**
