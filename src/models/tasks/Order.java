@@ -193,35 +193,6 @@ public class Order extends AbstractTask implements QuantityAddable<Item>, TaskAs
     }
 
     /**
-     * Checks whether this {@code Order} is feasible of being fulfilled regarding
-     * its needed items quantities.
-     * <p>
-     * TODO: check agent to rack reach-ability
-     * TODO: check agents availability
-     * TODO: check REFILL order feasibility
-     *
-     * @return {@code true} if this {@code Order} is feasible; {@code false} otherwise.
-     */
-    public boolean isFeasible() {
-        //
-        // Iterate over every needed item in the order
-        //
-        for (Map.Entry<Item, Integer> pair : items.entrySet()) {
-            // Get needed item and its quantity
-            Item item = pair.getKey();
-            int quantity = pair.getValue();
-
-            // If needed quantity is greater than the overall available units
-            // then this order is infeasible
-            if (quantity > item.getAvailableUnits()) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
      * Activates this {@code Order} by reserving all the needed units to avoid
      * accepting infeasible orders in the future.
      * <p>

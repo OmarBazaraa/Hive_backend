@@ -19,6 +19,9 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONException;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 /**
  * This {@code ServerDecoder} class contains useful static functions to decode
@@ -287,19 +290,8 @@ public class ServerDecoder {
         // Extract items
         decodeItemsList(itemsJSON, ret, "Order-" + id);
 
-        //
-        // Checks
-        //
-        if (!ret.isPending()) {
-            throw new DataException("Order-" + id + " has no assigned items.");
-        }
-        if (!ret.isFeasible()) {
-            if (type == ServerConstants.TYPE_ORDER_COLLECT) {
-                throw new DataException("Order-" + id + " is currently infeasible due to item shortage.");
-            } else {
-                throw new DataException("Order-" + id + " is infeasible due to low storage space.");
-            }
-        }
+        // Validate order feasibility
+        checkOrderFeasibility(ret);
 
         // Add to the warehouse
         warehouse.addOrder(ret);
@@ -343,6 +335,35 @@ public class ServerDecoder {
 
             // Add to the order
             cont.add(item, quantity);
+        }
+    }
+
+    public static void checkOrderFeasibility(Order order) throws DataException {
+        if (!order.isPending()) {
+            throw new DataException("Order-" + order.getId() + " has no assigned items.");
+        }
+
+        // TODO: check agent-to-rack reach-ability
+        // TODO: check agents availability
+        // TODO: check agents ability to load racks of this order
+
+        if (order.getType() == OrderType.COLLECT) {
+            List<Integer> list = new ArrayList<>();
+
+            for (var pair : order) {
+                Item item = pair.getKey();
+                int quantity = pair.getValue();
+
+                if (item.getAvailableUnits() < quantity) {
+                    list.add(item.getId());
+                }
+            }
+
+            if (list.size() > 0) {
+                throw new DataException("Order-" + order.getId() + " is currently infeasible due to shortage in items: " + list + ".");
+            }
+        } else {
+            // TODO: check REFILL order feasibility
         }
     }
 }
