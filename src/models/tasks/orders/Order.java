@@ -288,7 +288,8 @@ abstract public class Order extends AbstractTask implements QuantityAddable<Item
             rack.reserve(item, quantity);       // Reserve items in the current rack
 
             // Remove those reserved items of this order
-            add(item, -quantity);
+            QuantityAddable.update(pendingItems, item, -quantity);
+            pendingUnits -= quantity;
         }
     }
 

@@ -44,14 +44,14 @@ public class Task extends AbstractTask {
     //
 
     /**
-     * The {@code Rack} needed to be delivered.
-     */
-    private Rack rack;
-
-    /**
      * The {@code Agent} assigned for this {@code Task}.
      */
     private Agent agent;
+
+    /**
+     * The {@code Rack} needed to be delivered.
+     */
+    private Rack rack;
 
     /**
      * The currently active {@code Order} by this {@code Task}.
@@ -76,27 +76,18 @@ public class Task extends AbstractTask {
     /**
      * Constructs a new {@code Task} object.
      *
+     * @param agent the assigned {@code Agent}.
      * @param rack  the assigned {@code Rack}.
-     * @param agent the assigned {@code agent}.
      */
-    public Task(Rack rack, Agent agent) {
+    public Task(Agent agent, Rack rack) {
         super();
-        this.rack = rack;
         this.agent = agent;
+        this.rack = rack;
 
         // Add initial basic actions
         actions.add(new Pair<>(TaskAction.BIND, rack));             // Go and load the rack
         actions.add(new Pair<>(TaskAction.SELECT_ORDER, null));     // Select an order to deliver
         actions.add(new Pair<>(TaskAction.UNBIND, rack));           // Go and offload the rack back
-    }
-
-    /**
-     * Returns the assigned {@code Rack} with this {@code Task}.
-     *
-     * @return the assigned {@code Rack}.
-     */
-    public Rack getRack() {
-        return rack;
     }
 
     /**
@@ -106,6 +97,15 @@ public class Task extends AbstractTask {
      */
     public Agent getAgent() {
         return agent;
+    }
+
+    /**
+     * Returns the assigned {@code Rack} with this {@code Task}.
+     *
+     * @return the assigned {@code Rack}.
+     */
+    public Rack getRack() {
+        return rack;
     }
 
     /**

@@ -56,7 +56,7 @@ public class Dispatcher {
             if (activeTask != null) {
                 activeTask.addOrder(order);
             } else {
-                Task task = new Task(rack, agent);
+                Task task = new Task(agent, rack);
                 task.addOrder(order);
                 Warehouse.getInstance().addTask(task);
             }
