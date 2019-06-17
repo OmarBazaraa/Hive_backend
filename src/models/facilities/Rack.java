@@ -226,15 +226,28 @@ public class Rack extends Facility implements QuantityAddable<Item>, QuantityRes
     public String toString() {
         StringBuilder builder = new StringBuilder();
 
-        builder
-                .append("Rack: {")
-                .append(" id: ").append(id).append(",")
-                .append(" pos: ").append("(").append(row).append("x").append(col).append(")")
-                .append(" capacity: ").append(capacity).append(",")
-                .append(" container weight: ").append(containerWeight).append(",")
-                .append(" stored weight: ").append(storedWeight).append(",")
-                .append(" items: ").append(items.size())
-                .append(" }");
+        builder.append("Rack: {");
+        builder.append(" id: ").append(id).append(",");
+        builder.append(" pos: ").append("(").append(row).append("x").append(col).append(")");
+        builder.append(" capacity: ").append(capacity).append(",");
+        builder.append(" weight: ").append(containerWeight).append(",");
+        builder.append(" stored_weight: ").append(storedWeight).append(",");
+        builder.append(" items: {");
+
+        boolean first = true;
+
+        for (Map.Entry<Item, Integer> pair : items.entrySet()) {
+            if (first) {
+                first = false;
+            } else {
+                builder.append(", ");
+            }
+
+            builder.append("item-").append(pair.getKey().getId()).append(": ").append(pair.getValue());
+        }
+
+        builder.append("}");
+        builder.append(" }");
 
         return builder.toString();
     }

@@ -199,11 +199,26 @@ public class Item extends Entity implements QuantityAddable<Rack>, QuantityReser
     public String toString() {
         StringBuilder builder = new StringBuilder();
 
-        builder
-                .append("Item: {")
-                .append(" id: ").append(id).append(",")
-                .append(" weight: ").append(weight)
-                .append(" }");
+        builder.append("Item: {");
+        builder.append(" id: ").append(id).append(",");
+        builder.append(" weight: ").append(weight).append(",");
+        builder.append(" tot_units: ").append(totalUnits).append(",");
+        builder.append(" racks: {");
+
+        boolean first = true;
+
+        for (Map.Entry<Rack, Integer> pair : racks.entrySet()) {
+            if (first) {
+                first = false;
+            } else {
+                builder.append(", ");
+            }
+
+            builder.append("rack-").append(pair.getKey().getId()).append(": ").append(pair.getValue());
+        }
+
+        builder.append("}");
+        builder.append(" }");
 
         return builder.toString();
     }
