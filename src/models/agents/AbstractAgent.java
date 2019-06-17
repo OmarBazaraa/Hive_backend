@@ -183,13 +183,13 @@ abstract public class AbstractAgent extends HiveObject implements TaskAssignable
 
     /**
      * Returns the priority of this {@code Agent}.
-     * Greater value indicates higher priority.
+     * Smaller value indicates higher priority.
      *
      * @return the priority of this {@code Agent}.
      */
     public int getPriority() {
         Task task = getActiveTask();
-        return (task != null ? task.getPriority() : Short.MIN_VALUE);
+        return (task != null ? task.getPriority() : Short.MAX_VALUE);
     }
 
     /**
@@ -264,7 +264,7 @@ abstract public class AbstractAgent extends HiveObject implements TaskAssignable
             return id - obj.getId();
         }
         Agent rhs = (Agent) obj;
-        int cmp = (getPriority() - rhs.getPriority());
+        int cmp = (rhs.getPriority() - getPriority());
         if (cmp == 0) {
             return id - rhs.id;
         }

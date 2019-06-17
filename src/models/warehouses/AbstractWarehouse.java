@@ -49,7 +49,7 @@ abstract public class AbstractWarehouse {
     /**
      * The queue of all currently active agents, sorted by their priority.
      */
-    protected Queue<Agent> activeAgents = new PriorityQueue<>();
+    protected Queue<Agent> activeAgents = new PriorityQueue<>(Collections.reverseOrder());
 
     /**
      * The set of all currently idle agents.

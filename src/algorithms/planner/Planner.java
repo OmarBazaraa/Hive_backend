@@ -211,7 +211,7 @@ public class Planner {
         Agent a = timeMap.getAgentAt(nxt.pos, nxt.time);
 
         // If there is an agent with higher priority then skip this state as well
-        if (a != null && agent.getPriority() < a.getPriority()) {
+        if (a != null && a.compareTo(agent) > 0) {
             return false;
         }
 

@@ -82,12 +82,12 @@ abstract public class AbstractTask extends Entity {
 
     /**
      * Returns the priority of this {@code AbstractTask}.
-     * Greater value indicates higher priority.
+     * Smaller value indicates higher priority.
      *
      * @return the priority of this {@code AbstractTask}.
      */
     public int getPriority() {
-        return -id;
+        return id;
     }
 
     /**

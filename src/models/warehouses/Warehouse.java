@@ -165,7 +165,7 @@ public class Warehouse extends AbstractWarehouse {
         int size = activeAgents.size();
 
         // Create another queue of agents
-        Queue<Agent> q = new PriorityQueue<>(size);
+        Queue<Agent> q = new PriorityQueue<>(size, Collections.reverseOrder());
 
         //
         // Iterate over all active agents
