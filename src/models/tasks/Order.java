@@ -257,7 +257,7 @@ public class Order extends AbstractTask implements TaskAssignable, QuantityAddab
         Server.getInstance().enqueueTaskAssignedLog(task, this);
 
         // Add task to the set of sub tasks
-        allocateItemsInRack(task);
+        reserveItemsInRack(task);
         subTasks.add(task);
 
         // Check if this is the first assigned task
@@ -278,7 +278,7 @@ public class Order extends AbstractTask implements TaskAssignable, QuantityAddab
         Server.getInstance().enqueueTaskCompletedLog(task, this);
 
         // Remove completed task
-        acquireAllocatedItemsInRack(task);
+        acquireReservedItemsInRack(task);
         subTasks.remove(task);
 
         // Check if no more pending units and all running tasks have been completed
@@ -294,7 +294,7 @@ public class Order extends AbstractTask implements TaskAssignable, QuantityAddab
      * accept infeasible orders in the future.
      * <p>
      * This function just reserve the needed number of units, not specific units
-     * in a specific racks.
+     * in specific racks.
      */
     private void reserveItems() {
         for (Map.Entry<Item, Integer> pair : items.entrySet()) {
@@ -303,11 +303,11 @@ public class Order extends AbstractTask implements TaskAssignable, QuantityAddab
     }
 
     /**
-     * Allocates some of the items in the {@code Rack} specified by the
+     * Reserves some of the items in the {@code Rack} specified by the
      * given {@code Task} for the favor of this {@code Order}, and removes
      * them from the {@code Order} pending items.
      */
-    private void allocateItemsInRack(Task task) {
+    private void reserveItemsInRack(Task task) {
         Rack rack = task.getRack();
         Map<Item, Integer> reservedItems = task.getReservedItems(this);
 
@@ -315,16 +315,20 @@ public class Order extends AbstractTask implements TaskAssignable, QuantityAddab
             Item item = pair.getKey();
             int quantity = pair.getValue();
 
-            rack.reserve(item, quantity);
+            // Specify the reservation of the current item
+            item.reserve(-quantity);                // Confirm portion of the general reservation of item units
+            rack.reserveItems(item, quantity);      // Reserve items in the current specific rack
+
+            // Remove those reserved items of this order
             add(item, -quantity);
         }
     }
 
     /**
-     * Acquires the previously allocated items in the {@code Rack} specified by the
+     * Acquires the previously Reserves items in the {@code Rack} specified by the
      * given {@code Task} for the favor of this {@code Order}.
      */
-    private void acquireAllocatedItemsInRack(Task task) {
+    private void acquireReservedItemsInRack(Task task) {
         Rack rack = task.getRack();
         Map<Item, Integer> reservedItems = task.getReservedItems(this);
 
@@ -332,9 +336,9 @@ public class Order extends AbstractTask implements TaskAssignable, QuantityAddab
             Item item = pair.getKey();
             int quantity = pair.getValue();
 
-            item.reserve(-quantity);
-            rack.reserve(item, -quantity);
-            rack.add(item, -quantity);
+            // Acquire the current item from the rack
+            rack.reserveItems(item, -quantity);     // Confirm previous reservation
+            rack.add(item, -quantity);              // Remove items from the rack
         }
     }
 

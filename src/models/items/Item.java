@@ -107,9 +107,9 @@ public class Item extends Entity implements QuantityAddable<Rack>, Iterable<Rack
     }
 
     /**
-     * Returns the current quantity of this {@code Item} in a {@code Rack}.
+     * Returns the current quantity of this {@code Item} in the given {@code Rack}.
      *
-     * @param rack the {@code Rack} to get its quantity.
+     * @param rack the specified {@code Rack}.
      *
      * @return the quantity in the given {@code Rack}.
      */

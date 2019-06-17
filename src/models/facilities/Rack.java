@@ -58,13 +58,6 @@ public class Rack extends Facility implements QuantityAddable<Item>, Iterable<It
      */
     private Map<Item, Integer> items = new HashMap<>();
 
-    /**
-     * The map of reserved items this {@code Rack} is storing.<p>
-     * The key is an {@code Item}.<p>
-     * The mapped value represents the reserved quantity of this {@code Item}.
-     */
-    private Map<Item, Integer> reservedItems = new HashMap<>();
-
     // ===============================================================================================
     //
     // Member Methods
@@ -137,7 +130,7 @@ public class Rack extends Facility implements QuantityAddable<Item>, Iterable<It
      */
     @Override
     public int get(Item item) {
-        return items.getOrDefault(item, 0) - reservedItems.getOrDefault(item, 0);
+        return items.getOrDefault(item, 0);
     }
 
     /**
@@ -164,8 +157,7 @@ public class Rack extends Facility implements QuantityAddable<Item>, Iterable<It
     }
 
     /**
-     * Reserves some units of an {@code Item} specified by the given quantity.
-     * Reservation can be conformed or undone by passing negative quantities.
+     * Reserves some number of units of the given {@code Item} in this {@code Rack}.
      * <p>
      * This function should be called after ensuring that reservation is possible.
      * <p>
@@ -174,8 +166,9 @@ public class Rack extends Facility implements QuantityAddable<Item>, Iterable<It
      * @param item     the {@code Item} to reserve.
      * @param quantity the quantity to reserve.
      */
-    public void reserve(Item item, int quantity) {
-        QuantityAddable.update(reservedItems, item, quantity);
+    public void reserveItems(Item item, int quantity) {
+        item.add(this, -quantity);
+        QuantityAddable.update(items, item, -quantity);
     }
 
     /**
