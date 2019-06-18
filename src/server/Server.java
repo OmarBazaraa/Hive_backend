@@ -525,15 +525,6 @@ public class Server {
     }
 
     /**
-     * Enqueues a log about a newly issued {@code Order} to be sent in the next update message.
-     *
-     * @param order the newly issued {@code Order}.
-     */
-    public synchronized void enqueueOrderIssuedLog(Order order) {
-        logs.put(ServerEncoder.encodeOrderLog(ServerConstants.TYPE_LOG_ORDER_ISSUED, order));
-    }
-
-    /**
      * Enqueues a log about a newly fulfilled {@code Order} to be sent in the next update message.
      *
      * @param order the newly issued {@code Order}.

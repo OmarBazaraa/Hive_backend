@@ -151,7 +151,6 @@ public class ServerConstants {
     public static final int TYPE_LOG_TASK_ASSIGNED = 0;
     public static final int TYPE_LOG_TASK_COMPLETED = 1;
     public static final int TYPE_LOG_ORDER_FULFILLED = 2;
-    public static final int TYPE_LOG_ORDER_ISSUED = 3;
 
     // Statistics types
     // TODO

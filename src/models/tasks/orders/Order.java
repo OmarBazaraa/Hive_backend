@@ -73,7 +73,7 @@ abstract public class Order extends AbstractTask implements QuantityAddable<Item
     /**
      * The time when this {@code Order} has been issued.
      */
-    protected long timeIssued = -1;
+    protected long timeStarted = -1;
 
     /**
      * The time when this {@code Order} has been completed.
@@ -217,9 +217,8 @@ abstract public class Order extends AbstractTask implements QuantityAddable<Item
         subTasks.add(task);
 
         // Check if this is the first assigned task
-        if (timeIssued == -1) {
-            timeIssued = Warehouse.getInstance().getTime();
-            Server.getInstance().enqueueOrderIssuedLog(this);
+        if (timeStarted == -1) {
+            timeStarted = Warehouse.getInstance().getTime();
         }
     }
 
