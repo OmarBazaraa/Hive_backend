@@ -195,7 +195,6 @@ public class ServerConstants {
     //      - Non positive capacities
     //      - Non positive item quantities
     //      - Negative weights
-    //      - Rack weight exceed maximum capacity
     //      - Non existing item ID
     //      - Non existing gate ID
     //      - Non existing rack ID
@@ -205,15 +204,15 @@ public class ServerConstants {
     //      - Invalid cell type         TODO
     public static final int ERR_INVALID_ARGS = 103;
 
-    // Rack maximum storage capacity exceeded
+    // Rack weight exceed maximum capacity
     // Args: [rack id, the excess weight]
     public static final int ERR_RACK_CAP_EXCEEDED = 104;
 
-    // Infeasible order
-    //      - Collect order: item shortage
-    //              Args: [array the missing items]
-    //
-    //      - Refill order: weight exceed rack capacity
-    //              Args: [the excess weight]
-    public static final int ERR_ORDER_INFEASIBLE = 105;
+    // Infeasible collect order due to item shortage
+    // Args: [array the missing items]
+    public static final int ERR_ORDER_INFEASIBLE_COLLECT = 105;
+
+    // Infeasible refill order as items weight exceed rack capacity
+    // Args: [the excess weight]
+    public static final int ERR_ORDER_INFEASIBLE_REFILL = 106;
 }
