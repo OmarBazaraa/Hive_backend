@@ -17,7 +17,7 @@ import java.util.List;
 
 import static org.junit.Assert.*;
 
-public class RackSelectorTest {
+public class RackSelectorTest extends Dispatcher {
     @BeforeClass
     public static void before() {
 
@@ -82,5 +82,75 @@ public class RackSelectorTest {
 //        assertEquals(warehouse.getAgentById(1).getActiveTask().orders.size(), 2);
 //        assertEquals(warehouse.getAgentById(2).getActiveTask().orders.size(), 2);
 //        assertEquals(warehouse.getAgentById(3).getActiveTask().orders.size(), 2);
+    }
+
+    @Test
+    public void RackSelectorTestThree() throws Exception {
+        // Unfulfilled order yet due to lack of racks
+        WarehouseHelper.configureWarehouse("data/dispatcher_test/2A_3R_2G.hive");
+        Warehouse warehouse = Warehouse.getInstance();
+
+        Gate gate1 = warehouse.getGateById(1);
+        Gate gate2 = warehouse.getGateById(2);
+
+        Item item1 = warehouse.getItemById(1);
+        Item item2 = warehouse.getItemById(2);
+        Item item3 = warehouse.getItemById(3);
+
+        Order order1 = new CollectOrder(1, gate2);
+        order1.add(item1, 10);
+        order1.add(item2, 10);
+        warehouse.addOrder(order1);
+
+        warehouse.run();
+
+        Order order2 = new CollectOrder(2, gate1);
+        order2.add(item3, 5);
+        warehouse.addOrder(order2);
+
+        warehouse.run();
+
+        assertEquals(warehouse.getOrderById(2).getPendingUnits(), 5);
+    }
+
+    @Test
+    public void RackSelectorTestFour() throws Exception {
+        // Notice It's a different map from the previous test
+        // Unfulfilled order yet due to no agents carrying racks of needed items even if there
+        // is a single unallocated rack having this item.
+        WarehouseHelper.configureWarehouse("data/dispatcher_test/2A_3R_2G_T.hive");
+        Warehouse warehouse = Warehouse.getInstance();
+
+        Gate gate1 = warehouse.getGateById(1);
+        Gate gate2 = warehouse.getGateById(2);
+
+        Item item1 = warehouse.getItemById(1);
+        Item item2 = warehouse.getItemById(2);
+        Item item3 = warehouse.getItemById(3);
+
+        Order order1 = new CollectOrder(1, gate2);
+        order1.add(item1, 10);
+        order1.add(item2, 10);
+        warehouse.addOrder(order1);
+
+        warehouse.run();
+
+        Order order2 = new CollectOrder(2, gate1);
+        order2.add(item3, 5);
+        warehouse.addOrder(order2);
+
+        warehouse.run();
+
+        assertEquals(warehouse.getOrderById(2).getPendingUnits(), 5);
+
+        warehouse.getRackById(2).add(item3, 5);
+
+        warehouse.run();
+
+        // Unfulfilled order yet as the agent carrying rack of needed items cannot load more than
+        // the load capacity of 100.
+        assertEquals(warehouse.getOrderById(2).getPendingUnits(), 5);
+
+        // TODO @Samir be able to change the load capacity to test order fulfilling.
     }
 }

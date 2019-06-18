@@ -17,6 +17,8 @@ import java.util.*;
  */
 public class Dispatcher {
 
+    private static int stageTwoRacksThreshold = 100;
+
     /**
      * Dispatches the given {@code Order} into a set of specific tasks assigned
      * to a set of agents.
@@ -71,7 +73,7 @@ public class Dispatcher {
      * @param order {@code Order}       The order for which we select the most suitable racks.
      * @return list of the most suitable {@code Rack}s for fulfilling the order.
      */
-    public static List<Rack> selectRacks(Order order, Set<Agent> readyAgents) {
+    protected static List<Rack> selectRacks(Order order, Set<Agent> readyAgents) {
         // Refill orders as assigned with a rack by default
         if (order instanceof RefillOrder) {
             return new ArrayList<>(List.of(((RefillOrder) order).getRefillRack()));
@@ -99,7 +101,6 @@ public class Dispatcher {
         //
 
         // TODO Add if looped twice without adding anything return empty list
-        // TODO Put Constraint on the second stage
         while (orderTotalQs > 0 && candidateRacks.size() > 0) {
             Rack bestRack = null;
             double bestRank = 1e9;
@@ -137,7 +138,8 @@ public class Dispatcher {
 
             if (readyAgents != null) {
                 Agent agent = selectAgent(idleAgents, order, bestRack);
-                if (agent == null) {
+                if (agent == null) { // This rack cannot have any agent to be assigned to even if this rack is needed.
+                    // So, remove it only from the candidate racks.
                     continue;
                 }
                 ret.put(bestRack, agent);
@@ -162,7 +164,7 @@ public class Dispatcher {
         //
         // Stage 2. Delete Redundant racks from the final set, Do this if the racks count is less than some threshold
         //
-        if (selectedRacks.size() < 1000) {
+        if (selectedRacks.size() < stageTwoRacksThreshold) {
             RackSelector.removeRedundantRack(selectedRacks, candidateRacks, selectedRacksItemsQs, order, true);
         }
 
@@ -228,37 +230,5 @@ public class Dispatcher {
 
         // Return the selected agent if reachable
         return (distance == Integer.MAX_VALUE) ? null : ret;
-    }
-
-    /**
-     * @param readyAgents the set of all idle agents.
-     * @param order       the {@code Order} to select a {@code Rack} for.
-     * @return a suitable {@code Rack}.
-     * @deprecated Selects a suitable {@code Rack} to partially fulfill the given {@code Order}.
-     */
-    private static Rack selectRack(Set<Agent> readyAgents, Order order) { // TODO
-        if (readyAgents.size() > 0) {
-            // There exits idle agents to carry on the rack
-            // Select a rack storing one of the needed items of the order
-            Item item = order.iterator().next().getKey();
-            return item.iterator().next().getKey();
-        } else {
-            // There are no idle agents at the moment
-            // Select an allocated rack storing one of the needed items of the order
-            for (var i : order) {
-                Item item = i.getKey();
-
-                for (var r : item) {
-                    Rack rack = r.getKey();
-
-                    if (rack.isAllocated()) {
-                        return rack;
-                    }
-                }
-            }
-        }
-
-        // No rack found
-        return null;
     }
 }
