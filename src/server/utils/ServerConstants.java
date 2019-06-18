@@ -169,13 +169,13 @@ public class ServerConstants {
     //
 
     // Internal server error
-    public static final int ERR_SERVER = 100;
+    public static final int ERR_SERVER = 5000;
 
     // Invalid message format from the frontend
     //      - Invalid JSON format
     //      - Missing messages fields
     //      - Unknown message type      TODO
-    public static final int ERR_MSG_FORMAT = 101;
+    public static final int ERR_MSG_FORMAT = 5001;
 
     // Received known message at unexpected time:
     //      - Received START message while the server is not in IDLE state
@@ -184,7 +184,7 @@ public class ServerConstants {
     //      - Received ACK message while the server is IDLE state
     //      - Received multiple ACK messages
     //      - Received ORDER message while the server is not in RUNNING state
-    public static final int ERR_MSG_UNEXPECTED = 102;
+    public static final int ERR_MSG_UNEXPECTED = 5002;
 
     // Invalid object (map, robot, facility, item, order) arguments sent from the frontend:
     //      - Warehouse map with non positive dimensions
@@ -201,17 +201,17 @@ public class ServerConstants {
     //      - Invalid robot direction   TODO
     //      - Invalid order type        TODO
     //      - Invalid cell type         TODO
-    public static final int ERR_INVALID_ARGS = 103;
+    public static final int ERR_INVALID_ARGS = 5003;
 
     // Rack weight exceed maximum capacity
     // Args: [rack id, the excess weight]
-    public static final int ERR_RACK_CAP_EXCEEDED = 104;
+    public static final int ERR_RACK_CAP_EXCEEDED = 5004;
 
     // Infeasible collect order due to item shortage
     // Args: [order id, array the missing items]
-    public static final int ERR_ORDER_INFEASIBLE_COLLECT = 105;
+    public static final int ERR_ORDER_INFEASIBLE_COLLECT = 5005;
 
     // Infeasible refill order as items weight exceed rack capacity
     // Args: [order id, rack id, the excess weight]
-    public static final int ERR_ORDER_INFEASIBLE_REFILL = 106;
+    public static final int ERR_ORDER_INFEASIBLE_REFILL = 5006;
 }
