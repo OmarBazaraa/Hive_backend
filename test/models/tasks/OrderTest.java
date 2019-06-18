@@ -102,12 +102,13 @@ public class OrderTest {
         Item item = warehouse.getItemById(1);
 
         // Create refill order
-        Order order = new RefillOrder(1, gate, rack);
+        RefillOrder order = new RefillOrder(1, gate, rack);
         order.add(item, 5);
 
         // Check refill order properties
         Assert.assertEquals(order.getPendingUnits(), -5);
         Assert.assertEquals(order.get(item), -5);
+        Assert.assertEquals(order.getAddedWeight(), 5 * item.getWeight());
         Assert.assertTrue(order.isPending());
 
         // Check items before and after order activation
