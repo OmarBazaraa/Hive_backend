@@ -93,7 +93,7 @@ public class RefillOrder extends Order {
     @Override
     public void add(Item item, int quantity) {
         super.add(item, -quantity);
-        addedWeight += item.getWeight();
+        addedWeight += item.getWeight() * quantity;
     }
 
     /**

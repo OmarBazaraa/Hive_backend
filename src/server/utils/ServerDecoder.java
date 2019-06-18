@@ -424,18 +424,9 @@ public class ServerDecoder {
             // Refill order feasibility checks
             //
 
-            int addedWeight = 0;
-
-            for (var pair : order) {
-                Item item = pair.getKey();
-                int quantity = -pair.getValue();
-
-                addedWeight += item.getWeight() * quantity;
-            }
-
-            Rack rack = ((RefillOrder) order).getRefillRack();
-
-            int totWeight = rack.getStoredWeight() + addedWeight;
+            RefillOrder ord = (RefillOrder) order;
+            Rack rack = ord.getRefillRack();
+            int totWeight = rack.getStoredWeight() + ord.getAddedWeight();
 
             if (totWeight > rack.getCapacity()) {
                 throw new DataException("Refill order-" + order.getId() +
