@@ -209,10 +209,10 @@ public class ServerConstants {
     public static final int ERR_RACK_CAP_EXCEEDED = 104;
 
     // Infeasible collect order due to item shortage
-    // Args: [array the missing items]
+    // Args: [order id, array the missing items]
     public static final int ERR_ORDER_INFEASIBLE_COLLECT = 105;
 
     // Infeasible refill order as items weight exceed rack capacity
-    // Args: [the excess weight]
+    // Args: [order id, rack id, the excess weight]
     public static final int ERR_ORDER_INFEASIBLE_REFILL = 106;
 }
