@@ -79,6 +79,20 @@ public class ServerEncoder {
         return ret;
     }
 
+    public static JSONObject encodeControlMsg(int type, Agent... agents) {
+        JSONArray ids = new JSONArray();
+
+        for (Agent agent : agents) {
+            ids.put(agent.getId());
+        }
+
+        JSONObject data = new JSONObject();
+        data.put(ServerConstants.KEY_IDS, ids);
+        data.put(ServerConstants.KEY_TYPE, type);
+
+        return encodeMsg(ServerConstants.TYPE_CONTROL, data);
+    }
+
     public static JSONObject encodeAckMsg(int type, int status, int errCode, String errReason, Object... errArgs) {
         JSONObject data = new JSONObject();
         data.put(ServerConstants.KEY_STATUS, status);

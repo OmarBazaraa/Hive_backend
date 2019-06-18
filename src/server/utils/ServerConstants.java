@@ -54,6 +54,7 @@ public class ServerConstants {
     public static final String KEY_GRID = "grid";
 
     public static final String KEY_ID = "id";
+    public static final String KEY_IDS = "ids";
     public static final String KEY_ROW = "row";
     public static final String KEY_COL = "col";
 
@@ -108,12 +109,8 @@ public class ServerConstants {
     public static final int TYPE_STOP = 3;
     public static final int TYPE_RESUME = 4;
     public static final int TYPE_ACK_UPDATE = 5;
-    public static final int TYPE_EXIT = 6;
-
-    // TODO: to be revised
-    public static final int TYPE_AGENT_DEACTIVATE = 8;
-    public static final int TYPE_AGENT_ACTIVATE = 8;
-    public static final int TYPE_AGENT_BLOCKED = 8;
+    public static final int TYPE_CONTROL = 6;
+    public static final int TYPE_EXIT = 7;
 
     // Main message types from server
     public static final int TYPE_ACK_START = 0;
@@ -121,6 +118,10 @@ public class ServerConstants {
     public static final int TYPE_ACK_ORDER = 2;
     public static final int TYPE_UPDATE = 3;
     public static final int TYPE_MSG = 6;
+
+    // Control message types from/to server
+    public static final int TYPE_CONTROL_ACTIVATE = 0;
+    public static final int TYPE_CONTROL_DEACTIVATE = 1;
 
     // Running-mode types
     public static final int TYPE_MODE_SIMULATE = 0;

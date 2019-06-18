@@ -305,6 +305,9 @@ public class Server {
             case ServerConstants.TYPE_ORDER:
                 processOrderMsg(data);
                 break;
+            case ServerConstants.TYPE_CONTROL:
+                processControlMsg(data);
+                break;
             default:
                 throw new DataException("Invalid message type.", ServerConstants.ERR_MSG_FORMAT);
         }
@@ -467,6 +470,22 @@ public class Server {
         }
     }
 
+    /**
+     * Processes the CONTROL message from the frontend.
+     * <p>
+     * CONTROL message is used to control the agents of the {@code Warehouse}.
+     *
+     * @param data the received JSON data part of the message.
+     */
+    private synchronized void processControlMsg(JSONObject data) throws Exception {
+        if (currentState != ServerStates.RUNNING) {
+            throw new DataException("Received CONTROL message while the server is not in RUNNING state.",
+                    ServerConstants.ERR_MSG_UNEXPECTED);
+        }
+
+        ServerDecoder.decodeAndApplyControl(data);
+    }
+
     // ===============================================================================================
     //
     // Backend -> Frontend
@@ -549,6 +568,16 @@ public class Server {
      */
     public synchronized void sendUpdateMsg() throws Exception {
         send(ServerEncoder.encodeUpdateMsg(warehouse.getTime(), actions, logs, statistics));
+    }
+
+    /**
+     * Sends a control message to the frontend.
+     *
+     * @param type   the type of the control.
+     * @param agents a list of agents to apply this control.
+     */
+    public synchronized void sendControlMsg(int type, Agent... agents) throws Exception {
+        send(ServerEncoder.encodeControlMsg(type, agents));
     }
 
     // ===============================================================================================
