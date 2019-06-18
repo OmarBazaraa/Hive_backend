@@ -203,7 +203,7 @@ public class ServerDecoder {
         if (ret.getStoredWeight() > ret.getCapacity()) {
             throw new DataException("Rack-" + id + " exceeds the maximum storage capacity by: " +
                     (ret.getStoredWeight() - ret.getCapacity()) + ".",
-                    ServerConstants.ERR_INVALID_ARGS);
+                    ServerConstants.ERR_RACK_CAP_EXCEEDED, ret.getStoredWeight() - ret.getCapacity());
         }
 
         // Add to the warehouse

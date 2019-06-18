@@ -205,11 +205,15 @@ public class ServerConstants {
     //      - Invalid cell type         TODO
     public static final int ERR_INVALID_ARGS = 103;
 
+    // Rack maximum storage capacity exceeded
+    // Args: [rack id, the excess weight]
+    public static final int ERR_RACK_CAP_EXCEEDED = 104;
+
     // Infeasible order
     //      - Collect order: item shortage
-    //              Args: array the missing items
+    //              Args: [array the missing items]
     //
     //      - Refill order: weight exceed rack capacity
-    //              Args: the excess weight
-    public static final int ERR_ORDER_INFEASIBLE = 104;
+    //              Args: [the excess weight]
+    public static final int ERR_ORDER_INFEASIBLE = 105;
 }
