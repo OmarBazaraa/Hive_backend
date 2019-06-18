@@ -216,7 +216,8 @@ public class Server {
             }
             // Handle internal server exceptions
             catch (Exception ex) {
-                sendAckMsg(ServerConstants.TYPE_MSG, ServerConstants.TYPE_ERROR, "Internal server error.");
+                sendAckMsg(ServerConstants.TYPE_MSG, ServerConstants.TYPE_ERROR,
+                        ServerConstants.ERR_SERVER, "Internal server error.");
                 currentState = ServerStates.IDLE;
                 System.out.println(ex.getMessage());
                 ex.printStackTrace();
@@ -242,24 +243,27 @@ public class Server {
         }
         // Handle invalid message format
         catch (JSONException ex) {
-            sendAckMsg(ServerConstants.TYPE_MSG, ServerConstants.TYPE_ERROR, "Invalid message format.");
+            sendAckMsg(ServerConstants.TYPE_MSG, ServerConstants.TYPE_ERROR,
+                    ServerConstants.ERR_MSG_FORMAT, "Invalid message format.");
             System.out.println(ex.getMessage());
             ex.printStackTrace();
         }
         // Handle data inconsistency exceptions
         catch (DataException ex) {
-            sendAckMsg(ServerConstants.TYPE_MSG, ServerConstants.TYPE_ERROR, ex.getMessage());
+            sendAckMsg(ServerConstants.TYPE_MSG, ServerConstants.TYPE_ERROR,
+                    ex.getErrorCode(), ex.getMessage(), ex.getErrorArgs());
             System.out.println(ex.getMessage());
             ex.printStackTrace();
         }
-        // Handle communication exceptions (probably the frontend is down)
+        // Handle communication exceptions (probably the frontend is down or connection is lost)
         catch (IOException ex) {
             System.out.println(ex.getMessage());
             currentState = ServerStates.IDLE;
         }
         // Handle internal server exceptions
         catch (Exception ex) {
-            sendAckMsg(ServerConstants.TYPE_MSG, ServerConstants.TYPE_ERROR, "Internal server error.");
+            sendAckMsg(ServerConstants.TYPE_MSG, ServerConstants.TYPE_ERROR,
+                    ServerConstants.ERR_SERVER, "Internal server error.");
             currentState = ServerStates.IDLE;
             System.out.println(ex.getMessage());
             ex.printStackTrace();
@@ -302,7 +306,7 @@ public class Server {
                 processOrderMsg(data);
                 break;
             default:
-                throw new DataException("Invalid message type.");
+                throw new DataException("Invalid message type.", ServerConstants.ERR_MSG_FORMAT);
         }
     }
 
@@ -316,7 +320,8 @@ public class Server {
      */
     private synchronized void processStartMsg(JSONObject data) throws Exception {
         if (currentState != ServerStates.IDLE) {
-            throw new DataException("Received START message while the server is not in IDLE state.");
+            throw new DataException("Received START message while the server is not in IDLE state.",
+                    ServerConstants.ERR_MSG_UNEXPECTED);
         }
 
         try {
@@ -324,18 +329,20 @@ public class Server {
             JSONObject state = data.getJSONObject(ServerConstants.KEY_STATE);
 
             ServerDecoder.decodeInitConfig(state);
-            sendAckMsg(ServerConstants.TYPE_ACK_START, ServerConstants.TYPE_OK, "");
+            sendAckMsg(ServerConstants.TYPE_ACK_START, ServerConstants.TYPE_OK, 0, "");
             currentState = ServerStates.RUNNING;
             receivedAck = true;
 
             // DEBUG
             warehouse.print();
         } catch (JSONException ex) {
-            sendAckMsg(ServerConstants.TYPE_ACK_START, ServerConstants.TYPE_ERROR, "Invalid START message format.");
+            sendAckMsg(ServerConstants.TYPE_ACK_START, ServerConstants.TYPE_ERROR,
+                    ServerConstants.ERR_MSG_FORMAT, "Invalid START message format.");
             System.out.println(ex.getMessage());
             ex.printStackTrace();
         } catch (DataException ex) {
-            sendAckMsg(ServerConstants.TYPE_ACK_START, ServerConstants.TYPE_ERROR, ex.getMessage());
+            sendAckMsg(ServerConstants.TYPE_ACK_START, ServerConstants.TYPE_ERROR,
+                    ex.getErrorCode(), ex.getMessage(), ex.getErrorArgs());
             System.out.println(ex.getMessage());
             ex.printStackTrace();
         }
@@ -363,7 +370,8 @@ public class Server {
      */
     private synchronized void processPauseMsg(JSONObject data) throws Exception {
         if (currentState != ServerStates.RUNNING) {
-            throw new DataException("Received PAUSE message while the server is not in RUNNING state.");
+            throw new DataException("Received PAUSE message while the server is not in RUNNING state.",
+                    ServerConstants.ERR_MSG_UNEXPECTED);
         }
 
         currentState = ServerStates.PAUSE;
@@ -379,10 +387,11 @@ public class Server {
      */
     private synchronized void processResumeMsg(JSONObject data) throws Exception {
         if (currentState != ServerStates.PAUSE) {
-            throw new DataException("Received RESUME message while the server is not in PAUSE state.");
+            throw new DataException("Received RESUME message while the server is not in PAUSE state.",
+                    ServerConstants.ERR_MSG_UNEXPECTED);
         }
 
-        sendAckMsg(ServerConstants.TYPE_ACK_RESUME, ServerConstants.TYPE_OK, "");
+        sendAckMsg(ServerConstants.TYPE_ACK_RESUME, ServerConstants.TYPE_OK, 0, "");
         currentState = ServerStates.RUNNING;
     }
 
@@ -407,11 +416,13 @@ public class Server {
      */
     private synchronized void processUpdateAckMsg(JSONObject data) throws Exception {
         if (currentState == ServerStates.IDLE) {
-            throw new DataException("Received ACK message while the server is IDLE state.");
+            throw new DataException("Received ACK message while the server is IDLE state.",
+                    ServerConstants.ERR_MSG_UNEXPECTED);
         }
 
         if (receivedAck) {
-            throw new DataException("Received multiple ACK messages.");
+            throw new DataException("Received multiple ACK messages.",
+                    ServerConstants.ERR_MSG_UNEXPECTED);
         }
 
         receivedAck = true;
@@ -430,23 +441,26 @@ public class Server {
      */
     private synchronized void processOrderMsg(JSONObject data) throws Exception {
         if (currentState != ServerStates.RUNNING) {
-            throw new DataException("Received ORDER message while the server is not in RUNNING state.");
+            throw new DataException("Received ORDER message while the server is not in RUNNING state.",
+                    ServerConstants.ERR_MSG_UNEXPECTED);
         }
 
         try {
             Order order = ServerDecoder.decodeOrder(data);
-            sendAckMsg(ServerConstants.TYPE_ACK_ORDER, ServerConstants.TYPE_OK, "");
+            sendAckMsg(ServerConstants.TYPE_ACK_ORDER, ServerConstants.TYPE_OK, 0, "");
 
             // DEBUG
             System.out.println("Order received:");
             System.out.println("    > " + order);
             System.out.println();
         } catch (JSONException ex) {
-            sendAckMsg(ServerConstants.TYPE_ACK_START, ServerConstants.TYPE_ERROR, "Invalid ORDER message format.");
+            sendAckMsg(ServerConstants.TYPE_ACK_START, ServerConstants.TYPE_ERROR,
+                    ServerConstants.ERR_MSG_FORMAT, "Invalid ORDER message format.");
             System.out.println(ex.getMessage());
             ex.printStackTrace();
         } catch (DataException ex) {
-            sendAckMsg(ServerConstants.TYPE_ACK_ORDER, ServerConstants.TYPE_ERROR, ex.getMessage());
+            sendAckMsg(ServerConstants.TYPE_ACK_ORDER, ServerConstants.TYPE_ERROR,
+                    ex.getErrorCode(), ex.getMessage(), ex.getErrorArgs());
             System.out.println(ex.getMessage());
             ex.printStackTrace();
         }
@@ -469,12 +483,14 @@ public class Server {
     /**
      * Sends an acknowledge message to the frontend.
      *
-     * @param type   the type of acknowledgement.
-     * @param status the status of the acknowledgement.
-     * @param msg    the piggybacked message if needed.
+     * @param type      the type of acknowledgement.
+     * @param status    the status of the acknowledgement. Either OK or ERROR.
+     * @param errCode   the error code.
+     * @param errReason the string message explaining the reason of the error.
+     * @param errArgs   the error arguments.
      */
-    private synchronized void sendAckMsg(int type, int status, String msg) throws Exception {
-        send(ServerEncoder.encodeAckMsg(type, status, msg));
+    private synchronized void sendAckMsg(int type, int status, int errCode, String errReason, Object... errArgs) throws Exception {
+        send(ServerEncoder.encodeAckMsg(type, status, errCode, errReason, errArgs));
     }
 
     /**

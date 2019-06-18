@@ -79,10 +79,18 @@ public class ServerEncoder {
         return ret;
     }
 
-    public static JSONObject encodeAckMsg(int type, int status, String msg) {
+    public static JSONObject encodeAckMsg(int type, int status, int errCode, String errReason, Object... errArgs) {
         JSONObject data = new JSONObject();
         data.put(ServerConstants.KEY_STATUS, status);
-        data.put(ServerConstants.KEY_MSG, msg);
+
+        if (status == ServerConstants.TYPE_ERROR) {
+            JSONObject msg = new JSONObject();
+            msg.put(ServerConstants.KEY_REASON, errReason);
+            msg.put(ServerConstants.KEY_ID, errCode);
+            msg.put(ServerConstants.KEY_ARGS, errArgs);
+            data.put(ServerConstants.KEY_MSG, msg);
+        }
+
         return encodeMsg(type, data);
     }
 

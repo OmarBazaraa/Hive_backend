@@ -67,7 +67,8 @@ public class ServerDecoder {
         // Checks
         //
         if (h < 1 || w < 1) {
-            throw new DataException("Warehouse grid with invalid dimensions: (" + h + " x " + w + ").");
+            throw new DataException("Warehouse grid with invalid dimensions: (" + h + " x " + w + ").",
+                    ServerConstants.ERR_INVALID_ARGS);
         }
 
         MapCell[][] grid = new MapCell[h][w];
@@ -109,7 +110,8 @@ public class ServerDecoder {
                     ret.setFacility(CellType.STATION, decodeStation(obj, row, col));
                     break;
                 default:
-                    throw new DataException("Cell (" + row + ", " + col + ") with invalid facilities type: " + type + ".");
+                    throw new DataException("Cell (" + row + ", " + col + ") with invalid facilities type: " + type + ".",
+                            ServerConstants.ERR_INVALID_ARGS);
             }
         }
 
@@ -117,7 +119,8 @@ public class ServerDecoder {
         // Checks
         //
         if (ret.hasAgent() && ret.hasFacility()) {
-            throw new DataException("Cell (" + row + ", " + col + ") has both agent and facilities. Expecting only one.");
+            throw new DataException("Cell (" + row + ", " + col + ") has both agent and facilities. Expecting only one.",
+                    ServerConstants.ERR_INVALID_ARGS);
         }
 
         return ret;
@@ -135,16 +138,20 @@ public class ServerDecoder {
         // Checks
         //
         if (id < 0) {
-            throw new DataException("Agent with negative id: " + id + ".");
+            throw new DataException("Agent with negative id: " + id + ".",
+                    ServerConstants.ERR_INVALID_ARGS);
         }
         if (warehouse.getAgentById(id) != null) {
-            throw new DataException("Agent with duplicate id: " + id + ".");
+            throw new DataException("Agent with duplicate id: " + id + ".",
+                    ServerConstants.ERR_INVALID_ARGS);
         }
         if (cap < 1) {
-            throw new DataException("Agent-" + id + " with non-positive load capacity: " + cap + ".");
+            throw new DataException("Agent-" + id + " with non-positive load capacity: " + cap + ".",
+                    ServerConstants.ERR_INVALID_ARGS);
         }
         if (dir < 0 || dir > 3) {
-            throw new DataException("Agent-" + id + " with invalid direction: " + dir + ".");
+            throw new DataException("Agent-" + id + " with invalid direction: " + dir + ".",
+                    ServerConstants.ERR_INVALID_ARGS);
         }
 
         // Create and add to the warehouse
@@ -167,16 +174,20 @@ public class ServerDecoder {
         // Checks
         //
         if (id < 0) {
-            throw new DataException("Rack with negative id: " + id + ".");
+            throw new DataException("Rack with negative id: " + id + ".",
+                    ServerConstants.ERR_INVALID_ARGS);
         }
         if (warehouse.getRackById(id) != null) {
-            throw new DataException("Rack with duplicate id: " + id + ".");
+            throw new DataException("Rack with duplicate id: " + id + ".",
+                    ServerConstants.ERR_INVALID_ARGS);
         }
         if (cap < 1) {
-            throw new DataException("Rack-" + id + " with non-positive capacity: " + cap + ".");
+            throw new DataException("Rack-" + id + " with non-positive capacity: " + cap + ".",
+                    ServerConstants.ERR_INVALID_ARGS);
         }
         if (weight < 0) {
-            throw new DataException("Rack-" + id + " with negative weight: " + weight + ".");
+            throw new DataException("Rack-" + id + " with negative weight: " + weight + ".",
+                    ServerConstants.ERR_INVALID_ARGS);
         }
 
         // Create rack
@@ -190,7 +201,9 @@ public class ServerDecoder {
         // Checks
         //
         if (ret.getStoredWeight() > ret.getCapacity()) {
-            throw new DataException("Rack-" + id + " exceeds the maximum storage capacity: " + ret.getStoredWeight() + ".");
+            throw new DataException("Rack-" + id + " exceeds the maximum storage capacity by: " +
+                    (ret.getStoredWeight() - ret.getCapacity()) + ".",
+                    ServerConstants.ERR_INVALID_ARGS);
         }
 
         // Add to the warehouse
@@ -206,10 +219,12 @@ public class ServerDecoder {
         // Checks
         //
         if (id < 0) {
-            throw new DataException("Gate with negative id: " + id + ".");
+            throw new DataException("Gate with negative id: " + id + ".",
+                    ServerConstants.ERR_INVALID_ARGS);
         }
         if (warehouse.getGateById(id) != null) {
-            throw new DataException("Gate with duplicate id: " + id + ".");
+            throw new DataException("Gate with duplicate id: " + id + ".",
+                    ServerConstants.ERR_INVALID_ARGS);
         }
 
         // Create and add to the warehouse
@@ -227,10 +242,12 @@ public class ServerDecoder {
         // Checks
         //
         if (id < 0) {
-            throw new DataException("Station with negative id: " + id + ".");
+            throw new DataException("Station with negative id: " + id + ".",
+                    ServerConstants.ERR_INVALID_ARGS);
         }
         if (warehouse.getStationById(id) != null) {
-            throw new DataException("Station with duplicate id: " + id + ".");
+            throw new DataException("Station with duplicate id: " + id + ".",
+                    ServerConstants.ERR_INVALID_ARGS);
         }
 
         // Create and add to the warehouse
@@ -249,10 +266,12 @@ public class ServerDecoder {
         // Checks
         //
         if (id < 0) {
-            throw new DataException("Item with negative id: " + id + ".");
+            throw new DataException("Item with negative id: " + id + ".",
+                    ServerConstants.ERR_INVALID_ARGS);
         }
         if (warehouse.getItemById(id) != null) {
-            throw new DataException("Item with duplicate id: " + id + ".");
+            throw new DataException("Item with duplicate id: " + id + ".",
+                    ServerConstants.ERR_INVALID_ARGS);
         }
 
         // Create and add to the warehouse
@@ -273,13 +292,16 @@ public class ServerDecoder {
         // Checks
         //
         if (id < 0) {
-            throw new DataException("Order with negative id: " + id + ".");
+            throw new DataException("Order with negative id: " + id + ".",
+                    ServerConstants.ERR_INVALID_ARGS);
         }
         if (warehouse.getOrderById(id) != null) {
-            throw new DataException("Order with duplicate id: " + id + ".");
+            throw new DataException("Order with duplicate id: " + id + ".",
+                    ServerConstants.ERR_INVALID_ARGS);
         }
         if (gate == null) {
-            throw new DataException("Order-" + id + " is assigned invalid gate with id: " + gateId + ".");
+            throw new DataException("Order-" + id + " is assigned invalid gate with id: " + gateId + ".",
+                    ServerConstants.ERR_INVALID_ARGS);
         }
 
         //
@@ -295,7 +317,8 @@ public class ServerDecoder {
                 ret = decodeRefillOrder(data, id, gate);
                 break;
             default:
-                throw new DataException("Order-" + id + " with invalid type: " + type + ".");
+                throw new DataException("Order-" + id + " with invalid type: " + type + ".",
+                        ServerConstants.ERR_INVALID_ARGS);
         }
 
         // Extract items
@@ -332,7 +355,8 @@ public class ServerDecoder {
         // Checks
         //
         if (rack == null) {
-            throw new DataException("Order-" + id + " is assigned invalid rack with id: " + rackId + ".");
+            throw new DataException("Order-" + id + " is assigned invalid rack with id: " + rackId + ".",
+                    ServerConstants.ERR_INVALID_ARGS);
         }
 
         // Create refill order
@@ -351,10 +375,12 @@ public class ServerDecoder {
             // Checks
             //
             if (item == null) {
-                throw new DataException(name + " has invalid item with id: " + itemId + ".");
+                throw new DataException(name + " has invalid item with id: " + itemId + ".",
+                        ServerConstants.ERR_INVALID_ARGS);
             }
             if (quantity < 1) {
-                throw new DataException(name + " has item-" + itemId + " with non-positive quantity: " + quantity + ".");
+                throw new DataException(name + " has item-" + itemId + " with non-positive quantity: " + quantity + ".",
+                        ServerConstants.ERR_INVALID_ARGS);
             }
 
             // Add to the order
@@ -364,7 +390,8 @@ public class ServerDecoder {
 
     public static void checkOrderFeasibility(Order order) throws DataException {
         if (!order.isPending()) {
-            throw new DataException("Order-" + order.getId() + " has no assigned items.");
+            throw new DataException("Order-" + order.getId() + " has no assigned items.",
+                    ServerConstants.ERR_INVALID_ARGS);
         }
 
         // TODO: check agent-to-rack reach-ability
@@ -389,7 +416,8 @@ public class ServerDecoder {
 
             if (list.size() > 0) {
                 throw new DataException("Collect order-" + order.getId() +
-                        " is currently infeasible due to shortage in items: " + list + ".");
+                        " is currently infeasible due to shortage in items: " + list + ".",
+                        ServerConstants.ERR_ORDER_INFEASIBLE, list);
             }
         } else {
             //
@@ -412,7 +440,8 @@ public class ServerDecoder {
             if (totWeight > rack.getCapacity()) {
                 throw new DataException("Refill order-" + order.getId() +
                         " items weight exceed rack-" + rack.getId() + " capacity by: " +
-                        (totWeight - rack.getCapacity()) + ".");
+                        (totWeight - rack.getCapacity()) + ".",
+                        ServerConstants.ERR_ORDER_INFEASIBLE, totWeight - rack.getCapacity());
             }
         }
     }
