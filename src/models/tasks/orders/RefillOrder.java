@@ -34,7 +34,12 @@ public class RefillOrder extends Order {
     /**
      * The {@code Rack} where this {@code RefillOrder} must be refill.
      */
-    protected Rack refillRack;
+    private Rack refillRack;
+
+    /**
+     * The total weight added to the associated {@code Rack} after refilling.
+     */
+    private int addedWeight;
 
     // ===============================================================================================
     //
@@ -63,6 +68,15 @@ public class RefillOrder extends Order {
     }
 
     /**
+     * Returns the total weight added to the associated {@code Rack} after refilling.
+     *
+     * @return the added weight.
+     */
+    public int getAddedWeight() {
+        return addedWeight;
+    }
+
+    /**
      * Updates the quantity of an {@code Item} in this {@code Order}.
      * <p>
      * This function is used to add extra units of the given {@code Item}
@@ -79,6 +93,7 @@ public class RefillOrder extends Order {
     @Override
     public void add(Item item, int quantity) {
         super.add(item, -quantity);
+        addedWeight += item.getWeight();
     }
 
     /**

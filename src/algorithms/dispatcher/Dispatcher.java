@@ -44,7 +44,7 @@ public class Dispatcher {
             }
 
             // Find a suitable agent
-            Agent agent = selectAgent(readyAgents, rack);
+            Agent agent = selectAgent(readyAgents, order, rack);
 
             // Return if no agent is found
             if (agent == null) {
@@ -71,7 +71,7 @@ public class Dispatcher {
      * Selects a suitable {@code Rack} to partially fulfill the given {@code Order}.
      *
      * @param readyAgents the set of all idle agents.
-     * @param order       the {@code Order} to select {@code Rack} for.
+     * @param order       the {@code Order} to select a {@code Rack} for.
      *
      * @return a suitable {@code Rack}.
      */
@@ -110,15 +110,29 @@ public class Dispatcher {
      * Selects a suitable {@code Agent} for carrying out the given {@code Rack}.
      *
      * @param readyAgents the set of all idle agents.
+     * @param order       the {@code Order} to select an {@code Agent} for.
      * @param rack        the {@code Rack} to.
      *
      * @return a suitable {@code Agent}.
      */
-    private static Agent selectAgent(Set<Agent> readyAgents, Rack rack) {
+    private static Agent selectAgent(Set<Agent> readyAgents, Order order, Rack rack) {
+        // Compute maximum rack weight during the task
+        int rackWeight = rack.getStoredWeight();
+
+        if (order instanceof RefillOrder) {
+            rackWeight += ((RefillOrder) order).getAddedWeight();
+        }
+
         // If the rack is already allocated to an agent,
         // then assign the task to that agent
         if (rack.isAllocated()) {
-            return rack.getAllocatingAgent();
+            Agent agent = rack.getAllocatingAgent();
+
+            if (agent.getLoadCapacity() >= rackWeight) {
+                return agent;
+            } else {
+                return null;
+            }
         }
 
         // Get the guide map of this rack
@@ -133,7 +147,7 @@ public class Dispatcher {
         //
         for (Agent agent : readyAgents) {
             // Skip agent if it cannot hold that rack
-            if (agent.getLoadCapacity() < rack.getTotalWeight()) {
+            if (agent.getLoadCapacity() < rackWeight) {
                 continue;
             }
 
