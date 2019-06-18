@@ -307,37 +307,6 @@ public class ServerDecoder {
         return ret;
     }
 
-    public static void decodeAndApplyControl(JSONObject data) throws Exception {
-        int type = data.getInt(ServerConstants.KEY_TYPE);
-        int id = data.getInt(ServerConstants.KEY_ID);
-        Agent agent = warehouse.getAgentById(id);
-
-        if (agent == null) {
-            throw new DataException("Control message with invalid agent id: " + id + ".",
-                    ServerConstants.ERR_INVALID_ARGS);
-        }
-
-        switch (type) {
-            case ServerConstants.TYPE_CONTROL_ACTIVATE:
-                // TODO:
-                Server.getInstance().sendControlMsg(ServerConstants.TYPE_CONTROL_ACTIVATE, agent);
-
-                // DEBUG
-                System.out.println("Activating " + agent + ".");
-                break;
-            case ServerConstants.TYPE_CONTROL_DEACTIVATE:
-                // TODO:
-                Server.getInstance().sendControlMsg(ServerConstants.TYPE_CONTROL_DEACTIVATE, agent);
-
-                // DEBUG
-                System.out.println("Deactivating " + agent + ".");
-                break;
-            default:
-                throw new DataException("Control message with invalid type: " + type + ".",
-                        ServerConstants.ERR_INVALID_ARGS);
-        }
-    }
-
     // ===============================================================================================
     //
     // Static Helper Methods
