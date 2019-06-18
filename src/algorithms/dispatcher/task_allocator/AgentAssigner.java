@@ -3,7 +3,6 @@ package algorithms.dispatcher.task_allocator;
 import models.HiveObject;
 import models.agents.Agent;
 import models.facilities.Rack;
-import models.maps.GuideGrid;
 import models.maps.utils.Position;
 import org.jgrapht.alg.interfaces.MatchingAlgorithm;
 import org.jgrapht.alg.matching.KuhnMunkresMinimalWeightBipartitePerfectMatching;
@@ -37,10 +36,8 @@ public class AgentAssigner {
 
         for (int i = 0; i < Math.max(nRacks, candidateAgents.size()); i++) {
             Rack rack = null;
-            GuideGrid guide = null;
             if (i < nRacks) {
                 rack = selectedRacks.get(i);
-                guide = rack.getGuideMap();
             } else {
                 rack = new Rack();
             }
@@ -54,7 +51,7 @@ public class AgentAssigner {
 
                 int cost = 0;
                 if (i < nRacks) {
-                    cost = calculateOperationCost(guide, agent.getPosition());
+                    cost = calculateOperationCost(rack, agent.getPosition());
                 }
 
                 costGraph.setEdgeWeight(rack, agent, cost);
@@ -81,13 +78,13 @@ public class AgentAssigner {
      * Calculate the estimated operational cost for a certain {@code Agent} transferring a {@code Rack} to a certain
      * {@code Gate}.
      *
-     * @param rackGuide  {@code GuideGrid} of the rack.
+     * @param rack  {@code GuideGrid} of the rack.
      * @param agentPos {@code Position} of the agent.
      *
      * @return the estimated operational cost.
      */
-    private static int calculateOperationCost(GuideGrid rackGuide, Position agentPos) {
-        return rackGuide.getDistance(agentPos) * 19;
+    private static int calculateOperationCost(Rack rack, Position agentPos) {
+        return rack.getDistanceTo(agentPos) * 19;
     }
 
 }
