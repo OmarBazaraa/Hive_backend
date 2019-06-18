@@ -59,10 +59,10 @@ public class WarehouseTest {
 
         // Item 1
         Assert.assertEquals(item.getReservedUnits(), 0);
-        Assert.assertEquals(item.getTotalUnits(), 0);
-        Assert.assertEquals(item.getAvailableUnits(), 0);
-        Assert.assertEquals(item.get(rack), 0);
-        Assert.assertEquals(rack.get(item), 0);
+        Assert.assertEquals(item.getTotalUnits(), 9);
+        Assert.assertEquals(item.getAvailableUnits(), 9);
+        Assert.assertEquals(item.get(rack), 9);
+        Assert.assertEquals(rack.get(item), 9);
     }
 
     @Test

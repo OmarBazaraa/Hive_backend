@@ -69,9 +69,17 @@ public class ItemTest {
         Assert.assertEquals(item.getAvailableUnits(), 0);
         Assert.assertEquals(item.getTotalUnits(), 0);
 
+        // Check simple units addition
+        // Note that it is advised not to add items directly to item object
+        // Items are better be added into a rack and the count will be synchronized internally
+        Rack rack = new Rack(1, 100, 50);
+        item.add(rack, 7);
+        Assert.assertEquals(item.getTotalUnits(), 7);
+
         // Check simple units reservation
         item.reserve(-5);
         Assert.assertEquals(item.getReservedUnits(), -5);
+        Assert.assertEquals(item.getAvailableUnits(), 12);
     }
 
     @Test

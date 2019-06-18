@@ -104,7 +104,11 @@
               "items": [
                 {
                   "id": 1,
-                  "quantity": 1
+                  "quantity": 10
+                },
+                {
+                  "id": 2,
+                  "quantity": 10
                 }
               ],
               "color": "#bababa"
@@ -215,6 +219,11 @@
       "id": 1,
       "weight": 1,
       "name": "1"
+    },
+    {
+      "id": 2,
+      "weight": 1,
+      "name": "2"
     }
   ],
   "nextIDs": {
