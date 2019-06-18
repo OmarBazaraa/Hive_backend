@@ -119,12 +119,22 @@ public class Task extends AbstractTask {
 
     /**
      * Adds a new {@code Order} to be partially fulfilled by this {@code Task}.
+     * <p>
+     * The newly added {@code Order} will start being partially fulfilled by
+     * this {@code Task} when either it is added when the {@code Task} is currently
+     * running (i.e. before calling {@link Task#terminate()}), or after activating
+     * the {@code Task} (i.e. after calling {@link Task#activate()}).
      *
      * @param order the new {@code Order} to add.
      */
     public void addOrder(Order order) {
         orders.addLast(order);
         order.assignTask(this);
+
+        // Check if currently the task is returning the rack back
+        if (actions.size() == 1) {
+            actions.addFirst(new Pair<>(TaskAction.SELECT_ORDER, null));
+        }
     }
 
     /**
