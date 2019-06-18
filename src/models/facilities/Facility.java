@@ -6,8 +6,7 @@ import models.HiveObject;
 import models.agents.Agent;
 import models.agents.AgentAllocatable;
 import models.agents.AgentBindable;
-import models.maps.GuideGrid;
-import models.maps.MapGrid;
+import models.maps.utils.Position;
 
 
 /**
@@ -33,7 +32,7 @@ abstract public class Facility extends HiveObject implements AgentBindable, Agen
     /**
      * The guide map grid of this {@code Facility}.
      */
-    protected GuideGrid guideMap;
+    protected int[][] guideMap;
 
     /**
      * The {@code Agent} allocating this {@code Facility}.
@@ -67,21 +66,52 @@ abstract public class Facility extends HiveObject implements AgentBindable, Agen
     }
 
     /**
-     * Returns a guide map to reach this {@code Facility}.
+     * Returns the least number of steps to reach this {@code Facility}
+     * from the given position in the {@code Warehouse} or vice versa.
      *
-     * @return the {@code GuideGrid} of this {@code Facility}.
+     * @param row the row position of the destination.
+     * @param col the column position of the destination.
+     *
+     * @return the shortest distance to the given position;
+     *         or {@link Integer#MAX_VALUE} if unreachable.
      */
-    public GuideGrid getGuideMap() {
-        return guideMap;
+    public int getDistanceTo(int row, int col) {
+        return guideMap[row][col];
     }
 
     /**
-     * Computes a guide map to reach this {@code Facility}.
+     * Returns the least number of steps to reach this {@code Facility}
+     * from the given position in the {@code Warehouse} or vice versa.
      *
-     * @param map the {@code MapGrid} of the {@code Warehouse} where this {@code Facility} is located in.
+     * @param pos the {@code Position} of the destination.
+     *
+     * @return the shortest distance to the given position;
+     *         or {@link Integer#MAX_VALUE} if unreachable.
      */
-    public void computeGuideMap(MapGrid map) {
-        guideMap = Planner.computeGuideMap(map, getPosition());
+    public int getDistanceTo(Position pos) {
+        return guideMap[pos.row][pos.col];
+    }
+
+    /**
+     * Returns the least number of steps for the given {@code Agent}
+     * to reach this {@code Facility} in the {@code Warehouse} or vice versa.
+     *
+     * @param agent the target {@code Agent}.
+     *
+     * @return the shortest distance to the given position;
+     *         or {@link Integer#MAX_VALUE} if unreachable.
+     */
+    public int getDistanceTo(Agent agent) {
+        return guideMap[agent.getRow()][agent.getCol()];
+    }
+
+    /**
+     * Computes the guide map to reach this {@code Facility}.
+     * That is, a map with the least number of steps to reach this {@code Facility}
+     * from any other cell in the {@code Warehouse}.
+     */
+    public void computeGuideMap() {
+        guideMap = Planner.computeGuideMap(row, col);
     }
 
     /**

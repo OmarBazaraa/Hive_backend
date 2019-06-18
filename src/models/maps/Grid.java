@@ -9,10 +9,6 @@ import utils.Constants.*;
 
 /**
  * This {@code Grid} class represents a grid of 2D {@link Cell} objects.
- *
- * @see MapGrid
- * @see GuideGrid
- * @see TimeCell
  */
 public class Grid<T extends Cell> {
 

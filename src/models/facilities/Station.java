@@ -80,7 +80,7 @@ public class Station extends Facility {
 
         builder.append("Station: {");
         builder.append(" id: ").append(id).append(",");
-        builder.append(" pos: ").append("(").append(row).append("x").append(col).append(")");
+        builder.append(" pos: ").append(getPosition());
         builder.append(" }");
 
         return builder.toString();

@@ -283,7 +283,7 @@ abstract public class AbstractAgent extends HiveObject implements TaskAssignable
 
         builder.append("Agent: {");
         builder.append(" id: ").append(id).append(",");
-        builder.append(" pos: ").append("(").append(row).append("x").append(col).append(")");
+        builder.append(" pos: ").append(getPosition()).append(", ");
         builder.append(" load_capacity: ").append(loadCapacity).append(",");
         builder.append(" direction: ").append(direction);
         builder.append(" }");

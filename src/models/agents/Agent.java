@@ -4,10 +4,6 @@ import algorithms.planner.Planner;
 
 import models.facilities.Facility;
 import models.facilities.Rack;
-import models.maps.GuideGrid;
-import models.maps.MapCell;
-import models.maps.MapGrid;
-import models.maps.utils.Position;
 import models.tasks.Task;
 import models.warehouses.Warehouse;
 
@@ -89,7 +85,7 @@ public class Agent extends AbstractAgent {
 
         // Set the destination and plan the path
         target = dst;
-        plan = Planner.plan(this, dst.getPosition());
+        plan = Planner.plan(this, dst);
     }
 
     /**

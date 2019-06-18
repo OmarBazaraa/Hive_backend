@@ -16,6 +16,6 @@ public class WarehouseHelper {
      */
     public static void configureWarehouse(String path) throws Exception {
         String config = Utility.readFile(path);
-        ServerDecoder.decodeInitConfig(new JSONObject(config));
+        ServerDecoder.decodeWarehouse(new JSONObject(config));
     }
 }

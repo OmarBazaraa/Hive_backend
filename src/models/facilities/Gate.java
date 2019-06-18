@@ -94,7 +94,7 @@ public class Gate extends Facility {
 
         builder.append("Gate: {");
         builder.append(" id: ").append(id).append(",");
-        builder.append(" pos: ").append("(").append(row).append("x").append(col).append(")");
+        builder.append(" pos: ").append(getPosition());
         builder.append(" }");
 
         return builder.toString();

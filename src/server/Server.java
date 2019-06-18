@@ -328,7 +328,7 @@ public class Server {
             int mode = data.getInt(ServerConstants.KEY_MODE);
             JSONObject state = data.getJSONObject(ServerConstants.KEY_STATE);
 
-            ServerDecoder.decodeInitConfig(state);
+            ServerDecoder.decodeWarehouse(state);
             sendAckMsg(ServerConstants.TYPE_ACK_START, ServerConstants.TYPE_OK, 0, "");
             currentState = ServerStates.RUNNING;
             receivedAck = true;
@@ -447,6 +447,7 @@ public class Server {
 
         try {
             Order order = ServerDecoder.decodeOrder(data);
+            warehouse.addOrder(order);
             sendAckMsg(ServerConstants.TYPE_ACK_ORDER, ServerConstants.TYPE_OK, 0, "");
 
             // DEBUG

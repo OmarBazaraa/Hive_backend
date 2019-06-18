@@ -120,6 +120,29 @@ abstract public class HiveObject extends Entity {
     }
 
     /**
+     * Checks whether the given position is the same as of this {@code HiveObject}.
+     *
+     * @param row the row position to check.
+     * @param col the column position to check.
+     *
+     * @return {@code true} if both have the same position; {@code false} otherwise.
+     */
+    public boolean isCoincide(int row, int col) {
+        return this.row == row && this.col == col;
+    }
+
+    /**
+     * Checks whether the given position is the same as of this {@code HiveObject}.
+     *
+     * @param pos the {@code Position} to check.
+     *
+     * @return {@code true} if both have the same position; {@code false} otherwise.
+     */
+    public boolean isCoincide(Position pos) {
+        return this.row == pos.row && this.col == pos.col;
+    }
+
+    /**
      * Checks whether other {@code HiveObject} has the same position of this {@code HiveObject}.
      *
      * @param obj the {@code HiveObject} with which to compare.
@@ -128,5 +151,16 @@ abstract public class HiveObject extends Entity {
      */
     public boolean isCoincide(HiveObject obj) {
         return row == obj.row && col == obj.col;
+    }
+
+    /**
+     * Returns a string representation of this {@code HiveObject}.
+     * In general, the toString method returns a string that "textually represents" this object.
+     *
+     * @return a string representation of this {@code HiveObject}.
+     */
+    @Override
+    public String toString() {
+        return "HiveObject-" + id + "@ " + getPosition().toString();
     }
 }

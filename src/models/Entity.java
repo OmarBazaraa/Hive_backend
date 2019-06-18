@@ -84,4 +84,15 @@ public class Entity implements Comparable<Entity> {
     public int compareTo(Entity rhs) {
         return id - rhs.id;
     }
+
+    /**
+     * Returns a string representation of this {@code Entity} object.
+     * In general, the toString method returns a string that "textually represents" this object.
+     *
+     * @return a string representation of this {@code Entity} object.
+     */
+    @Override
+    public String toString() {
+        return "Entity-" + id;
+    }
 }

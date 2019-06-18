@@ -3,7 +3,6 @@ package algorithms.dispatcher;
 import models.agents.Agent;
 import models.facilities.Rack;
 import models.items.Item;
-import models.maps.GuideGrid;
 import models.tasks.orders.Order;
 import models.tasks.Task;
 import models.tasks.orders.RefillOrder;
@@ -135,9 +134,6 @@ public class Dispatcher {
             }
         }
 
-        // Get the guide map of this rack
-        GuideGrid guide = rack.getGuideMap();
-
         // Selected agent and its corresponding distance
         Agent ret = null;
         int distance = Integer.MAX_VALUE;
@@ -152,7 +148,7 @@ public class Dispatcher {
             }
 
             // Calculate distance from the agent to the rack
-            int dis = guide.getDistance(agent.getPosition());
+            int dis = rack.getDistanceTo(agent.getRow(), agent.getCol());
 
             // Select the current agent if it is nearer to the rack
             if (distance > dis) {

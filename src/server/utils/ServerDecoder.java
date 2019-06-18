@@ -6,7 +6,6 @@ import models.facilities.Rack;
 import models.facilities.Station;
 import models.items.Item;
 import models.items.QuantityAddable;
-import models.maps.MapCell;
 import models.tasks.orders.CollectOrder;
 import models.tasks.orders.Order;
 import models.tasks.orders.RefillOrder;
@@ -41,27 +40,13 @@ public class ServerDecoder {
     // Static Main Methods
     //
 
-    public static void decodeInitConfig(JSONObject data) throws JSONException, DataException {
-        JSONObject mapJSON = data.getJSONObject(ServerConstants.KEY_MAP);
-        JSONArray itemsJSON = data.getJSONArray(ServerConstants.KEY_ITEMS);
-
-        warehouse.clear();
-        decodeWarehouseItems(itemsJSON);
-        decodeWarehouseMap(mapJSON);
-        warehouse.init();
-    }
-
-    public static void decodeWarehouseItems(JSONArray data) throws JSONException, DataException {
-        for (int i = 0; i < data.length(); ++i) {
-            decodeItem(data.getJSONObject(i));
-        }
-    }
-
-    public static void decodeWarehouseMap(JSONObject data) throws JSONException, DataException {
+    public static Warehouse decodeWarehouse(JSONObject data) throws JSONException, DataException {
         // Extract received properties
-        int h = data.getInt(ServerConstants.KEY_HEIGHT);
-        int w = data.getInt(ServerConstants.KEY_WIDTH);
-        JSONArray gridJSON = data.getJSONArray(ServerConstants.KEY_GRID);
+        JSONObject mapJSON = data.getJSONObject(ServerConstants.KEY_MAP);
+        JSONArray gridJSON = mapJSON.getJSONArray(ServerConstants.KEY_GRID);
+        JSONArray itemsJSON = data.getJSONArray(ServerConstants.KEY_ITEMS);
+        int h = mapJSON.getInt(ServerConstants.KEY_HEIGHT);
+        int w = mapJSON.getInt(ServerConstants.KEY_WIDTH);
 
         //
         // Checks
@@ -71,23 +56,37 @@ public class ServerDecoder {
                     ServerConstants.ERR_INVALID_ARGS);
         }
 
-        MapCell[][] grid = new MapCell[h][w];
+        // Configure warehouse
+        warehouse.configure(h, w);
 
+        // Define new items in the warehouse
+        for (int i = 0; i < itemsJSON.length(); ++i) {
+            warehouse.addItem(decodeItem(itemsJSON.getJSONObject(i)));
+        }
+
+        // Decode warehouse grid cells
         for (int i = 0; i < h; ++i) {
             JSONArray rowJSON = gridJSON.getJSONArray(i);
             for (int j = 0; j < w; ++j) {
-                grid[i][j] = decodeMapCell(rowJSON.getJSONObject(j), i, j);
+                updateWarehouseCell(rowJSON.getJSONObject(j), i, j);
             }
         }
 
-        // Update the warehouse
-        warehouse.updateMap(grid);
+        // Initialize and return the decoded warehouse
+        warehouse.init();
+        return warehouse;
     }
 
-    public static MapCell decodeMapCell(JSONObject data, int row, int col) throws JSONException, DataException {
-        MapCell ret = new MapCell();
-
+    public static void updateWarehouseCell(JSONObject data, int row, int col) throws JSONException, DataException {
         JSONArray objects = data.getJSONArray(ServerConstants.KEY_OBJECTS);
+
+        //
+        // Checks
+        //
+        if (objects.length() > 1) {
+            throw new DataException("Cell (" + row + ", " + col + ") has multiple objects. Expecting only one.",
+                    ServerConstants.ERR_INVALID_ARGS);
+        }
 
         for (int i = 0; i < objects.length(); ++i) {
             JSONObject obj = objects.getJSONObject(i);
@@ -95,38 +94,28 @@ public class ServerDecoder {
 
             switch (type) {
                 case ServerConstants.TYPE_CELL_AGENT:
-                    ret.setAgent(decodeAgent(obj, row, col));
-                    break;
-                case ServerConstants.TYPE_CELL_OBSTACLE:
-                    ret.setFacility(CellType.OBSTACLE, null);
+                    warehouse.addAgent(decodeAgent(obj), row, col);
                     break;
                 case ServerConstants.TYPE_CELL_RACK:
-                    ret.setFacility(CellType.RACK, decodeRack(obj, row, col));
+                    warehouse.addRack(decodeRack(obj), row, col);
                     break;
                 case ServerConstants.TYPE_CELL_GATE:
-                    ret.setFacility(CellType.GATE, decodeGate(obj, row, col));
+                    warehouse.addGate(decodeGate(obj), row, col);
                     break;
                 case ServerConstants.TYPE_CELL_STATION:
-                    ret.setFacility(CellType.STATION, decodeStation(obj, row, col));
+                    warehouse.addStation(decodeStation(obj), row, col);
+                    break;
+                case ServerConstants.TYPE_CELL_OBSTACLE:
+                    warehouse.addObstacle(row, col);
                     break;
                 default:
-                    throw new DataException("Cell (" + row + ", " + col + ") with invalid facilities type: " + type + ".",
+                    throw new DataException("Cell (" + row + ", " + col + ") with invalid object type: " + type + ".",
                             ServerConstants.ERR_INVALID_ARGS);
             }
         }
-
-        //
-        // Checks
-        //
-        if (ret.hasAgent() && ret.hasFacility()) {
-            throw new DataException("Cell (" + row + ", " + col + ") has both agent and facilities. Expecting only one.",
-                    ServerConstants.ERR_INVALID_ARGS);
-        }
-
-        return ret;
     }
 
-    public static Agent decodeAgent(JSONObject data, int row, int col) throws JSONException, DataException {
+    public static Agent decodeAgent(JSONObject data) throws JSONException, DataException {
         // Extract received properties
         int id = data.getInt(ServerConstants.KEY_ID);
         int cap = data.getInt(ServerConstants.KEY_AGENT_LOAD_CAPACITY);
@@ -154,16 +143,14 @@ public class ServerDecoder {
                     ServerConstants.ERR_INVALID_ARGS);
         }
 
-        // Create and add to the warehouse
+        // Create and return to be added into the warehouse
         Agent ret = new Agent(id, cap, decodeDirection(dir));
         ret.setIpAddress(ip);
         ret.setPortNumber(port);
-        ret.setPosition(row, col);
-        warehouse.addAgent(ret);
         return ret;
     }
 
-    public static Rack decodeRack(JSONObject data, int row, int col) throws JSONException, DataException {
+    public static Rack decodeRack(JSONObject data) throws JSONException, DataException {
         // Extract received properties
         int id = data.getInt(ServerConstants.KEY_ID);
         int cap = data.getInt(ServerConstants.KEY_RACK_CAPACITY);
@@ -190,12 +177,9 @@ public class ServerDecoder {
                     ServerConstants.ERR_INVALID_ARGS);
         }
 
-        // Create rack
+        // Create rack and decode its items
         Rack ret = new Rack(id, cap, weight);
-        ret.setPosition(row, col);
-
-        // Extract items
-        decodeItemsList(itemsJSON, ret, "Rack-" + id);
+        fillItemsList(itemsJSON, ret, "Rack-" + id);
 
         //
         // Checks
@@ -206,12 +190,11 @@ public class ServerDecoder {
                     ServerConstants.ERR_RACK_CAP_EXCEEDED, ret.getStoredWeight() - ret.getCapacity());
         }
 
-        // Add to the warehouse
-        warehouse.addRack(ret);
+        // Return to be added into the warehouse
         return ret;
     }
 
-    public static Gate decodeGate(JSONObject data, int row, int col) throws JSONException, DataException {
+    public static Gate decodeGate(JSONObject data) throws JSONException, DataException {
         // Extract received properties
         int id = data.getInt(ServerConstants.KEY_ID);
 
@@ -227,14 +210,11 @@ public class ServerDecoder {
                     ServerConstants.ERR_INVALID_ARGS);
         }
 
-        // Create and add to the warehouse
-        Gate ret = new Gate(id);
-        ret.setPosition(row, col);
-        warehouse.addGate(ret);
-        return ret;
+        // Create and return to be added into the warehouse
+        return new Gate(id);
     }
 
-    public static Station decodeStation(JSONObject data, int row, int col) throws JSONException, DataException {
+    public static Station decodeStation(JSONObject data) throws JSONException, DataException {
         // Extract received properties
         int id = data.getInt(ServerConstants.KEY_ID);
 
@@ -250,11 +230,8 @@ public class ServerDecoder {
                     ServerConstants.ERR_INVALID_ARGS);
         }
 
-        // Create and add to the warehouse
-        Station ret = new Station(id);
-        ret.setPosition(row, col);
-        warehouse.addStation(ret);
-        return ret;
+        // Create and return to be added into the warehouse
+        return new Station(id);
     }
 
     public static Item decodeItem(JSONObject data) throws JSONException, DataException {
@@ -274,10 +251,8 @@ public class ServerDecoder {
                     ServerConstants.ERR_INVALID_ARGS);
         }
 
-        // Create and add to the warehouse
-        Item ret = new Item(id, weight);
-        warehouse.addItem(ret);
-        return ret;
+        // Create and return to be added into the warehouse
+        return new Item(id, weight);
     }
 
     public static Order decodeOrder(JSONObject data) throws JSONException, DataException {
@@ -322,13 +297,12 @@ public class ServerDecoder {
         }
 
         // Extract items
-        decodeItemsList(itemsJSON, ret, "Order-" + id);
+        fillItemsList(itemsJSON, ret, "Order-" + id);
 
         // Validate order feasibility
         checkOrderFeasibility(ret);
 
-        // Add to the warehouse
-        warehouse.addOrder(ret);
+        // Return to be added into the warehouse
         return ret;
     }
 
@@ -363,7 +337,7 @@ public class ServerDecoder {
         return new RefillOrder(id, gate, rack);
     }
 
-    public static void decodeItemsList(JSONArray data, QuantityAddable<Item> cont, String name) throws JSONException, DataException {
+    public static void fillItemsList(JSONArray data, QuantityAddable<Item> cont, String name) throws JSONException, DataException {
         for (int i = 0; i < data.length(); ++i) {
             // Extract item properties
             JSONObject itemJSON = data.getJSONObject(i);

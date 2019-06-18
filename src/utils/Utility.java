@@ -201,19 +201,6 @@ public class Utility {
     }
 
     /**
-     * Returns the reverse (opposite) direction of the given one.
-     *
-     * @param dir the direction to get its reverse.
-     *
-     * @return the reverse direction.
-     */
-    public static Direction getReverseDir(Direction dir) {
-        int i = dir.ordinal();
-        Direction[] dirs = Direction.values();
-        return dirs[(i + 2) % 4];
-    }
-
-    /**
      * Calculates the next direction if rotating with the given rotation action.
      * <p>
      * The allowed actions are only:
@@ -288,5 +275,18 @@ public class Utility {
         } else {
             return AgentAction.ROTATE_RIGHT;
         }
+    }
+
+    /**
+     * Returns the reverse (opposite) direction of the given one.
+     *
+     * @param dir the direction to get its reverse.
+     *
+     * @return the reverse direction.
+     */
+    public static Direction getReverseDir(Direction dir) {
+        int i = dir.ordinal();
+        Direction[] dirs = Direction.values();
+        return dirs[(i + 2) % 4];
     }
 }

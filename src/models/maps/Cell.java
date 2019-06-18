@@ -1,34 +1,18 @@
 package models.maps;
 
-import utils.Constants;
-
 
 /**
- * This {@code Cell} class represents a grid cell used by {@link Grid} class.
+ * This {@code Cell} class is the base class of all the grid cells used by
+ * the {@link Grid} class.
  *
  * @see MapCell
- * @see GuideCell
- * @see TimeCell
  */
-public class Cell {
+abstract public class Cell {
 
     /**
      * Converts this {@code Cell} to a character symbol representing its shape.
      *
      * @return a character representing the shape of this cell.
      */
-    public char toShape() {
-        return Constants.SHAPE_CELL_UNKNOWN;
-    }
-
-    /**
-     * Returns a string representation of object.
-     * In general, the toString method returns a string that "textually represents" this object.
-     *
-     * @return a string representation of object.
-     */
-    @Override
-    public String toString() {
-        return Character.toString(toShape());
-    }
+    abstract public char toShape();
 }

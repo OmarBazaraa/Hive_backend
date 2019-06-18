@@ -1,7 +1,12 @@
 package algorithms.planner;
 
+import models.agents.Agent;
+import models.facilities.Facility;
+import models.maps.MapCell;
 import models.maps.utils.Position;
 
+import models.warehouses.Warehouse;
+import utils.Constants;
 import utils.Constants.*;
 import utils.Utility;
 
@@ -22,16 +27,33 @@ public class PlanNode implements Comparable<PlanNode> {
     private static AgentAction[][][] par;
 
     /**
-     * The target position in the search tree.
+     * The {@code Warehouse} holding the map grid to plan into.
      */
-    private static Position target;
+    private static Warehouse warehouse = Warehouse.getInstance();
+
+    /**
+     * The source {@code Agent}.
+     */
+    private static Agent source;
+
+    /**
+     * The target {@code Facility} of the {@code Agent}.
+     */
+    private static Facility target;
 
     /**
      * Initializes the planning state.
      * <p>
      * This function should be called once before running the planning algorithm.
+     *
+     * @param src the source {@code Agent}.
+     * @param dst the destination {@code Facility}.
      */
-    public static void initializes(int rows, int cols, int dirs, Position dst) {
+    public static void initializes(Agent src, Facility dst) {
+        int rows = warehouse.getRows();
+        int cols = warehouse.getCols();
+        int dirs = 4;
+
         par = new AgentAction[rows][cols][dirs];
 
         for (int i = 0; i < rows; ++i) {
@@ -42,6 +64,7 @@ public class PlanNode implements Comparable<PlanNode> {
             }
         }
 
+        source = src;
         target = dst;
     }
 
@@ -51,9 +74,14 @@ public class PlanNode implements Comparable<PlanNode> {
     //
 
     /**
-     * The {@code Position} of the {@code Agent} in the grid.
+     * The row position of the {@code Agent} in the this simulation state.
      */
-    public Position pos;
+    public int row;
+
+    /**
+     * The column position of the {@code Agent} in the this simulation state.
+     */
+    public int col;
 
     /**
      * The {@code Direction} of the {@code Agent} in the cell.
@@ -61,14 +89,14 @@ public class PlanNode implements Comparable<PlanNode> {
     public Direction dir;
 
     /**
-     * The action leading to this state.
-     */
-    public AgentAction action;
-
-    /**
      * The time at which the {@code Agent} will be in this state.
      */
     public long time;
+
+    /**
+     * The action leading to this state.
+     */
+    public AgentAction action;
 
     // ===============================================================================================
     //
@@ -78,16 +106,87 @@ public class PlanNode implements Comparable<PlanNode> {
     /**
      * Constructs a new {@code PlanNode} object.
      *
-     * @param pos    the {@code Position} of the {@code Agent} in the grid.
-     * @param dir    the {@code Direction} of the {@code Agent} in the cell.
-     * @param action the action leading to this state.
+     * @param row    the row position of the {@code Agent}.
+     * @param col    the row position of the {@code Agent}.
+     * @param dir    the {@code Direction} of the {@code Agent}.
      * @param time   the time at which the {@code Agent} will be in this state.
      */
-    public PlanNode(Position pos, Direction dir, AgentAction action, long time) {
-        this.pos = pos;
+    public PlanNode(int row, int col, Direction dir, long time) {
+        this(row, col, dir, time, AgentAction.MOVE);
+    }
+
+    /**
+     * Constructs a new {@code PlanNode} object.
+     *
+     * @param row    the row position of the {@code Agent}.
+     * @param col    the row position of the {@code Agent}.
+     * @param dir    the {@code Direction} of the {@code Agent}.
+     * @param time   the time at which the {@code Agent} will be in this state.
+     * @param action the action leading to this state.
+     */
+    private PlanNode(int row, int col, Direction dir, long time, AgentAction action) {
+        this.row = row;
+        this.col = col;
         this.dir = dir;
-        this.action = action;
         this.time = time;
+        this.action = action;
+    }
+
+    /**
+     * Checks whether this state node is the initial state node.
+     * That is, whether it has the same position and direction of the source {@code Agent}.
+     *
+     * @return {@code true} if it is an initial node; {@code false} otherwise.
+     */
+    public boolean isInitial() {
+        return source.isCoincide(row, col) && dir == source.getDirection();
+    }
+
+    /**
+     * Checks whether this state node is the finial state node.
+     * That is, whether it has the same position of the target {@code Facility}.
+     *
+     * @return {@code true} if it is a final node; {@code false} otherwise.
+     */
+    public boolean isFinal() {
+        return target.isCoincide(row, col);
+    }
+
+    /**
+     * Checks whether it is possible to further explore and expand this plan node or not.
+     *
+     * @return {@code true} if it is possible to explore; {@code false} otherwise.
+     */
+    public boolean canVisit() {
+        // First of all return if out of warehouse boundaries
+        if (!warehouse.isInBound(row, col)) {
+            return false;
+        }
+
+        // Get this state cell
+        MapCell cell = warehouse.get(row, col);
+
+        // Skip if obstacle or already visited cell
+        if (cell.isObstacle() || isVisited()) {
+            return false;
+        }
+
+        // Get the agent that is scheduled to be in this state
+        Agent a = cell.getScheduledAt(time);
+
+        // If there is an agent with higher priority then skip this state as well
+        if (a != null && a.compareTo(source) > 0) {
+            return false;
+        }
+
+        // If there is a facility then we can only explore it
+        // when it is either the source or target position
+        if (cell.hasFacility()) {
+            return source.isCoincide(row, col) || target.isCoincide(row, col);
+        }
+
+        // The state is empty so we can explore it
+        return true;
     }
 
     /**
@@ -96,14 +195,14 @@ public class PlanNode implements Comparable<PlanNode> {
      * @return {@code true} if already visited; {@code false} otherwise.
      */
     public boolean isVisited() {
-        return (par[pos.row][pos.col][dir.ordinal()] != AgentAction.NOTHING);
+        return (par[row][col][dir.ordinal()] != AgentAction.NOTHING);
     }
 
     /**
      * Marks this state node as visited.
      */
     public void visit() {
-        par[pos.row][pos.col][dir.ordinal()] = action;
+        par[row][col][dir.ordinal()] = action;
     }
 
     /**
@@ -119,9 +218,13 @@ public class PlanNode implements Comparable<PlanNode> {
      */
     public PlanNode next(AgentAction action) {
         if (action == AgentAction.MOVE) {
-            return new PlanNode(Utility.nextPos(pos, dir), dir, action, time + 1);
+            int i = dir.ordinal();
+            int r = row + Constants.DIR_ROW[i];
+            int c = col + Constants.DIR_COL[i];
+
+            return new PlanNode(r, c, dir, time + 1, action);
         } else {
-            return new PlanNode(pos, Utility.nextDir(dir, action), action, time + 1);
+            return new PlanNode(row, col, Utility.nextDir(dir, action), time + 1, action);
         }
     }
 
@@ -135,12 +238,16 @@ public class PlanNode implements Comparable<PlanNode> {
         PlanNode ret;
 
         if (action == AgentAction.MOVE) {
-            ret = new PlanNode(Utility.prevPos(pos, dir), dir, action, time - 1);
+            int i = dir.ordinal();
+            int r = row - Constants.DIR_ROW[i];
+            int c = col - Constants.DIR_COL[i];
+
+            ret = new PlanNode(r, c, dir, time - 1, action);
         } else {
-            ret = new PlanNode(pos, Utility.prevDir(dir, action), action, time - 1);
+            ret = new PlanNode(row, col, Utility.prevDir(dir, action), time - 1, action);
         }
 
-        ret.action = par[ret.pos.row][ret.pos.col][ret.dir.ordinal()];
+        ret.action = par[ret.row][ret.col][ret.dir.ordinal()];
 
         return ret;
     }
@@ -151,8 +258,7 @@ public class PlanNode implements Comparable<PlanNode> {
      * @return the heuristic score.
      */
     public int heuristic() {
-        // Return the manhattan distance to the target
-        return pos.distanceTo(target);
+        return target.getDistanceTo(row, col);
     }
 
     /**
@@ -173,5 +279,25 @@ public class PlanNode implements Comparable<PlanNode> {
         }
 
         return lhs < rhs ? -1 : +1;
+    }
+
+    /**
+     * Returns a string representation of this {@code PlanNode}.
+     * In general, the toString method returns a string that "textually represents" this object.
+     *
+     * @return a string representation of this {@code PlanNode}.
+     */
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+
+        builder.append("PlanNode: {");
+        builder.append(" pos: ").append("(").append(row).append(", ").append(col).append(")").append(", ");
+        builder.append(" dir: ").append(dir).append(", ");
+        builder.append(" time: ").append(time).append(", ");
+        builder.append(" action: ").append(action);
+        builder.append(" }");
+
+        return builder.toString();
     }
 }

@@ -1,8 +1,8 @@
 package algorithms.planner;
 
 import models.agents.Agent;
+import models.facilities.Facility;
 import models.maps.*;
-import models.maps.utils.Dimensions;
 import models.maps.utils.Position;
 
 import models.warehouses.Warehouse;
@@ -19,50 +19,68 @@ import java.util.*;
 public class Planner {
 
     /**
-     * Runs a BFS algorithms on the given grid to compute the guide maps
-     * to the given destination position.
+     * Runs a BFS algorithms on the {@link Warehouse} grid to compute the
+     * shortest distance guide map from every cell to the given destination position.
      *
-     * @param map         the map grid to compute upon.
-     * @param dst         the destination position.
+     * @param row the row position of the destination.
+     * @param col the column position of the destination.
      *
      * @return the computed guide map to reach the destination.
      */
-    public static GuideGrid computeGuideMap(MapGrid map, Position dst) {
+    public static int[][] computeGuideMap(int row, int col) {
+        // Global information about the warehouse
+        Warehouse warehouse = Warehouse.getInstance();
+        int rows = warehouse.getRows();
+        int cols = warehouse.getCols();
+
         // Initialize BFS algorithm requirements
-        GuideCell[][] ret = GuideCell.allocate2D(map.getRows(), map.getCols());
+        int[][] ret = new int[rows][cols];
+
+        for (int i = 0; i < rows; ++i) {
+            for (int j = 0; j < cols; ++j) {
+                ret[i][j] = Integer.MAX_VALUE;  // Set all distance initially to infinity
+            }
+        }
 
         // Create the planning queue and add the initial state
         Queue<Position> q = new LinkedList<>();
-        q.add(dst);
-        ret[dst.row][dst.col].setDistance(0);
+        q.add(new Position(row, col));
+        ret[row][col] = 0;
 
         // Keep expanding all cells in the maps
         while (!q.isEmpty()) {
             // Get current node and its distance to the destination
             Position cur = q.poll();
-            int dis = ret[cur.row][cur.col].getDistance();
 
             // Expanding in all directions
             for (Direction dir : Direction.values()) {
                 // Get net position
-                Position nxt = map.next(cur, dir);
+                Position nxt = Utility.nextPos(cur, dir);
 
-                // Skip if out of bound or obstacle cell or already visited
-                if (map.isObstacle(nxt) || ret[nxt.row][nxt.col].isReachable()) {
+                // Skip if next position is out of bound
+                if (!warehouse.isInBound(nxt.row, nxt.col)) {
+                    continue;
+                }
+
+                // Get next cell
+                MapCell cell = warehouse.get(nxt.row, nxt.col);
+
+                // Skip if obstacle or already visited cell
+                if (cell.isObstacle() || ret[nxt.row][nxt.col] < Integer.MAX_VALUE) {
                     continue;
                 }
 
                 // Set the guide value
-                ret[nxt.row][nxt.col].setDistance(dis + 1);
+                ret[nxt.row][nxt.col] = ret[cur.row][cur.col] + 1;
 
                 // Add expanded cell to the queue only if it is not holding a facility
-                if (!map.get(nxt).hasFacility()) {
+                if (!cell.hasFacility()) {
                     q.add(nxt);
                 }
             }
         }
 
-        return new GuideGrid(ret);
+        return ret;
     }
 
 
@@ -76,29 +94,27 @@ public class Planner {
     public static boolean route(Agent agent, AgentAction action) {
         // Global information about the warehouse
         Warehouse warehouse = Warehouse.getInstance();
-        MapGrid map = warehouse.getMap();
-        TimeGrid timeMap = warehouse.getTimeMap();
         long time = warehouse.getTime();
 
         // Agent current position information
         Position curPos = agent.getPosition();
-        MapCell curCell = map.get(curPos);
+        MapCell curCell = warehouse.get(curPos.row, curPos.col);
 
         // Rotation actions are easy
         if (action != AgentAction.MOVE) {
-            timeMap.clearAt(curPos, time);
+            curCell.clearScheduleAt(time);
             agent.move(action);
             return true;
         }
 
         // Agent next position information
         Position nxtPos = Utility.nextPos(curPos, agent.getDirection());
-        MapCell nxtCell = map.get(nxtPos);
+        MapCell nxtCell = warehouse.get(nxtPos.row, nxtPos.col);
         Agent a = nxtCell.getAgent();
 
         // Check if the can move to the next cell
         if (a == null || slide(a, agent)) {
-            timeMap.clearAt(curPos, time);
+            curCell.clearScheduleAt(time);
             curCell.setAgent(null);
             nxtCell.setAgent(agent);
             agent.setPosition(nxtPos);
@@ -128,26 +144,19 @@ public class Planner {
      * Plans a sequence of actions to be done by the given {@code Agent} to reach
      * its target.
      *
-     * @param agent the {@code Agent} to plan for.
-     * @param dst   the target position of the {@code Agent}.
+     * @param source the source {@code Agent} to plan for.
+     * @param target the target {@code Facility} of the {@code Agent}.
      *
      * @return a sequence of {@code AgentAction}; or {@code null} if currently unreachable.
      */
-    public static Stack<AgentAction> plan(Agent agent, Position dst) {
+    public static Stack<AgentAction> plan(Agent source, Facility target) {
         // Initialize planning algorithm
         Warehouse warehouse = Warehouse.getInstance();
-        MapGrid map = warehouse.getMap();
-        TimeGrid timeMap = warehouse.getTimeMap();
-        PlanNode.initializes(map.getRows(), map.getCols(), 4, dst);
+        PlanNode.initializes(source, target);
 
         // Create the planning queue and add the initial state
         PriorityQueue<PlanNode> q = new PriorityQueue<>();
-        q.add(new PlanNode(
-                agent.getPosition(),
-                agent.getDirection(),
-                AgentAction.MOVE,       // The initial action is not significant but it cannot be AgentAction.NOTHING
-                warehouse.getTime()
-        ));
+        q.add(new PlanNode(source.getRow(), source.getCol(), source.getDirection(), warehouse.getTime()));
 
         //
         // Keep exploring states until the target is found
@@ -172,13 +181,13 @@ public class Planner {
                 PlanNode nxt = cur.next(action);
 
                 // Skip invalid states
-                if (!canExplore(nxt, agent, dst, map, timeMap)) {
+                if (!nxt.canVisit()) {
                     continue;
                 }
 
                 // Check if target has been reached
-                if (dst.equals(nxt.pos)) {
-                    return constructPlan(agent, nxt);
+                if (nxt.isFinal()) {
+                    return constructPlan(source, nxt);
                 }
 
                 // Add state for further exploration
@@ -191,60 +200,17 @@ public class Planner {
     }
 
     /**
-     * Checks whether it is possible to further explore and expand this plan node or not.
-     *
-     * @param nxt     the {@code PlanNode} to check.
-     * @param agent   the associated {@code Agent}.
-     * @param dst     the final destination of the {@code Agent}.
-     * @param map     the grid map of the {@code Warehouse}.
-     * @param timeMap the timeline map.
-     *
-     * @return {@code true} if it is possible to explore; {@code false} otherwise.
-     */
-    private static boolean canExplore(PlanNode nxt, Agent agent, Position dst, MapGrid map, TimeGrid timeMap) {
-        // Skip out of bound or visited states
-        if (!map.isInBound(nxt.pos) || nxt.isVisited()) {
-            return false;
-        }
-
-        // Get the agent that is planned to be in this state
-        Agent a = timeMap.getAgentAt(nxt.pos, nxt.time);
-
-        // If there is an agent with higher priority then skip this state as well
-        if (a != null && a.compareTo(agent) > 0) {
-            return false;
-        }
-
-        // Get cell
-        MapCell cell = map.get(nxt.pos);
-
-        // Skip obstacle cells
-        if (cell.isObstacle()) {
-            return false;
-        }
-
-        // If there is a facility then we can only explore it
-        // when it is either the source or destination position
-        if (cell.hasFacility()) {
-            return agent.getPosition().equals(nxt.pos) || dst.equals(nxt.pos);
-        }
-
-        // The state is empty so we can explore it
-        return true;
-    }
-
-    /**
      * Constructs the sequence of actions leading to the target after
      * finishing the planning, and update the timeline map of the {@code Warehouse}
      * in accordance.
      *
-     * @param agent the {@code Agent} to plan for.
-     * @param node  the target state {@code PlanNode}.
+     * @param source the source {@code Agent} to plan for.
+     * @param node   the target state {@code PlanNode}.
      *
      * @return a sequence of {@code AgentAction} to reach the given state.
      */
-    private static Stack<AgentAction> constructPlan(Agent agent, PlanNode node) {
-        TimeGrid timeMap = Warehouse.getInstance().getTimeMap();
+    private static Stack<AgentAction> constructPlan(Agent source, PlanNode node) {
+        Warehouse warehouse = Warehouse.getInstance();
 
         // Prepare the stack of actions
         Stack<AgentAction> ret = new Stack<>();
@@ -254,7 +220,8 @@ public class Planner {
         //
         while (true) {
             // Get the agent that is planned to be in this state
-            Agent a = timeMap.getAgentAt(node.pos, node.time);
+            MapCell cell = warehouse.get(node.row, node.col);
+            Agent a = cell.getScheduledAt(node.time);
 
             // If there is an agent then it must be with lower priority
             // So drop its plan for now
@@ -263,10 +230,10 @@ public class Planner {
             }
 
             // Update timeline
-            timeMap.setAgentAt(node.pos, node.time, agent);
+            cell.setScheduleAt(node.time, source);
 
-            // Stop when reaching the initial position of the agent
-            if (agent.getPosition().equals(node.pos) && agent.getDirection() == node.dir) {
+            // Stop when reaching the initial state of the agent
+            if (node.isInitial()) {
                 break;
             }
 
@@ -286,22 +253,18 @@ public class Planner {
      * @param actions the plan of the agent.
      */
     public static void dropPlan(Agent agent, Stack<AgentAction> actions) {
-        TimeGrid timeMap = Warehouse.getInstance().getTimeMap();
+        Warehouse warehouse = Warehouse.getInstance();
 
         // Create a node with the current state of the agent
-        PlanNode node = new PlanNode(
-                agent.getPosition(),
-                agent.getDirection(),
-                AgentAction.MOVE,
-                Warehouse.getInstance().getTime()
-        );
+        PlanNode node = new PlanNode(agent.getRow(), agent.getCol(), agent.getDirection(), warehouse.getTime());
 
         //
         // Keep dropping the plan one action at a time
         //
         while (true) {
             // Clear the time slot of the agent in the current state
-            timeMap.clearAt(node.pos, node.time);
+            MapCell cell = warehouse.get(node.row, node.col);
+            cell.clearScheduleAt(node.time);
 
             // Stop when no further actions in the plan
             if (actions.isEmpty()) {

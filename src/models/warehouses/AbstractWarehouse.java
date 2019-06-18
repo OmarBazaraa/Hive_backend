@@ -6,9 +6,12 @@ import models.facilities.Rack;
 import models.facilities.Station;
 import models.items.Item;
 import models.maps.MapCell;
-import models.maps.MapGrid;
-import models.maps.TimeGrid;
+import models.maps.utils.Dimensions;
+import models.maps.utils.Position;
 import models.tasks.orders.Order;
+
+import utils.Constants;
+import utils.Constants.*;
 
 import java.util.*;
 
@@ -32,14 +35,19 @@ abstract public class AbstractWarehouse {
     protected long time;
 
     /**
-     * The map grid of this {@code Warehouse}.
+     * The number of rows of this {@code Warehouse}.
      */
-    protected MapGrid map;
+    protected int rows;
 
     /**
-     * The timeline map of the {@code Warehouse}.
+     * The number of columns of this {@code Warehouse}.
      */
-    protected TimeGrid timeMap;
+    protected int cols;
+
+    /**
+     * The map grid of this {@code Warehouse}.
+     */
+    protected MapCell[][] grid;
 
     /**
      * The map of all agents in this {@code Warehouse}, indexed by their id.
@@ -96,8 +104,8 @@ abstract public class AbstractWarehouse {
      */
     public void clear() {
         time = 0;
-        map = null;
-        timeMap = null;
+        rows = cols;
+        grid = null;
         agents.clear();
         activeAgents.clear();
         readyAgents.clear();
@@ -146,31 +154,80 @@ abstract public class AbstractWarehouse {
     }
 
     /**
-     * Returns the map grid of this {@code Warehouse} object.
+     * Configures and allocates a new empty grid for the {@code Warehouse}
+     * with the given dimensions and clears the previous state of
+     * the {@code Warehouse} completely.
      *
-     * @return the {@code MapGrid} of this {@code Warehouse}.
+     * @param rows the number of rows of this {@code Warehouse}.
+     * @param cols the number of columns of this {@code Warehouse}.
      */
-    public MapGrid getMap() {
-        return map;
+    public void configure(int rows, int cols) {
+        this.clear();
+        this.rows = rows;
+        this.cols = cols;
+        this.grid = MapCell.allocate2D(rows, cols);
     }
 
     /**
-     * Updates the grid map of this {@code Warehouse} object,
-     * and clears all previous components.
+     * Returns the number of rows of this {@code Warehouse}.
      *
-     * @param grid the new map grid.
+     * @return an integer representing the number of rows in the {@code Warehouse} grid.
      */
-    public void updateMap(MapCell[][] grid) {
-        map = new MapGrid(grid);
+    public int getRows() {
+        return rows;
     }
 
     /**
-     * Returns the timeline map of this {@code Warehouse} object.
+     * Returns the number of columns in this {@code Warehouse}.
      *
-     * @return the timeline map of this {@code Warehouse}.
+     * @return an integer representing the number of columns in the {@code Warehouse} grid.
      */
-    public TimeGrid getTimeMap() {
-        return timeMap;
+    public int getCols() {
+        return cols;
+    }
+
+    /**
+     * Returns the dimensions of this {@code Warehouse}.
+     *
+     * @return a {@code Dimensions} object representing the dimensions of the {@code Warehouse}.
+     */
+    public Dimensions getDimensions() {
+        return new Dimensions(rows, cols);
+    }
+
+    /**
+     * Checks whether a cell is inside the boundaries of this {@code Warehouse} or not.
+     *
+     * @param row the row position of the cell to check.
+     * @param col the column position of the cell to check.
+     *
+     * @return {@code true} if the cell is inside the grid; {@code false} otherwise.
+     */
+    public boolean isInBound(int row, int col) {
+        return 0 <= row && row < rows && 0 <= col && col < cols;
+    }
+
+    /**
+     * Returns a {@code MapCell} given its position in this {@code Warehouse}.
+     *
+     * @param row the row position of the cell to return.
+     * @param col the column position of the cell to return.
+     *
+     * @return the {@code MapCell} in the given position.
+     */
+    public MapCell get(int row, int col) {
+        return grid[row][col];
+    }
+
+    /**
+     * Returns a {@code MapCell} given its position in this {@code Warehouse}.
+     *
+     * @param pos the {@code Position} of the cell to return.
+     *
+     * @return the {@code MapCell} in the given position.
+     */
+    public MapCell get(Position pos) {
+        return grid[pos.row][pos.col];
     }
 
     /**
@@ -188,8 +245,12 @@ abstract public class AbstractWarehouse {
      * Adds a new {@code Agent} object to the {@code Warehouse}.
      *
      * @param agent the new {@code Agent} to add.
+     * @param row   the row position of the cell to add into.
+     * @param col   the column position of the cell to add into.
      */
-    public void addAgent(Agent agent) {
+    public void addAgent(Agent agent, int row, int col) {
+        agent.setPosition(row, col);
+        grid[row][col].setAgent(agent);
         agents.put(agent.getId(), agent);
         readyAgents.add(agent);
     }
@@ -209,8 +270,12 @@ abstract public class AbstractWarehouse {
      * Adds a new {@code Rack} object to the {@code Warehouse}.
      *
      * @param rack the new {@code Rack} to add.
+     * @param row  the row position of the cell to add into.
+     * @param col  the column position of the cell to add into.
      */
-    public void addRack(Rack rack) {
+    public void addRack(Rack rack, int row, int col) {
+        rack.setPosition(row, col);
+        grid[row][col].setFacility(CellType.RACK, rack);
         racks.put(rack.getId(), rack);
     }
 
@@ -229,8 +294,12 @@ abstract public class AbstractWarehouse {
      * Adds a new {@code Gate} object to the {@code Warehouse}.
      *
      * @param gate the new {@code Gate} to add.
+     * @param row  the row position of the cell to add into.
+     * @param col  the column position of the cell to add into.
      */
-    public void addGate(Gate gate) {
+    public void addGate(Gate gate, int row, int col) {
+        gate.setPosition(row, col);
+        grid[row][col].setFacility(CellType.GATE, gate);
         gates.put(gate.getId(), gate);
     }
 
@@ -249,9 +318,23 @@ abstract public class AbstractWarehouse {
      * Adds a new {@code Station} object to the {@code Warehouse}.
      *
      * @param station the new {@code Station} to add.
+     * @param row     the row position of the cell to add into.
+     * @param col     the column position of the cell to add into.
      */
-    public void addStation(Station station) {
+    public void addStation(Station station, int row, int col) {
+        station.setPosition(row, col);
+        grid[row][col].setFacility(CellType.STATION, station);
         stations.put(station.getId(), station);
+    }
+
+    /**
+     * Adds a new obstacle object to the {@code Warehouse}.
+     *
+     * @param row the row position of the cell to add into.
+     * @param col the column position of the cell to add into.
+     */
+    public void addObstacle(int row, int col) {
+        grid[row][col].setFacility(CellType.OBSTACLE, null);
     }
 
     /**
@@ -310,10 +393,15 @@ abstract public class AbstractWarehouse {
     public String toString() {
         StringBuilder builder = new StringBuilder();
 
-        builder.append("Warehouse of size: ");
-        builder.append(map.getRows()).append("x").append(map.getCols());
+        builder.append("Warehouse ").append(getDimensions());
         builder.append(" @time: ").append(time).append("\n");
-        builder.append(map);
+
+        for (int i = 0; i < rows; ++i) {
+            for (int j = 0; j < cols; ++j) {
+                builder.append(grid[i][j].toShape());
+            }
+            builder.append('\n');
+        }
 
         return builder.toString();
     }

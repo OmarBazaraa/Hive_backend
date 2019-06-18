@@ -5,7 +5,6 @@ import models.agents.Agent;
 import models.facilities.Gate;
 import models.facilities.Rack;
 import models.facilities.Station;
-import models.maps.TimeGrid;
 import models.tasks.orders.Order;
 import models.tasks.Task;
 
@@ -54,18 +53,15 @@ public class Warehouse extends AbstractWarehouse {
      */
     @Override
     public void init() {
-        // Initializes the time map
-        timeMap = new TimeGrid(map.getRows(), map.getCols());
-
         // Initializes the guide maps
         for (Rack rack : racks.values()) {
-            rack.computeGuideMap(map);
+            rack.computeGuideMap();
         }
         for (Gate gate : gates.values()) {
-            gate.computeGuideMap(map);
+            gate.computeGuideMap();
         }
         for (Station station : stations.values()) {
-            station.computeGuideMap(map);
+            station.computeGuideMap();
         }
     }
 
