@@ -2,7 +2,7 @@ package algorithms.planner;
 
 import models.agents.Agent;
 import models.facilities.Facility;
-import models.maps.*;
+import models.maps.Cell;
 import models.maps.utils.Position;
 
 import models.warehouses.Warehouse;
@@ -63,7 +63,7 @@ public class Planner {
                 }
 
                 // Get next cell
-                MapCell cell = warehouse.get(nxt.row, nxt.col);
+                Cell cell = warehouse.get(nxt.row, nxt.col);
 
                 // Skip if obstacle or already visited cell
                 if (cell.isObstacle() || ret[nxt.row][nxt.col] < Integer.MAX_VALUE) {
@@ -98,7 +98,7 @@ public class Planner {
 
         // Agent current position information
         Position curPos = agent.getPosition();
-        MapCell curCell = warehouse.get(curPos.row, curPos.col);
+        Cell curCell = warehouse.get(curPos.row, curPos.col);
 
         // Rotation actions are easy
         if (action != AgentAction.MOVE) {
@@ -109,7 +109,7 @@ public class Planner {
 
         // Agent next position information
         Position nxtPos = Utility.nextPos(curPos, agent.getDirection());
-        MapCell nxtCell = warehouse.get(nxtPos.row, nxtPos.col);
+        Cell nxtCell = warehouse.get(nxtPos.row, nxtPos.col);
         Agent a = nxtCell.getAgent();
 
         // Check if the can move to the next cell
@@ -220,7 +220,7 @@ public class Planner {
         //
         while (true) {
             // Get the agent that is planned to be in this state
-            MapCell cell = warehouse.get(node.row, node.col);
+            Cell cell = warehouse.get(node.row, node.col);
             Agent a = cell.getScheduledAt(node.time);
 
             // If there is an agent then it must be with lower priority
@@ -263,7 +263,7 @@ public class Planner {
         //
         while (true) {
             // Clear the time slot of the agent in the current state
-            MapCell cell = warehouse.get(node.row, node.col);
+            Cell cell = warehouse.get(node.row, node.col);
             cell.clearScheduleAt(node.time);
 
             // Stop when no further actions in the plan

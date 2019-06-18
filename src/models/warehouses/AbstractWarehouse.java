@@ -5,12 +5,11 @@ import models.facilities.Gate;
 import models.facilities.Rack;
 import models.facilities.Station;
 import models.items.Item;
-import models.maps.MapCell;
+import models.maps.Cell;
 import models.maps.utils.Dimensions;
 import models.maps.utils.Position;
 import models.tasks.orders.Order;
 
-import utils.Constants;
 import utils.Constants.*;
 
 import java.util.*;
@@ -47,7 +46,7 @@ abstract public class AbstractWarehouse {
     /**
      * The map grid of this {@code Warehouse}.
      */
-    protected MapCell[][] grid;
+    protected Cell[][] grid;
 
     /**
      * The map of all agents in this {@code Warehouse}, indexed by their id.
@@ -165,7 +164,7 @@ abstract public class AbstractWarehouse {
         this.clear();
         this.rows = rows;
         this.cols = cols;
-        this.grid = MapCell.allocate2D(rows, cols);
+        this.grid = Cell.allocate2D(rows, cols);
     }
 
     /**
@@ -208,25 +207,25 @@ abstract public class AbstractWarehouse {
     }
 
     /**
-     * Returns a {@code MapCell} given its position in this {@code Warehouse}.
+     * Returns a {@code Cell} given its position in this {@code Warehouse}.
      *
      * @param row the row position of the cell to return.
      * @param col the column position of the cell to return.
      *
-     * @return the {@code MapCell} in the given position.
+     * @return the {@code Cell} in the given position.
      */
-    public MapCell get(int row, int col) {
+    public Cell get(int row, int col) {
         return grid[row][col];
     }
 
     /**
-     * Returns a {@code MapCell} given its position in this {@code Warehouse}.
+     * Returns a {@code Cell} given its position in this {@code Warehouse}.
      *
      * @param pos the {@code Position} of the cell to return.
      *
-     * @return the {@code MapCell} in the given position.
+     * @return the {@code Cell} in the given position.
      */
-    public MapCell get(Position pos) {
+    public Cell get(Position pos) {
         return grid[pos.row][pos.col];
     }
 

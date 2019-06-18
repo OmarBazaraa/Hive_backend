@@ -8,9 +8,9 @@ import utils.Constants.*;
 
 
 /**
- * This {@code Grid} class represents a grid of 2D {@link Cell} objects.
+ * This {@code Grid} class represents a grid of 2D objects.
  */
-public class Grid<T extends Cell> {
+public class Grid<T> {
 
     //
     // Member Variables
@@ -32,7 +32,7 @@ public class Grid<T extends Cell> {
     protected int size;
 
     /**
-     * The 2D array of {@code Cell} objects forming this {@code Grid}.
+     * The 2D array of objects forming this {@code Grid}.
      */
     protected T[][] grid;
 
@@ -42,9 +42,9 @@ public class Grid<T extends Cell> {
     //
 
     /**
-     * Constructs a new {@code Grid} object with the given 2D {@code Cell} array.
+     * Constructs a new {@code Grid} object with the given 2D array.
      *
-     * @param grid a 2D array of {@code Cell} objects.
+     * @param grid a 2D array of objects.
      */
     public Grid(T[][] grid) {
         this.rows = grid.length;
@@ -90,34 +90,34 @@ public class Grid<T extends Cell> {
     }
 
     /**
-     * Returns a {@code Cell} given its position in this {@code Grid}.
+     * Returns a cell given its position in this {@code Grid}.
      *
      * @param row the row position of the cell to return.
      * @param col the column position of the cell to return.
      *
-     * @return the {@code Cell} in the given position.
+     * @return the cell in the given position.
      */
     public T get(int row, int col) {
         return grid[row][col];
     }
 
     /**
-     * Returns a {@code Cell} given its position in this {@code Grid}.
+     * Returns a cell given its position in this {@code Grid}.
      *
      * @param pos the {@code Position} of the cell to return.
      *
-     * @return the {@code Cell} in the given position.
+     * @return the cell in the given position.
      */
     public T get(Position pos) {
         return get(pos.row, pos.col);
     }
 
     /**
-     * Returns a {@code Cell} given its id in this {@code Grid}.
+     * Returns a cell given its id in this {@code Grid}.
      *
      * @param id the id of the cell to return.
      *
-     * @return the {@code Cell} of the given id.
+     * @return the cell of the given id.
      */
     public T get(int id) {
         Position pos = toCellPos(id);
@@ -304,7 +304,7 @@ public class Grid<T extends Cell> {
 
         for (int i = 0; i < rows; ++i) {
             for (int j = 0; j < cols; ++j) {
-                builder.append(grid[i][j].toShape());
+                builder.append(grid[i][j]);
             }
             builder.append('\n');
         }

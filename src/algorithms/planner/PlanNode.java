@@ -2,8 +2,7 @@ package algorithms.planner;
 
 import models.agents.Agent;
 import models.facilities.Facility;
-import models.maps.MapCell;
-import models.maps.utils.Position;
+import models.maps.Cell;
 
 import models.warehouses.Warehouse;
 import utils.Constants;
@@ -164,7 +163,7 @@ public class PlanNode implements Comparable<PlanNode> {
         }
 
         // Get this state cell
-        MapCell cell = warehouse.get(row, col);
+        Cell cell = warehouse.get(row, col);
 
         // Skip if obstacle or already visited cell
         if (cell.isObstacle() || isVisited()) {
