@@ -215,15 +215,9 @@ public class Utility {
         int i = dir.ordinal();
 
         if (action == AgentAction.ROTATE_RIGHT) {
-            i--;
-            if (i < 0) {
-                i = 3;
-            }
+            i = (i - 1) & 3;
         } else {
-            i++;
-            if (i > 3) {
-                i = 0;
-            }
+            i = (i + 1) & 3;
         }
 
         return Direction.values()[i];
@@ -245,15 +239,9 @@ public class Utility {
         int i = dir.ordinal();
 
         if (action == AgentAction.ROTATE_LEFT) {
-            i--;
-            if (i < 0) {
-                i = 3;
-            }
+            i = (i - 1) & 3;
         } else {
-            i++;
-            if (i > 3) {
-                i = 0;
-            }
+            i = (i + 1) & 3;
         }
 
         return Direction.values()[i];
