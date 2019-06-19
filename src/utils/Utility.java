@@ -41,7 +41,7 @@ public class Utility {
     /**
      * Converts the given item-quantity map into a visual representative string.
      *
-     * @param map     the items map to stringify.
+     * @param map the items map to stringify.
      *
      * @return the visual representation of the map.
      */
@@ -70,7 +70,7 @@ public class Utility {
     /**
      * Converts the given rack-quantity map into a visual representative string.
      *
-     * @param map     the racks map to stringify.
+     * @param map the racks map to stringify.
      *
      * @return the visual representation of the map.
      */
@@ -118,25 +118,6 @@ public class Utility {
     }
 
     /**
-     * Calculates the remainder of {@code a} after dividing by {@code m}.
-     *
-     * @param a
-     * @param m
-     *
-     * @return the remainder.
-     */
-    public static int remainder(int a, int m) {
-        a %= m;
-        if (a < 0) {
-            return a + m;
-        }
-        if (a >= m) {
-            return a - m;
-        }
-        return a;
-    }
-
-    /**
      * Calculates the next cell position if moving along the given direction
      * from a given current cell.
      * (i.e. position(current) + dir = position(next)).
@@ -152,20 +133,6 @@ public class Utility {
         row += Constants.DIR_ROW[i];
         col += Constants.DIR_COL[i];
         return new Position(row, col);
-    }
-
-    /**
-     * Calculates the next cell position if moving along the given direction
-     * from a given current cell.
-     * (i.e. position(current) + dir = position(next)).
-     *
-     * @param pos the {@code Position} of the current cell.
-     * @param dir the {@code Direction} to move along.
-     *
-     * @return the {@code Position} corresponding to the next cell.
-     */
-    public static Position nextPos(Position pos, Direction dir) {
-        return nextPos(pos.row, pos.col, dir);
     }
 
     /**
@@ -187,20 +154,6 @@ public class Utility {
     }
 
     /**
-     * Calculates the previous cell position if moving backward along the given direction
-     * from a given current cell.
-     * (i.e. position(previous) + dir = position(current)).
-     *
-     * @param pos the {@code Position} of the current cell.
-     * @param dir the {@code Direction} to move along.
-     *
-     * @return the {@code Position} corresponding to the previous cell.
-     */
-    public static Position prevPos(Position pos, Direction dir) {
-        return prevPos(pos.row, pos.col, dir);
-    }
-
-    /**
      * Calculates the next direction if rotating with the given rotation action.
      * <p>
      * The allowed actions are only:
@@ -209,7 +162,7 @@ public class Utility {
      * @param dir    the current {@code Direction}.
      * @param action the rotation action to apply.
      *
-     * @return
+     * @return the next {@code Direction}.
      */
     public static Direction nextDir(Direction dir, AgentAction action) {
         int i = dir.ordinal();
@@ -233,7 +186,7 @@ public class Utility {
      * @param dir    the current {@code Direction}.
      * @param action the rotation action to apply.
      *
-     * @return
+     * @return the next {@code Direction}.
      */
     public static Direction prevDir(Direction dir, AgentAction action) {
         int i = dir.ordinal();
@@ -248,24 +201,6 @@ public class Utility {
     }
 
     /**
-     * Returns the reverse rotation action of the given one.
-     * <p>
-     * The allowed actions are only:
-     * {@code AgentAction.ROTATE_RIGHT} and {@code AgentAction.ROTATE_LEFT}.
-     *
-     * @param action the rotation action.
-     *
-     * @return the reverse rotation action.
-     */
-    public static AgentAction getReverseRotation(AgentAction action) {
-        if (action == AgentAction.ROTATE_RIGHT) {
-            return AgentAction.ROTATE_LEFT;
-        } else {
-            return AgentAction.ROTATE_RIGHT;
-        }
-    }
-
-    /**
      * Returns the reverse (opposite) direction of the given one.
      *
      * @param dir the direction to get its reverse.
@@ -275,6 +210,6 @@ public class Utility {
     public static Direction getReverseDir(Direction dir) {
         int i = dir.ordinal();
         Direction[] dirs = Direction.values();
-        return dirs[(i + 2) % 4];
+        return dirs[(i + 2) & 3];
     }
 }

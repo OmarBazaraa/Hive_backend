@@ -46,6 +46,11 @@ public class GridCell {
      */
     private TreeMap<Long, Agent> timeline = new TreeMap<>();
 
+    /**
+     * Whether this {@code GridCell} is locked or not.
+     */
+    private boolean locked;
+
     // ===============================================================================================
     //
     // Static Methods
@@ -159,10 +164,19 @@ public class GridCell {
     }
 
     /**
-     * Checks whether this {@code GridCell} is statically empty or not.
+     * Checks whether this {@code GridCell} is blocked or not.
+     * The cell is considered blocked if either it is locked or it holds an obstacle.
+     *
+     * @return {@code true} if this cell is an blocked; {@code false} otherwise.
+     */
+    public boolean isBlocked() {
+        return (type == CellType.OBSTACLE || locked);
+    }
+
+    /**
+     * Checks whether this {@code GridCell} is empty or not.
      * <p>
-     * A cell is considered statically empty if it is empty or it is currently
-     * occupied by an {@code Agent}.
+     * A cell is considered empty even it is currently occupied by an {@code Agent}.
      *
      * @return {@code true} if this cell is statically empty; {@code false} otherwise.
      */
@@ -180,27 +194,21 @@ public class GridCell {
     }
 
     /**
-     * Checks whether this {@code GridCell} is accessible or not.
-     * <p>
-     * A cell is considered accessible if it is empty, currently occupied by an {@code Agent},
-     * or its type matches one of the given types.
+     * Checks whether this {@code GridCell} has been locked or not.
      *
-     * @param accessTypes a list of accessible cell types.
-     *
-     * @return {@code true} if this cell is accessible; {@code false} otherwise.
+     * @return {@code true} if this cell is locked; {@code false} otherwise.
      */
-    public boolean isAccessible(CellType... accessTypes) {
-        if (isEmpty()) {
-            return true;
-        }
+    public boolean isLocked() {
+        return locked;
+    }
 
-        for (CellType t : accessTypes) {
-            if (type == t) {
-                return true;
-            }
-        }
-
-        return false;
+    /**
+     * Sets the lock status of this {@code GridCell}.
+     *
+     * @param block {@code true} to lock the cell; {@code false} unlock it.
+     */
+    public void setLock(boolean block) {
+        locked = block;
     }
 
     // ===============================================================================================

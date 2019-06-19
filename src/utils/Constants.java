@@ -85,7 +85,6 @@ public class Constants {
         OFFLOAD,
         BIND,
         UNBIND,
-        CHARGE,
         NOTHING
     }
 

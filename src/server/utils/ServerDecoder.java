@@ -145,7 +145,8 @@ public class ServerDecoder {
         }
 
         // Create and return to be added into the warehouse
-        Agent ret = new Agent(id, cap, decodeDirection(dir));
+        Agent ret = new Agent(id, cap);
+        ret.setDirection(decodeDirection(dir));
         ret.setIpAddress(ip);
         ret.setPortNumber(port);
         return ret;

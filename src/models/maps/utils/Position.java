@@ -1,5 +1,8 @@
 package models.maps.utils;
 
+import utils.Constants;
+import utils.Constants.*;
+
 
 /**
  * This {@code Position} class holds the coordinates of an object in a 2D grid.
@@ -25,6 +28,38 @@ public class Position implements Comparable<Position> {
     }
 
     /**
+     * Calculates the next position if moving forward along the given direction
+     * from a this {@code Position}.
+     * (i.e. position(previous) + dir = position(current)).
+     *
+     * @param dir the {@code Direction} to move along.
+     *
+     * @return the next {@code Position}.
+     */
+    public Position next(Direction dir) {
+        int i = dir.ordinal();
+        int r = row + Constants.DIR_ROW[i];
+        int c = col + Constants.DIR_COL[i];
+        return new Position(r, c);
+    }
+
+    /**
+     * Calculates the previous position if moving backward along the given direction
+     * from a this {@code Position}.
+     * (i.e. position(previous) + dir = position(current)).
+     *
+     * @param dir the {@code Direction} to move along.
+     *
+     * @return the previous {@code Position}.
+     */
+    public Position prev(Direction dir) {
+        int i = dir.ordinal();
+        int r = row - Constants.DIR_ROW[i];
+        int c = col - Constants.DIR_COL[i];
+        return new Position(r, c);
+    }
+
+    /**
      * Checks whether the given {@code Position} is adjacent to this one or not.
      *
      * @param pos the {@code Position} to check against.
@@ -32,7 +67,7 @@ public class Position implements Comparable<Position> {
      * @return {@code true} if both positions are adjacent; {@code false} otherwise.
      */
     public boolean isAdjacent(Position pos) {
-        return distanceTo(pos) == 1;
+        return getDistanceTo(pos) == 1;
     }
 
     /**
@@ -42,7 +77,7 @@ public class Position implements Comparable<Position> {
      *
      * @return the manhattan distance.
      */
-    public int distanceTo(Position pos) {
+    public int getDistanceTo(Position pos) {
         return Math.abs(row - pos.row) + Math.abs(col - pos.col);
     }
 

@@ -166,7 +166,7 @@ public class PlanNode implements Comparable<PlanNode> {
         GridCell cell = warehouse.get(row, col);
 
         // Skip if obstacle or already visited cell
-        if (cell.isObstacle() || isVisited()) {
+        if (cell.isBlocked() || isVisited()) {
             return false;
         }
 

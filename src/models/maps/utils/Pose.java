@@ -15,7 +15,7 @@ public class Pose extends Position {
     /**
      * The orientation of an object.
      */
-    Direction dir;
+    public Direction dir;
 
     /**
      * Constructs a {@code Pose} object with the given coordinates and orientation.
@@ -60,19 +60,27 @@ public class Pose extends Position {
      * @return the previous {@code Pose}.
      */
     public Pose previous(AgentAction action) {
-        int i = dir.ordinal();
 
+        // Movement
         if (action == AgentAction.MOVE) {
+            int i = dir.ordinal();
             int r = row - Constants.DIR_ROW[i];
             int c = col - Constants.DIR_COL[i];
             return new Pose(r, c, dir);
         }
 
+        // Re-treatment
         if (action == AgentAction.RETREAT) {
             // TODO:
         }
 
-        return new Pose(row, col, Utility.prevDir(dir, action));
+        // Rotation
+        if (action == AgentAction.ROTATE_RIGHT || action == AgentAction.ROTATE_LEFT) {
+            return new Pose(row, col, Utility.prevDir(dir, action));
+        }
+
+        // Return same pose
+        return new Pose(row, col, dir);
     }
 
     /**

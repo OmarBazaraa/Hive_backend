@@ -47,6 +47,11 @@ public class ServerConstants {
     public static final String KEY_LOGS = "logs";
     public static final String KEY_STATISTICS = "statistics";
 
+    // Control message keys
+    public static final String KEY_ACTIVATED = "activated";
+    public static final String KEY_DEACTIVATED = "deactivated";
+    public static final String KEY_BLOCKED = "blocked";
+
     // Warehouse-related keys
     public static final String KEY_MAP = "map";
     public static final String KEY_WIDTH = "width";
@@ -54,7 +59,6 @@ public class ServerConstants {
     public static final String KEY_GRID = "grid";
 
     public static final String KEY_ID = "id";
-    public static final String KEY_IDS = "ids";
     public static final String KEY_ROW = "row";
     public static final String KEY_COL = "col";
 
@@ -119,7 +123,7 @@ public class ServerConstants {
     public static final int TYPE_UPDATE = 3;
     public static final int TYPE_MSG = 6;
 
-    // Control message types from/to server
+    // Control message types to server
     public static final int TYPE_CONTROL_ACTIVATE = 0;
     public static final int TYPE_CONTROL_DEACTIVATE = 1;
 

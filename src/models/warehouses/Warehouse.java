@@ -108,12 +108,13 @@ public class Warehouse extends AbstractWarehouse {
     @Override
     public boolean run() {
         // Skip if warehouse is currently idle
-        if (pendingOrders.isEmpty() && activeAgents.isEmpty()) {
+        if (pendingOrders.isEmpty() && activeAgents.isEmpty() && blockedAgents.isEmpty()) {
             return false;
         }
 
         // Do a single run and increment time
         dispatchPendingOrders();
+        retreatBlockedAgents();
         advanceActiveAgents();
         time++;
         return true;
@@ -150,6 +151,31 @@ public class Warehouse extends AbstractWarehouse {
     }
 
     /**
+     * Retreats the blocked agents to a normal state if possible.
+     */
+    @Override
+    protected void retreatBlockedAgents() {
+        // Get the initial size of the queue
+        int size = blockedAgents.size();
+
+        //
+        // Iterate over every blocked agent and tries to retreat it
+        //
+        for (int i = 0; i < size; ++i) {
+            // Get the current blocked agent
+            Agent agent = blockedAgents.remove();
+
+            // Try retreating the current agent
+            agent.retreat();
+
+            // Re-add the agent to the end of the queue if still blocked
+            if (agent.isBlocked()) {
+                blockedAgents.add(agent);
+            }
+        }
+    }
+
+    /**
      * Moves the active agents one step towards their targets.
      */
     @Override
@@ -163,14 +189,14 @@ public class Warehouse extends AbstractWarehouse {
         int size = activeAgents.size();
 
         // Create another queue of agents
-        Queue<Agent> q = new PriorityQueue<>(size, Collections.reverseOrder());
+        TreeSet<Agent> q = new TreeSet<>(Collections.reverseOrder());
 
         //
         // Iterate over all active agents
         //
         for (int i = 0; i < size; ++i) {
             // Get current active agent
-            Agent agent = activeAgents.remove();
+            Agent agent = activeAgents.pollFirst();
 
             // Try moving the current agent towards its target
             agent.executeAction();

@@ -56,14 +56,19 @@ abstract public class AbstractWarehouse {
     protected Map<Integer, Agent> agents = new HashMap<>();
 
     /**
-     * The queue of all currently active agents, sorted by their priority.
+     * The set of all currently active agents, sorted by their priority.
      */
-    protected Queue<Agent> activeAgents = new PriorityQueue<>(Collections.reverseOrder());
+    protected TreeSet<Agent> activeAgents = new TreeSet<>(Collections.reverseOrder());
 
     /**
      * The set of all currently idle agents.
      */
     protected Set<Agent> readyAgents = new HashSet<>();
+
+    /**
+     * The set of currently blocked agents.
+     */
+    protected Queue<Agent> blockedAgents = new LinkedList<>();
 
     /**
      * The map of all racks in this {@code Warehouse}, indexed by their id.
@@ -101,6 +106,21 @@ abstract public class AbstractWarehouse {
     //
 
     /**
+     * Configures and allocates a new empty grid for the {@code Warehouse}
+     * with the given dimensions and clears the previous state of
+     * the {@code Warehouse} completely.
+     *
+     * @param rows the number of rows of this {@code Warehouse}.
+     * @param cols the number of columns of this {@code Warehouse}.
+     */
+    public void configure(int rows, int cols) {
+        this.clear();
+        this.rows = rows;
+        this.cols = cols;
+        this.grid = GridCell.allocate2D(rows, cols);
+    }
+
+    /**
      * Clears the {@code Warehouse} and removes all its components.
      */
     public void clear() {
@@ -136,9 +156,31 @@ abstract public class AbstractWarehouse {
     abstract protected void dispatchPendingOrders();
 
     /**
+     * Retreats the blocked agents to a normal state if possible.
+     */
+    abstract protected void retreatBlockedAgents();
+
+    /**
      * Moves the active agents one step towards their targets.
      */
     abstract protected void advanceActiveAgents();
+
+
+    // ===============================================================================================
+    //
+    // Callback Methods
+    //
+
+    /**
+     * A callback function to be invoked when an {@code Agent} get blocked.
+     *
+     * @param agent the blocked {@code Agent}.
+     */
+    public void onAgentBlocked(Agent agent) {
+        readyAgents.remove(agent);
+        activeAgents.remove(agent);
+        blockedAgents.add(agent);
+    }
 
     // ===============================================================================================
     //
@@ -152,21 +194,6 @@ abstract public class AbstractWarehouse {
      */
     public long getTime() {
         return time;
-    }
-
-    /**
-     * Configures and allocates a new empty grid for the {@code Warehouse}
-     * with the given dimensions and clears the previous state of
-     * the {@code Warehouse} completely.
-     *
-     * @param rows the number of rows of this {@code Warehouse}.
-     * @param cols the number of columns of this {@code Warehouse}.
-     */
-    public void configure(int rows, int cols) {
-        this.clear();
-        this.rows = rows;
-        this.cols = cols;
-        this.grid = GridCell.allocate2D(rows, cols);
     }
 
     /**

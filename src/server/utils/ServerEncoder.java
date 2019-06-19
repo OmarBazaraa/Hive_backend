@@ -79,17 +79,11 @@ public class ServerEncoder {
         return ret;
     }
 
-    public static JSONObject encodeControlMsg(int type, Agent... agents) {
-        JSONArray ids = new JSONArray();
-
-        for (Agent agent : agents) {
-            ids.put(agent.getId());
-        }
-
+    public static JSONObject encodeControlMsg(JSONArray activated, JSONArray deactivated, JSONArray blocked) {
         JSONObject data = new JSONObject();
-        data.put(ServerConstants.KEY_IDS, ids);
-        data.put(ServerConstants.KEY_TYPE, type);
-
+        data.put(ServerConstants.KEY_ACTIVATED, activated);
+        data.put(ServerConstants.KEY_DEACTIVATED, deactivated);
+        data.put(ServerConstants.KEY_BLOCKED, blocked);
         return encodeMsg(ServerConstants.TYPE_CONTROL, data);
     }
 

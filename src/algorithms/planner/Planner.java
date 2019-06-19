@@ -8,7 +8,6 @@ import models.maps.utils.Position;
 import models.warehouses.Warehouse;
 import utils.Constants;
 import utils.Constants.*;
-import utils.Utility;
 
 import java.util.*;
 
@@ -17,6 +16,11 @@ import java.util.*;
  * This {@code Planner} class contains some static method for multi-agent path planning algorithms.
  */
 public class Planner {
+
+    // ===============================================================================================
+    //
+    // Guide Map
+    //
 
     /**
      * Runs a BFS algorithms on the {@link Warehouse} grid to compute the
@@ -55,7 +59,7 @@ public class Planner {
             // Expanding in all directions
             for (Direction dir : Direction.values()) {
                 // Get net position
-                Position nxt = Utility.nextPos(cur, dir);
+                Position nxt = cur.next(dir);
 
                 // Skip if next position is out of bound
                 if (!warehouse.isInBound(nxt.row, nxt.col)) {
@@ -66,7 +70,7 @@ public class Planner {
                 GridCell cell = warehouse.get(nxt.row, nxt.col);
 
                 // Skip if obstacle or already visited cell
-                if (cell.isObstacle() || ret[nxt.row][nxt.col] < Integer.MAX_VALUE) {
+                if (cell.isBlocked() || ret[nxt.row][nxt.col] < Integer.MAX_VALUE) {
                     continue;
                 }
 
@@ -83,6 +87,10 @@ public class Planner {
         return ret;
     }
 
+    // ===============================================================================================
+    //
+    // Routing Using Pre-Planned Actions
+    //
 
     /**
      * Routes the given {@code Agent} one step towards its target location
@@ -108,7 +116,7 @@ public class Planner {
         }
 
         // Agent next position information
-        Position nxtPos = Utility.nextPos(curPos, agent.getDirection());
+        Position nxtPos = curPos.next(agent.getDirection());
         GridCell nxtCell = warehouse.get(nxtPos.row, nxtPos.col);
         Agent a = nxtCell.getAgent();
 
@@ -139,6 +147,11 @@ public class Planner {
     private static boolean slide(Agent slidingAgent, Agent mainAgent) {
         return false;
     }
+
+    // ===============================================================================================
+    //
+    // Planning Sequence of Actions
+    //
 
     /**
      * Plans a sequence of actions to be done by the given {@code Agent} to reach

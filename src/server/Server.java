@@ -60,9 +60,14 @@ public class Server {
     private boolean receivedAck = false;
 
     /**
-     * The updates states of the current time step to be sent to the frontend.
+     * The updates of the current time step to be sent to the frontend in the next UPDATE message.
      */
     private JSONArray actions, logs, statistics;
+
+    /**
+     * The controls to be sent to the frontend in the next CONTROL message
+     */
+    private JSONArray activatedAgents, deactivatedAgents, blockedAgents;
 
     /**
      * Object used to lock thread from updating the {@code Warehouse} simultaneously.
@@ -106,6 +111,7 @@ public class Server {
         Spark.webSocket(path, new WebSocketHandler());
 
         clearUpdateStates();
+        clearControlStates();
     }
 
     /**
@@ -151,13 +157,18 @@ public class Server {
      *
      * @param msg the message to sent.
      */
-    private void send(JSONObject msg) throws IOException {
+    private void send(JSONObject msg) {
         // DEBUG
         System.out.println("Sending ...");
         System.out.println(msg.toString(4));
         System.out.println();
 
-        session.getRemote().sendString(msg.toString());
+        try {
+            session.getRemote().sendString(msg.toString());
+        } catch (IOException ex) {
+            currentState = ServerStates.IDLE;
+            System.out.println(ex.getMessage());
+        }
     }
 
     /**
@@ -190,7 +201,7 @@ public class Server {
      * <p>
      * This function is to be called from the main thread.
      */
-    public synchronized void run() throws Exception {
+    public synchronized void run() {
         // Must be in RUNNING state
         if (currentState != ServerStates.RUNNING) {
             return;
@@ -208,14 +219,7 @@ public class Server {
                     // DEBUG
                     System.out.println(warehouse);
                 }
-            }
-            // Handle communication exceptions (probably the frontend is down)
-            catch (IOException ex) {
-                currentState = ServerStates.IDLE;
-                System.out.println(ex.getMessage());
-            }
-            // Handle internal server exceptions
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 sendAckMsg(ServerConstants.TYPE_MSG, ServerConstants.TYPE_ERROR,
                         ServerConstants.ERR_SERVER, "Internal server error.");
                 currentState = ServerStates.IDLE;
@@ -237,7 +241,7 @@ public class Server {
      *
      * @param msg the raw message as received from the frontend.
      */
-    private synchronized void process(String msg) throws Exception {
+    private synchronized void process(String msg) {
         try {
             process(new JSONObject(msg));
         }
@@ -254,11 +258,6 @@ public class Server {
                     ex.getErrorCode(), ex.getMessage(), ex.getErrorArgs());
             System.out.println(ex.getMessage());
             ex.printStackTrace();
-        }
-        // Handle communication exceptions (probably the frontend is down or connection is lost)
-        catch (IOException ex) {
-            System.out.println(ex.getMessage());
-            currentState = ServerStates.IDLE;
         }
         // Handle internal server exceptions
         catch (Exception ex) {
@@ -492,17 +491,17 @@ public class Server {
                     ServerConstants.ERR_INVALID_ARGS);
         }
 
+        clearControlStates();
+
         switch (type) {
             case ServerConstants.TYPE_CONTROL_ACTIVATE:
-                // TODO:
-                Server.getInstance().sendControlMsg(ServerConstants.TYPE_CONTROL_ACTIVATE, agent);
+                agent.activate();
 
                 // DEBUG
                 System.out.println("Activating " + agent + ".");
                 break;
             case ServerConstants.TYPE_CONTROL_DEACTIVATE:
-                // TODO:
-                Server.getInstance().sendControlMsg(ServerConstants.TYPE_CONTROL_DEACTIVATE, agent);
+                agent.deactivate();
 
                 // DEBUG
                 System.out.println("Deactivating " + agent + ".");
@@ -511,6 +510,8 @@ public class Server {
                 throw new DataException("Control message with invalid type: " + type + ".",
                         ServerConstants.ERR_INVALID_ARGS);
         }
+
+        sendControlMsg();
     }
 
     // ===============================================================================================
@@ -521,7 +522,7 @@ public class Server {
     /**
      * Clears the update states JSON arrays of the current time step.
      */
-    private synchronized void clearUpdateStates() {
+    public synchronized void clearUpdateStates() {
         actions = new JSONArray();
         logs = new JSONArray();
         statistics = new JSONArray();
@@ -536,7 +537,7 @@ public class Server {
      * @param errReason the string message explaining the reason of the error.
      * @param errArgs   the error arguments.
      */
-    private synchronized void sendAckMsg(int type, int status, int errCode, String errReason, Object... errArgs) throws Exception {
+    private synchronized void sendAckMsg(int type, int status, int errCode, String errReason, Object... errArgs) {
         send(ServerEncoder.encodeAckMsg(type, status, errCode, errReason, errArgs));
     }
 
@@ -593,18 +594,51 @@ public class Server {
     /**
      * Sends the current update message to the frontend.
      */
-    public synchronized void sendUpdateMsg() throws Exception {
+    public synchronized void sendUpdateMsg() {
         send(ServerEncoder.encodeUpdateMsg(warehouse.getTime(), actions, logs, statistics));
     }
 
     /**
-     * Sends a control message to the frontend.
-     *
-     * @param type   the type of the control.
-     * @param agents a list of agents to apply this control.
+     * Clears the control states JSON arrays.
      */
-    public synchronized void sendControlMsg(int type, Agent... agents) throws Exception {
-        send(ServerEncoder.encodeControlMsg(type, agents));
+    public synchronized void clearControlStates() {
+        activatedAgents = new JSONArray();
+        deactivatedAgents = new JSONArray();
+        blockedAgents = new JSONArray();
+    }
+
+    /**
+     * Enqueues an activated {@code Agent} to be sent in the next control message.
+     *
+     * @param agent the activated {@code Agent}.
+     */
+    public synchronized void enqueueActivatedAgent(Agent agent) {
+        activatedAgents.put(agent.getId());
+    }
+
+    /**
+     * Enqueues an deactivated {@code Agent} to be sent in the next control message.
+     *
+     * @param agent the deactivated {@code Agent}.
+     */
+    public synchronized void enqueueDeactivatedAgent(Agent agent) {
+        deactivatedAgents.put(agent.getId());
+    }
+
+    /**
+     * Enqueues a blocked {@code Agent} to be sent in the next control message.
+     *
+     * @param agent the blocked {@code Agent}.
+     */
+    public synchronized void enqueueBlockedAgent(Agent agent) {
+        blockedAgents.put(agent.getId());
+    }
+
+    /**
+     * Sends the current control message to the frontend.
+     */
+    public synchronized void sendControlMsg() {
+        send(ServerEncoder.encodeControlMsg(activatedAgents, deactivatedAgents, blockedAgents));
     }
 
     // ===============================================================================================
@@ -616,7 +650,7 @@ public class Server {
     public class WebSocketHandler {
 
         @OnWebSocketConnect
-        public void onConnect(Session client) throws Exception {
+        public void onConnect(Session client) {
             openSession(client);
 
             System.out.println();

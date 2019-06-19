@@ -4,9 +4,9 @@ import models.Entity;
 import models.HiveObject;
 import models.facilities.Facility;
 import models.facilities.Rack;
+import models.maps.utils.Pose;
 import models.tasks.Task;
 import models.tasks.TaskAssignable;
-import models.warehouses.Warehouse;
 
 import utils.Constants;
 import utils.Constants.*;
@@ -28,6 +28,26 @@ abstract public class AbstractAgent extends HiveObject implements TaskAssignable
     //
 
     /**
+     * The current direction this {@code Agent} is heading to.
+     */
+    protected Direction direction = Constants.AGENT_DEFAULT_DIRECTION;
+
+    /**
+     * The flag indicating whether this {@code Agent} is currently deactivated or not.
+     */
+    protected boolean deactivated = false;
+
+    /**
+     * The flag indicating whether the last {@code AgentAction} got blocked or not.
+     */
+    protected boolean blocked = false;
+
+    /**
+     * The flag indicating whether this {@code Agent} is currently loaded by a {@code Rack}.
+     */
+    protected boolean loaded = false;
+
+    /**
      * The maximum weight the {@code Agent} can load.
      */
     protected int loadCapacity = Constants.AGENT_DEFAULT_LOAD_CAPACITY;
@@ -38,16 +58,6 @@ abstract public class AbstractAgent extends HiveObject implements TaskAssignable
     protected int chargePercentage = Constants.AGENT_DEFAULT_CHARGE_PERCENTAGE;
 
     /**
-     * The current direction this {@code Agent} is heading to.
-     */
-    protected Direction direction = Constants.AGENT_DEFAULT_DIRECTION;
-
-    /**
-     * The flag indicating whether this {@code Agent} is currently loaded by a {@code Rack}.
-     */
-    protected boolean loaded = false;
-
-    /**
      * The ip address of this {@code Agent} needed for communication.
      */
     protected String ip;
@@ -56,12 +66,6 @@ abstract public class AbstractAgent extends HiveObject implements TaskAssignable
      * The port number of this {@code Agent} needed for communication.
      */
     protected String port;
-
-    /**
-     * The last time this {@code Agent} has performed an action.
-     * Needed by the planner algorithm.
-     */
-    protected long lastActionTime = -1;
 
     /**
      * The queue of assigned tasks for this {@code Agent}.
@@ -83,14 +87,84 @@ abstract public class AbstractAgent extends HiveObject implements TaskAssignable
     /**
      * Constructs a new {@code Agent} robot.
      *
-     * @param id           the id of the {@code Agent}.
-     * @param loadCapacity the maximum weight the {@code Agent} can load.
-     * @param direction    the current direction this {@code Agent} is heading to.
+     * @param id      the id of the {@code Agent}.
+     * @param loadCap the maximum weight the {@code Agent} can load.
      */
-    public AbstractAgent(int id, int loadCapacity, Direction direction) {
+    public AbstractAgent(int id, int loadCap) {
         super(id);
-        this.loadCapacity = loadCapacity;
+        this.loadCapacity = loadCap;
         this.direction = direction;
+    }
+
+
+    // ===============================================================================================
+    //
+    // Getters & Setters
+    //
+
+    /**
+     * Returns the current direction this {@code Agent} is heading to.
+     *
+     * @return the {@code Direction} of this {@code Agent}.
+     */
+    public Direction getDirection() {
+        return direction;
+    }
+
+    /**
+     * Sets the direction of this {@code Agent}.
+     *
+     * @param dir the new {@code Direction} to set.
+     */
+    public void setDirection(Direction dir) {
+        direction = dir;
+    }
+
+    /**
+     * Returns the current pose of this {@code Agent}.
+     *
+     * @return the {@code Pose} of this {@code Agent}.
+     */
+    public Pose getPose() {
+        return new Pose(row, col, direction);
+    }
+
+    /**
+     * Sets the pose of this {@code Agent}.
+     *
+     * @param pose the new {@code Pose} to set.
+     */
+    public void setPose(Pose pose) {
+        row = pose.row;
+        col = pose.col;
+        direction = pose.dir;
+    }
+
+    /**
+     * Returns whether this {@code Agent} is currently deactivated or not.
+     *
+     * @return {@code true} if this {@code Agent} is currently deactivated; {@code false} otherwise.
+     */
+    public boolean isDeactivated() {
+        return deactivated;
+    }
+
+    /**
+     * Returns whether this {@code Agent} is currently blocked or not.
+     *
+     * @return {@code true} if this {@code Agent} is currently blocked; {@code false} otherwise.
+     */
+    public boolean isBlocked() {
+        return blocked;
+    }
+
+    /**
+     * Checks whether this {@code Agent} is currently loaded by a {@code Rack} or not.
+     *
+     * @return {@code true} if this {@code Agent} is loaded; {@code false} otherwise.
+     */
+    public boolean isLoaded() {
+        return loaded;
     }
 
     /**
@@ -109,24 +183,6 @@ abstract public class AbstractAgent extends HiveObject implements TaskAssignable
      */
     public int getChargePercentage() {
         return chargePercentage;
-    }
-
-    /**
-     * Returns the current direction this {@code Agent} is heading to.
-     *
-     * @return the direction of this {@code Agent}.
-     */
-    public Direction getDirection() {
-        return direction;
-    }
-
-    /**
-     * Checks whether this {@code Agent} is currently loaded by a {@code Rack} or not.
-     *
-     * @return {@code true} if this {@code Agent} is loaded; {@code false} otherwise.
-     */
-    public boolean isLoaded() {
-        return loaded;
     }
 
     /**
@@ -165,21 +221,10 @@ abstract public class AbstractAgent extends HiveObject implements TaskAssignable
         port = portNum;
     }
 
-    /**
-     * Checks whether this {@code Agent} already done an action this time step or not.
-     *
-     * @return {@code true} if already done an action; {@code false} otherwise.
-     */
-    public boolean isAlreadyMoved() {
-        return lastActionTime >= Warehouse.getInstance().getTime();
-    }
-
-    /**
-     * Sets the last time this {@code Agent} has performed an action.
-     */
-    public void updateLastActionTime() {
-        lastActionTime = Warehouse.getInstance().getTime();
-    }
+    // ===============================================================================================
+    //
+    // Task-Related Methods
+    //
 
     /**
      * Returns the priority of this {@code Agent}.
@@ -213,6 +258,67 @@ abstract public class AbstractAgent extends HiveObject implements TaskAssignable
     }
 
     /**
+     * Assigns a new {@code Task} to this {@code Agent}.
+     *
+     * @param task the new {@code Task} to assign.
+     */
+    @Override
+    public void assignTask(Task task) {
+        tasks.add(task);
+    }
+
+    /**
+     * The callback function to be invoked when the currently active {@code Task} is completed.
+     *
+     * @param task the completed {@code Task}.
+     */
+    @Override
+    public void onTaskComplete(Task task) {
+        tasks.remove();
+    }
+
+    // ===============================================================================================
+    //
+    // Control-Related Methods
+    //
+
+    /**
+     * Activates this {@code Agent}.
+     */
+    abstract public void activate();
+
+    /**
+     * Deactivates this {@code Agent}.
+     */
+    abstract public void deactivate();
+
+    /**
+     * Sudden blocks this {@code Agent} and all the affected agents
+     * from completing their last actions.
+     */
+    abstract public void block();
+
+    // ===============================================================================================
+    //
+    // Action-Related Methods
+    //
+
+    /**
+     * Plans the sequence of actions to reach the given target {@code Facility}.
+     * <p>
+     * This function should be called with new destination only when the previous
+     * plan has been reached.
+     *
+     * @param dst the target {@code Facility} to reach.
+     */
+    abstract public void plan(Facility dst);
+
+    /**
+     * Drops and cancels the current plan of this {@code Agent}.
+     */
+    abstract public void dropPlan();
+
+    /**
      * Executes the next required action as specified by the currently
      * active assigned {@code Task}.
      */
@@ -237,6 +343,11 @@ abstract public class AbstractAgent extends HiveObject implements TaskAssignable
     abstract public void move(AgentAction action);
 
     /**
+     * Retreats from the last action done and returns back to a normal state.
+     */
+    abstract public void retreat();
+
+    /**
      * Loads and lifts the given {@code Rack} above this {@code Agent}.
      *
      * @param rack the {@code Rack} to load.
@@ -249,6 +360,11 @@ abstract public class AbstractAgent extends HiveObject implements TaskAssignable
      * @param rack the {@code Rack} to offload.
      */
     abstract public void offloadRack(Rack rack);
+
+    // ===============================================================================================
+    //
+    // Helper Methods
+    //
 
     /**
      * Compares whether some other object is less than, equal to, or greater than this one.
