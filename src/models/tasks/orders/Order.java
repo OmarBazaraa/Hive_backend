@@ -121,6 +121,9 @@ abstract public class Order extends AbstractTask implements QuantityAddable<Item
 
     /**
      * Checks whether this {@code Order} still has some pending items or not.
+     * <p>
+     * An {@code Order} is considered pending if there exist some needed units
+     * not assigned to a {@code Task} yet.
      *
      * @return {@code true} if this {@code Order} is still pending; {@code false} otherwise.
      */

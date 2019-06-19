@@ -2,7 +2,7 @@ package algorithms.planner;
 
 import models.agents.Agent;
 import models.facilities.Facility;
-import models.maps.Cell;
+import models.maps.GridCell;
 
 import models.warehouses.Warehouse;
 import utils.Constants;
@@ -163,7 +163,7 @@ public class PlanNode implements Comparable<PlanNode> {
         }
 
         // Get this state cell
-        Cell cell = warehouse.get(row, col);
+        GridCell cell = warehouse.get(row, col);
 
         // Skip if obstacle or already visited cell
         if (cell.isObstacle() || isVisited()) {

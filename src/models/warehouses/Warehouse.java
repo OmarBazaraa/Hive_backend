@@ -84,6 +84,7 @@ public class Warehouse extends AbstractWarehouse {
      *
      * @param task the {@code Task} to add to the system.
      */
+    @Override
     public void addTask(Task task) {
         // Activate the task
         task.activate();
@@ -104,6 +105,7 @@ public class Warehouse extends AbstractWarehouse {
      *
      * @return {@code true} if a change has happen in the {@code Warehouse}; {@code false} otherwise.
      */
+    @Override
     public boolean run() {
         // Skip if warehouse is currently idle
         if (pendingOrders.isEmpty() && activeAgents.isEmpty()) {

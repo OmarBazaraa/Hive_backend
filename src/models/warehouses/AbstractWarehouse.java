@@ -1,13 +1,15 @@
 package models.warehouses;
 
+import algorithms.dispatcher.Dispatcher;
 import models.agents.Agent;
 import models.facilities.Gate;
 import models.facilities.Rack;
 import models.facilities.Station;
 import models.items.Item;
-import models.maps.Cell;
+import models.maps.GridCell;
 import models.maps.utils.Dimensions;
 import models.maps.utils.Position;
+import models.tasks.Task;
 import models.tasks.orders.Order;
 
 import utils.Constants.*;
@@ -46,7 +48,7 @@ abstract public class AbstractWarehouse {
     /**
      * The map grid of this {@code Warehouse}.
      */
-    protected Cell[][] grid;
+    protected GridCell[][] grid;
 
     /**
      * The map of all agents in this {@code Warehouse}, indexed by their id.
@@ -164,7 +166,7 @@ abstract public class AbstractWarehouse {
         this.clear();
         this.rows = rows;
         this.cols = cols;
-        this.grid = Cell.allocate2D(rows, cols);
+        this.grid = GridCell.allocate2D(rows, cols);
     }
 
     /**
@@ -207,25 +209,25 @@ abstract public class AbstractWarehouse {
     }
 
     /**
-     * Returns a {@code Cell} given its position in this {@code Warehouse}.
+     * Returns a {@code GridCell} given its position in this {@code Warehouse}.
      *
      * @param row the row position of the cell to return.
      * @param col the column position of the cell to return.
      *
-     * @return the {@code Cell} in the given position.
+     * @return the {@code GridCell} in the given position.
      */
-    public Cell get(int row, int col) {
+    public GridCell get(int row, int col) {
         return grid[row][col];
     }
 
     /**
-     * Returns a {@code Cell} given its position in this {@code Warehouse}.
+     * Returns a {@code GridCell} given its position in this {@code Warehouse}.
      *
      * @param pos the {@code Position} of the cell to return.
      *
-     * @return the {@code Cell} in the given position.
+     * @return the {@code GridCell} in the given position.
      */
-    public Cell get(Position pos) {
+    public GridCell get(Position pos) {
         return grid[pos.row][pos.col];
     }
 
@@ -377,33 +379,20 @@ abstract public class AbstractWarehouse {
         pendingOrders.add(order);
     }
 
+    /**
+     * Adds and activates a new {@code Task} to this {@code Warehouse} after being dispatched
+     * by {@link Dispatcher}.
+     * <p>
+     * This function should only be called from the {@link Dispatcher}.
+     *
+     * @param task the {@code Task} to add to the system.
+     */
+    abstract public void addTask(Task task);
+
     // ===============================================================================================
     //
     // Helper Methods
     //
-
-    /**
-     * Returns a string representation of this {@code Warehouse}.
-     * In general, the toString method returns a string that "textually represents" this object.
-     *
-     * @return a string representation of this {@code Warehouse}.
-     */
-    @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder();
-
-        builder.append("Warehouse ").append(getDimensions());
-        builder.append(" @time: ").append(time).append("\n");
-
-        for (int i = 0; i < rows; ++i) {
-            for (int j = 0; j < cols; ++j) {
-                builder.append(grid[i][j].toShape());
-            }
-            builder.append('\n');
-        }
-
-        return builder.toString();
-    }
 
     /**
      * Prints a visual representation of this {@code Warehouse} along with
@@ -451,5 +440,28 @@ abstract public class AbstractWarehouse {
 
         // Print to standard output
         System.out.println(builder);
+    }
+
+    /**
+     * Returns a string representation of this {@code Warehouse}.
+     * In general, the toString method returns a string that "textually represents" this object.
+     *
+     * @return a string representation of this {@code Warehouse}.
+     */
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+
+        builder.append("Warehouse ").append(getDimensions());
+        builder.append(" @time: ").append(time).append("\n");
+
+        for (int i = 0; i < rows; ++i) {
+            for (int j = 0; j < cols; ++j) {
+                builder.append(grid[i][j].toShape());
+            }
+            builder.append('\n');
+        }
+
+        return builder.toString();
     }
 }

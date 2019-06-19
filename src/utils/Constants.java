@@ -13,8 +13,8 @@ public class Constants {
 
     // Project details
     public static final String PROJ_NAME = "Hive System";
-    public static final String PROJ_VERSION = "0.0.1.0";
-    public static final String PROJ_VERSION_DATE = "8 March 2019";
+    public static final String PROJ_VERSION = "0.1.0.0";
+    public static final String PROJ_VERSION_DATE = "19 June 2019";
 
     //
     // Map Grid

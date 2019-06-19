@@ -15,34 +15,34 @@ import java.util.TreeMap;
 
 
 /**
- * This {@code Cell} class represents a cell of the grid of the {@link Warehouse}.
+ * This {@code GridCell} class represents a cell of the grid of the {@link Warehouse}.
  * <p>
  * A cell in the {@link Warehouse} grid may be empty, may hold an {@link Agent} and/or
  * {@link Facility}, or may be an obstacle cell.
  */
-public class Cell {
+public class GridCell {
 
     //
     // Member Variables
     //
 
     /**
-     * The type of this {@code Cell}.
+     * The type of this {@code GridCell}.
      */
     private CellType type = CellType.EMPTY;
 
     /**
-     * The {@code Facility} in this {@code Cell} if exists; {@code null} otherwise.
+     * The {@code Facility} in this {@code GridCell} if exists; {@code null} otherwise.
      */
     private Facility facility;
 
     /**
-     * The {@code Agent} in this {@code Cell} if exists; {@code null} otherwise.
+     * The {@code Agent} in this {@code GridCell} if exists; {@code null} otherwise.
      */
     private Agent agent;
 
     /**
-     * The timeline of the scheduled agents in this {@code Cell}.
+     * The timeline of the scheduled agents in this {@code GridCell}.
      */
     private TreeMap<Long, Agent> timeline = new TreeMap<>();
 
@@ -59,12 +59,12 @@ public class Cell {
      *
      * @return the allocated array.
      */
-    public static Cell[][] allocate2D(int n, int m) {
-        Cell[][] ret = new Cell[n][m];
+    public static GridCell[][] allocate2D(int n, int m) {
+        GridCell[][] ret = new GridCell[n][m];
 
         for (int i = 0; i < n; ++i) {
             for (int j = 0; j < m; ++j) {
-                ret[i][j] = new Cell();
+                ret[i][j] = new GridCell();
             }
         }
 
@@ -77,32 +77,32 @@ public class Cell {
     //
 
     /**
-     * Constructs a new empty {@code Cell}.
+     * Constructs a new empty {@code GridCell}.
      */
-    public Cell() {
+    public GridCell() {
 
     }
 
     /**
-     * Returns the type of this {@code Cell}.
+     * Returns the type of this {@code GridCell}.
      *
-     * @return the {@code CellType} of this {@code Cell}.
+     * @return the {@code CellType} of this {@code GridCell}.
      */
     public CellType getType() {
         return type;
     }
 
     /**
-     * Returns the existing {@code Facility} in this {@code Cell}.
+     * Returns the existing {@code Facility} in this {@code GridCell}.
      *
-     * @return the {@code Facility} in this {@code Cell} if exists; {@code null} otherwise.
+     * @return the {@code Facility} in this {@code GridCell} if exists; {@code null} otherwise.
      */
     public Facility getFacility() {
         return facility;
     }
 
     /**
-     * Checks whether this {@code Cell} has an existing {@code Facility} in it or not.
+     * Checks whether this {@code GridCell} has an existing {@code Facility} in it or not.
      *
      * @return {@code true} if this cell contains a {@code Facility}; {@code false} otherwise.
      */
@@ -111,7 +111,7 @@ public class Cell {
     }
 
     /**
-     * Sets the existing {@code Facility} in this {@code Cell}.
+     * Sets the existing {@code Facility} in this {@code GridCell}.
      * <p>
      * Note that the cell type and the facilities object type should be consistent in the following manner:
      * <ul>
@@ -132,16 +132,16 @@ public class Cell {
     }
 
     /**
-     * Returns the existing {@code Agent} in this {@code Cell}.
+     * Returns the existing {@code Agent} in this {@code GridCell}.
      *
-     * @return the {@code Agent} in this {@code Cell} if exists; {@code null} otherwise.
+     * @return the {@code Agent} in this {@code GridCell} if exists; {@code null} otherwise.
      */
     public Agent getAgent() {
         return agent;
     }
 
     /**
-     * Checks whether this {@code Cell} has an existing {@code Agent} in it or not.
+     * Checks whether this {@code GridCell} has an existing {@code Agent} in it or not.
      *
      * @return {@code true} if this cell contains an {@code Agent}; {@code false} otherwise.
      */
@@ -150,7 +150,7 @@ public class Cell {
     }
 
     /**
-     * Sets the existing {@code Agent} in this {@code Cell}.
+     * Sets the existing {@code Agent} in this {@code GridCell}.
      *
      * @param agent the {@code Agent} to set.
      */
@@ -159,7 +159,7 @@ public class Cell {
     }
 
     /**
-     * Checks whether this {@code Cell} is statically empty or not.
+     * Checks whether this {@code GridCell} is statically empty or not.
      * <p>
      * A cell is considered statically empty if it is empty or it is currently
      * occupied by an {@code Agent}.
@@ -171,7 +171,7 @@ public class Cell {
     }
 
     /**
-     * Checks whether this {@code Cell} is an obstacle or not.
+     * Checks whether this {@code GridCell} is an obstacle or not.
      *
      * @return {@code true} if this cell is an obstacle; {@code false} otherwise.
      */
@@ -180,7 +180,7 @@ public class Cell {
     }
 
     /**
-     * Checks whether this {@code Cell} is accessible or not.
+     * Checks whether this {@code GridCell} is accessible or not.
      * <p>
      * A cell is considered accessible if it is empty, currently occupied by an {@code Agent},
      * or its type matches one of the given types.
@@ -209,7 +209,7 @@ public class Cell {
     //
 
     /**
-     * Returns the {@code Agent} scheduled to pass though this {@code Cell} at the given time.
+     * Returns the {@code Agent} scheduled to pass though this {@code GridCell} at the given time.
      *
      * @param time the time to get at.
      *
@@ -220,7 +220,7 @@ public class Cell {
     }
 
     /**
-     * Checks whether this {@code Cell} is occupied by an {@code Agent} at the given time or not.
+     * Checks whether this {@code GridCell} is occupied by an {@code Agent} at the given time or not.
      *
      * @param time the time to check at.
      *
@@ -231,7 +231,7 @@ public class Cell {
     }
 
     /**
-     * Schedules an {@code Agent} to pass though this {@code Cell} at the given time.
+     * Schedules an {@code Agent} to pass though this {@code GridCell} at the given time.
      *
      * @param time  the time to set at.
      * @param agent the passing {@code Agent}.
@@ -241,7 +241,7 @@ public class Cell {
     }
 
     /**
-     * Clears the timeline schedule of this {@code Cell} at the given time.
+     * Clears the timeline schedule of this {@code GridCell} at the given time.
      *
      * @param time the time to clear at.
      */
@@ -255,7 +255,7 @@ public class Cell {
     //
 
     /**
-     * Converts this {@code Cell} to a character symbol representing its shape.
+     * Converts this {@code GridCell} to a character symbol representing its shape.
      *
      * @return a character representing the shape of this cell.
      */

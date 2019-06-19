@@ -118,6 +118,17 @@ public class Task extends AbstractTask {
     }
 
     /**
+     * Returns the number of assigned orders to this {@code Task} that are still running.
+     * That is, the number of added orders that has not been partially completed
+     * by this {@code Task}.
+     *
+     * @return the number of running orders.
+     */
+    public int getRunningOrdersCount() {
+        return orders.size() + (activeOrder != null ? 1 : 0);
+    }
+
+    /**
      * Adds a new {@code Order} to be partially fulfilled by this {@code Task}.
      * <p>
      * The newly added {@code Order} will start being partially fulfilled by
