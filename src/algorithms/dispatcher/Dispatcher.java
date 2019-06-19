@@ -10,7 +10,7 @@ import models.warehouses.Warehouse;
 
 import java.util.*;
 
-import static algorithms.dispatcher.task_allocator.RackSelector.*;
+import static algorithms.dispatcher.task_allocator_helpers.RackSelectorHelper.*;
 
 
 /**
@@ -21,7 +21,7 @@ public class Dispatcher {
     /**
      * Threshold on applying rack selector stage two (removing redundant racks).
      */
-    private static int stageTwoRacksThreshold = 100;
+    private static final int stageTwoRacksThreshold = 100;
 
     /**
      * Count the number of the dismisses of orders which acts as a threshold for order deletion.
@@ -80,7 +80,9 @@ public class Dispatcher {
      * approach found in this paper "Optimal Selection Of Movable Shelves Under
      * Cargo-to-person Picking Mode".
      *
-     * @param order {@code Order}       The order for which we select the most suitable racks.
+     * @param order       The order for which we select the most suitable racks.
+     * @param readyAgents Set A list of ready (idle) agents
+     *
      * @return list of the most suitable {@code Rack}s for fulfilling the order.
      */
     protected static List<Rack> selectRacks(Order order, Set<Agent> readyAgents) {
@@ -92,24 +94,6 @@ public class Dispatcher {
         // Get all candidate racks and their round trip costs
         Map<Rack, Integer> candidateRacks = getCandidateRacks(order.iterator(), order.getDeliveryGate().getPosition());
 
-        // Create necessary maps
-        Set<Agent> idleAgents = new HashSet<>();
-        Map<Rack, Agent> ret = new HashMap<>(); // TODO @Samir improve
-        Map<Rack, Integer> selectedRacks = new HashMap<>();
-        Map<Item, Integer> selectedRacksItemsQs = new HashMap<>();
-
-        // Initialize the idle agents map
-        if (readyAgents != null) {
-            idleAgents.addAll(readyAgents);
-        }
-
-        int estimatedCost = 0;
-        int orderTotalQs = order.getPendingUnits();
-
-        //
-        // Stage 1: Find an initial solution
-        //
-
         // Calculate the maximum needed quantity of order items that can be taken out of each candidate rack
         // and the maximum provided quantity of order items at each candidate rack
         Map<Rack, Map<Item, Integer>> maxTakenItemsQs = new HashMap<>();
@@ -119,7 +103,23 @@ public class Dispatcher {
             totalItemsQs.put(r, rackMaxOrderItemsSupply(r, order.iterator()));
         }
 
-        // TODO Add if looped twice without adding anything return empty list
+        // Create necessary maps
+        Set<Agent> idleAgents = new HashSet<>();
+
+        if (readyAgents != null) {
+            idleAgents.addAll(readyAgents);
+        }
+
+        // Selected racks with their round trip cost
+        Map<Rack, Integer> selectedRacks = new HashMap<>();
+        // Total quantities of all items in all selected racks
+        Map<Item, Integer> selectedRacksItemsQs = new HashMap<>();
+
+        int orderTotalQs = order.getPendingUnits();
+
+        //
+        // Stage 1: Find an initial solution
+        //
         while (orderTotalQs > 0 && candidateRacks.size() > 0) {
             Rack bestRack = null;
             double bestRank = 1e9;
@@ -164,11 +164,9 @@ public class Dispatcher {
                     // So, remove it only from the candidate racks.
                     continue;
                 }
-                ret.put(bestRack, agent);
                 idleAgents.remove(agent);
             }
 
-            estimatedCost += bestRackCost;
             selectedRacks.put(bestRack, bestRackCost);
 
             // Update the left quantities of the orders items and the total selected racks quantities
@@ -190,11 +188,6 @@ public class Dispatcher {
             removeRedundantRack(selectedRacks, candidateRacks, selectedRacksItemsQs, order, true);
         }
 
-        estimatedCost = 0;
-        for (Rack rack : selectedRacks.keySet()) {
-            estimatedCost += selectedRacks.get(rack);
-        }
-
         return new ArrayList<>(selectedRacks.keySet());
     }
 
@@ -204,6 +197,7 @@ public class Dispatcher {
      * @param readyAgents the set of all idle agents.
      * @param order       the {@code Order} to select an {@code Agent} for.
      * @param rack        the {@code Rack} to.
+     *
      * @return a suitable {@code Agent}.
      */
     private static Agent selectAgent(Set<Agent> readyAgents, Order order, Rack rack) {

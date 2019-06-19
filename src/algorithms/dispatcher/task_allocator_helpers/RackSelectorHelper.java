@@ -1,4 +1,4 @@
-package algorithms.dispatcher.task_allocator;
+package algorithms.dispatcher.task_allocator_helpers;
 
 import models.facilities.Rack;
 import models.items.Item;
@@ -8,7 +8,7 @@ import models.tasks.orders.Order;
 import java.util.*;
 
 
-public class RackSelector {
+public class RackSelectorHelper {
     /**
      * Apply Exchange step to the current accepted racks with the ignored and candidate racks
      * for better refinements if possible.

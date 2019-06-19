@@ -1,6 +1,6 @@
 package algorithms.dispatcher;
 
-import algorithms.dispatcher.task_allocator.AgentAssigner;
+import algorithms.dispatcher.task_allocator_helpers.AgentAssigner;
 import models.HiveObject;
 import models.agents.Agent;
 import models.facilities.Rack;

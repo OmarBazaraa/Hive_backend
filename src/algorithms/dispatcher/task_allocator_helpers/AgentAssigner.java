@@ -1,4 +1,4 @@
-package algorithms.dispatcher.task_allocator;
+package algorithms.dispatcher.task_allocator_helpers;
 
 import models.HiveObject;
 import models.agents.Agent;
