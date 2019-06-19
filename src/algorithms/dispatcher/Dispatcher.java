@@ -7,9 +7,10 @@ import models.tasks.orders.Order;
 import models.tasks.Task;
 import models.tasks.orders.RefillOrder;
 import models.warehouses.Warehouse;
-import algorithms.dispatcher.task_allocator.RackSelector;
 
 import java.util.*;
+
+import static algorithms.dispatcher.task_allocator.RackSelector.*;
 
 
 /**
@@ -17,7 +18,15 @@ import java.util.*;
  */
 public class Dispatcher {
 
+    /**
+     * Threshold on applying rack selector stage two (removing redundant racks).
+     */
     private static int stageTwoRacksThreshold = 100;
+
+    /**
+     * Count the number of the dismisses of orders which acts as a threshold for order deletion.
+     */
+    private static Map<Order, Integer> orderDismissCount = new HashMap<>();
 
     /**
      * Dispatches the given {@code Order} into a set of specific tasks assigned
@@ -36,6 +45,7 @@ public class Dispatcher {
 
             // Return if no rack is found
             if (selectedRacks.size() == 0) {
+                orderDismissCount.put(order, orderDismissCount.getOrDefault(order, 0) + 1);
                 return;
             }
 
@@ -80,18 +90,18 @@ public class Dispatcher {
         }
 
         // Get all candidate racks and their round trip costs
-        Map<Rack, Integer> candidateRacks = RackSelector.getCandidateRacks(order.iterator(), order.getDeliveryGate().getPosition());
+        Map<Rack, Integer> candidateRacks = getCandidateRacks(order.iterator(), order.getDeliveryGate().getPosition());
 
         // Create necessary maps
         Set<Agent> idleAgents = new HashSet<>();
+        Map<Rack, Agent> ret = new HashMap<>(); // TODO @Samir improve
+        Map<Rack, Integer> selectedRacks = new HashMap<>();
+        Map<Item, Integer> selectedRacksItemsQs = new HashMap<>();
 
+        // Initialize the idle agents map
         if (readyAgents != null) {
             idleAgents.addAll(readyAgents);
         }
-
-        Map<Rack, Agent> ret = new HashMap<>();
-        Map<Rack, Integer> selectedRacks = new HashMap<>();
-        Map<Item, Integer> selectedRacksItemsQs = new HashMap<>();
 
         int estimatedCost = 0;
         int orderTotalQs = order.getPendingUnits();
@@ -99,6 +109,15 @@ public class Dispatcher {
         //
         // Stage 1: Find an initial solution
         //
+
+        // Calculate the maximum needed quantity of order items that can be taken out of each candidate rack
+        // and the maximum provided quantity of order items at each candidate rack
+        Map<Rack, Map<Item, Integer>> maxTakenItemsQs = new HashMap<>();
+        Map<Rack, Map<Item, Integer>> totalItemsQs = new HashMap<>();
+        for (var r : candidateRacks.keySet()) {
+            maxTakenItemsQs.put(r, rackOrderItemsSupply(r, order.iterator()));
+            totalItemsQs.put(r, rackMaxOrderItemsSupply(r, order.iterator()));
+        }
 
         // TODO Add if looped twice without adding anything return empty list
         while (orderTotalQs > 0 && candidateRacks.size() > 0) {
@@ -110,12 +129,13 @@ public class Dispatcher {
                 Rack rack = rackEntry.getKey();
 
                 // Calculate the maximum needed quantity of order items that can be taken out of each candidate rack
-                Map<Item, Integer> rackItemsQs = RackSelector.rackOrderItemsSupply(rack, order.iterator());
+                Map<Item, Integer> rackItemsQs = maxTakenItemsQs.get(rack);
 
                 int rackTotalItemSupply = rackItemsQs.values().stream().reduce(0, Integer::sum);
 
-                // Ignore rack, doesn't offer new items to the current accepted racks set
-                if (rackTotalItemSupply == 0) {
+                // Ignore rack, doesn't offer new items to the current accepted racks set or it is physically impossible
+                // to reach.
+                if (rackTotalItemSupply == 0 || candidateRacks.get(rack) == Integer.MAX_VALUE) {
                     candidateRacks.remove(rack);
                     continue;
                 }
@@ -126,11 +146,13 @@ public class Dispatcher {
                 if (Double.compare(rackCostRate, bestRank) < 0) {
                     bestRack = rack;
                     bestRank = rackCostRate;
-                    bestRackItemsQs = rackItemsQs;
+                    bestRackItemsQs = totalItemsQs.get(bestRack);
                 }
             }
 
-            assert bestRack != null;
+            if (bestRack == null) {
+                continue;
+            }
 
             // Accept the best rack and Remove from the candidate racks list if it can be assigned to an agent
             int bestRackCost = candidateRacks.get(bestRack);
@@ -165,7 +187,7 @@ public class Dispatcher {
         // Stage 2. Delete Redundant racks from the final set, Do this if the racks count is less than some threshold
         //
         if (selectedRacks.size() < stageTwoRacksThreshold) {
-            RackSelector.removeRedundantRack(selectedRacks, candidateRacks, selectedRacksItemsQs, order, true);
+            removeRedundantRack(selectedRacks, candidateRacks, selectedRacksItemsQs, order, true);
         }
 
         estimatedCost = 0;
@@ -182,7 +204,6 @@ public class Dispatcher {
      * @param readyAgents the set of all idle agents.
      * @param order       the {@code Order} to select an {@code Agent} for.
      * @param rack        the {@code Rack} to.
-     *
      * @return a suitable {@code Agent}.
      */
     private static Agent selectAgent(Set<Agent> readyAgents, Order order, Rack rack) {

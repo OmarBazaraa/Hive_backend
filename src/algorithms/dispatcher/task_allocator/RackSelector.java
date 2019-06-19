@@ -1,14 +1,9 @@
 package algorithms.dispatcher.task_allocator;
 
-import algorithms.dispatcher.Dispatcher;
 import models.facilities.Rack;
 import models.items.Item;
 import models.maps.utils.Position;
 import models.tasks.orders.Order;
-import models.tasks.orders.RefillOrder;
-import models.warehouses.Warehouse;
-import utils.Constants.*;
-import utils.Pair;
 
 import java.util.*;
 
@@ -116,6 +111,24 @@ public class RackSelector {
         while (orderItems.hasNext()) {
             var itemEntry = orderItems.next();
             ret.put(itemEntry.getKey(), Math.min(itemEntry.getValue(), rack.get(itemEntry.getKey())));
+        }
+
+        return ret;
+    }
+
+    /**
+     * Get the maximum provided quantities of order items that can be taken out of each candidate rack.
+     *
+     * @param rack       @{code Rack} rack in question.
+     * @param orderItems Iterator to the list of the orders @{code Item}s.
+     * @return int[] the maximum provided quantities of order items that can be taken out of each candidate rack.
+     */
+    public static Map<Item, Integer> rackMaxOrderItemsSupply(Rack rack, Iterator<Map.Entry<Item, Integer>> orderItems) {
+        Map<Item, Integer> ret = new HashMap<>();
+
+        while (orderItems.hasNext()) {
+            var itemEntry = orderItems.next();
+            ret.put(itemEntry.getKey(), rack.get(itemEntry.getKey()));
         }
 
         return ret;

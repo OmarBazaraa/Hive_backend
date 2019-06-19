@@ -29,7 +29,7 @@ public class RackSelectorTest extends Dispatcher {
     }
 
     @Test
-    public void RackSelectorTestOne() throws Exception {
+    public void RackSelectorTest1() throws Exception {
         WarehouseHelper.configureWarehouse("data/dispatcher_test/0A_6R_1G.hive");
 
         Warehouse warehouse = Warehouse.getInstance();
@@ -48,7 +48,8 @@ public class RackSelectorTest extends Dispatcher {
     }
 
     @Test
-    public void RackSelectorTestTwo() throws Exception {
+    public void RackSelectorTest2() throws Exception {
+        // Adding new tasks to the currently allocated racks
         WarehouseHelper.configureWarehouse("data/dispatcher_test/3A_3R_2G.hive");
         Warehouse warehouse = Warehouse.getInstance();
 
@@ -85,7 +86,7 @@ public class RackSelectorTest extends Dispatcher {
     }
 
     @Test
-    public void RackSelectorTestThree() throws Exception {
+    public void RackSelectorTest3() throws Exception {
         // Unfulfilled order yet due to lack of racks
         WarehouseHelper.configureWarehouse("data/dispatcher_test/2A_3R_2G.hive");
         Warehouse warehouse = Warehouse.getInstance();
@@ -114,7 +115,7 @@ public class RackSelectorTest extends Dispatcher {
     }
 
     @Test
-    public void RackSelectorTestFour() throws Exception {
+    public void RackSelectorTest4() throws Exception {
         // Notice It's a different map from the previous test
         // Unfulfilled order yet due to no agents carrying racks of needed items even if there
         // is a single unallocated rack having this item.
@@ -152,5 +153,64 @@ public class RackSelectorTest extends Dispatcher {
         assertEquals(warehouse.getOrderById(2).getPendingUnits(), 5);
 
         // TODO @Samir be able to change the load capacity to test order fulfilling.
+    }
+
+    @Test
+    public void RackSelectorTest5() throws Exception {
+        // Only subset of an order is satisfied due to obstacles in the warehouse map.
+        WarehouseHelper.configureWarehouse("data/dispatcher_test/4A_4R_2G.hive");
+        Warehouse warehouse = Warehouse.getInstance();
+
+        Gate gate1 = warehouse.getGateById(1);
+        Gate gate2 = warehouse.getGateById(2);
+
+        Item item1 = warehouse.getItemById(1);
+        Item item2 = warehouse.getItemById(2);
+        Item item3 = warehouse.getItemById(3);
+
+        Order order1 = new CollectOrder(1, gate1);
+        order1.add(item1, 10);
+        warehouse.addOrder(order1);
+
+        warehouse.run();
+
+        assertEquals(warehouse.getRackById(1).getAllocatingAgent().getId(), 1);
+
+        // Test physically impossible to fulfill this order.
+        Order order2 = new CollectOrder(2, gate1);
+        order2.add(item3, 10);
+        warehouse.addOrder(order2);
+
+        warehouse.run();
+
+        // TODO @Samir remove order if it is dismissed many times.
+        assertTrue(warehouse.getOrderById(2).isPending());
+        assertFalse(warehouse.getRackById(3).isAllocated());
+    }
+
+
+    @Test
+    public void RackSelectorTest6() throws Exception {
+        // Only subset of an order is satisfied due to obstacles in the warehouse map.
+        WarehouseHelper.configureWarehouse("data/dispatcher_test/4A_4R_2G.hive");
+        Warehouse warehouse = Warehouse.getInstance();
+
+        Gate gate1 = warehouse.getGateById(1);
+        Gate gate2 = warehouse.getGateById(2);
+
+        Item item1 = warehouse.getItemById(1);
+        Item item2 = warehouse.getItemById(2);
+        Item item3 = warehouse.getItemById(3);
+
+        Order order1 = new CollectOrder(1, gate1);
+        order1.add(item1, 11);
+        order1.add(item2, 11);
+        warehouse.addOrder(order1);
+
+        warehouse.run();
+
+        assertEquals(warehouse.getRackById(1).getAllocatingAgent().getId(), 1);
+        assertNull(warehouse.getRackById(2).getAllocatingAgent());
+        assertEquals(warehouse.getRackById(4).getAllocatingAgent().getId(), 2);
     }
 }
