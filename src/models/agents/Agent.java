@@ -6,6 +6,7 @@ import models.facilities.Facility;
 import models.facilities.Rack;
 import models.maps.GridCell;
 import models.maps.utils.Pose;
+import models.maps.utils.Position;
 import models.tasks.Task;
 import models.warehouses.Warehouse;
 
@@ -281,19 +282,78 @@ public class Agent extends AbstractAgent {
         }
 
         updateLastAction(action);
-        Server.getInstance().enqueueAgentAction(this, action);
     }
 
     /**
      * Retreats from the last action done and returns back to a normal state.
+     *
+     * @return {@code true} if retreated successfully; {@code false} otherwise.
      */
-    public void retreat() {
-        blocked = false;
-        direction = Utility.getReverseDir(direction);
-        // TODO
+    public boolean retreat() {
+        // Cannot retreat if the agent is deactivate
+        // Wait until it is activated again
+        if (deactivated) {
+            return false;
+        }
 
-        updateLastAction(AgentAction.RETREAT);
-        Server.getInstance().enqueueAgentAction(this, AgentAction.RETREAT);
+        //
+        // Handle different last actions
+        //
+
+        // Actions that does not change the pose of the agent
+        if (lastAction == AgentAction.NOTHING || lastAction == AgentAction.LOAD || lastAction == AgentAction.OFFLOAD) {
+            blocked = true;
+            updateLastAction(lastAction);
+            return true;
+        }
+
+        // Retreat action
+        if (lastAction == AgentAction.RETREAT) {
+            direction = Utility.getReverseDir(direction);
+            blocked = true;
+            updateLastAction(lastAction);
+            return true;
+        }
+
+        // Rotation action
+        if (lastAction == AgentAction.ROTATE_RIGHT || lastAction == AgentAction.ROTATE_LEFT) {
+            direction = Utility.nextDir(direction, lastAction);
+            blocked = true;
+            updateLastAction(lastAction);
+            return true;
+        }
+
+        // Move action
+        if (lastAction == AgentAction.MOVE) {
+            // Get the current and the next cells
+            Warehouse warehouse = Warehouse.getInstance();
+            Position nxt = Utility.nextPos(row, col, direction);
+            GridCell curCell = warehouse.get(row, col);
+            GridCell nxtCell = warehouse.get(nxt);
+
+            // Check if there are other agents that was going to the previous position of this agent
+            Agent a = nxtCell.getAgent();
+
+            // Recursive block affected agents
+            if (a != null) {
+                a.retreat();
+            }
+
+            if (!nxtCell.hasAgent()) {
+                curCell.setAgent(null);
+                nxtCell.setAgent(this);
+                setPosition(nxt);
+            }
+
+            if (!curCell.isBlocked()) {
+                direction = Utility.getReverseDir(direction);
+                blocked = true;
+                updateLastAction(lastAction);
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -305,7 +365,6 @@ public class Agent extends AbstractAgent {
     public void loadRack(Rack rack) {
         loaded = true;
         updateLastAction(AgentAction.LOAD);
-        Server.getInstance().enqueueAgentAction(this, AgentAction.LOAD);
     }
 
     /**
@@ -317,7 +376,6 @@ public class Agent extends AbstractAgent {
     public void offloadRack(Rack rack) {
         loaded = false;
         updateLastAction(AgentAction.OFFLOAD);
-        Server.getInstance().enqueueAgentAction(this, AgentAction.OFFLOAD);
     }
 
     // ===============================================================================================
@@ -344,5 +402,6 @@ public class Agent extends AbstractAgent {
     public void updateLastAction(AgentAction action) {
         lastAction = action;
         lastActionTime = Warehouse.getInstance().getTime();
+        Server.getInstance().enqueueAgentAction(this, action);
     }
 }
