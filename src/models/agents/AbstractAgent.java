@@ -11,6 +11,7 @@ import models.tasks.TaskAssignable;
 import utils.Constants;
 import utils.Constants.*;
 
+import java.net.InetAddress;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -68,6 +69,11 @@ abstract public class AbstractAgent extends HiveObject implements TaskAssignable
     protected int port;
 
     /**
+     * The listener object to this {@code Agent} events.
+     */
+    protected AgentListener listener;
+
+    /**
      * The queue of assigned tasks for this {@code Agent}.
      */
     protected Queue<Task> tasks = new LinkedList<>();
@@ -95,7 +101,6 @@ abstract public class AbstractAgent extends HiveObject implements TaskAssignable
         this.loadCapacity = loadCap;
         this.direction = direction;
     }
-
 
     // ===============================================================================================
     //
@@ -219,6 +224,20 @@ abstract public class AbstractAgent extends HiveObject implements TaskAssignable
      */
     public void setPortNumber(int portNum) {
         port = portNum;
+    }
+
+    // ===============================================================================================
+    //
+    // Listener-Related Methods
+    //
+
+    /**
+     * Registers a callback functions to be invoked when this {@code Agent} produces any events.
+     *
+     * @param l the callback to run; {@code null} to unregister any listeners.
+     */
+    public void setListener(AgentListener l) {
+        listener = l;
     }
 
     // ===============================================================================================

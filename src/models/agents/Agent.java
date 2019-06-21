@@ -97,6 +97,11 @@ public class Agent extends AbstractAgent {
             return;
         }
 
+        // Inform listener
+        if (listener != null) {
+            listener.onAgentActivated(this);
+        }
+
         // Inform the frontend
         FrontendCommunicator.getInstance().enqueueActivatedAgent(this);
 
@@ -117,6 +122,11 @@ public class Agent extends AbstractAgent {
         // Return if already deactivated
         if (deactivated) {
             return;
+        }
+
+        // Inform listener
+        if (listener != null) {
+            listener.onAgentDeactivated(this);
         }
 
         // Inform the frontend
@@ -143,6 +153,11 @@ public class Agent extends AbstractAgent {
         // Return if already block to avoid infinite recursion
         if (blocked) {
             return;
+        }
+
+        // Inform listener
+        if (listener != null) {
+            listener.onAgentBlocked(this);
         }
 
         // Inform the frontend
@@ -402,6 +417,13 @@ public class Agent extends AbstractAgent {
     public void updateLastAction(AgentAction action) {
         lastAction = action;
         lastActionTime = Warehouse.getInstance().getTime();
-        Server.getInstance().enqueueAgentAction(this, action);
+
+        // Inform listener
+        if (listener != null) {
+            listener.onAgentActionExecuted(this, action);
+        }
+
+        // Inform the frontend
+        FrontendCommunicator.getInstance().enqueueAgentAction(this, action);
     }
 }
