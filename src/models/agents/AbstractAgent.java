@@ -44,6 +44,11 @@ abstract public class AbstractAgent extends HiveObject implements TaskAssignable
     protected boolean blocked = false;
 
     /**
+     * The flag indicating whether this {@code Agent} is currently locked by a {@code Facility}.
+     */
+    protected boolean locked = true;
+
+    /**
      * The flag indicating whether this {@code Agent} is currently loaded by a {@code Rack}.
      */
     protected boolean loaded = false;
@@ -317,6 +322,13 @@ abstract public class AbstractAgent extends HiveObject implements TaskAssignable
      */
     abstract public void block();
 
+    /**
+     * Retreats from the last action done and returns back to a normal state.
+     *
+     * @return {@code true} if retreated successfully; {@code false} otherwise.
+     */
+    abstract public boolean retreat();
+
     // ===============================================================================================
     //
     // Action-Related Methods
@@ -362,13 +374,6 @@ abstract public class AbstractAgent extends HiveObject implements TaskAssignable
     abstract public void move(AgentAction action);
 
     /**
-     * Retreats from the last action done and returns back to a normal state.
-     *
-     * @return {@code true} if retreated successfully; {@code false} otherwise.
-     */
-    abstract public boolean retreat();
-
-    /**
      * Loads and lifts the given {@code Rack} above this {@code Agent}.
      *
      * @param rack the {@code Rack} to load.
@@ -381,6 +386,20 @@ abstract public class AbstractAgent extends HiveObject implements TaskAssignable
      * @param rack the {@code Rack} to offload.
      */
     abstract public void offloadRack(Rack rack);
+
+    /**
+     * Locks this {@code Agent} for the favor of the given {@code Facility}.
+     *
+     * @param facility the locking {@code Facility}.
+     */
+    abstract public void lock(Facility facility);
+
+    /**
+     * Unlocks the lock that the given {@code Facility} has locked this {@code Agent} by.
+     *
+     * @param facility the unlocking {@code Facility}.
+     */
+    abstract public void unlock(Facility facility);
 
     // ===============================================================================================
     //

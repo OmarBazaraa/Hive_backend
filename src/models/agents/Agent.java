@@ -215,6 +215,79 @@ public class Agent extends AbstractAgent {
         }
     }
 
+    /**
+     * Retreats from the last action done and returns back to a normal state.
+     *
+     * @return {@code true} if retreated successfully; {@code false} otherwise.
+     */
+    @Override
+    public boolean retreat() {
+        // Cannot retreat if the agent is deactivate
+        // Wait until it is activated again
+        if (deactivated) {
+            return false;
+        }
+
+        //
+        // Handle different last actions
+        //
+
+        // Actions that does not change the pose of the agent
+        if (lastAction == AgentAction.NOTHING || lastAction == AgentAction.LOAD || lastAction == AgentAction.OFFLOAD) {
+            blocked = true;
+            updateLastAction(lastAction);
+            return true;
+        }
+
+        // Retreat action
+        if (lastAction == AgentAction.RETREAT) {
+            direction = Utility.getReverseDir(direction);
+            blocked = true;
+            updateLastAction(lastAction);
+            return true;
+        }
+
+        // Rotation action
+        if (lastAction == AgentAction.ROTATE_RIGHT || lastAction == AgentAction.ROTATE_LEFT) {
+            direction = Utility.nextDir(direction, lastAction);
+            blocked = true;
+            updateLastAction(lastAction);
+            return true;
+        }
+
+        // Move action
+        if (lastAction == AgentAction.MOVE) {
+            // Get the current and the next cells
+            Warehouse warehouse = Warehouse.getInstance();
+            Position nxt = Utility.nextPos(row, col, direction);
+            GridCell curCell = warehouse.get(row, col);
+            GridCell nxtCell = warehouse.get(nxt);
+
+            // Check if there are other agents that was going to the previous position of this agent
+            Agent a = nxtCell.getAgent();
+
+            // Recursive block affected agents
+            if (a != null) {
+                a.retreat();
+            }
+
+            if (!nxtCell.hasAgent()) {
+                curCell.setAgent(null);
+                nxtCell.setAgent(this);
+                setPosition(nxt);
+            }
+
+            if (!curCell.isBlocked()) {
+                direction = Utility.getReverseDir(direction);
+                blocked = true;
+                updateLastAction(lastAction);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     // ===============================================================================================
     //
     // Action-Related Methods
@@ -300,78 +373,6 @@ public class Agent extends AbstractAgent {
     }
 
     /**
-     * Retreats from the last action done and returns back to a normal state.
-     *
-     * @return {@code true} if retreated successfully; {@code false} otherwise.
-     */
-    public boolean retreat() {
-        // Cannot retreat if the agent is deactivate
-        // Wait until it is activated again
-        if (deactivated) {
-            return false;
-        }
-
-        //
-        // Handle different last actions
-        //
-
-        // Actions that does not change the pose of the agent
-        if (lastAction == AgentAction.NOTHING || lastAction == AgentAction.LOAD || lastAction == AgentAction.OFFLOAD) {
-            blocked = true;
-            updateLastAction(lastAction);
-            return true;
-        }
-
-        // Retreat action
-        if (lastAction == AgentAction.RETREAT) {
-            direction = Utility.getReverseDir(direction);
-            blocked = true;
-            updateLastAction(lastAction);
-            return true;
-        }
-
-        // Rotation action
-        if (lastAction == AgentAction.ROTATE_RIGHT || lastAction == AgentAction.ROTATE_LEFT) {
-            direction = Utility.nextDir(direction, lastAction);
-            blocked = true;
-            updateLastAction(lastAction);
-            return true;
-        }
-
-        // Move action
-        if (lastAction == AgentAction.MOVE) {
-            // Get the current and the next cells
-            Warehouse warehouse = Warehouse.getInstance();
-            Position nxt = Utility.nextPos(row, col, direction);
-            GridCell curCell = warehouse.get(row, col);
-            GridCell nxtCell = warehouse.get(nxt);
-
-            // Check if there are other agents that was going to the previous position of this agent
-            Agent a = nxtCell.getAgent();
-
-            // Recursive block affected agents
-            if (a != null) {
-                a.retreat();
-            }
-
-            if (!nxtCell.hasAgent()) {
-                curCell.setAgent(null);
-                nxtCell.setAgent(this);
-                setPosition(nxt);
-            }
-
-            if (!curCell.isBlocked()) {
-                direction = Utility.getReverseDir(direction);
-                blocked = true;
-                updateLastAction(lastAction);
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
      * Loads and lifts the given {@code Rack} above this {@code Agent}.
      *
      * @param rack the {@code Rack} to load.
@@ -391,6 +392,28 @@ public class Agent extends AbstractAgent {
     public void offloadRack(Rack rack) {
         loaded = false;
         updateLastAction(AgentAction.OFFLOAD);
+    }
+
+    /**
+     * Locks this {@code Agent} for the favor of the given {@code Facility}.
+     *
+     * @param facility the locking {@code Facility}.
+     */
+    @Override
+    public void lock(Facility facility) {
+        locked = true;
+        updateLastAction(AgentAction.BIND);
+    }
+
+    /**
+     * Unlocks the lock that the given {@code Facility} has locked this {@code Agent} by.
+     *
+     * @param facility the unlocking {@code Facility}.
+     */
+    @Override
+    public void unlock(Facility facility) {
+        locked = false;
+        updateLastAction(AgentAction.BIND);
     }
 
     // ===============================================================================================
