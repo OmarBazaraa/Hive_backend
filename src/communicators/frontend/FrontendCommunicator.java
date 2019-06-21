@@ -1,43 +1,48 @@
-package server;
+package communicators.frontend;
+
+import communicators.CommConstants;
+import communicators.CommConstants.ServerStates;
+import communicators.exceptions.DataException;
+import communicators.frontend.utils.Decoder;
+import communicators.frontend.utils.Encoder;
 
 import models.agents.Agent;
 import models.items.Item;
-import models.tasks.orders.Order;
 import models.tasks.Task;
+import models.tasks.orders.Order;
 import models.warehouses.Warehouse;
 
-import server.exceptions.DataException;
-import server.utils.ServerConstants;
-import server.utils.ServerConstants.*;
-import server.utils.ServerDecoder;
-import server.utils.ServerEncoder;
-
 import utils.Constants.*;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.json.JSONException;
 
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.*;
 
-import spark.Spark;
+import spark.Service;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.Map;
 
 
 /**
- * This {@code Server} class is the connection between our Hive Warehouse System's
+ * This {@code FrontendCommunicator} class is the connection between our Hive Warehouse System's
  * backend and frontend.
  * <p>
  * It contains useful functions for sending and receiving information between the backend and the frontend.
  */
-public class Server {
+public class FrontendCommunicator {
 
     //
     // Member Variables
     //
+
+    /**
+     * The spark web socket server
+     */
+    private Service server;
 
     /**
      * The {@code Session} with the frontend.
@@ -50,7 +55,7 @@ public class Server {
     private Warehouse warehouse = Warehouse.getInstance();
 
     /**
-     * The current state of the server.
+     * The current state of the communicator.
      */
     private ServerStates currentState = ServerStates.IDLE;
 
@@ -69,29 +74,23 @@ public class Server {
      */
     private JSONArray activatedAgents, deactivatedAgents, blockedAgents;
 
-    /**
-     * Object used to lock thread from updating the {@code Warehouse} simultaneously.
-     */
-    private final Object lock = new Object();
-
     // ===============================================================================================
     //
     // Static Variables & Methods
     //
 
     /**
-     * The only instance of this {@code Server} class.
+     * The only instance of this {@code FrontendCommunicator} class.
      */
-    private static Server sServer =
-            new Server(ServerConstants.SERVER_PATH, ServerConstants.SERVER_PORT);
+    private static FrontendCommunicator sComm = new FrontendCommunicator(CommConstants.FRONTEND_COMM_PORT);
 
     /**
-     * Returns the only available instance of this {@code Server} class.
+     * Returns the only available instance of this {@code FrontendCommunicator} class.
      *
-     * @return the only available {@code Server} object.
+     * @return the only available {@code FrontendCommunicator} object.
      */
-    public static Server getInstance() {
-        return sServer;
+    public static FrontendCommunicator getInstance() {
+        return sComm;
     }
 
     // ===============================================================================================
@@ -100,32 +99,33 @@ public class Server {
     //
 
     /**
-     * Constructs a new {@code Server} object.
+     * Constructs a new {@code FrontendCommunicator} object.
      *
-     * @param path the endpoint path of the communicator.
      * @param port the port number.
      */
-    protected Server(String path, int port) {
+    protected FrontendCommunicator(int port) {
         // Protected constructor to ensure a singleton object.
-        Spark.port(port);
-        Spark.webSocket(path, new WebSocketHandler());
+        server = Service.ignite();
+        server.port(port);
+        server.webSocket("/", new WebSocketHandler());
 
+        // Clear message queue
         clearUpdateStates();
         clearControlStates();
     }
 
     /**
-     * Starts and initializes this {@code Server} object.
+     * Starts and initializes this {@code FrontendCommunicator} object.
      */
     public void start() {
-        Spark.init();
+        server.init();
     }
 
     /**
-     * Closes and terminates this {@code Server} object.
+     * Closes and terminates this {@code FrontendCommunicator} object.
      */
     public void close() {
-        Spark.stop();
+        server.stop();
     }
 
     /**
@@ -172,8 +172,8 @@ public class Server {
     }
 
     /**
-     * Checks whether this {@code Server} object is currently connected with the
-     * frontend.
+     * Checks whether this {@code FrontendCommunicator} object is currently connected
+     * with the frontend.
      *
      * @return {@code true} if connected; {@code false} otherwise.
      */
@@ -182,10 +182,10 @@ public class Server {
     }
 
     /**
-     * Checks whether this {@code Server} is still running and did not process
-     * an EXIT message.
+     * Checks whether this {@code FrontendCommunicator} is still running and
+     * did not process an EXIT message.
      *
-     * @return {@code true} if this {@code Server} did not process an EXIT message; {@code false} otherwise.
+     * @return {@code true} if did not receive an EXIT message; {@code false} otherwise.
      */
     public synchronized boolean isRunning() {
         return (currentState != ServerStates.EXIT);
@@ -220,8 +220,8 @@ public class Server {
                     System.out.println(warehouse);
                 }
             } catch (Exception ex) {
-                sendAckMsg(ServerConstants.TYPE_MSG, ServerConstants.TYPE_ERROR,
-                        ServerConstants.ERR_SERVER, "Internal server error.");
+                sendAckMsg(CommConstants.TYPE_MSG, CommConstants.TYPE_ERROR,
+                        CommConstants.ERR_SERVER, "Internal server error.");
                 currentState = ServerStates.IDLE;
                 System.out.println(ex.getMessage());
                 ex.printStackTrace();
@@ -237,7 +237,7 @@ public class Server {
     /**
      * Processes the incoming messages from the frontend.
      * <p>
-     * This function is to be called from server threads no the main thread.
+     * This function is to be called from communicator threads not the main thread.
      *
      * @param msg the raw message as received from the frontend.
      */
@@ -247,22 +247,22 @@ public class Server {
         }
         // Handle invalid message format
         catch (JSONException ex) {
-            sendAckMsg(ServerConstants.TYPE_MSG, ServerConstants.TYPE_ERROR,
-                    ServerConstants.ERR_MSG_FORMAT, "Invalid message format.");
+            sendAckMsg(CommConstants.TYPE_MSG, CommConstants.TYPE_ERROR,
+                    CommConstants.ERR_MSG_FORMAT, "Invalid message format.");
             System.out.println(ex.getMessage());
             ex.printStackTrace();
         }
         // Handle data inconsistency exceptions
         catch (DataException ex) {
-            sendAckMsg(ServerConstants.TYPE_MSG, ServerConstants.TYPE_ERROR,
+            sendAckMsg(CommConstants.TYPE_MSG, CommConstants.TYPE_ERROR,
                     ex.getErrorCode(), ex.getMessage(), ex.getErrorArgs());
             System.out.println(ex.getMessage());
             ex.printStackTrace();
         }
         // Handle internal server exceptions
         catch (Exception ex) {
-            sendAckMsg(ServerConstants.TYPE_MSG, ServerConstants.TYPE_ERROR,
-                    ServerConstants.ERR_SERVER, "Internal server error.");
+            sendAckMsg(CommConstants.TYPE_MSG, CommConstants.TYPE_ERROR,
+                    CommConstants.ERR_SERVER, "Internal server error.");
             currentState = ServerStates.IDLE;
             System.out.println(ex.getMessage());
             ex.printStackTrace();
@@ -278,37 +278,37 @@ public class Server {
      */
     private synchronized void process(JSONObject msg) throws Exception {
         // Get message type
-        int type = msg.getInt(ServerConstants.KEY_TYPE);
-        JSONObject data = msg.optJSONObject(ServerConstants.KEY_DATA);
+        int type = msg.getInt(CommConstants.KEY_TYPE);
+        JSONObject data = msg.optJSONObject(CommConstants.KEY_DATA);
 
         // Switch on different message types from the frontend
         switch (type) {
-            case ServerConstants.TYPE_START:
+            case CommConstants.TYPE_START:
                 processStartMsg(data);
                 break;
-            case ServerConstants.TYPE_STOP:
+            case CommConstants.TYPE_STOP:
                 processStopMsg(data);
                 break;
-            case ServerConstants.TYPE_RESUME:
+            case CommConstants.TYPE_RESUME:
                 processResumeMsg(data);
                 break;
-            case ServerConstants.TYPE_PAUSE:
+            case CommConstants.TYPE_PAUSE:
                 processPauseMsg(data);
                 break;
-            case ServerConstants.TYPE_EXIT:
+            case CommConstants.TYPE_EXIT:
                 processExistMsg(data);
                 break;
-            case ServerConstants.TYPE_ACK_UPDATE:
+            case CommConstants.TYPE_ACK_UPDATE:
                 processUpdateAckMsg(data);
                 break;
-            case ServerConstants.TYPE_ORDER:
+            case CommConstants.TYPE_ORDER:
                 processOrderMsg(data);
                 break;
-            case ServerConstants.TYPE_CONTROL:
+            case CommConstants.TYPE_CONTROL:
                 processControlMsg(data);
                 break;
             default:
-                throw new DataException("Invalid message type.", ServerConstants.ERR_MSG_FORMAT);
+                throw new DataException("Invalid message type.", CommConstants.ERR_MSG_FORMAT);
         }
     }
 
@@ -323,27 +323,27 @@ public class Server {
     private synchronized void processStartMsg(JSONObject data) throws Exception {
         if (currentState != ServerStates.IDLE) {
             throw new DataException("Received START message while the server is not in IDLE state.",
-                    ServerConstants.ERR_MSG_UNEXPECTED);
+                    CommConstants.ERR_MSG_UNEXPECTED);
         }
 
         try {
-            int mode = data.getInt(ServerConstants.KEY_MODE);
-            JSONObject state = data.getJSONObject(ServerConstants.KEY_STATE);
+            int mode = data.getInt(CommConstants.KEY_MODE);
+            JSONObject state = data.getJSONObject(CommConstants.KEY_STATE);
 
-            ServerDecoder.decodeWarehouse(state);
-            sendAckMsg(ServerConstants.TYPE_ACK_START, ServerConstants.TYPE_OK, 0, "");
+            Decoder.decodeWarehouse(state);
+            sendAckMsg(CommConstants.TYPE_ACK_START, CommConstants.TYPE_OK, 0, "");
             currentState = ServerStates.RUNNING;
             receivedAck = true;
 
             // DEBUG
             warehouse.print();
         } catch (JSONException ex) {
-            sendAckMsg(ServerConstants.TYPE_ACK_START, ServerConstants.TYPE_ERROR,
-                    ServerConstants.ERR_MSG_FORMAT, "Invalid START message format.");
+            sendAckMsg(CommConstants.TYPE_ACK_START, CommConstants.TYPE_ERROR,
+                    CommConstants.ERR_MSG_FORMAT, "Invalid START message format.");
             System.out.println(ex.getMessage());
             ex.printStackTrace();
         } catch (DataException ex) {
-            sendAckMsg(ServerConstants.TYPE_ACK_START, ServerConstants.TYPE_ERROR,
+            sendAckMsg(CommConstants.TYPE_ACK_START, CommConstants.TYPE_ERROR,
                     ex.getErrorCode(), ex.getMessage(), ex.getErrorArgs());
             System.out.println(ex.getMessage());
             ex.printStackTrace();
@@ -373,7 +373,7 @@ public class Server {
     private synchronized void processPauseMsg(JSONObject data) throws Exception {
         if (currentState != ServerStates.RUNNING) {
             throw new DataException("Received PAUSE message while the server is not in RUNNING state.",
-                    ServerConstants.ERR_MSG_UNEXPECTED);
+                    CommConstants.ERR_MSG_UNEXPECTED);
         }
 
         currentState = ServerStates.PAUSE;
@@ -390,10 +390,10 @@ public class Server {
     private synchronized void processResumeMsg(JSONObject data) throws Exception {
         if (currentState != ServerStates.PAUSE) {
             throw new DataException("Received RESUME message while the server is not in PAUSE state.",
-                    ServerConstants.ERR_MSG_UNEXPECTED);
+                    CommConstants.ERR_MSG_UNEXPECTED);
         }
 
-        sendAckMsg(ServerConstants.TYPE_ACK_RESUME, ServerConstants.TYPE_OK, 0, "");
+        sendAckMsg(CommConstants.TYPE_ACK_RESUME, CommConstants.TYPE_OK, 0, "");
         currentState = ServerStates.RUNNING;
     }
 
@@ -411,7 +411,7 @@ public class Server {
     /**
      * Processes the ACK_UPDATE message from the frontend.
      * <p>
-     * ACK_UPDATE message is used to acknowledge the server of that last update message
+     * ACK_UPDATE message is used to acknowledge the communicator of that last update message
      * has been received successfully.
      *
      * @param data the received JSON data part of the message.
@@ -419,12 +419,12 @@ public class Server {
     private synchronized void processUpdateAckMsg(JSONObject data) throws Exception {
         if (currentState == ServerStates.IDLE) {
             throw new DataException("Received ACK message while the server is IDLE state.",
-                    ServerConstants.ERR_MSG_UNEXPECTED);
+                    CommConstants.ERR_MSG_UNEXPECTED);
         }
 
         if (receivedAck) {
             throw new DataException("Received multiple ACK messages.",
-                    ServerConstants.ERR_MSG_UNEXPECTED);
+                    CommConstants.ERR_MSG_UNEXPECTED);
         }
 
         receivedAck = true;
@@ -444,25 +444,25 @@ public class Server {
     private synchronized void processOrderMsg(JSONObject data) throws Exception {
         if (currentState != ServerStates.RUNNING) {
             throw new DataException("Received ORDER message while the server is not in RUNNING state.",
-                    ServerConstants.ERR_MSG_UNEXPECTED);
+                    CommConstants.ERR_MSG_UNEXPECTED);
         }
 
         try {
-            Order order = ServerDecoder.decodeOrder(data);
+            Order order = Decoder.decodeOrder(data);
             warehouse.addOrder(order);
-            sendAckMsg(ServerConstants.TYPE_ACK_ORDER, ServerConstants.TYPE_OK, 0, "");
+            sendAckMsg(CommConstants.TYPE_ACK_ORDER, CommConstants.TYPE_OK, 0, "");
 
             // DEBUG
             System.out.println("Order received:");
             System.out.println("    > " + order);
             System.out.println();
         } catch (JSONException ex) {
-            sendAckMsg(ServerConstants.TYPE_ACK_START, ServerConstants.TYPE_ERROR,
-                    ServerConstants.ERR_MSG_FORMAT, "Invalid ORDER message format.");
+            sendAckMsg(CommConstants.TYPE_ACK_START, CommConstants.TYPE_ERROR,
+                    CommConstants.ERR_MSG_FORMAT, "Invalid ORDER message format.");
             System.out.println(ex.getMessage());
             ex.printStackTrace();
         } catch (DataException ex) {
-            sendAckMsg(ServerConstants.TYPE_ACK_ORDER, ServerConstants.TYPE_ERROR,
+            sendAckMsg(CommConstants.TYPE_ACK_ORDER, CommConstants.TYPE_ERROR,
                     ex.getErrorCode(), ex.getMessage(), ex.getErrorArgs());
             System.out.println(ex.getMessage());
             ex.printStackTrace();
@@ -479,28 +479,28 @@ public class Server {
     private synchronized void processControlMsg(JSONObject data) throws Exception {
         if (currentState != ServerStates.RUNNING) {
             throw new DataException("Received CONTROL message while the server is not in RUNNING state.",
-                    ServerConstants.ERR_MSG_UNEXPECTED);
+                    CommConstants.ERR_MSG_UNEXPECTED);
         }
 
-        int type = data.getInt(ServerConstants.KEY_TYPE);
-        int id = data.getInt(ServerConstants.KEY_ID);
+        int type = data.getInt(CommConstants.KEY_TYPE);
+        int id = data.getInt(CommConstants.KEY_ID);
         Agent agent = warehouse.getAgentById(id);
 
         if (agent == null) {
             throw new DataException("Control message with invalid agent id: " + id + ".",
-                    ServerConstants.ERR_INVALID_ARGS);
+                    CommConstants.ERR_INVALID_ARGS);
         }
 
         clearControlStates();
 
         switch (type) {
-            case ServerConstants.TYPE_CONTROL_ACTIVATE:
+            case CommConstants.TYPE_CONTROL_ACTIVATE:
                 agent.activate();
 
                 // DEBUG
                 System.out.println("Activating " + agent + ".");
                 break;
-            case ServerConstants.TYPE_CONTROL_DEACTIVATE:
+            case CommConstants.TYPE_CONTROL_DEACTIVATE:
                 agent.deactivate();
 
                 // DEBUG
@@ -508,7 +508,7 @@ public class Server {
                 break;
             default:
                 throw new DataException("Control message with invalid type: " + type + ".",
-                        ServerConstants.ERR_INVALID_ARGS);
+                        CommConstants.ERR_INVALID_ARGS);
         }
 
         sendControlMsg();
@@ -538,7 +538,7 @@ public class Server {
      * @param errArgs   the error arguments.
      */
     private synchronized void sendAckMsg(int type, int status, int errCode, String errReason, Object... errArgs) {
-        send(ServerEncoder.encodeAckMsg(type, status, errCode, errReason, errArgs));
+        send(Encoder.encodeAckMsg(type, status, errCode, errReason, errArgs));
     }
 
     /**
@@ -548,7 +548,7 @@ public class Server {
      * @param action the performed action.
      */
     public synchronized void enqueueAgentAction(Agent agent, AgentAction action) {
-        actions.put(ServerEncoder.encodeAgentAction(agent, action));
+        actions.put(Encoder.encodeAgentAction(agent, action));
     }
 
     /**
@@ -558,7 +558,7 @@ public class Server {
      * @param order the associated {@code Order}.
      */
     public synchronized void enqueueTaskAssignedLog(Task task, Order order) {
-        logs.put(ServerEncoder.encodeTaskAssignedLog(task, order));
+        logs.put(Encoder.encodeTaskAssignedLog(task, order));
     }
 
     /**
@@ -569,7 +569,7 @@ public class Server {
      * @param items the map of add/removed items by the completed {@code Task}.
      */
     public synchronized void enqueueTaskCompletedLog(Task task, Order order, Map<Item, Integer> items) {
-        logs.put(ServerEncoder.encodeTaskCompletedLog(task, order, items));
+        logs.put(Encoder.encodeTaskCompletedLog(task, order, items));
     }
 
     /**
@@ -578,7 +578,7 @@ public class Server {
      * @param order the newly issued {@code Order}.
      */
     public synchronized void enqueueOrderFulfilledLog(Order order) {
-        logs.put(ServerEncoder.encodeOrderLog(ServerConstants.TYPE_LOG_ORDER_FULFILLED, order));
+        logs.put(Encoder.encodeOrderLog(CommConstants.TYPE_LOG_ORDER_FULFILLED, order));
     }
 
     /**
@@ -588,14 +588,14 @@ public class Server {
      * @param value the value of the statistic.
      */
     public synchronized void enqueueStatistics(int key, double value) {
-        actions.put(ServerEncoder.encodeStatistics(key, value));
+        actions.put(Encoder.encodeStatistics(key, value));
     }
 
     /**
      * Sends the current update message to the frontend.
      */
     public synchronized void sendUpdateMsg() {
-        send(ServerEncoder.encodeUpdateMsg(warehouse.getTime(), actions, logs, statistics));
+        send(Encoder.encodeUpdateMsg(warehouse.getTime(), actions, logs, statistics));
     }
 
     /**
@@ -638,7 +638,7 @@ public class Server {
      * Sends the current control message to the frontend.
      */
     public synchronized void sendControlMsg() {
-        send(ServerEncoder.encodeControlMsg(activatedAgents, deactivatedAgents, blockedAgents));
+        send(Encoder.encodeControlMsg(activatedAgents, deactivatedAgents, blockedAgents));
     }
 
     // ===============================================================================================

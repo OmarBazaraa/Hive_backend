@@ -1,9 +1,9 @@
-package server;
+package communicators;
 
 import org.junit.BeforeClass;
 
 
-public class ServerTest {
+public class CommunicatorTest {
 
     /**
      * Initializes the required objects.

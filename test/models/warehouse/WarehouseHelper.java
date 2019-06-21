@@ -1,6 +1,6 @@
 package models.warehouse;
 
-import server.utils.ServerDecoder;
+import communicators.frontend.utils.Decoder;
 
 import utils.Utility;
 
@@ -16,6 +16,6 @@ public class WarehouseHelper {
      */
     public static void configureWarehouse(String path) throws Exception {
         String config = Utility.readFile(path);
-        ServerDecoder.decodeWarehouse(new JSONObject(config));
+        Decoder.decodeWarehouse(new JSONObject(config));
     }
 }

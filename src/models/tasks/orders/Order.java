@@ -1,5 +1,7 @@
 package models.tasks.orders;
 
+import communicators.frontend.FrontendCommunicator;
+
 import models.facilities.Gate;
 import models.facilities.Rack;
 import models.items.Item;
@@ -8,7 +10,6 @@ import models.tasks.AbstractTask;
 import models.tasks.Task;
 import models.tasks.TaskAssignable;
 import models.warehouses.Warehouse;
-import server.Server;
 
 import java.util.*;
 
@@ -212,7 +213,7 @@ abstract public class Order extends AbstractTask implements QuantityAddable<Item
     @Override
     public void assignTask(Task task) {
         // Inform the frontend
-        Server.getInstance().enqueueTaskAssignedLog(task, this);
+        FrontendCommunicator.getInstance().enqueueTaskAssignedLog(task, this);
 
         // Add task to the order
         planItemsToReserve(task);
@@ -233,7 +234,7 @@ abstract public class Order extends AbstractTask implements QuantityAddable<Item
     @Override
     public void onTaskComplete(Task task) {
         // Inform the frontend
-        Server.getInstance().enqueueTaskCompletedLog(task, this, reservedItems.get(task));
+        FrontendCommunicator.getInstance().enqueueTaskCompletedLog(task, this, reservedItems.get(task));
 
         // Finalize completed task
         acquireReservedItemsInRack(task);
@@ -242,7 +243,7 @@ abstract public class Order extends AbstractTask implements QuantityAddable<Item
         // Check if no more pending units and all running tasks have been completed
         if (pendingUnits == 0 && subTasks.isEmpty()) {
             timeCompleted = Warehouse.getInstance().getTime();
-            Server.getInstance().enqueueOrderFulfilledLog(this);
+            FrontendCommunicator.getInstance().enqueueOrderFulfilledLog(this);
             terminate();
         }
     }

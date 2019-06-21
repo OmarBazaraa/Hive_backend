@@ -1,9 +1,9 @@
 package models.facilities;
 
+import communicators.frontend.FrontendCommunicator;
+
 import models.agents.Agent;
 import models.tasks.Task;
-
-import server.Server;
 
 import utils.Constants.*;
 
@@ -51,7 +51,7 @@ public class Gate extends Facility {
     @Override
     public void bind(Agent agent) {
         super.bind(agent);
-        Server.getInstance().enqueueAgentAction(boundAgent, AgentAction.BIND);
+        FrontendCommunicator.getInstance().enqueueAgentAction(boundAgent, AgentAction.BIND);
 
         // TODO: lock the agent
         Task task = agent.getActiveTask();
@@ -78,7 +78,7 @@ public class Gate extends Facility {
     @Override
     public void unbind() {
         // TODO: unlock the bound agent
-        Server.getInstance().enqueueAgentAction(boundAgent, AgentAction.UNBIND);
+        FrontendCommunicator.getInstance().enqueueAgentAction(boundAgent, AgentAction.UNBIND);
         super.unbind();
     }
 

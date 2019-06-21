@@ -1,4 +1,4 @@
-package server.exceptions;
+package communicators.exceptions;
 
 
 /**

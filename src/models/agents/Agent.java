@@ -2,6 +2,8 @@ package models.agents;
 
 import algorithms.planner.Planner;
 
+import communicators.frontend.FrontendCommunicator;
+
 import models.facilities.Facility;
 import models.facilities.Rack;
 import models.maps.GridCell;
@@ -9,8 +11,6 @@ import models.maps.utils.Pose;
 import models.maps.utils.Position;
 import models.tasks.Task;
 import models.warehouses.Warehouse;
-
-import server.Server;
 
 import utils.Constants;
 import utils.Constants.*;
@@ -98,7 +98,7 @@ public class Agent extends AbstractAgent {
         }
 
         // Inform the frontend
-        Server.getInstance().enqueueActivatedAgent(this);
+        FrontendCommunicator.getInstance().enqueueActivatedAgent(this);
 
         // Mark as activated
         deactivated = false;
@@ -120,7 +120,7 @@ public class Agent extends AbstractAgent {
         }
 
         // Inform the frontend
-        Server.getInstance().enqueueDeactivatedAgent(this);
+        FrontendCommunicator.getInstance().enqueueDeactivatedAgent(this);
 
         // Mark as deactivated
         deactivated = true;
@@ -146,7 +146,7 @@ public class Agent extends AbstractAgent {
         }
 
         // Inform the frontend
-        Server.getInstance().enqueueBlockedAgent(this);
+        FrontendCommunicator.getInstance().enqueueBlockedAgent(this);
 
         // Inform the warehouse
         Warehouse warehouse = Warehouse.getInstance();

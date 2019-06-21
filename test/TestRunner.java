@@ -1,15 +1,16 @@
 import algorithms.AlgorithmsTestRunner;
+import communicators.CommunicatorTest;
 import models.ModelsTestRunner;
+import utils.UtilityTest;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
-import server.ServerTest;
-import utils.UtilityTest;
 
 
 @RunWith(Suite.class)
-@Suite.SuiteClasses({AlgorithmsTestRunner.class, ModelsTestRunner.class, UtilityTest.class, ServerTest.class})
+@Suite.SuiteClasses({AlgorithmsTestRunner.class, ModelsTestRunner.class, UtilityTest.class, CommunicatorTest.class})
 public class TestRunner {
     @BeforeClass
     public static void before() {

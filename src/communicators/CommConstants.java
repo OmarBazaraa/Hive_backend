@@ -1,15 +1,11 @@
-package server.utils;
+package communicators;
 
 
 /**
- * This {@code ServerConstants} class contains some static constants values
+ * This {@code CommConstants} class contains some static constants values
  * to be used by the frontend server.
  */
-public class ServerConstants {
-
-    //
-    // Communication details
-    //
+public class CommConstants {
 
     /**
      * Different states of the {@code Server} during its lifecycle.
@@ -21,9 +17,23 @@ public class ServerConstants {
         EXIT
     }
 
-    // WebSocket server details
-    public static final String SERVER_PATH = "/";
-    public static final int SERVER_PORT = 1337;
+    // ===============================================================================================
+    //
+    // Hardware Communicator Constants
+    //
+
+    // Hardware Communicator Port Number
+    public static final int HARDWARE_COMM_PORT = 1337;
+
+
+
+    // ===============================================================================================
+    //
+    // Frontend Communicator Constants
+    //
+
+    // Frontend Communicator Port Number
+    public static final int FRONTEND_COMM_PORT = 1337;
 
     //
     // Communication messages keys
@@ -169,17 +179,13 @@ public class ServerConstants {
     // Error Codes
     //
 
-    //
-    // TODO: select better error names
-    //
-
     // Internal server error
     public static final int ERR_SERVER = 5000;
 
     // Invalid message format from the frontend
     //      - Invalid JSON format
     //      - Missing messages fields
-    //      - Unknown message type      TODO
+    //      - Unknown message type
     public static final int ERR_MSG_FORMAT = 5001;
 
     // Received known message at unexpected time:
@@ -203,9 +209,9 @@ public class ServerConstants {
     //      - Non existing gate ID
     //      - Non existing rack ID
     //      - Order with no items
-    //      - Invalid robot direction   TODO
-    //      - Invalid order type        TODO
-    //      - Invalid cell type         TODO
+    //      - Invalid robot direction
+    //      - Invalid order type
+    //      - Invalid cell type
     public static final int ERR_INVALID_ARGS = 5003;
 
     // Rack weight exceed maximum capacity

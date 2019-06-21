@@ -1,10 +1,9 @@
 package models.facilities;
 
+import communicators.frontend.FrontendCommunicator;
+
 import models.agents.Agent;
 
-import server.Server;
-
-import utils.Constants;
 import utils.Constants.*;
 
 
@@ -53,7 +52,7 @@ public class Station extends Facility {
     @Override
     public void bind(Agent agent) {
         super.bind(agent);
-        Server.getInstance().enqueueAgentAction(boundAgent, AgentAction.BIND);
+        FrontendCommunicator.getInstance().enqueueAgentAction(boundAgent, AgentAction.BIND);
     }
 
     /**
@@ -64,7 +63,7 @@ public class Station extends Facility {
      */
     @Override
     public void unbind() {
-        Server.getInstance().enqueueAgentAction(boundAgent, AgentAction.UNBIND);
+        FrontendCommunicator.getInstance().enqueueAgentAction(boundAgent, AgentAction.UNBIND);
         super.unbind();
     }
 

@@ -1,4 +1,4 @@
-import server.Server;
+import communicators.frontend.FrontendCommunicator;
 
 
 /**
@@ -30,7 +30,7 @@ public class Main {
 
     public static void run() throws Exception {
         // Create server object
-        Server server = Server.getInstance();
+        FrontendCommunicator server = FrontendCommunicator.getInstance();
 
         // Start the server and allocate the port
         server.start();
