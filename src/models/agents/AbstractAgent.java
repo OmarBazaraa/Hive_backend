@@ -169,6 +169,15 @@ abstract public class AbstractAgent extends HiveObject implements TaskAssignable
     }
 
     /**
+     * Checks whether this {@code Agent} is currently locked by a {@code Facility} or not.
+     *
+     * @return {@code true} if this {@code Agent} is locked; {@code false} otherwise.
+     */
+    public boolean isLocked() {
+        return locked;
+    }
+
+    /**
      * Checks whether this {@code Agent} is currently loaded by a {@code Rack} or not.
      *
      * @return {@code true} if this {@code Agent} is loaded; {@code false} otherwise.
@@ -230,11 +239,6 @@ abstract public class AbstractAgent extends HiveObject implements TaskAssignable
     public void setPortNumber(int portNum) {
         port = portNum;
     }
-
-    // ===============================================================================================
-    //
-    // Listener-Related Methods
-    //
 
     /**
      * Registers a callback functions to be invoked when this {@code Agent} produces any events.
