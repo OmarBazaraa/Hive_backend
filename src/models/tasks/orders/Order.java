@@ -81,6 +81,11 @@ abstract public class Order extends AbstractTask implements QuantityAddable<Item
      */
     protected long timeCompleted = -1;
 
+    /**
+     * The listener object to this {@code Order} events.
+     */
+    protected OrderListener listener;
+
     // ===============================================================================================
     //
     // Member Methods
@@ -133,6 +138,15 @@ abstract public class Order extends AbstractTask implements QuantityAddable<Item
     }
 
     /**
+     * Registers a callback functions to be invoked when this {@code Order} produces any events.
+     *
+     * @param l the callback to run; {@code null} to unregister any listeners.
+     */
+    public void setListener(OrderListener l) {
+        listener = l;
+    }
+
+    /**
      * Returns the pending quantity of the an {@code Item} of this {@code Order}.
      * A negative quantity represents a refill order, where these quantity
      * should be taken from the {@code Gate} to the racks of the {@code Warehouse}.
@@ -180,18 +194,6 @@ abstract public class Order extends AbstractTask implements QuantityAddable<Item
     }
 
     /**
-     * Activates this {@code Order} by reserving all the needed units to avoid
-     * accepting infeasible orders in the future.
-     * <p>
-     * This function should be called only once per {@code Order} object.
-     */
-    @Override
-    public void activate() {
-        reserveItems();
-        super.activate();
-    }
-
-    /**
      * Terminates this {@code Order} after completion.
      * <p>
      * A callback function to be invoked when this {@code Order} has been completed.
@@ -204,6 +206,18 @@ abstract public class Order extends AbstractTask implements QuantityAddable<Item
     }
 
     /**
+     * Activates this {@code Order} by reserving all the needed units to avoid
+     * accepting infeasible orders in the future.
+     * <p>
+     * This function should be called only once per {@code Order} object.
+     */
+    @Override
+    public void activate() {
+        reserveItems();
+        super.activate();
+    }
+
+    /**
      * Assigns a new sub {@code Task} for fulfilling this {@code Order}.
      * <p>
      * This function should be called once per {@code Task} object after activating the {@code Order}.
@@ -212,6 +226,11 @@ abstract public class Order extends AbstractTask implements QuantityAddable<Item
      */
     @Override
     public void assignTask(Task task) {
+        // Inform listener
+        if (listener != null) {
+            listener.onOrderTaskAssigned(this, task);
+        }
+
         // Inform the frontend
         FrontendCommunicator.getInstance().enqueueTaskAssignedLog(task, this);
 
@@ -223,6 +242,11 @@ abstract public class Order extends AbstractTask implements QuantityAddable<Item
         // Check if this is the first assigned task
         if (timeStarted == -1) {
             timeStarted = Warehouse.getInstance().getTime();
+
+            // Inform listener
+            if (listener != null) {
+                listener.onOrderStarted(this);
+            }
         }
     }
 
@@ -233,6 +257,11 @@ abstract public class Order extends AbstractTask implements QuantityAddable<Item
      */
     @Override
     public void onTaskComplete(Task task) {
+        // Inform listener
+        if (listener != null) {
+            listener.onOrderTaskCompleted(this, task);
+        }
+
         // Inform the frontend
         FrontendCommunicator.getInstance().enqueueTaskCompletedLog(task, this, reservedItems.get(task));
 
@@ -243,7 +272,15 @@ abstract public class Order extends AbstractTask implements QuantityAddable<Item
         // Check if no more pending units and all running tasks have been completed
         if (pendingUnits == 0 && subTasks.isEmpty()) {
             timeCompleted = Warehouse.getInstance().getTime();
+
+            // Inform listener
+            if (listener != null) {
+                listener.onOrderFulfilled(this);
+            }
+
+            // Inform the frontend
             FrontendCommunicator.getInstance().enqueueOrderFulfilledLog(this);
+
             terminate();
         }
     }
