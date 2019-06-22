@@ -271,6 +271,15 @@ abstract public class AbstractWarehouse {
     }
 
     /**
+     * Returns the list of all {@code Agent} objects in this {@code Warehouse}.
+     *
+     * @return a collection of all agents.
+     */
+    public Collection<Agent> getAgentList() {
+        return agents.values();
+    }
+
+    /**
      * Adds a new {@code Agent} object to the {@code Warehouse}.
      *
      * @param agent the new {@code Agent} to add.
