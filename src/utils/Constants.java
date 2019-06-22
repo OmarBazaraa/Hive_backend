@@ -16,6 +16,32 @@ public class Constants {
     public static final String PROJ_VERSION = "0.1.0.0";
     public static final String PROJ_VERSION_DATE = "19 June 2019";
 
+    // Communication details
+    public static final int FRONTEND_COMM_PORT = 1337;
+    public static final int HARDWARE_COMM_PORT = 4995;
+
+    //
+    // Server controller constants
+    //
+
+    /**
+     * Different supported running modes of the server.
+     */
+    public enum RunningMode {
+        SIMULATION,
+        DEPLOYMENT
+    }
+
+    /**
+     * Different states of the {@code Server} during its lifecycle.
+     */
+    public enum ServerState {
+        IDLE,
+        RUNNING,
+        PAUSE,
+        EXIT
+    }
+
     //
     // Map Grid
     //

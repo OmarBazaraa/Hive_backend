@@ -1,39 +1,11 @@
-package communicators;
+package communicators.frontend;
 
 
 /**
- * This {@code CommConstants} class contains some static constants values
- * to be used by the frontend server.
+ * This {@code FrontendConstants} class contains some static constants values
+ * to be used by the frontend communicator.
  */
-public class CommConstants {
-
-    /**
-     * Different states of the {@code Server} during its lifecycle.
-     */
-    public enum ServerStates {
-        IDLE,
-        RUNNING,
-        PAUSE,
-        EXIT
-    }
-
-    // ===============================================================================================
-    //
-    // Hardware Communicator Constants
-    //
-
-    // Hardware Communicator Port Number
-    public static final int HARDWARE_COMM_PORT = 1337;
-
-
-
-    // ===============================================================================================
-    //
-    // Frontend Communicator Constants
-    //
-
-    // Frontend Communicator Port Number
-    public static final int FRONTEND_COMM_PORT = 1337;
+public class FrontendConstants {
 
     //
     // Communication messages keys
@@ -152,7 +124,7 @@ public class CommConstants {
     public static final int TYPE_ORDER_COLLECT = 0;
     public static final int TYPE_ORDER_REFILL = 1;
 
-    // Action types
+    // Agent action types
     public static final int TYPE_AGENT_MOVE = 0;
     public static final int TYPE_AGENT_ROTATE_RIGHT = 1;
     public static final int TYPE_AGENT_ROTATE_LEFT = 2;

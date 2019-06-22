@@ -1,7 +1,6 @@
 package communicators.frontend;
 
-import communicators.CommConstants;
-import communicators.CommConstants.ServerStates;
+import communicators.CommunicationListener;
 import communicators.exceptions.DataException;
 import communicators.frontend.utils.Decoder;
 import communicators.frontend.utils.Encoder;
@@ -40,7 +39,7 @@ public class FrontendCommunicator {
     //
 
     /**
-     * The spark web socket server
+     * The spark web socket server.
      */
     private Service server;
 
@@ -50,14 +49,14 @@ public class FrontendCommunicator {
     private Session session;
 
     /**
-     * The {@code Warehouse} object.
+     * The communication listener.
      */
-    private Warehouse warehouse = Warehouse.getInstance();
+    private CommunicationListener listener;
 
     /**
-     * The current state of the communicator.
+     * The {@code Warehouse} object.
      */
-    private ServerStates currentState = ServerStates.IDLE;
+    private final Warehouse warehouse = Warehouse.getInstance();
 
     /**
      * Whether ACK is received on the last update message.
@@ -70,28 +69,14 @@ public class FrontendCommunicator {
     private JSONArray actions, logs, statistics;
 
     /**
-     * The controls to be sent to the frontend in the next CONTROL message
+     * The controls to be sent to the frontend in the next CONTROL message.
      */
     private JSONArray activatedAgents, deactivatedAgents, blockedAgents;
 
-    // ===============================================================================================
-    //
-    // Static Variables & Methods
-    //
-
     /**
-     * The only instance of this {@code FrontendCommunicator} class.
+     * Object used to lock threads from updating the ACK flag of this {@code FrontendCommunicator} simultaneously.
      */
-    private static FrontendCommunicator sComm = new FrontendCommunicator(CommConstants.FRONTEND_COMM_PORT);
-
-    /**
-     * Returns the only available instance of this {@code FrontendCommunicator} class.
-     *
-     * @return the only available {@code FrontendCommunicator} object.
-     */
-    public static FrontendCommunicator getInstance() {
-        return sComm;
-    }
+    private final Object lock = new Object();
 
     // ===============================================================================================
     //
@@ -103,13 +88,17 @@ public class FrontendCommunicator {
      *
      * @param port the port number.
      */
-    protected FrontendCommunicator(int port) {
+    public FrontendCommunicator(int port, CommunicationListener l) {
         // Protected constructor to ensure a singleton object.
         server = Service.ignite();
+        server.threadPool(1);
         server.port(port);
         server.webSocket("/", new WebSocketHandler());
 
-        // Clear message queue
+        // Set the communication listener
+        listener = l;
+
+        // Clear queues
         clearUpdateStates();
         clearControlStates();
     }
@@ -137,7 +126,6 @@ public class FrontendCommunicator {
      */
     private synchronized void openSession(Session sess) {
         session = sess;
-        currentState = ServerStates.IDLE;
     }
 
     /**
@@ -149,7 +137,7 @@ public class FrontendCommunicator {
      */
     private synchronized void closeSession(Session sess) {
         session = null;
-        currentState = ServerStates.IDLE;
+        listener.onStop();
     }
 
     /**
@@ -158,74 +146,38 @@ public class FrontendCommunicator {
      * @param msg the message to sent.
      */
     private void send(JSONObject msg) {
-        // DEBUG
-        System.out.println("Sending ...");
-        System.out.println(msg.toString(4));
-        System.out.println();
-
         try {
             session.getRemote().sendString(msg.toString());
         } catch (IOException ex) {
-            currentState = ServerStates.IDLE;
+            listener.onStop();
             System.out.println(ex.getMessage());
         }
+
+        // DEBUG
+        System.out.println("Sending to frontend ...");
+        System.out.println(msg.toString(4));
+        System.out.println();
     }
 
     /**
-     * Checks whether this {@code FrontendCommunicator} object is currently connected
-     * with the frontend.
+     * Checks whether the last time step has been completed by the frontend or not.
      *
-     * @return {@code true} if connected; {@code false} otherwise.
+     * @return {@code true} if completed; {@code false} otherwise.
      */
-    public synchronized boolean isConnected() {
-        return (session != null && session.isOpen());
-    }
-
-    /**
-     * Checks whether this {@code FrontendCommunicator} is still running and
-     * did not process an EXIT message.
-     *
-     * @return {@code true} if did not receive an EXIT message; {@code false} otherwise.
-     */
-    public synchronized boolean isRunning() {
-        return (currentState != ServerStates.EXIT);
-    }
-
-    // ===============================================================================================
-    //
-    // Running Methods
-    //
-
-    /**
-     * Performs a single run step in the {@code Warehouse}.
-     * <p>
-     * This function is to be called from the main thread.
-     */
-    public synchronized void run() {
-        // Must be in RUNNING state
-        if (currentState != ServerStates.RUNNING) {
-            return;
+    public boolean isLastStepCompleted() {
+        synchronized (lock) {
+            return receivedAck;
         }
+    }
 
-        // Check if last update message has been acknowledged
-        if (receivedAck) {
-            clearUpdateStates();
-
-            try {
-                if (warehouse.run()) {
-                    sendUpdateMsg();        // Send updates only in the case of actual change in the warehouse
-                    receivedAck = false;    // Consume the ACK
-
-                    // DEBUG
-                    System.out.println(warehouse);
-                }
-            } catch (Exception ex) {
-                sendAckMsg(CommConstants.TYPE_MSG, CommConstants.TYPE_ERROR,
-                        CommConstants.ERR_SERVER, "Internal server error.");
-                currentState = ServerStates.IDLE;
-                System.out.println(ex.getMessage());
-                ex.printStackTrace();
-            }
+    /**
+     * Sets the last time step as being completed by the frontend.
+     *
+     * @param completed {@code true} to set the last step as completed; {@code false} otherwise.
+     */
+    private void setLastStepStatus(boolean completed) {
+        synchronized (lock) {
+            receivedAck = true;
         }
     }
 
@@ -241,29 +193,20 @@ public class FrontendCommunicator {
      *
      * @param msg the raw message as received from the frontend.
      */
-    private synchronized void process(String msg) {
+    private void process(String msg) {
+        // Try to process the incoming JSON message
         try {
             process(new JSONObject(msg));
         }
         // Handle invalid message format
         catch (JSONException ex) {
-            sendAckMsg(CommConstants.TYPE_MSG, CommConstants.TYPE_ERROR,
-                    CommConstants.ERR_MSG_FORMAT, "Invalid message format.");
+            sendErr(FrontendConstants.ERR_MSG_FORMAT, "Invalid message format.");
             System.out.println(ex.getMessage());
             ex.printStackTrace();
         }
         // Handle data inconsistency exceptions
         catch (DataException ex) {
-            sendAckMsg(CommConstants.TYPE_MSG, CommConstants.TYPE_ERROR,
-                    ex.getErrorCode(), ex.getMessage(), ex.getErrorArgs());
-            System.out.println(ex.getMessage());
-            ex.printStackTrace();
-        }
-        // Handle internal server exceptions
-        catch (Exception ex) {
-            sendAckMsg(CommConstants.TYPE_MSG, CommConstants.TYPE_ERROR,
-                    CommConstants.ERR_SERVER, "Internal server error.");
-            currentState = ServerStates.IDLE;
+            sendErr(ex.getErrorCode(), ex.getMessage(), ex.getErrorArgs());
             System.out.println(ex.getMessage());
             ex.printStackTrace();
         }
@@ -276,39 +219,36 @@ public class FrontendCommunicator {
      *
      * @param msg the message as from the frontend after JSON parsing.
      */
-    private synchronized void process(JSONObject msg) throws Exception {
+    private void process(JSONObject msg) throws JSONException, DataException {
         // Get message type
-        int type = msg.getInt(CommConstants.KEY_TYPE);
-        JSONObject data = msg.optJSONObject(CommConstants.KEY_DATA);
+        int type = msg.getInt(FrontendConstants.KEY_TYPE);
+        JSONObject data = msg.optJSONObject(FrontendConstants.KEY_DATA);
 
         // Switch on different message types from the frontend
         switch (type) {
-            case CommConstants.TYPE_START:
+            case FrontendConstants.TYPE_START:
                 processStartMsg(data);
                 break;
-            case CommConstants.TYPE_STOP:
+            case FrontendConstants.TYPE_STOP:
                 processStopMsg(data);
                 break;
-            case CommConstants.TYPE_RESUME:
-                processResumeMsg(data);
-                break;
-            case CommConstants.TYPE_PAUSE:
+            case FrontendConstants.TYPE_PAUSE:
                 processPauseMsg(data);
                 break;
-            case CommConstants.TYPE_EXIT:
-                processExistMsg(data);
+            case FrontendConstants.TYPE_RESUME:
+                processResumeMsg(data);
                 break;
-            case CommConstants.TYPE_ACK_UPDATE:
+            case FrontendConstants.TYPE_ACK_UPDATE:
                 processUpdateAckMsg(data);
                 break;
-            case CommConstants.TYPE_ORDER:
+            case FrontendConstants.TYPE_ORDER:
                 processOrderMsg(data);
                 break;
-            case CommConstants.TYPE_CONTROL:
+            case FrontendConstants.TYPE_CONTROL:
                 processControlMsg(data);
                 break;
             default:
-                throw new DataException("Invalid message type.", CommConstants.ERR_MSG_FORMAT);
+                throw new DataException("Invalid message type.", FrontendConstants.ERR_MSG_FORMAT);
         }
     }
 
@@ -320,30 +260,35 @@ public class FrontendCommunicator {
      *
      * @param data the received JSON data part of the message.
      */
-    private synchronized void processStartMsg(JSONObject data) throws Exception {
-        if (currentState != ServerStates.IDLE) {
+    private void processStartMsg(JSONObject data) throws DataException {
+        if (listener.getState() != ServerState.IDLE) {
             throw new DataException("Received START message while the server is not in IDLE state.",
-                    CommConstants.ERR_MSG_UNEXPECTED);
+                    FrontendConstants.ERR_MSG_UNEXPECTED);
         }
 
         try {
-            int mode = data.getInt(CommConstants.KEY_MODE);
-            JSONObject state = data.getJSONObject(CommConstants.KEY_STATE);
+            // Decode initial warehouse configurations
+            int mode = data.getInt(FrontendConstants.KEY_MODE);
+            JSONObject state = data.getJSONObject(FrontendConstants.KEY_STATE);
 
-            Decoder.decodeWarehouse(state);
-            sendAckMsg(CommConstants.TYPE_ACK_START, CommConstants.TYPE_OK, 0, "");
-            currentState = ServerStates.RUNNING;
-            receivedAck = true;
+            RunningMode runningMode = (mode == FrontendConstants.TYPE_MODE_DEPLOY) ?
+                    RunningMode.DEPLOYMENT : RunningMode.SIMULATION;
 
-            // DEBUG
-            warehouse.print();
+            synchronized (warehouse) {
+                Decoder.decodeWarehouse(state);
+                listener.onStart(runningMode);
+            }
+
+            // Send start acknowledgement
+            sendMsg(FrontendConstants.TYPE_ACK_START, FrontendConstants.TYPE_OK, 0, "");
+            setLastStepStatus(true);
         } catch (JSONException ex) {
-            sendAckMsg(CommConstants.TYPE_ACK_START, CommConstants.TYPE_ERROR,
-                    CommConstants.ERR_MSG_FORMAT, "Invalid START message format.");
+            sendMsg(FrontendConstants.TYPE_ACK_START, FrontendConstants.TYPE_ERROR,
+                    FrontendConstants.ERR_MSG_FORMAT, "Invalid START message format.");
             System.out.println(ex.getMessage());
             ex.printStackTrace();
         } catch (DataException ex) {
-            sendAckMsg(CommConstants.TYPE_ACK_START, CommConstants.TYPE_ERROR,
+            sendMsg(FrontendConstants.TYPE_ACK_START, FrontendConstants.TYPE_ERROR,
                     ex.getErrorCode(), ex.getMessage(), ex.getErrorArgs());
             System.out.println(ex.getMessage());
             ex.printStackTrace();
@@ -358,8 +303,8 @@ public class FrontendCommunicator {
      *
      * @param data the received JSON data part of the message.
      */
-    private synchronized void processStopMsg(JSONObject data) throws Exception {
-        currentState = ServerStates.IDLE;
+    private void processStopMsg(JSONObject data) throws DataException {
+        listener.onStop();
     }
 
     /**
@@ -370,13 +315,13 @@ public class FrontendCommunicator {
      *
      * @param data the received JSON data part of the message.
      */
-    private synchronized void processPauseMsg(JSONObject data) throws Exception {
-        if (currentState != ServerStates.RUNNING) {
+    private void processPauseMsg(JSONObject data) throws DataException {
+        if (listener.getState() != ServerState.RUNNING) {
             throw new DataException("Received PAUSE message while the server is not in RUNNING state.",
-                    CommConstants.ERR_MSG_UNEXPECTED);
+                    FrontendConstants.ERR_MSG_UNEXPECTED);
         }
 
-        currentState = ServerStates.PAUSE;
+        listener.onPause();
     }
 
     /**
@@ -387,25 +332,14 @@ public class FrontendCommunicator {
      *
      * @param data the received JSON data part of the message.
      */
-    private synchronized void processResumeMsg(JSONObject data) throws Exception {
-        if (currentState != ServerStates.PAUSE) {
+    private void processResumeMsg(JSONObject data) throws DataException {
+        if (listener.getState() != ServerState.PAUSE) {
             throw new DataException("Received RESUME message while the server is not in PAUSE state.",
-                    CommConstants.ERR_MSG_UNEXPECTED);
+                    FrontendConstants.ERR_MSG_UNEXPECTED);
         }
 
-        sendAckMsg(CommConstants.TYPE_ACK_RESUME, CommConstants.TYPE_OK, 0, "");
-        currentState = ServerStates.RUNNING;
-    }
-
-    /**
-     * Processes the EXIT message from the frontend.
-     * <p>
-     * EXIT message is used to close the server completely.
-     *
-     * @param data the received JSON data part of the message.
-     */
-    private synchronized void processExistMsg(JSONObject data) throws Exception {
-        currentState = ServerStates.EXIT;
+        listener.onResume();
+        sendMsg(FrontendConstants.TYPE_ACK_RESUME, FrontendConstants.TYPE_OK, 0, "");
     }
 
     /**
@@ -416,21 +350,22 @@ public class FrontendCommunicator {
      *
      * @param data the received JSON data part of the message.
      */
-    private synchronized void processUpdateAckMsg(JSONObject data) throws Exception {
-        if (currentState == ServerStates.IDLE) {
+    private void processUpdateAckMsg(JSONObject data) throws DataException {
+        if (listener.getState() == ServerState.IDLE) {
             throw new DataException("Received ACK message while the server is IDLE state.",
-                    CommConstants.ERR_MSG_UNEXPECTED);
+                    FrontendConstants.ERR_MSG_UNEXPECTED);
         }
 
-        if (receivedAck) {
+        if (isLastStepCompleted()) {
             throw new DataException("Received multiple ACK messages.",
-                    CommConstants.ERR_MSG_UNEXPECTED);
+                    FrontendConstants.ERR_MSG_UNEXPECTED);
         }
 
-        receivedAck = true;
+        // Update ACK flag
+        setLastStepStatus(true);
 
         // DEBUG
-        System.out.println("Received ACK");
+        System.out.println("Frontend update ACK received ...");
         System.out.println();
     }
 
@@ -441,28 +376,28 @@ public class FrontendCommunicator {
      *
      * @param data the received JSON data part of the message.
      */
-    private synchronized void processOrderMsg(JSONObject data) throws Exception {
-        if (currentState != ServerStates.RUNNING) {
+    private void processOrderMsg(JSONObject data) throws DataException {
+        if (listener.getState() != ServerState.RUNNING) {
             throw new DataException("Received ORDER message while the server is not in RUNNING state.",
-                    CommConstants.ERR_MSG_UNEXPECTED);
+                    FrontendConstants.ERR_MSG_UNEXPECTED);
         }
 
         try {
-            Order order = Decoder.decodeOrder(data);
-            warehouse.addOrder(order);
-            sendAckMsg(CommConstants.TYPE_ACK_ORDER, CommConstants.TYPE_OK, 0, "");
+            // Decode incoming order
+            synchronized (warehouse) {
+                Order order = Decoder.decodeOrder(data);
+                listener.onOrderIssued(order);
+            }
 
-            // DEBUG
-            System.out.println("Order received:");
-            System.out.println("    > " + order);
-            System.out.println();
+            // Send order acknowledgement
+            sendMsg(FrontendConstants.TYPE_ACK_ORDER, FrontendConstants.TYPE_OK, 0, "");
         } catch (JSONException ex) {
-            sendAckMsg(CommConstants.TYPE_ACK_START, CommConstants.TYPE_ERROR,
-                    CommConstants.ERR_MSG_FORMAT, "Invalid ORDER message format.");
+            sendMsg(FrontendConstants.TYPE_ACK_START, FrontendConstants.TYPE_ERROR,
+                    FrontendConstants.ERR_MSG_FORMAT, "Invalid ORDER message format.");
             System.out.println(ex.getMessage());
             ex.printStackTrace();
         } catch (DataException ex) {
-            sendAckMsg(CommConstants.TYPE_ACK_ORDER, CommConstants.TYPE_ERROR,
+            sendMsg(FrontendConstants.TYPE_ACK_ORDER, FrontendConstants.TYPE_ERROR,
                     ex.getErrorCode(), ex.getMessage(), ex.getErrorArgs());
             System.out.println(ex.getMessage());
             ex.printStackTrace();
@@ -476,42 +411,36 @@ public class FrontendCommunicator {
      *
      * @param data the received JSON data part of the message.
      */
-    private synchronized void processControlMsg(JSONObject data) throws Exception {
-        if (currentState != ServerStates.RUNNING) {
+    private void processControlMsg(JSONObject data) throws DataException {
+        if (listener.getState() != ServerState.RUNNING) {
             throw new DataException("Received CONTROL message while the server is not in RUNNING state.",
-                    CommConstants.ERR_MSG_UNEXPECTED);
+                    FrontendConstants.ERR_MSG_UNEXPECTED);
         }
 
-        int type = data.getInt(CommConstants.KEY_TYPE);
-        int id = data.getInt(CommConstants.KEY_ID);
-        Agent agent = warehouse.getAgentById(id);
+        int id = data.getInt(FrontendConstants.KEY_ID);
+        int type = data.getInt(FrontendConstants.KEY_TYPE);
+        Agent agent;
+
+        synchronized (warehouse) {
+            agent = warehouse.getAgentById(id);
+        }
 
         if (agent == null) {
             throw new DataException("Control message with invalid agent id: " + id + ".",
-                    CommConstants.ERR_INVALID_ARGS);
+                    FrontendConstants.ERR_INVALID_ARGS);
         }
 
-        clearControlStates();
-
         switch (type) {
-            case CommConstants.TYPE_CONTROL_ACTIVATE:
-                agent.activate();
-
-                // DEBUG
-                System.out.println("Activating " + agent + ".");
+            case FrontendConstants.TYPE_CONTROL_ACTIVATE:
+                listener.onAgentActivated(agent);
                 break;
-            case CommConstants.TYPE_CONTROL_DEACTIVATE:
-                agent.deactivate();
-
-                // DEBUG
-                System.out.println("Deactivating " + agent + ".");
+            case FrontendConstants.TYPE_CONTROL_DEACTIVATE:
+                listener.onAgentDeactivated(agent);
                 break;
             default:
                 throw new DataException("Control message with invalid type: " + type + ".",
-                        CommConstants.ERR_INVALID_ARGS);
+                        FrontendConstants.ERR_INVALID_ARGS);
         }
-
-        sendControlMsg();
     }
 
     // ===============================================================================================
@@ -520,25 +449,36 @@ public class FrontendCommunicator {
     //
 
     /**
-     * Clears the update states JSON arrays of the current time step.
+     * Sends a message to the frontend.
+     *
+     * @param type      the type of message.
+     * @param status    the status of the message. Either OK or ERROR.
+     * @param errCode   the error code in case of ERROR; 0 otherwise.
+     * @param errReason the string message explaining the reason of the error if any.
+     * @param errArgs   the error arguments if any.
      */
-    public synchronized void clearUpdateStates() {
-        actions = new JSONArray();
-        logs = new JSONArray();
-        statistics = new JSONArray();
+    public void sendMsg(int type, int status, int errCode, String errReason, Object... errArgs) {
+        send(Encoder.encodeAckMsg(type, status, errCode, errReason, errArgs));
     }
 
     /**
-     * Sends an acknowledge message to the frontend.
+     * Sends an error message to the frontend.
      *
-     * @param type      the type of acknowledgement.
-     * @param status    the status of the acknowledgement. Either OK or ERROR.
-     * @param errCode   the error code.
-     * @param errReason the string message explaining the reason of the error.
-     * @param errArgs   the error arguments.
+     * @param errCode   the error code in case;
+     * @param errReason the string message explaining the reason of the error if any.
+     * @param errArgs   the error arguments if any.
      */
-    private synchronized void sendAckMsg(int type, int status, int errCode, String errReason, Object... errArgs) {
-        send(Encoder.encodeAckMsg(type, status, errCode, errReason, errArgs));
+    public void sendErr(int errCode, String errReason, Object... errArgs) {
+        sendMsg(FrontendConstants.TYPE_MSG, FrontendConstants.TYPE_ERROR, errCode, errReason, errArgs);
+    }
+
+    /**
+     * Clears the update states JSON arrays of the current time step.
+     */
+    public void clearUpdateStates() {
+        actions = new JSONArray();
+        logs = new JSONArray();
+        statistics = new JSONArray();
     }
 
     /**
@@ -547,7 +487,7 @@ public class FrontendCommunicator {
      * @param agent  the updated {@code Agent}.
      * @param action the performed action.
      */
-    public synchronized void enqueueAgentAction(Agent agent, AgentAction action) {
+    public void enqueueAgentAction(Agent agent, AgentAction action) {
         actions.put(Encoder.encodeAgentAction(agent, action));
     }
 
@@ -557,7 +497,7 @@ public class FrontendCommunicator {
      * @param task  the newly assigned {@code Task}.
      * @param order the associated {@code Order}.
      */
-    public synchronized void enqueueTaskAssignedLog(Task task, Order order) {
+    public void enqueueTaskAssignedLog(Task task, Order order) {
         logs.put(Encoder.encodeTaskAssignedLog(task, order));
     }
 
@@ -568,7 +508,7 @@ public class FrontendCommunicator {
      * @param order the associated {@code Order}.
      * @param items the map of add/removed items by the completed {@code Task}.
      */
-    public synchronized void enqueueTaskCompletedLog(Task task, Order order, Map<Item, Integer> items) {
+    public void enqueueTaskCompletedLog(Task task, Order order, Map<Item, Integer> items) {
         logs.put(Encoder.encodeTaskCompletedLog(task, order, items));
     }
 
@@ -577,8 +517,8 @@ public class FrontendCommunicator {
      *
      * @param order the newly issued {@code Order}.
      */
-    public synchronized void enqueueOrderFulfilledLog(Order order) {
-        logs.put(Encoder.encodeOrderLog(CommConstants.TYPE_LOG_ORDER_FULFILLED, order));
+    public void enqueueOrderFulfilledLog(Order order) {
+        logs.put(Encoder.encodeOrderLog(FrontendConstants.TYPE_LOG_ORDER_FULFILLED, order));
     }
 
     /**
@@ -587,21 +527,23 @@ public class FrontendCommunicator {
      * @param key   the statistic type.
      * @param value the value of the statistic.
      */
-    public synchronized void enqueueStatistics(int key, double value) {
+    public void enqueueStatistics(int key, double value) {
         actions.put(Encoder.encodeStatistics(key, value));
     }
 
     /**
      * Sends the current update message to the frontend.
      */
-    public synchronized void sendUpdateMsg() {
+    public void flushUpdateMsg() {
         send(Encoder.encodeUpdateMsg(warehouse.getTime(), actions, logs, statistics));
+        clearUpdateStates();
+        setLastStepStatus(false);
     }
 
     /**
      * Clears the control states JSON arrays.
      */
-    public synchronized void clearControlStates() {
+    public void clearControlStates() {
         activatedAgents = new JSONArray();
         deactivatedAgents = new JSONArray();
         blockedAgents = new JSONArray();
@@ -612,7 +554,7 @@ public class FrontendCommunicator {
      *
      * @param agent the activated {@code Agent}.
      */
-    public synchronized void enqueueActivatedAgent(Agent agent) {
+    public void enqueueActivatedAgent(Agent agent) {
         activatedAgents.put(agent.getId());
     }
 
@@ -621,7 +563,7 @@ public class FrontendCommunicator {
      *
      * @param agent the deactivated {@code Agent}.
      */
-    public synchronized void enqueueDeactivatedAgent(Agent agent) {
+    public void enqueueDeactivatedAgent(Agent agent) {
         deactivatedAgents.put(agent.getId());
     }
 
@@ -630,15 +572,16 @@ public class FrontendCommunicator {
      *
      * @param agent the blocked {@code Agent}.
      */
-    public synchronized void enqueueBlockedAgent(Agent agent) {
+    public void enqueueBlockedAgent(Agent agent) {
         blockedAgents.put(agent.getId());
     }
 
     /**
      * Sends the current control message to the frontend.
      */
-    public synchronized void sendControlMsg() {
+    public void flushControlMsg() {
         send(Encoder.encodeControlMsg(activatedAgents, deactivatedAgents, blockedAgents));
+        clearControlStates();
     }
 
     // ===============================================================================================
@@ -653,8 +596,11 @@ public class FrontendCommunicator {
         public void onConnect(Session client) {
             openSession(client);
 
+            // DEBUG
             System.out.println();
             System.out.println("Frontend connected!");
+            System.out.println();
+            System.out.println("Frontend communicator thread count: " + server.activeThreadCount());
             System.out.println();
         }
 
@@ -662,13 +608,14 @@ public class FrontendCommunicator {
         public void onClose(Session client, int statusCode, String reason) {
             closeSession(client);
 
+            // DEBUG
             System.out.println();
             System.out.println("Frontend connection closed with status code: " + statusCode);
             System.out.println();
         }
 
         @OnWebSocketMessage
-        public void onMessage(Session client, String message) throws Exception {
+        public void onMessage(Session client, String message) {
             process(message);
         }
     }

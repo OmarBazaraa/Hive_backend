@@ -2,8 +2,7 @@ package communicators.exceptions;
 
 
 /**
- * This {@code DataException} class is used for any data consistency exceptions
- * received from the frontend.
+ * This {@code DataException} class is used for any data consistency exceptions.
  */
 public class DataException extends Exception {
 
