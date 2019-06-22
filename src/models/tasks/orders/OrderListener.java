@@ -1,6 +1,9 @@
 package models.tasks.orders;
 
+import models.items.Item;
 import models.tasks.Task;
+
+import java.util.Map;
 
 
 /**
@@ -15,7 +18,7 @@ public interface OrderListener {
      *
      * @param order the started {@code Order}.
      */
-    void onOrderStarted(Order order);
+    void onStart(Order order);
 
     /**
      * Called when a {@code Task} has been assigned to an {@code Order}.
@@ -23,15 +26,16 @@ public interface OrderListener {
      * @param order the {@code Order}.
      * @param task  the assigned {@code Task}.
      */
-    void onOrderTaskAssigned(Order order, Task task);
+    void onTaskAssign(Order order, Task task);
 
     /**
      * Called when an assigned {@code Task} for an {@code Order} has been completed.
      *
      * @param order the {@code Order}.
      * @param task  the completed {@code Task}.
+     * @param items the map of add/removed items by the completed {@code Task}.
      */
-    void onOrderTaskCompleted(Order order, Task task);
+    void onTaskComplete(Order order, Task task, Map<Item, Integer> items);
 
     /**
      * Called when an {@code Order} has just been fulfilled.
@@ -39,12 +43,12 @@ public interface OrderListener {
      *
      * @param order the fulfilled {@code Order}.
      */
-    void onOrderFulfilled(Order order);
+    void onFulfill(Order order);
 
     /**
      * Called when an {@code Order} has been dismissed from the system.
      *
      * @param order the dismissed {@code Order}.
      */
-    void onOrderDismissed(Order order);
+    void onDismiss(Order order);
 }

@@ -228,11 +228,8 @@ abstract public class Order extends AbstractTask implements QuantityAddable<Item
     public void assignTask(Task task) {
         // Inform listener
         if (listener != null) {
-            listener.onOrderTaskAssigned(this, task);
+            listener.onTaskAssign(this, task);
         }
-
-        // Inform the frontend
-        FrontendCommunicator.getInstance().enqueueTaskAssignedLog(task, this);
 
         // Add task to the order
         planItemsToReserve(task);
@@ -245,7 +242,7 @@ abstract public class Order extends AbstractTask implements QuantityAddable<Item
 
             // Inform listener
             if (listener != null) {
-                listener.onOrderStarted(this);
+                listener.onStart(this);
             }
         }
     }
@@ -259,11 +256,8 @@ abstract public class Order extends AbstractTask implements QuantityAddable<Item
     public void onTaskComplete(Task task) {
         // Inform listener
         if (listener != null) {
-            listener.onOrderTaskCompleted(this, task);
+            listener.onTaskComplete(this, task, reservedItems.get(task));
         }
-
-        // Inform the frontend
-        FrontendCommunicator.getInstance().enqueueTaskCompletedLog(task, this, reservedItems.get(task));
 
         // Finalize completed task
         acquireReservedItemsInRack(task);
@@ -275,11 +269,8 @@ abstract public class Order extends AbstractTask implements QuantityAddable<Item
 
             // Inform listener
             if (listener != null) {
-                listener.onOrderFulfilled(this);
+                listener.onFulfill(this);
             }
-
-            // Inform the frontend
-            FrontendCommunicator.getInstance().enqueueOrderFulfilledLog(this);
 
             terminate();
         }
