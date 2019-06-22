@@ -59,9 +59,9 @@ abstract public class AbstractAgent extends HiveObject implements TaskAssignable
     protected int loadCapacity = Constants.AGENT_DEFAULT_LOAD_CAPACITY;
 
     /**
-     * The current battery percentage of this {@code Agent}.
+     * The current battery level of this {@code Agent}.
      */
-    protected int chargePercentage = Constants.AGENT_DEFAULT_CHARGE_PERCENTAGE;
+    protected int batteryLevel = Constants.AGENT_DEFAULT_CHARGE_PERCENTAGE;
 
     /**
      * The ip address of this {@code Agent} needed for communication.
@@ -104,7 +104,6 @@ abstract public class AbstractAgent extends HiveObject implements TaskAssignable
     public AbstractAgent(int id, int loadCap) {
         super(id);
         this.loadCapacity = loadCap;
-        this.direction = direction;
     }
 
     // ===============================================================================================
@@ -196,12 +195,25 @@ abstract public class AbstractAgent extends HiveObject implements TaskAssignable
     }
 
     /**
-     * Returns the current battery percentage of this {@code Agent}.
+     * Returns the current battery level of this {@code Agent}.
      *
-     * @return the charge percentage of this {@code Agent}.
+     * @return the charge level of this {@code Agent}.
      */
-    public int getChargePercentage() {
-        return chargePercentage;
+    public int getBatteryLevel() {
+        return batteryLevel;
+    }
+
+    /**
+     * Sets the battery level of this {@code Agent}.
+     *
+     * @param level the new battery level to set.
+     */
+    public void setBatteryLevel(int level) {
+        batteryLevel = level;
+
+        if (listener != null) {
+            listener.onBatteryLevelChange((Agent) this, level);
+        }
     }
 
     /**

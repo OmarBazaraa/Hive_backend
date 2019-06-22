@@ -99,11 +99,8 @@ public class Agent extends AbstractAgent {
 
         // Inform listener
         if (listener != null) {
-            listener.onAgentActivated(this);
+            listener.onActivate(this);
         }
-
-        // Inform the frontend
-        FrontendCommunicator.getInstance().enqueueActivatedAgent(this);
 
         // Mark as activated
         deactivated = false;
@@ -126,11 +123,8 @@ public class Agent extends AbstractAgent {
 
         // Inform listener
         if (listener != null) {
-            listener.onAgentDeactivated(this);
+            listener.onDeactivate(this);
         }
-
-        // Inform the frontend
-        FrontendCommunicator.getInstance().enqueueDeactivatedAgent(this);
 
         // Mark as deactivated
         deactivated = true;
@@ -157,11 +151,8 @@ public class Agent extends AbstractAgent {
 
         // Inform listener
         if (listener != null) {
-            listener.onAgentBlocked(this);
+            listener.onBlock(this);
         }
-
-        // Inform the frontend
-        FrontendCommunicator.getInstance().enqueueBlockedAgent(this);
 
         // Inform the warehouse
         Warehouse warehouse = Warehouse.getInstance();
@@ -413,7 +404,7 @@ public class Agent extends AbstractAgent {
     @Override
     public void unlock(Facility facility) {
         locked = false;
-        updateLastAction(AgentAction.BIND);
+        updateLastAction(AgentAction.UNBIND);
     }
 
     // ===============================================================================================
@@ -443,10 +434,7 @@ public class Agent extends AbstractAgent {
 
         // Inform listener
         if (listener != null) {
-            listener.onAgentActionExecuted(this, action);
+            listener.onAction(this, action);
         }
-
-        // Inform the frontend
-        FrontendCommunicator.getInstance().enqueueAgentAction(this, action);
     }
 }
