@@ -91,7 +91,6 @@ public class FrontendCommunicator {
     public FrontendCommunicator(int port, CommunicationListener l) {
         // Protected constructor to ensure a singleton object.
         server = Service.ignite();
-        server.threadPool(1);
         server.port(port);
         server.webSocket("/", new WebSocketHandler());
 
@@ -177,7 +176,7 @@ public class FrontendCommunicator {
      */
     private void setLastStepStatus(boolean completed) {
         synchronized (lock) {
-            receivedAck = true;
+            receivedAck = completed;
         }
     }
 
@@ -535,9 +534,9 @@ public class FrontendCommunicator {
      * Sends the current update message to the frontend.
      */
     public void flushUpdateMsg() {
+        setLastStepStatus(false);
         send(Encoder.encodeUpdateMsg(warehouse.getTime(), actions, logs, statistics));
         clearUpdateStates();
-        setLastStepStatus(false);
     }
 
     /**
