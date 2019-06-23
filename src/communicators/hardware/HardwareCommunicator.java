@@ -109,7 +109,20 @@ public class HardwareCommunicator {
      * Configures the connection with all the registered agents.
      */
     public void configure() {
+        // Sleep for some duration
+        try {
+            Thread.sleep(HardwareConstants.HARDWARE_CONFIG_DURATION);
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+            ex.printStackTrace();
+        }
 
+        // Check for un-connected agents
+        for (Agent agent : ipToAgentMap.values()) {
+            if (!agentToSessionMap.containsKey(agent)) {
+                listener.onAgentDeactivated(agent);
+            }
+        }
     }
 
     /**

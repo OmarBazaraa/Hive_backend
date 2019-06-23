@@ -27,4 +27,8 @@ public class HardwareConstants {
 
     public static final int TYPE_LIGHT_RED = 5;
     public static final int TYPE_LIGHT_BLUE = 6;
+
+    // Others
+    public static final int HARDWARE_CONFIG_DURATION = 3000;
+
 }
