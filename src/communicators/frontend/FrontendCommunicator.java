@@ -74,9 +74,16 @@ public class FrontendCommunicator {
     private JSONArray activatedAgents, deactivatedAgents, blockedAgents;
 
     /**
-     * Object used to lock threads from updating the ACK flag of this {@code FrontendCommunicator} simultaneously.
+     * Object used to lock threads from modifying
+     * the UPDATE message-related variables of this {@code FrontendCommunicator} simultaneously.
      */
-    private final Object lock = new Object();
+    private final Object lock1 = new Object();
+
+    /**
+     * Object used to lock threads from modifying
+     * the CONTROL message-related variables of this {@code FrontendCommunicator} simultaneously.
+     */
+    private final Object lock2 = new Object();
 
     // ===============================================================================================
     //
@@ -158,28 +165,6 @@ public class FrontendCommunicator {
         System.out.println();
     }
 
-    /**
-     * Checks whether the last time step has been completed by the frontend or not.
-     *
-     * @return {@code true} if completed; {@code false} otherwise.
-     */
-    public boolean isLastStepCompleted() {
-        synchronized (lock) {
-            return receivedAck;
-        }
-    }
-
-    /**
-     * Sets the last time step as being completed by the frontend.
-     *
-     * @param completed {@code true} to set the last step as completed; {@code false} otherwise.
-     */
-    private void setLastStepStatus(boolean completed) {
-        synchronized (lock) {
-            receivedAck = completed;
-        }
-    }
-
     // ===============================================================================================
     //
     // Frontend -> Backend
@@ -237,14 +222,14 @@ public class FrontendCommunicator {
             case FrontendConstants.TYPE_RESUME:
                 processResumeMsg(data);
                 break;
-            case FrontendConstants.TYPE_ACK_UPDATE:
-                processUpdateAckMsg(data);
-                break;
             case FrontendConstants.TYPE_ORDER:
                 processOrderMsg(data);
                 break;
             case FrontendConstants.TYPE_CONTROL:
                 processControlMsg(data);
+                break;
+            case FrontendConstants.TYPE_ACK_UPDATE:
+                processUpdateAckMsg(data);
                 break;
             default:
                 throw new DataException("Invalid message type.", FrontendConstants.ERR_MSG_FORMAT);
@@ -342,33 +327,6 @@ public class FrontendCommunicator {
     }
 
     /**
-     * Processes the ACK_UPDATE message from the frontend.
-     * <p>
-     * ACK_UPDATE message is used to acknowledge the communicator of that last update message
-     * has been received successfully.
-     *
-     * @param data the received JSON data part of the message.
-     */
-    private void processUpdateAckMsg(JSONObject data) throws DataException {
-        if (listener.getState() == ServerState.IDLE) {
-            throw new DataException("Received ACK message while the server is IDLE state.",
-                    FrontendConstants.ERR_MSG_UNEXPECTED);
-        }
-
-        if (isLastStepCompleted()) {
-            throw new DataException("Received multiple ACK messages.",
-                    FrontendConstants.ERR_MSG_UNEXPECTED);
-        }
-
-        // Update ACK flag
-        setLastStepStatus(true);
-
-        // DEBUG
-        System.out.println("Frontend update ACK received ...");
-        System.out.println();
-    }
-
-    /**
      * Processes the ORDER message from the frontend.
      * <p>
      * ORDER message is used to add a new {@code Order} to the {@code Warehouse}.
@@ -442,6 +400,55 @@ public class FrontendCommunicator {
         }
     }
 
+    /**
+     * Processes the ACK_UPDATE message from the frontend.
+     * <p>
+     * ACK_UPDATE message is used to acknowledge the communicator of that last update message
+     * has been received successfully.
+     *
+     * @param data the received JSON data part of the message.
+     */
+    private void processUpdateAckMsg(JSONObject data) throws DataException {
+        if (listener.getState() == ServerState.IDLE) {
+            throw new DataException("Received ACK message while the server is in IDLE state.",
+                    FrontendConstants.ERR_MSG_UNEXPECTED);
+        }
+
+        if (isLastStepCompleted()) {
+            throw new DataException("Received multiple ACK messages.",
+                    FrontendConstants.ERR_MSG_UNEXPECTED);
+        }
+
+        // Update ACK flag
+        setLastStepStatus(true);
+
+        // DEBUG
+        System.out.println("Frontend update ACK received ...");
+        System.out.println();
+    }
+
+    /**
+     * Checks whether the last time step has been completed by the frontend or not.
+     *
+     * @return {@code true} if completed; {@code false} otherwise.
+     */
+    public boolean isLastStepCompleted() {
+        synchronized (lock1) {
+            return receivedAck;
+        }
+    }
+
+    /**
+     * Sets the last time step as being completed by the frontend.
+     *
+     * @param completed {@code true} to set the last step as completed; {@code false} otherwise.
+     */
+    private void setLastStepStatus(boolean completed) {
+        synchronized (lock1) {
+            receivedAck = completed;
+        }
+    }
+
     // ===============================================================================================
     //
     // Backend -> Frontend
@@ -475,9 +482,11 @@ public class FrontendCommunicator {
      * Clears the update states JSON arrays of the current time step.
      */
     public void clearUpdateStates() {
-        actions = new JSONArray();
-        logs = new JSONArray();
-        statistics = new JSONArray();
+        synchronized (lock1) {
+            actions = new JSONArray();
+            logs = new JSONArray();
+            statistics = new JSONArray();
+        }
     }
 
     /**
@@ -487,7 +496,9 @@ public class FrontendCommunicator {
      * @param action the performed action.
      */
     public void enqueueAgentAction(Agent agent, AgentAction action) {
-        actions.put(Encoder.encodeAgentAction(agent, action));
+        synchronized (lock1) {
+            actions.put(Encoder.encodeAgentAction(agent, action));
+        }
     }
 
     /**
@@ -497,7 +508,9 @@ public class FrontendCommunicator {
      * @param order the associated {@code Order}.
      */
     public void enqueueTaskAssignedLog(Task task, Order order) {
-        logs.put(Encoder.encodeTaskAssignedLog(task, order));
+        synchronized (lock1) {
+            logs.put(Encoder.encodeTaskAssignedLog(task, order));
+        }
     }
 
     /**
@@ -508,7 +521,9 @@ public class FrontendCommunicator {
      * @param items the map of add/removed items by the completed {@code Task}.
      */
     public void enqueueTaskCompletedLog(Task task, Order order, Map<Item, Integer> items) {
-        logs.put(Encoder.encodeTaskCompletedLog(task, order, items));
+        synchronized (lock1) {
+            logs.put(Encoder.encodeTaskCompletedLog(task, order, items));
+        }
     }
 
     /**
@@ -517,7 +532,9 @@ public class FrontendCommunicator {
      * @param order the newly issued {@code Order}.
      */
     public void enqueueOrderFulfilledLog(Order order) {
-        logs.put(Encoder.encodeOrderLog(FrontendConstants.TYPE_LOG_ORDER_FULFILLED, order));
+        synchronized (lock1) {
+            logs.put(Encoder.encodeOrderLog(FrontendConstants.TYPE_LOG_ORDER_FULFILLED, order));
+        }
     }
 
     /**
@@ -527,25 +544,31 @@ public class FrontendCommunicator {
      * @param value the value of the statistic.
      */
     public void enqueueStatistics(int key, double value) {
-        actions.put(Encoder.encodeStatistics(key, value));
+        synchronized (lock1) {
+            actions.put(Encoder.encodeStatistics(key, value));
+        }
     }
 
     /**
      * Sends the current update message to the frontend.
      */
     public void flushUpdateMsg() {
-        setLastStepStatus(false);
-        send(Encoder.encodeUpdateMsg(warehouse.getTime(), actions, logs, statistics));
-        clearUpdateStates();
+        synchronized (lock1) {
+            send(Encoder.encodeUpdateMsg(warehouse.getTime(), actions, logs, statistics));
+            clearUpdateStates();
+            setLastStepStatus(false);
+        }
     }
 
     /**
      * Clears the control states JSON arrays.
      */
     public void clearControlStates() {
-        activatedAgents = new JSONArray();
-        deactivatedAgents = new JSONArray();
-        blockedAgents = new JSONArray();
+        synchronized (lock2) {
+            activatedAgents = new JSONArray();
+            deactivatedAgents = new JSONArray();
+            blockedAgents = new JSONArray();
+        }
     }
 
     /**
@@ -554,7 +577,9 @@ public class FrontendCommunicator {
      * @param agent the activated {@code Agent}.
      */
     public void enqueueActivatedAgent(Agent agent) {
-        activatedAgents.put(agent.getId());
+        synchronized (lock2) {
+            activatedAgents.put(agent.getId());
+        }
     }
 
     /**
@@ -563,7 +588,9 @@ public class FrontendCommunicator {
      * @param agent the deactivated {@code Agent}.
      */
     public void enqueueDeactivatedAgent(Agent agent) {
-        deactivatedAgents.put(agent.getId());
+        synchronized (lock2) {
+            deactivatedAgents.put(agent.getId());
+        }
     }
 
     /**
@@ -572,15 +599,19 @@ public class FrontendCommunicator {
      * @param agent the blocked {@code Agent}.
      */
     public void enqueueBlockedAgent(Agent agent) {
-        blockedAgents.put(agent.getId());
+        synchronized (lock2) {
+            blockedAgents.put(agent.getId());
+        }
     }
 
     /**
      * Sends the current control message to the frontend.
      */
     public void flushControlMsg() {
-        send(Encoder.encodeControlMsg(activatedAgents, deactivatedAgents, blockedAgents));
-        clearControlStates();
+        synchronized (lock2) {
+            send(Encoder.encodeControlMsg(activatedAgents, deactivatedAgents, blockedAgents));
+            clearControlStates();
+        }
     }
 
     // ===============================================================================================

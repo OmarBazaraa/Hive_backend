@@ -52,7 +52,8 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
     private HardwareCommunicator hardwareComm;
 
     /**
-     * Object used to lock threads from updating the state/mode of this {@code Controller} simultaneously.
+     * Object used to lock threads from modifying
+     * the state/mode of this {@code Controller} simultaneously.
      */
     private final Object lock = new Object();
 
@@ -65,7 +66,6 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
      * Constructs a new {@code Controller} object.
      */
     public Controller() {
-        frontendComm = new FrontendCommunicator(Constants.FRONTEND_COMM_PORT, this);
         frontendComm = new FrontendCommunicator(Constants.FRONTEND_COMM_PORT, this);
     }
 
@@ -82,6 +82,7 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
      */
     private void run() {
         while (getState() != ServerState.EXIT) {
+
             // Must be in RUNNING state
             if (getState() != ServerState.RUNNING) {
                 continue;
@@ -283,8 +284,6 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
     //
     // Agent Listener Methods
     //
-
-    // All these functions are being called from the controller main thread (i.e. Main Thread)
 
     /**
      * Called when an {@code Agent} has performed an action.
