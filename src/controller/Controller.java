@@ -67,6 +67,7 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
      */
     public Controller() {
         frontendComm = new FrontendCommunicator(Constants.FRONTEND_COMM_PORT, this);
+        hardwareComm = new HardwareCommunicator(Constants.HARDWARE_COMM_PORT, this);
     }
 
     /**
@@ -89,7 +90,7 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
             }
 
             // Check if last time step has been completed
-            if (!frontendComm.isLastStepCompleted()) {
+            if (!isLastStepCompleted()) {
                 continue;
             }
 
@@ -97,8 +98,8 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
             try {
                 simulate();
             } catch (Exception ex) {
-                frontendComm.sendErr(FrontendConstants.ERR_SERVER, "Internal server error.");
                 updateState(ServerState.IDLE);
+                frontendComm.sendErr(FrontendConstants.ERR_SERVER, "Internal server error.");
                 System.out.println(ex.getMessage());
                 ex.printStackTrace();
             }
@@ -116,6 +117,20 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
                 // DEBUG
                 System.out.println(warehouse);
             }
+        }
+    }
+
+    /**
+     * Checks whether the last time step has been completed by
+     * the frontend and the hardware.
+     *
+     * @return {@code true} if last time step has been completed; {@code false} otherwise.
+     */
+    private boolean isLastStepCompleted() {
+        if (getMode() == RunningMode.DEPLOYMENT) {
+            return frontendComm.isLastStepCompleted() && hardwareComm.isLastStepCompleted();
+        } else {
+            return frontendComm.isLastStepCompleted();
         }
     }
 
@@ -183,8 +198,19 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
         synchronized (warehouse) {
             Collection<Agent> agents = warehouse.getAgentList();
 
+            // Register agents callback function
             for (Agent agent : agents) {
                 agent.setListener(this);
+            }
+
+            // Initialize in case of deployment
+            if (getMode() == RunningMode.DEPLOYMENT) {
+                for (Agent agent : agents) {
+                    hardwareComm.registerAgent(agent);
+                }
+
+                hardwareComm.start();
+                hardwareComm.configure();
             }
 
             // DEBUG
@@ -198,6 +224,10 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
     @Override
     public void onStop() {
         updateState(ServerState.IDLE);
+
+        if (getMode() == RunningMode.DEPLOYMENT) {
+            hardwareComm.close();
+        }
     }
 
     /**
@@ -206,6 +236,10 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
     @Override
     public void onPause() {
         updateState(ServerState.PAUSE);
+
+        if (getMode() == RunningMode.DEPLOYMENT) {
+            hardwareComm.pause();
+        }
     }
 
     /**
@@ -214,6 +248,10 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
     @Override
     public void onResume() {
         updateState(ServerState.RUNNING);
+
+        if (getMode() == RunningMode.DEPLOYMENT) {
+            hardwareComm.resume();
+        }
     }
 
     /**
@@ -235,7 +273,7 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
     }
 
     /**
-     * Called when the frontend or hardware communicators receives an {@code Agent} activation.
+     * Called when the frontend or the hardware communicators receives an {@code Agent} activation.
      *
      * @param agent the activated {@code Agent}.
      */
@@ -251,7 +289,7 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
     }
 
     /**
-     * Called when the frontend or hardware communicators receives an {@code Agent} deactivation.
+     * Called when the frontend or the hardware communicators receives an {@code Agent} deactivation.
      *
      * @param agent the deactivated {@code Agent}.
      */
@@ -276,7 +314,7 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
     @Override
     public void onAgentBatteryLevelChanged(Agent agent, int level) {
         synchronized (warehouse) {
-
+            agent.setBatteryLevel(level);
         }
     }
 
@@ -294,6 +332,10 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
     @Override
     public void onAction(Agent agent, AgentAction action) {
         frontendComm.enqueueAgentAction(agent, action);
+
+        if (getMode() == RunningMode.DEPLOYMENT) {
+            hardwareComm.sendAgentAction(agent, action);
+        }
     }
 
     /**
@@ -304,7 +346,7 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
      */
     @Override
     public void onBatteryLevelChange(Agent agent, int level) {
-
+        // TODO: enqueue battery updates to the frontend
     }
 
     /**
@@ -335,6 +377,10 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
     @Override
     public void onBlock(Agent agent) {
         frontendComm.enqueueBlockedAgent(agent);
+
+        if (getMode() == RunningMode.DEPLOYMENT) {
+            hardwareComm.sendStop(agent);
+        }
     }
 
     // ===============================================================================================
