@@ -4,8 +4,8 @@ import models.agents.Agent;
 import models.facilities.Facility;
 import models.maps.GridCell;
 import models.maps.utils.Position;
-
 import models.warehouses.Warehouse;
+
 import utils.Constants;
 import utils.Constants.*;
 
@@ -85,67 +85,6 @@ public class Planner {
         }
 
         return ret;
-    }
-
-    // ===============================================================================================
-    //
-    // Routing Using Pre-Planned Actions
-    //
-
-    /**
-     * Routes the given {@code Agent} one step towards its target location
-     * using the given pre-planned action.
-     *
-     * @param agent  the {@code Agent} to be routed.
-     * @param action the {@code AgentAction} to apply.
-     */
-    public static boolean route(Agent agent, AgentAction action) {
-        // Global information about the warehouse
-        Warehouse warehouse = Warehouse.getInstance();
-        long time = warehouse.getTime();
-
-        // Agent current position information
-        Position curPos = agent.getPosition();
-        GridCell curCell = warehouse.get(curPos.row, curPos.col);
-
-        // Rotation actions are easy
-        if (action != AgentAction.MOVE) {
-            curCell.clearScheduleAt(time);
-            agent.move(action);
-            return true;
-        }
-
-        // Agent next position information
-        Position nxtPos = curPos.next(agent.getDirection());
-        GridCell nxtCell = warehouse.get(nxtPos.row, nxtPos.col);
-        Agent a = nxtCell.getAgent();
-
-        // Check if the can move to the next cell
-        if (a == null || slide(a, agent)) {
-            curCell.clearScheduleAt(time);
-            curCell.setAgent(null);
-            nxtCell.setAgent(agent);
-            agent.setPosition(nxtPos);
-            agent.move(action);
-            return true;
-        }
-
-        // Cannot move the agent
-        agent.dropPlan();
-        return false;
-    }
-
-    /**
-     * Tries sliding the given {@code Agent} in order to bring a blank location
-     * for the main {@code Agent} to move into.
-     *
-     * @param slidingAgent the {@code Agent} to slide away.
-     * @param mainAgent    the main {@code Agent}.
-     *
-     * @return {@code true} if sliding is done successfully; {@code false} otherwise.
-     */
-    private static boolean slide(Agent slidingAgent, Agent mainAgent) {
-        return false;
     }
 
     // ===============================================================================================

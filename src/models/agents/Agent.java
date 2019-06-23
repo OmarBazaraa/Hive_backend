@@ -2,8 +2,6 @@ package models.agents;
 
 import algorithms.planner.Planner;
 
-import communicators.frontend.FrontendCommunicator;
-
 import models.facilities.Facility;
 import models.facilities.Rack;
 import models.maps.GridCell;
@@ -12,7 +10,6 @@ import models.maps.utils.Position;
 import models.tasks.Task;
 import models.warehouses.Warehouse;
 
-import utils.Constants;
 import utils.Constants.*;
 import utils.Utility;
 
@@ -171,20 +168,20 @@ public class Agent extends AbstractAgent {
 
         // Rotation actions
         if (action == AgentAction.ROTATE_RIGHT || action == AgentAction.ROTATE_LEFT) {
-            direction = Utility.prevDir(direction, action);
+            dir = Utility.prevDir(dir, action);
             return;
         }
 
         // Retreat action
         if (action == AgentAction.RETREAT) {
-            direction = Utility.getReverseDir(direction);
+            dir = Utility.getReverseDir(dir);
             return;
         }
 
         // Move action
         if (action == AgentAction.MOVE) {
             // Get the current and the previous cells
-            Position prv = getPosition().prev(direction);
+            Position prv = getPosition().prev(dir);
             GridCell curCell = warehouse.get(row, col);
             GridCell prvCell = warehouse.get(prv);
 
@@ -227,7 +224,7 @@ public class Agent extends AbstractAgent {
         // Rotation action
         if (lastAction == AgentAction.ROTATE_RIGHT || lastAction == AgentAction.ROTATE_LEFT) {
             blocked = false;
-            direction = Utility.nextDir(direction, lastAction);
+            dir = Utility.nextDir(dir, lastAction);
             updateLastAction(lastAction);
             return true;
         }
@@ -235,7 +232,7 @@ public class Agent extends AbstractAgent {
         // Retreat action
         if (lastAction == AgentAction.RETREAT) {
             blocked = false;
-            direction = Utility.getReverseDir(direction);
+            dir = Utility.getReverseDir(dir);
             updateLastAction(lastAction);
             return true;
         }
@@ -244,7 +241,7 @@ public class Agent extends AbstractAgent {
         if (lastAction == AgentAction.MOVE) {
             // Get the current and the next cells
             Warehouse warehouse = Warehouse.getInstance();
-            Position nxt = Utility.nextPos(row, col, direction);
+            Position nxt = Utility.nextPos(row, col, dir);
             GridCell curCell = warehouse.get(row, col);
             GridCell nxtCell = warehouse.get(nxt);
 
@@ -264,7 +261,7 @@ public class Agent extends AbstractAgent {
             // Retreat if the current cell is not locked by a deactivated agent
             if (!curCell.isLocked()) {
                 blocked = false;
-                direction = Utility.getReverseDir(direction);
+                dir = Utility.getReverseDir(dir);
                 updateLastAction(lastAction);
                 return true;
             }
@@ -340,27 +337,29 @@ public class Agent extends AbstractAgent {
      */
     @Override
     public void reach(Facility dst) {
+        // Plan what action to apply next
         plan(dst);
-        Planner.route(this, plan.pop());
-    }
+        AgentAction action = plan.pop();
 
-    /**
-     * Moves this {@code Agent} according to the given action.
-     * <p>
-     * The allowed actions are only:
-     * {@code AgentAction.ROTATE_RIGHT}, {@code AgentAction.ROTATE_LEFT}, and
-     * {@code AgentAction.MOVE}.
-     *
-     * @param action the {@code AgentAction} to move with.
-     */
-    @Override
-    public void move(AgentAction action) {
-        if (action == AgentAction.MOVE) {
-            // Setting the new position is done by the routing function
-        } else {
-            direction = Utility.nextDir(direction, action);
+        // Get the current and the next cells
+        Warehouse warehouse = Warehouse.getInstance();
+        Pose nxt = getPose().next(action);
+        GridCell curCell = warehouse.get(row, col);
+        GridCell nxtCell = warehouse.get(nxt.row, nxt.col);
+        Agent blockingAgent = nxtCell.getAgent();
+        long time = warehouse.getTime();
+
+        // Check next cell
+        if (nxtCell.isLocked() || blockingAgent != null && blockingAgent != this) {
+            dropPlan();
+            return;
         }
 
+        // Apply action and set the new pose of the agent
+        curCell.clearScheduleAt(time);
+        curCell.setAgent(null);
+        nxtCell.setAgent(this);
+        setPose(nxt);
         updateLastAction(action);
     }
 

@@ -31,7 +31,7 @@ abstract public class AbstractAgent extends HiveObject implements TaskAssignable
     /**
      * The current direction this {@code Agent} is heading to.
      */
-    protected Direction direction = Constants.AGENT_DEFAULT_DIRECTION;
+    protected Direction dir = Constants.AGENT_DEFAULT_DIRECTION;
 
     /**
      * The flag indicating whether this {@code Agent} is currently deactivated or not.
@@ -117,16 +117,16 @@ abstract public class AbstractAgent extends HiveObject implements TaskAssignable
      * @return the {@code Direction} of this {@code Agent}.
      */
     public Direction getDirection() {
-        return direction;
+        return dir;
     }
 
     /**
      * Sets the direction of this {@code Agent}.
      *
-     * @param dir the new {@code Direction} to set.
+     * @param d the new {@code Direction} to set.
      */
-    public void setDirection(Direction dir) {
-        direction = dir;
+    public void setDirection(Direction d) {
+        dir = d;
     }
 
     /**
@@ -135,7 +135,7 @@ abstract public class AbstractAgent extends HiveObject implements TaskAssignable
      * @return the {@code Pose} of this {@code Agent}.
      */
     public Pose getPose() {
-        return new Pose(row, col, direction);
+        return new Pose(row, col, dir);
     }
 
     /**
@@ -146,7 +146,7 @@ abstract public class AbstractAgent extends HiveObject implements TaskAssignable
     public void setPose(Pose pose) {
         row = pose.row;
         col = pose.col;
-        direction = pose.dir;
+        dir = pose.dir;
     }
 
     /**
@@ -379,17 +379,6 @@ abstract public class AbstractAgent extends HiveObject implements TaskAssignable
     abstract public void reach(Facility dst);
 
     /**
-     * Moves this {@code Agent} according to the given action.
-     * <p>
-     * The allowed actions are only:
-     * {@code AgentAction.ROTATE_RIGHT}, {@code AgentAction.ROTATE_LEFT}, and
-     * {@code AgentAction.MOVE}.
-     *
-     * @param action the {@code AgentAction} to move with.
-     */
-    abstract public void move(AgentAction action);
-
-    /**
      * Loads and lifts the given {@code Rack} above this {@code Agent}.
      *
      * @param rack the {@code Rack} to load.
@@ -457,7 +446,7 @@ abstract public class AbstractAgent extends HiveObject implements TaskAssignable
         builder.append(" id: ").append(id).append(",");
         builder.append(" pos: ").append(getPosition()).append(", ");
         builder.append(" load_capacity: ").append(loadCapacity).append(",");
-        builder.append(" direction: ").append(direction);
+        builder.append(" direction: ").append(dir);
         builder.append(" }");
 
         return builder.toString();
