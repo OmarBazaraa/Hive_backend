@@ -339,6 +339,7 @@ public class Agent extends AbstractAgent {
     public void reach(Facility dst) {
         // Plan what action to apply next
         plan(dst);
+        if (plan == null || plan.isEmpty()) return;
         AgentAction action = plan.pop();
 
         // Get the current and the next cells

@@ -51,14 +51,18 @@ public class Planner {
         q.add(new Position(row, col));
         ret[row][col] = 0;
 
-        // Keep expanding all cells in the maps
+        //
+        // Keep exploring all states in the warehouse
+        //
         while (!q.isEmpty()) {
-            // Get current node and its distance to the destination
+            // Get current node
             Position cur = q.poll();
 
+            //
             // Expanding in all directions
+            //
             for (Direction dir : Direction.values()) {
-                // Get net position
+                // Get next position
                 Position nxt = cur.next(dir);
 
                 // Skip if next position is out of bound

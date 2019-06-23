@@ -173,8 +173,17 @@ public class PlanNode implements Comparable<PlanNode> {
         // Get the agent that is scheduled to be in this state
         Agent a = cell.getScheduledAt(time);
 
-        // If there is an agent with higher priority then skip this state as well
+        // If that agent is with higher priority then skip this state as well
         if (a != null && a.compareTo(source) > 0) {
+            return false;
+        }
+
+        // Get current agent in this state
+        a = cell.getAgent();
+
+        // If that agent is not assigned task yet or is currently locked or deactivated
+        // then skip this state as well
+        if (a != null && a != source && (!a.isActive() || a.isLocked() || a.isDeactivated())) {
             return false;
         }
 
@@ -291,9 +300,9 @@ public class PlanNode implements Comparable<PlanNode> {
         StringBuilder builder = new StringBuilder();
 
         builder.append("PlanNode: {");
-        builder.append(" pos: ").append("(").append(row).append(", ").append(col).append(")").append(", ");
-        builder.append(" dir: ").append(dir).append(", ");
-        builder.append(" time: ").append(time).append(", ");
+        builder.append(" pos: ").append("(").append(row).append(", ").append(col).append(")").append(",");
+        builder.append(" dir: ").append(dir).append(",");
+        builder.append(" time: ").append(time).append(",");
         builder.append(" action: ").append(action);
         builder.append(" }");
 
