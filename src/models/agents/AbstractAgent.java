@@ -61,7 +61,7 @@ abstract public class AbstractAgent extends HiveObject implements TaskAssignable
     /**
      * The current battery level of this {@code Agent}.
      */
-    protected int batteryLevel = Constants.AGENT_DEFAULT_CHARGE_PERCENTAGE;
+    protected int batteryLevel = Constants.AGENT_DEFAULT_BATTERY_LEVEL;
 
     /**
      * The ip address of this {@code Agent} needed for communication.

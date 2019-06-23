@@ -237,6 +237,18 @@ abstract public class AbstractWarehouse {
     }
 
     /**
+     * Checks whether a cell is outside the boundaries of this {@code Warehouse} or not.
+     *
+     * @param row the row position of the cell to check.
+     * @param col the column position of the cell to check.
+     *
+     * @return {@code true} if the cell is outside the grid; {@code false} otherwise.
+     */
+    public boolean isOutBound(int row, int col) {
+        return 0 > row || row >= rows || 0 > col || col >= cols;
+    }
+
+    /**
      * Returns a {@code GridCell} given its position in this {@code Warehouse}.
      *
      * @param row the row position of the cell to return.

@@ -62,7 +62,7 @@ public class Planner {
                 Position nxt = cur.next(dir);
 
                 // Skip if next position is out of bound
-                if (!warehouse.isInBound(nxt.row, nxt.col)) {
+                if (warehouse.isOutBound(nxt.row, nxt.col)) {
                     continue;
                 }
 

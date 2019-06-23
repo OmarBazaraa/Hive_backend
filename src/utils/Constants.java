@@ -121,7 +121,8 @@ public class Constants {
 
     // Agent default configurations
     public static final int AGENT_DEFAULT_LOAD_CAPACITY = 500;
-    public static final int AGENT_DEFAULT_CHARGE_PERCENTAGE = 70;
+    public static final int AGENT_DEFAULT_BATTERY_LEVEL = 7;
+    public static final int AGENT_BATTERY_THRESHOLD = 2;
     public static final Direction AGENT_DEFAULT_DIRECTION = Direction.RIGHT;
 
     //

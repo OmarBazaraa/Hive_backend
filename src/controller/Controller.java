@@ -204,7 +204,7 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
             }
 
             // Initialize in case of deployment
-            if (getMode() == RunningMode.DEPLOYMENT) {
+            if (mode == RunningMode.DEPLOYMENT) {
                 for (Agent agent : agents) {
                     hardwareComm.registerAgent(agent);
                 }

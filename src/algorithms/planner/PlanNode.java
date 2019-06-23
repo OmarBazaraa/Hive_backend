@@ -3,8 +3,8 @@ package algorithms.planner;
 import models.agents.Agent;
 import models.facilities.Facility;
 import models.maps.GridCell;
-
 import models.warehouses.Warehouse;
+
 import utils.Constants;
 import utils.Constants.*;
 import utils.Utility;
@@ -158,7 +158,7 @@ public class PlanNode implements Comparable<PlanNode> {
      */
     public boolean canVisit() {
         // First of all return if out of warehouse boundaries
-        if (!warehouse.isInBound(row, col)) {
+        if (warehouse.isOutBound(row, col)) {
             return false;
         }
 
