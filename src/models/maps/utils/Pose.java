@@ -37,19 +37,22 @@ public class Pose extends Position {
      * @return the next {@code Pose}.
      */
     public Pose next(AgentAction action) {
-        int i = dir.ordinal();
-
         if (action == AgentAction.MOVE) {
+            int i = dir.ordinal();
             int r = row + Constants.DIR_ROW[i];
             int c = col + Constants.DIR_COL[i];
             return new Pose(r, c, dir);
         }
 
         if (action == AgentAction.RETREAT) {
-            // TODO:
+            return new Pose(row, col, Utility.getReverseDir(dir));
         }
 
-        return new Pose(row, col, Utility.nextDir(dir, action));
+        if (action == AgentAction.ROTATE_RIGHT || action == AgentAction.ROTATE_LEFT) {
+            new Pose(row, col, Utility.nextDir(dir, action));
+        }
+
+        return new Pose(row, col, dir);
     }
 
     /**
@@ -60,8 +63,6 @@ public class Pose extends Position {
      * @return the previous {@code Pose}.
      */
     public Pose previous(AgentAction action) {
-
-        // Movement
         if (action == AgentAction.MOVE) {
             int i = dir.ordinal();
             int r = row - Constants.DIR_ROW[i];
@@ -69,17 +70,14 @@ public class Pose extends Position {
             return new Pose(r, c, dir);
         }
 
-        // Re-treatment
         if (action == AgentAction.RETREAT) {
-            // TODO:
+            return new Pose(row, col, Utility.getReverseDir(dir));
         }
 
-        // Rotation
         if (action == AgentAction.ROTATE_RIGHT || action == AgentAction.ROTATE_LEFT) {
             return new Pose(row, col, Utility.prevDir(dir, action));
         }
 
-        // Return same pose
         return new Pose(row, col, dir);
     }
 
