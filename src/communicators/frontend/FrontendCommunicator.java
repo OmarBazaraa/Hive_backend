@@ -125,8 +125,6 @@ public class FrontendCommunicator {
 
     /**
      * Opens a {@code Session} with the frontend.
-     * <p>
-     * TODO: force only one the frontend client
      *
      * @param sess the frontend {@code Session} to open.
      */
@@ -136,8 +134,6 @@ public class FrontendCommunicator {
 
     /**
      * Closes the {@code Session} with the frontend.
-     * <p>
-     * TODO: force only one the frontend client
      *
      * @param sess the frontend {@code Session} to close.
      */
@@ -154,15 +150,15 @@ public class FrontendCommunicator {
     private void send(JSONObject msg) {
         try {
             session.getRemote().sendString(msg.toString());
+
+            // DEBUG
+            System.out.println("FrontendCommunicator :: Sending to frontend ...");
+            System.out.println(msg.toString(4));
+            System.out.println();
         } catch (IOException ex) {
             listener.onStop();
             System.out.println(ex.getMessage());
         }
-
-        // DEBUG
-        System.out.println("Sending to frontend ...");
-        System.out.println(msg.toString(4));
-        System.out.println();
     }
 
     // ===============================================================================================
@@ -229,7 +225,7 @@ public class FrontendCommunicator {
                 processControlMsg(data);
                 break;
             case FrontendConstants.TYPE_ACK_UPDATE:
-                processUpdateAckMsg(data);
+                processAckMsg(data);
                 break;
             default:
                 throw new DataException("Invalid message type.", FrontendConstants.ERR_MSG_FORMAT);
@@ -408,7 +404,7 @@ public class FrontendCommunicator {
      *
      * @param data the received JSON data part of the message.
      */
-    private void processUpdateAckMsg(JSONObject data) throws DataException {
+    private void processAckMsg(JSONObject data) throws DataException {
         if (listener.getState() == ServerState.IDLE) {
             throw new DataException("Received ACK message while the server is in IDLE state.",
                     FrontendConstants.ERR_MSG_UNEXPECTED);
@@ -423,7 +419,7 @@ public class FrontendCommunicator {
         setLastStepStatus(true);
 
         // DEBUG
-        System.out.println("Frontend update ACK received ...");
+        System.out.println("FrontendCommunicator :: Received ACK ...");
         System.out.println();
     }
 
@@ -620,27 +616,27 @@ public class FrontendCommunicator {
     //
 
     @WebSocket
-    public class WebSocketHandler {
+    private class WebSocketHandler {
 
         @OnWebSocketConnect
         public void onConnect(Session client) {
+            // TODO: force only one the frontend client
             openSession(client);
 
             // DEBUG
             System.out.println();
-            System.out.println("Frontend connected!");
-            System.out.println();
-            System.out.println("Frontend communicator thread count: " + server.activeThreadCount());
+            System.out.println("FrontendCommunicator :: Frontend connected!");
             System.out.println();
         }
 
         @OnWebSocketClose
         public void onClose(Session client, int statusCode, String reason) {
+            // TODO: force only one the frontend client
             closeSession(client);
 
             // DEBUG
             System.out.println();
-            System.out.println("Frontend connection closed with status code: " + statusCode);
+            System.out.println("FrontendCommunicator :: Frontend connection closed with status code: " + statusCode);
             System.out.println();
         }
 
