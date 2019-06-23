@@ -327,7 +327,7 @@ public class HardwareCommunicator {
     //
 
     @WebSocket
-    private class WebSocketHandler {
+    public class WebSocketHandler {
 
         @OnWebSocketConnect
         public void onConnect(Session client) {

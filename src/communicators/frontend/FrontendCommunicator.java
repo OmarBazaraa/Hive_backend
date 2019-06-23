@@ -616,7 +616,7 @@ public class FrontendCommunicator {
     //
 
     @WebSocket
-    private class WebSocketHandler {
+    public class WebSocketHandler {
 
         @OnWebSocketConnect
         public void onConnect(Session client) {
