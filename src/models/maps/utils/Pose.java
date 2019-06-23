@@ -49,7 +49,7 @@ public class Pose extends Position {
         }
 
         if (action == AgentAction.ROTATE_RIGHT || action == AgentAction.ROTATE_LEFT) {
-            new Pose(row, col, Utility.nextDir(dir, action));
+            return new Pose(row, col, Utility.nextDir(dir, action));
         }
 
         return new Pose(row, col, dir);
