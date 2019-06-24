@@ -3,7 +3,6 @@ package communicators.hardware;
 import communicators.CommunicationListener;
 
 import models.agents.Agent;
-import models.warehouses.Warehouse;
 
 import utils.Constants.*;
 
@@ -12,9 +11,10 @@ import org.eclipse.jetty.websocket.api.annotations.*;
 
 import spark.Service;
 
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.util.Enumeration;
+import java.nio.ByteBuffer;
 import java.util.concurrent.ConcurrentHashMap;
 
 
@@ -58,6 +58,9 @@ public class HardwareCommunicator {
      */
     private CommunicationListener listener;
 
+
+    private FileWriter logger;
+
     // ===============================================================================================
     //
     // Member Methods
@@ -76,6 +79,13 @@ public class HardwareCommunicator {
 
         // Set the communication listener
         listener = l;
+
+        // Open logger file
+        try {
+            logger = new FileWriter(HardwareConstants.HARDWARE_LOG_FILE);
+        } catch (Exception ex) {
+            System.err.println(ex.getMessage());
+        }
     }
 
     /**
@@ -111,9 +121,9 @@ public class HardwareCommunicator {
     public void configure() {
         // Sleep for some duration
         try {
-            Thread.sleep(HardwareConstants.HARDWARE_CONFIG_DURATION);
+            Thread.sleep(HardwareConstants.HARDWARE_CONFIG_INTERVAL);
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            System.err.println(ex.getMessage());
             ex.printStackTrace();
         }
 
@@ -153,7 +163,7 @@ public class HardwareCommunicator {
      * @param agent the {@code Agent} to send the message to.
      * @param msg   the message to sent.
      */
-    private void send(Agent agent, String msg) {
+    private void send(Agent agent, byte[] msg) {
         Session session = agentToSessionMap.get(agent);
 
         if (session == null) {
@@ -161,7 +171,7 @@ public class HardwareCommunicator {
         }
 
         try {
-            session.getRemote().sendString(msg);
+            session.getRemote().sendBytes(ByteBuffer.wrap(msg));
 
             // DEBUG
             System.out.println("HardwareCommunicator :: Sending to agent-" + agent.getId() + " ...");
@@ -169,7 +179,7 @@ public class HardwareCommunicator {
             System.out.println();
         } catch (IOException ex) {
             listener.onAgentDeactivated(agent);
-            System.out.println(ex.getMessage());
+            System.err.println(ex.getMessage());
         }
     }
 
@@ -186,26 +196,26 @@ public class HardwareCommunicator {
      * @param agent the {@code Agent} sending this message.
      * @param msg   the raw message as received from this {@code Agent}.
      */
-    private void process(Agent agent, String msg) {
+    private void process(Agent agent, byte[] msg) {
         try {
-            int type = (msg.charAt(0) - '0');
+            int type = msg[0];
 
             switch (type) {
-                case HardwareConstants.TYPE_ACK:
+                case HardwareConstants.TYPE_DONE:
                     processAckMsg(agent);
                     break;
                 case HardwareConstants.TYPE_BATTERY:
-                    int level = (msg.charAt(1) - '0');
+                    int level = msg[1];
                     processBatteryMsg(agent, level);
                     break;
                 case HardwareConstants.TYPE_BLOCKED:
-                    boolean blocked = (msg.charAt(1) == '1');
+                    boolean blocked = (msg[1] == 1);
                     processControlMsg(agent, blocked);
                     break;
             }
         } catch (Exception ex) {
             System.out.println("HardwareCommunicator :: Invalid message format from agent-" + agent.getId() + ": " + msg);
-            System.out.println(ex.getMessage());
+            System.err.println(ex.getMessage());
             ex.printStackTrace();
         }
     }
@@ -293,31 +303,29 @@ public class HardwareCommunicator {
      * @param action the instruction to send.
      */
     public void sendAgentAction(Agent agent, AgentAction action) {
-        String msg = "";
+        byte[] msg = {HardwareConstants.TYPE_ACTION, 0};
 
         switch (action) {
             case MOVE:
-                msg = Integer.toString(HardwareConstants.TYPE_MOVE);
+                msg[1] = HardwareConstants.TYPE_MOVE;
                 break;
             case ROTATE_RIGHT:
-                msg = Integer.toString(HardwareConstants.TYPE_ROTATE_RIGHT);
+                msg[1] = HardwareConstants.TYPE_ROTATE_RIGHT;
                 break;
             case ROTATE_LEFT:
-                msg = Integer.toString(HardwareConstants.TYPE_ROTATE_LEFT);
+                msg[1] = HardwareConstants.TYPE_ROTATE_LEFT;
                 break;
             case RETREAT:
-                msg = Integer.toString(HardwareConstants.TYPE_RETREAT);
+                msg[1] = HardwareConstants.TYPE_RETREAT;
                 break;
             case LOAD:
-                msg = Integer.toString(HardwareConstants.TYPE_LOAD);
+                msg[1] = HardwareConstants.TYPE_LOAD;
                 break;
             case OFFLOAD:
-                msg = Integer.toString(HardwareConstants.TYPE_OFFLOAD);
+                msg[1] = HardwareConstants.TYPE_OFFLOAD;
                 break;
-        }
-
-        if (msg.isEmpty()) {
-            return;
+            default:
+                return;
         }
 
         send(agent, msg);
@@ -330,7 +338,7 @@ public class HardwareCommunicator {
      * @param agent the {@code Agent} to send the instruction to.
      */
     public void sendStop(Agent agent) {
-        String msg = Integer.toString(HardwareConstants.TYPE_STOP);
+        byte[] msg = {HardwareConstants.TYPE_ACTION, HardwareConstants.TYPE_STOP};
         send(agent, msg);
     }
 
@@ -383,12 +391,36 @@ public class HardwareCommunicator {
         }
 
         @OnWebSocketMessage
-        public void onMessage(Session client, String message) {
+        public void onMessage(Session client, String msg) {
             InetAddress addr = client.getRemoteAddress().getAddress();
             Agent agent = ipToAgentMap.get(addr);
 
             if (agent != null) {
-                process(agent, message);
+                try {
+                    logger.write("HardwareCommunicator :: Received message from agent-" + agent.getId() + ": " + msg);
+                } catch (Exception ex) {
+                    System.err.println(ex.getMessage());
+                }
+            }
+        }
+
+        @OnWebSocketMessage
+        public void onMessage(Session client, byte[] buffer, int offset, int length) {
+            InetAddress addr = client.getRemoteAddress().getAddress();
+            Agent agent = ipToAgentMap.get(addr);
+
+            byte[] msg = new byte[length];
+
+            for (int i = 0; i < length; ++i) {
+                msg[i] = buffer[offset + i];
+            }
+
+            System.out.println("Buffer: " + buffer);
+            System.out.println("Offset: " + offset);
+            System.out.println("Length: " + length);
+
+            if (agent != null) {
+                process(agent, msg);
             } else {
                 // DEBUG
                 System.out.println();
