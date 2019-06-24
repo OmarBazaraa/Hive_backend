@@ -1,4 +1,3 @@
-import communicators.frontend.FrontendCommunicator;
 import controller.Controller;
 
 
@@ -12,7 +11,7 @@ public class Main {
      *
      * @param args external system arguments.
      */
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         // Welcome screen
         System.out.println();
         System.out.println("+---------------------+");

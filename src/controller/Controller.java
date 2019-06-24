@@ -98,7 +98,7 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
             try {
                 simulate();
             } catch (Exception ex) {
-                updateState(ServerState.IDLE);
+                setState(ServerState.IDLE);
                 frontendComm.sendErr(FrontendConstants.ERR_SERVER, "Internal server error.");
                 System.out.println(ex.getMessage());
                 ex.printStackTrace();
@@ -156,7 +156,7 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
      *
      * @param state the new {@code ServerState} to set.
      */
-    private void updateState(ServerState state) {
+    private void setState(ServerState state) {
         synchronized (lock) {
             currentState = state;
         }
@@ -179,7 +179,7 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
      *
      * @param mode the new {@code RunningMode} to set.
      */
-    private void updateMode(RunningMode mode) {
+    private void setMode(RunningMode mode) {
         synchronized (lock) {
             currentMode = mode;
         }
@@ -192,8 +192,8 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
      */
     @Override
     public void onStart(RunningMode mode) {
-        updateState(ServerState.RUNNING);
-        updateMode(mode);
+        setState(ServerState.RUNNING);
+        setMode(mode);
 
         synchronized (warehouse) {
             Collection<Agent> agents = warehouse.getAgentList();
@@ -223,7 +223,7 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
      */
     @Override
     public void onStop() {
-        updateState(ServerState.IDLE);
+        setState(ServerState.IDLE);
 
         if (getMode() == RunningMode.DEPLOYMENT) {
             hardwareComm.close();
@@ -235,7 +235,7 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
      */
     @Override
     public void onPause() {
-        updateState(ServerState.PAUSE);
+        setState(ServerState.PAUSE);
 
         if (getMode() == RunningMode.DEPLOYMENT) {
             hardwareComm.pause();
@@ -247,7 +247,7 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
      */
     @Override
     public void onResume() {
-        updateState(ServerState.RUNNING);
+        setState(ServerState.RUNNING);
 
         if (getMode() == RunningMode.DEPLOYMENT) {
             hardwareComm.resume();
@@ -262,6 +262,9 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
     @Override
     public void onOrderIssued(Order order) {
         synchronized (warehouse) {
+            System.out.println(">> Controller.onOrderIssued(" + order.getId() + ") in thread: " + Thread.currentThread().getName());
+            System.out.flush();
+
             order.setListener(this);
             warehouse.addOrder(order);
 
@@ -269,6 +272,7 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
             System.out.println("Order received ...");
             System.out.println(order);
             System.out.println();
+            System.out.flush();
         }
     }
 

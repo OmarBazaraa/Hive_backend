@@ -134,6 +134,9 @@ public class Warehouse extends AbstractWarehouse {
         // Get the initial size of the queue
         int size = pendingOrders.size();
 
+        System.out.println(">> start dispatchPendingOrders() in thread: " + Thread.currentThread().getName());
+        System.out.flush();
+
         //
         // Iterate over every pending order and tries to dispatch it
         //
@@ -149,6 +152,9 @@ public class Warehouse extends AbstractWarehouse {
                 pendingOrders.add(order);
             }
         }
+
+        System.out.println(">> end dispatchPendingOrders() in thread: " + Thread.currentThread().getName());
+        System.out.flush();
     }
 
     /**

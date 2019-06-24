@@ -2,6 +2,8 @@ package models.warehouse;
 
 import communicators.frontend.utils.Decoder;
 
+import utils.Constants;
+import utils.Constants.*;
 import utils.Utility;
 
 import org.json.JSONObject;
@@ -16,6 +18,6 @@ public class WarehouseHelper {
      */
     public static void configureWarehouse(String path) throws Exception {
         String config = Utility.readFile(path);
-        Decoder.decodeWarehouse(new JSONObject(config));
+        Decoder.decodeWarehouse(new JSONObject(config), RunningMode.SIMULATION);
     }
 }
