@@ -209,6 +209,10 @@ public class Planner {
      * @param actions the plan of the agent.
      */
     public static void dropPlan(Agent agent, Stack<AgentAction> actions) {
+        if (actions == null) {
+            return;
+        }
+
         Warehouse warehouse = Warehouse.getInstance();
 
         // Create a node with the current state of the agent
