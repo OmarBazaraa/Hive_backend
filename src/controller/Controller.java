@@ -262,9 +262,6 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
     @Override
     public void onOrderIssued(Order order) {
         synchronized (warehouse) {
-            System.out.println(">> Controller.onOrderIssued(" + order.getId() + ") in thread: " + Thread.currentThread().getName());
-            System.out.flush();
-
             order.setListener(this);
             warehouse.addOrder(order);
 

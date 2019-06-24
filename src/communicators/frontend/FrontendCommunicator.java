@@ -152,7 +152,7 @@ public class FrontendCommunicator {
             session.getRemote().sendString(msg.toString());
 
             // DEBUG
-            System.out.println("FrontendCommunicator :: Sending to frontend from thread: " + Thread.currentThread().getName() + " ...");
+            System.out.println("FrontendCommunicator :: Sending to frontend ...");
             System.out.println(msg.toString(4));
             System.out.println();
             System.out.flush();
@@ -339,13 +339,8 @@ public class FrontendCommunicator {
         try {
             // Decode incoming order
             synchronized (warehouse) {
-                System.out.println(">> start FrontendCommunicator.processOrderMsg() in thread: " + Thread.currentThread().getName());
-                System.out.flush();
-
                 Order order = Decoder.decodeOrder(data);
                 listener.onOrderIssued(order);
-
-                System.out.println(">> end FrontendCommunicator.processOrderMsg() in thread: " + Thread.currentThread().getName());
             }
 
             // Send order acknowledgement
