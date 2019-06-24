@@ -157,7 +157,7 @@ abstract public class AbstractWarehouse {
     abstract protected void dispatchPendingOrders();
 
     /**
-     * Retreats the blocked agents to a normal state if possible.
+     * Retreats the blocked agents to their normal state if possible.
      */
     abstract protected void retreatBlockedAgents();
 

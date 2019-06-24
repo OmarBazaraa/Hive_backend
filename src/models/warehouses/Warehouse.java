@@ -152,7 +152,7 @@ public class Warehouse extends AbstractWarehouse {
     }
 
     /**
-     * Retreats the blocked agents to a normal state if possible.
+     * Retreats the blocked agents to their normal state if possible.
      */
     @Override
     protected void retreatBlockedAgents() {

@@ -255,7 +255,7 @@ public class FrontendCommunicator {
                     RunningMode.DEPLOYMENT : RunningMode.SIMULATION;
 
             synchronized (warehouse) {
-                Decoder.decodeWarehouse(state);
+                Decoder.decodeWarehouse(state, runningMode);
                 listener.onStart(runningMode);
             }
 
@@ -550,6 +550,10 @@ public class FrontendCommunicator {
      */
     public void flushUpdateMsg() {
         synchronized (lock1) {
+            if (actions.isEmpty() && logs.isEmpty() && statistics.isEmpty()) {
+                return;
+            }
+
             send(Encoder.encodeUpdateMsg(warehouse.getTime(), actions, logs, statistics));
             clearUpdateStates();
             setLastStepStatus(false);
@@ -605,6 +609,10 @@ public class FrontendCommunicator {
      */
     public void flushControlMsg() {
         synchronized (lock2) {
+            if (activatedAgents.isEmpty() && deactivatedAgents.isEmpty() && blockedAgents.isEmpty()) {
+                return;
+            }
+
             send(Encoder.encodeControlMsg(activatedAgents, deactivatedAgents, blockedAgents));
             clearControlStates();
         }
