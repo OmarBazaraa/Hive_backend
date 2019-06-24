@@ -233,4 +233,40 @@ public class WarehouseTest {
         Assert.assertEquals(item2.get(rack), 4);
         Assert.assertEquals(rack.get(item2), 4);
     }
+
+    @Test
+    public void crowdTest() throws Exception {
+        WarehouseHelper.configureWarehouse("data/4A_4R_4G.hive");
+
+        // Get components
+        Warehouse warehouse = Warehouse.getInstance();
+
+        // Print initial warehouse
+        warehouse.print();
+
+        // Create new order
+        Order order1 = new CollectOrder(1, warehouse.getGateById(1));
+        order1.add(warehouse.getItemById(1), 5);
+        warehouse.addOrder(order1);
+
+        Order order2 = new CollectOrder(2, warehouse.getGateById(2));
+        order2.add(warehouse.getItemById(1), 5);
+        warehouse.addOrder(order2);
+
+        Order order3 = new CollectOrder(3, warehouse.getGateById(3));
+        order3.add(warehouse.getItemById(1), 5);
+        warehouse.addOrder(order3);
+
+        Order order4 = new CollectOrder(4, warehouse.getGateById(4));
+        order4.add(warehouse.getItemById(1), 5);
+        warehouse.addOrder(order4);
+
+        // Run till no changes occur
+        while (warehouse.run()) {
+            System.out.println(warehouse);
+        }
+
+        // Print final warehouse
+        warehouse.print();
+    }
 }

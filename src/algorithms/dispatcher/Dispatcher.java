@@ -125,7 +125,9 @@ public class Dispatcher {
             double bestRank = 1e9;
             Map<Item, Integer> bestRackItemsQs = null;
 
-            for (var rackEntry : candidateRacks.entrySet()) {
+            var it = candidateRacks.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry<Rack, Integer> rackEntry = it.next();
                 Rack rack = rackEntry.getKey();
 
                 // Calculate the maximum needed quantity of order items that can be taken out of each candidate rack
@@ -136,7 +138,7 @@ public class Dispatcher {
                 // Ignore rack, doesn't offer new items to the current accepted racks set or it is physically impossible
                 // to reach.
                 if (rackTotalItemSupply == 0 || candidateRacks.get(rack) == Integer.MAX_VALUE) {
-                    candidateRacks.remove(rack);
+                    it.remove();
                     continue;
                 }
 

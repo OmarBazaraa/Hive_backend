@@ -1,16 +1,16 @@
 package algorithms;
 
+import algorithms.dispatcher.DispatcherTest;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
-import algorithms.dispatcher.Dispatcher;
 import algorithms.planner.PlannerTest;
 
 
 @RunWith(Suite.class)
-@Suite.SuiteClasses({PlannerTest.class, Dispatcher.class})
+@Suite.SuiteClasses({PlannerTest.class, DispatcherTest.class})
 public class AlgorithmsTestRunner {
     @BeforeClass
     public static void before() {
