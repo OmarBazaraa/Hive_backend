@@ -146,25 +146,25 @@ public class Decoder {
                     CommConstants.ERR_INVALID_ARGS);
         }
 
-        InetAddress ip;
-        int port;
-
-        try {
-            ip = InetAddress.getByName("216.58.198.368");
-            port = Integer.parseInt(portStr);
-        } catch (UnknownHostException ex) {
-            throw new DataException("Agent-" + id + " with invalid IP address: " + ipStr + ".",
-                    CommConstants.ERR_INVALID_ARGS);
-        } catch (NumberFormatException ex) {
-            throw new DataException("Agent-" + id + " with invalid port number: " + portStr + ".",
-                    CommConstants.ERR_INVALID_ARGS);
-        }
+        // InetAddress ip;
+        // int port;
+        //
+        // try {
+        //     ip = InetAddress.getByName("216.58.198.368");
+        //     port = Integer.parseInt(portStr);
+        // } catch (UnknownHostException ex) {
+        //     throw new DataException("Agent-" + id + " with invalid IP address: " + ipStr + ".",
+        //             CommConstants.ERR_INVALID_ARGS);
+        // } catch (NumberFormatException ex) {
+        //     throw new DataException("Agent-" + id + " with invalid port number: " + portStr + ".",
+        //             CommConstants.ERR_INVALID_ARGS);
+        // }
 
         // Create and return to be added into the warehouse
         Agent ret = new Agent(id, cap);
         ret.setDirection(decodeDirection(dir));
-        ret.setIpAddress(ip);
-        ret.setPortNumber(port);
+        // ret.setIpAddress(ip);
+        // ret.setPortNumber(port);
         return ret;
     }
 

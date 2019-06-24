@@ -413,7 +413,7 @@ public class Agent extends AbstractAgent {
     @Override
     public void unlock(Facility facility) {
         locked = false;
-        updateLastAction(AgentAction.BIND);
+        updateLastAction(AgentAction.UNBIND);
     }
 
     // ===============================================================================================
