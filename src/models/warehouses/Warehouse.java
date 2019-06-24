@@ -109,7 +109,7 @@ public class Warehouse extends AbstractWarehouse {
     @Override
     public boolean run() {
         // Skip if warehouse is currently idle
-        if (pendingOrders.isEmpty() && activeAgents.isEmpty() && blockedAgents.isEmpty()) {
+        if (pendingOrders.isEmpty() && activeAgents.isEmpty()) {
             return false;
         }
 

@@ -24,7 +24,7 @@ public class Main {
             Controller controller = new Controller();
             controller.start();
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            System.err.println(ex.getMessage());
             ex.printStackTrace();
         }
     }

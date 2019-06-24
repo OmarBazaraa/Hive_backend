@@ -158,7 +158,7 @@ public class FrontendCommunicator {
             System.out.flush();
         } catch (IOException ex) {
             listener.onStop();
-            System.out.println(ex.getMessage());
+            System.err.println(ex.getMessage());
         }
     }
 
@@ -182,13 +182,13 @@ public class FrontendCommunicator {
         // Handle invalid message format
         catch (JSONException ex) {
             sendErr(FrontendConstants.ERR_MSG_FORMAT, "Invalid message format.");
-            System.out.println(ex.getMessage());
+            System.err.println(ex.getMessage());
             ex.printStackTrace();
         }
         // Handle data inconsistency exceptions
         catch (DataException ex) {
             sendErr(ex.getErrorCode(), ex.getMessage(), ex.getErrorArgs());
-            System.out.println(ex.getMessage());
+            System.err.println(ex.getMessage());
             ex.printStackTrace();
         }
     }
@@ -266,12 +266,12 @@ public class FrontendCommunicator {
         } catch (JSONException ex) {
             sendMsg(FrontendConstants.TYPE_ACK_START, FrontendConstants.TYPE_ERROR,
                     FrontendConstants.ERR_MSG_FORMAT, "Invalid START message format.");
-            System.out.println(ex.getMessage());
+            System.err.println(ex.getMessage());
             ex.printStackTrace();
         } catch (DataException ex) {
             sendMsg(FrontendConstants.TYPE_ACK_START, FrontendConstants.TYPE_ERROR,
                     ex.getErrorCode(), ex.getMessage(), ex.getErrorArgs());
-            System.out.println(ex.getMessage());
+            System.err.println(ex.getMessage());
             ex.printStackTrace();
         }
     }
@@ -353,12 +353,12 @@ public class FrontendCommunicator {
         } catch (JSONException ex) {
             sendMsg(FrontendConstants.TYPE_ACK_START, FrontendConstants.TYPE_ERROR,
                     FrontendConstants.ERR_MSG_FORMAT, "Invalid ORDER message format.");
-            System.out.println(ex.getMessage());
+            System.err.println(ex.getMessage());
             ex.printStackTrace();
         } catch (DataException ex) {
             sendMsg(FrontendConstants.TYPE_ACK_ORDER, FrontendConstants.TYPE_ERROR,
                     ex.getErrorCode(), ex.getMessage(), ex.getErrorArgs());
-            System.out.println(ex.getMessage());
+            System.err.println(ex.getMessage());
             ex.printStackTrace();
         }
     }

@@ -18,7 +18,7 @@ public class Constants {
 
     // Communication details
     public static final int FRONTEND_COMM_PORT = 1337;
-    public static final int HARDWARE_COMM_PORT = 4995;
+    public static final int HARDWARE_COMM_PORT = 12344;
 
     //
     // Server controller constants
