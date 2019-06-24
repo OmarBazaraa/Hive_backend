@@ -84,6 +84,15 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
     private void run() {
         while (getState() != ServerState.EXIT) {
 
+            // try {
+            //     Thread.sleep(900);
+            // } catch (Exception ex) {
+            //
+            // }
+            //
+            // hardwareComm.log();
+
+
             // Must be in RUNNING state
             if (getState() != ServerState.RUNNING) {
                 continue;
@@ -226,6 +235,7 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
         setState(ServerState.IDLE);
 
         if (getMode() == RunningMode.DEPLOYMENT) {
+            hardwareComm.pause();
             hardwareComm.close();
         }
     }
@@ -286,6 +296,7 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
 
             // DEBUG
             System.out.println("Activating " + agent + ".");
+            System.out.println();
         }
     }
 
@@ -302,6 +313,7 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
 
             // DEBUG
             System.out.println("Deactivating " + agent + ".");
+            System.out.println();
         }
     }
 

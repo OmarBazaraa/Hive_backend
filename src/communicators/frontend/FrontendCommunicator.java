@@ -375,6 +375,9 @@ public class FrontendCommunicator {
         int type = data.getInt(FrontendConstants.KEY_TYPE);
         Agent agent;
 
+        System.out.println(">> Control message");
+        System.out.println(data.toString(4));
+
         synchronized (warehouse) {
             agent = warehouse.getAgentById(id);
         }

@@ -434,7 +434,7 @@ public class Agent extends AbstractAgent {
         lastActionTime = Warehouse.getInstance().getTime();
 
         // Inform listener
-        if (listener != null) {
+        if (listener != null && action != AgentAction.NOTHING) {
             listener.onAction(this, action);
         }
     }

@@ -108,6 +108,8 @@ public class Warehouse extends AbstractWarehouse {
      */
     @Override
     public boolean run() {
+        retreatBlockedAgents(); // TODO: return it back
+
         // Skip if warehouse is currently idle
         if (pendingOrders.isEmpty() && activeAgents.isEmpty()) {
             return false;
@@ -115,7 +117,6 @@ public class Warehouse extends AbstractWarehouse {
 
         // Do a single run and increment time
         dispatchPendingOrders();
-        retreatBlockedAgents();
         advanceActiveAgents();
         time++;
         return true;
@@ -172,6 +173,10 @@ public class Warehouse extends AbstractWarehouse {
             // Re-add the agent to the end of the queue if still blocked
             if (agent.isBlocked()) {
                 blockedAgents.add(agent);
+            } else if (agent.isActive()) {
+                activeAgents.add(agent);
+            } else {
+                readyAgents.add(agent);
             }
         }
     }

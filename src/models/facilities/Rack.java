@@ -229,7 +229,7 @@ public class Rack extends Facility implements QuantityAddable<Item>, QuantityRes
 
         builder.append("Rack: {");
         builder.append(" id: ").append(id).append(",");
-        builder.append(" pos: ").append(getPosition()).append(", ");
+        builder.append(" pos: ").append(getPosition()).append(",");
         builder.append(" capacity: ").append(capacity).append(",");
         builder.append(" weight: ").append(containerWeight).append(",");
         builder.append(" stored_weight: ").append(storedWeight).append(",");

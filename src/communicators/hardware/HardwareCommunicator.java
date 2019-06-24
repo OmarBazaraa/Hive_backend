@@ -75,6 +75,7 @@ public class HardwareCommunicator {
         // Protected constructor to ensure a singleton object.
         server = Service.ignite();
         server.port(port);
+        server.webSocketIdleTimeoutMillis(HardwareConstants.HARDWARE_TIMEOUT_INTERVAL);
         server.webSocket("/", new WebSocketHandler());
 
         // Set the communication listener
@@ -143,6 +144,7 @@ public class HardwareCommunicator {
      */
     private void openSession(Agent agent, Session sess) {
         agentToSessionMap.put(agent, sess);
+        listener.onAgentActivated(agent);
     }
 
     /**
@@ -175,11 +177,28 @@ public class HardwareCommunicator {
 
             // DEBUG
             System.out.println("HardwareCommunicator :: Sending to agent-" + agent.getId() + " ...");
-            System.out.println(msg);
+            for (int i = 0; i < msg.length; ++i) {
+                System.out.print(msg[i]);
+            }
+            System.out.println();
             System.out.println();
         } catch (IOException ex) {
             listener.onAgentDeactivated(agent);
             System.err.println(ex.getMessage());
+        }
+    }
+
+    public void log() {
+        for (var pair : agentToSessionMap.entrySet()) {
+            Agent agent = pair.getKey();
+            Session sess = pair.getValue();
+
+            try {
+                System.out.println("Sending pong to agent-" + agent.getId());
+                sess.getRemote().sendPong(null);
+            } catch (Exception ex) {
+
+            }
         }
     }
 
@@ -214,7 +233,7 @@ public class HardwareCommunicator {
                     break;
             }
         } catch (Exception ex) {
-            System.out.println("HardwareCommunicator :: Invalid message format from agent-" + agent.getId() + ": " + msg);
+            System.err.println("HardwareCommunicator :: Invalid message format from agent-" + agent.getId() + ": " + msg);
             System.err.println(ex.getMessage());
             ex.printStackTrace();
         }
@@ -239,7 +258,6 @@ public class HardwareCommunicator {
     private void processControlMsg(Agent agent, boolean blocked) {
         if (blocked) {
             listener.onAgentDeactivated(agent);
-            agentLastAction.remove(agent);
         } else {
             listener.onAgentActivated(agent);
         }
@@ -340,6 +358,7 @@ public class HardwareCommunicator {
     public void sendStop(Agent agent) {
         byte[] msg = {HardwareConstants.TYPE_ACTION, HardwareConstants.TYPE_STOP};
         send(agent, msg);
+        agentLastAction.remove(agent);
     }
 
     // ===============================================================================================
@@ -380,7 +399,7 @@ public class HardwareCommunicator {
 
                 // DEBUG
                 System.out.println();
-                System.out.println("HardwareCommunicator :: Agent-" + agent.getId() + " connection closed with status code: " + statusCode);
+                System.out.println("HardwareCommunicator :: Agent-" + agent.getId() + " connection closed with status code: " + statusCode + ", reason: " + reason);
                 System.out.println();
             } else {
                 // DEBUG
@@ -390,6 +409,11 @@ public class HardwareCommunicator {
             }
         }
 
+        @OnWebSocketError
+        public void onError(Session client, Throwable error) {
+            onClose(client, -1, error.getMessage());
+        }
+
         @OnWebSocketMessage
         public void onMessage(Session client, String msg) {
             InetAddress addr = client.getRemoteAddress().getAddress();
@@ -397,7 +421,8 @@ public class HardwareCommunicator {
 
             if (agent != null) {
                 try {
-                    logger.write("HardwareCommunicator :: Received message from agent-" + agent.getId() + ": " + msg);
+                    logger.write("HardwareCommunicator :: Received message from agent-" + agent.getId() + ": " + msg + "\n");
+                    logger.flush();
                 } catch (Exception ex) {
                     System.err.println(ex.getMessage());
                 }
@@ -415,7 +440,11 @@ public class HardwareCommunicator {
                 msg[i] = buffer[offset + i];
             }
 
-            System.out.println("Buffer: " + buffer);
+            System.out.print("Buffer: ");
+            for (int i = 0; i < buffer.length; ++i) {
+                System.out.print(buffer[i]);
+            }
+            System.out.println();
             System.out.println("Offset: " + offset);
             System.out.println("Length: " + length);
 

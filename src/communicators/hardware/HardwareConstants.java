@@ -40,6 +40,7 @@ public class HardwareConstants {
     public static final int TYPE_LIGHT_FLASH = 2;
 
     // Others
-    public static final int HARDWARE_CONFIG_INTERVAL = 6000;
+    public static final int HARDWARE_CONFIG_INTERVAL = 5000;   // ms
+    public static final int HARDWARE_TIMEOUT_INTERVAL = 1000;   // ms
     public static final String HARDWARE_LOG_FILE = "out/hardware_logs.txt";
 }
