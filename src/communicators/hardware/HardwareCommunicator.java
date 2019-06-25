@@ -47,6 +47,9 @@ public class HardwareCommunicator {
      */
     private ConcurrentHashMap<InetAddress, Agent> ipToAgentMap = new ConcurrentHashMap<>();
 
+    // TODO: just for debugging, to be removed
+    private ConcurrentHashMap<Integer, Agent> idToAgentMap = new ConcurrentHashMap<>();
+
     /**
      * The map of the last action done by the agents.
      * This is used to wait until all agents send ACK back on their last actions.
@@ -78,7 +81,7 @@ public class HardwareCommunicator {
         server = Service.ignite();
         server.port(port);
         server.webSocketIdleTimeoutMillis(HardwareConstants.TIMEOUT_INTERVAL);
-        server.webSocket("/", new WebSocketHandler());
+        server.webSocket("/", new WebSocketDebuggingHandler());     // TODO: to be removed
 
         // Set the communication listener
         listener = l;
@@ -116,6 +119,7 @@ public class HardwareCommunicator {
      */
     public void registerAgent(Agent agent) {
         ipToAgentMap.put(agent.getIpAddress(), agent);
+        idToAgentMap.put(agent.getId(), agent);         // TODO: to be removed
     }
 
     /**
@@ -375,7 +379,7 @@ public class HardwareCommunicator {
         builder.append("\"");
 
         for (int i = 0; i < buf.length; ++i) {
-            builder.append(buf[i] + '0');
+            builder.append((char) (buf[i] + '0'));
         }
 
         builder.append("\"");
@@ -400,12 +404,10 @@ public class HardwareCommunicator {
                 openSession(agent, client);
 
                 // DEBUG
-                System.out.println();
                 System.out.println("HardwareCommunicator :: Agent-" + agent.getId() + " connected!");
                 System.out.println();
             } else {
                 // DEBUG
-                System.out.println();
                 System.out.println("HardwareCommunicator :: Unknown session connected!");
                 System.out.println();
             }
@@ -420,12 +422,10 @@ public class HardwareCommunicator {
                 closeSession(agent, client);
 
                 // DEBUG
-                System.out.println();
                 System.out.println("HardwareCommunicator :: Agent-" + agent.getId() + " connection closed with status code: " + statusCode + ", reason: " + reason);
                 System.out.println();
             } else {
                 // DEBUG
-                System.out.println();
                 System.out.println("HardwareCommunicator :: Unknown session closed!");
                 System.out.println();
             }
@@ -466,7 +466,77 @@ public class HardwareCommunicator {
                 process(agent, msg);
             } else {
                 // DEBUG
+                System.out.println("HardwareCommunicator :: Received message from unknown source!");
                 System.out.println();
+            }
+        }
+    }
+
+    //
+    // TODO: just for debugging, to be removed
+    //
+    @WebSocket
+    public class WebSocketDebuggingHandler {
+        private ConcurrentHashMap<Session, Agent> sessionToAgentMap = new ConcurrentHashMap<>();
+
+        public void onConnect(Session client, int id) {
+            Agent agent = idToAgentMap.get(id);
+
+            if (agent != null) {
+                sessionToAgentMap.put(client, agent);
+                openSession(agent, client);
+
+                // DEBUG
+                System.out.println("HardwareCommunicator :: Agent-" + agent.getId() + " connected!");
+                System.out.println();
+            } else {
+                // DEBUG
+                System.out.println("HardwareCommunicator :: Unknown session connected!");
+                System.out.println();
+            }
+        }
+
+        @OnWebSocketClose
+        public void onClose(Session client, int statusCode, String reason) {
+            Agent agent = sessionToAgentMap.get(client);
+
+            if (agent != null) {
+                closeSession(agent, client);
+
+                // DEBUG
+                System.out.println("HardwareCommunicator :: Agent-" + agent.getId() + " connection closed with status code: " + statusCode + ", reason: " + reason);
+                System.out.println();
+            } else {
+                // DEBUG
+                System.out.println();
+                System.out.println("HardwareCommunicator :: Unknown session closed!");
+            }
+        }
+
+        @OnWebSocketError
+        public void onError(Session client, Throwable error) {
+            onClose(client, -1, error.getMessage());
+        }
+
+        @OnWebSocketMessage
+        public void onMessage(Session client, byte[] buffer, int offset, int length) {
+            if (buffer[offset] == 3) {
+                onConnect(client, buffer[offset + 1]);
+                return;
+            }
+
+            Agent agent = sessionToAgentMap.get(client);
+
+            byte[] msg = new byte[length];
+
+            for (int i = 0; i < length; ++i) {
+                msg[i] = buffer[offset + i];
+            }
+
+            if (agent != null) {
+                process(agent, msg);
+            } else {
+                // DEBUG
                 System.out.println("HardwareCommunicator :: Received message from unknown source!");
                 System.out.println();
             }

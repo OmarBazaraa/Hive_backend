@@ -632,7 +632,6 @@ public class FrontendCommunicator {
             openSession(client);
 
             // DEBUG
-            System.out.println();
             System.out.println("FrontendCommunicator :: Frontend connected!");
             System.out.println();
         }
@@ -643,7 +642,6 @@ public class FrontendCommunicator {
             closeSession(client);
 
             // DEBUG
-            System.out.println();
             System.out.println("FrontendCommunicator :: Frontend connection closed with status code: " + statusCode);
             System.out.println();
         }
