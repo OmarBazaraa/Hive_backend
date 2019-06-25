@@ -221,6 +221,12 @@ public class Agent extends AbstractAgent {
         // Handle different last actions
         //
 
+        // No last action
+        if (lastAction == AgentAction.NOTHING) {
+            blocked = false;
+            return true;
+        }
+
         // Rotation action
         if (lastAction == AgentAction.ROTATE_RIGHT || lastAction == AgentAction.ROTATE_LEFT) {
             blocked = false;
@@ -307,8 +313,12 @@ public class Agent extends AbstractAgent {
      */
     @Override
     public void dropPlan() {
+        if (plan != null) {
+            Planner.dropPlan(this, plan);
+        }
+
+        plan = null;
         target = null;
-        Planner.dropPlan(this, plan);
     }
 
     /**
@@ -434,7 +444,7 @@ public class Agent extends AbstractAgent {
         lastActionTime = Warehouse.getInstance().getTime();
 
         // Inform listener
-        if (listener != null && action != AgentAction.NOTHING) {
+        if (listener != null) {
             listener.onAction(this, action);
         }
     }
