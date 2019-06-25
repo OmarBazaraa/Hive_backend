@@ -155,7 +155,6 @@ public class FrontendCommunicator {
             System.out.println("FrontendCommunicator :: Sending to frontend ...");
             System.out.println(msg.toString(4));
             System.out.println();
-            System.out.flush();
         } catch (IOException ex) {
             listener.onStop();
             System.err.println(ex.getMessage());
@@ -375,9 +374,6 @@ public class FrontendCommunicator {
         int type = data.getInt(FrontendConstants.KEY_TYPE);
         Agent agent;
 
-        System.out.println(">> Control message");
-        System.out.println(data.toString(4));
-
         synchronized (warehouse) {
             agent = warehouse.getAgentById(id);
         }
@@ -423,7 +419,7 @@ public class FrontendCommunicator {
         setLastStepStatus(true);
 
         // DEBUG
-        System.out.println("FrontendCommunicator :: Received ACK ...");
+        System.out.println("FrontendCommunicator :: Received actions DONE.");
         System.out.println();
     }
 

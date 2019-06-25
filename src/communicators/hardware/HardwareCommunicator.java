@@ -58,7 +58,9 @@ public class HardwareCommunicator {
      */
     private CommunicationListener listener;
 
-
+    /**
+     * The logging file to write any logs from the hardware robots.
+     */
     private FileWriter logger;
 
     // ===============================================================================================
@@ -75,15 +77,15 @@ public class HardwareCommunicator {
         // Protected constructor to ensure a singleton object.
         server = Service.ignite();
         server.port(port);
-        server.webSocketIdleTimeoutMillis(HardwareConstants.HARDWARE_TIMEOUT_INTERVAL);
+        server.webSocketIdleTimeoutMillis(HardwareConstants.TIMEOUT_INTERVAL);
         server.webSocket("/", new WebSocketHandler());
 
         // Set the communication listener
         listener = l;
 
-        // Open logger file
+        // Open the logger file
         try {
-            logger = new FileWriter(HardwareConstants.HARDWARE_LOG_FILE);
+            logger = new FileWriter(HardwareConstants.LOG_FILE);
         } catch (Exception ex) {
             System.err.println(ex.getMessage());
         }
@@ -122,7 +124,7 @@ public class HardwareCommunicator {
     public void configure() {
         // Sleep for some duration
         try {
-            Thread.sleep(HardwareConstants.HARDWARE_CONFIG_INTERVAL);
+            Thread.sleep(HardwareConstants.CONFIG_INTERVAL);
         } catch (Exception ex) {
             System.err.println(ex.getMessage());
             ex.printStackTrace();
@@ -160,7 +162,7 @@ public class HardwareCommunicator {
     }
 
     /**
-     * Sends the give JSON message to the given {@code Agent}.
+     * Sends the give bytes array message to the given {@code Agent}.
      *
      * @param agent the {@code Agent} to send the message to.
      * @param msg   the message to sent.
@@ -176,29 +178,11 @@ public class HardwareCommunicator {
             session.getRemote().sendBytes(ByteBuffer.wrap(msg));
 
             // DEBUG
-            System.out.println("HardwareCommunicator :: Sending to agent-" + agent.getId() + " ...");
-            for (int i = 0; i < msg.length; ++i) {
-                System.out.print(msg[i]);
-            }
-            System.out.println();
+            System.out.println("HardwareCommunicator :: Sending to agent-" + agent.getId() + ": " + bytesToStr(msg) + " ...");
             System.out.println();
         } catch (IOException ex) {
             listener.onAgentDeactivated(agent);
             System.err.println(ex.getMessage());
-        }
-    }
-
-    public void log() {
-        for (var pair : agentToSessionMap.entrySet()) {
-            Agent agent = pair.getKey();
-            Session sess = pair.getValue();
-
-            try {
-                System.out.println("Sending pong to agent-" + agent.getId());
-                sess.getRemote().sendPong(null);
-            } catch (Exception ex) {
-
-            }
         }
     }
 
@@ -233,7 +217,7 @@ public class HardwareCommunicator {
                     break;
             }
         } catch (Exception ex) {
-            System.err.println("HardwareCommunicator :: Invalid message format from agent-" + agent.getId() + ": " + msg);
+            System.err.println("HardwareCommunicator :: Invalid message format from agent-" + agent.getId() + ": " + bytesToStr(msg));
             System.err.println(ex.getMessage());
             ex.printStackTrace();
         }
@@ -246,6 +230,10 @@ public class HardwareCommunicator {
      * @param level the new battery level.
      */
     private void processBatteryMsg(Agent agent, int level) {
+        // DEBUG
+        System.out.println("HardwareCommunicator :: Received BLOCKED from agent-" + agent.getId() + ".");
+        System.out.println();
+
         listener.onAgentBatteryLevelChanged(agent, level);
     }
 
@@ -257,8 +245,16 @@ public class HardwareCommunicator {
      */
     private void processControlMsg(Agent agent, boolean blocked) {
         if (blocked) {
+            // DEBUG
+            System.out.println("HardwareCommunicator :: Received BLOCKED from agent-" + agent.getId() + ".");
+            System.out.println();
+
             listener.onAgentDeactivated(agent);
         } else {
+            // DEBUG
+            System.out.println("HardwareCommunicator :: Received UNBLOCKED from agent-" + agent.getId() + ".");
+            System.out.println();
+
             listener.onAgentActivated(agent);
         }
     }
@@ -272,7 +268,7 @@ public class HardwareCommunicator {
         agentLastAction.remove(agent);
 
         // DEBUG
-        System.out.println("HardwareCommunicator :: Received ACK from agent-" + agent.getId() + " ...");
+        System.out.println("HardwareCommunicator :: Received action DONE from agent-" + agent.getId() + ".");
         System.out.println();
     }
 
@@ -363,6 +359,32 @@ public class HardwareCommunicator {
 
     // ===============================================================================================
     //
+    // Helper Methods
+    //
+
+    /**
+     * Converts the given {@code byte} array into a string.
+     *
+     * @param buf the array of bytes to convert.
+     *
+     * @return the corresponding string.
+     */
+    private String bytesToStr(byte[] buf) {
+        StringBuilder builder = new StringBuilder();
+
+        builder.append("\"");
+
+        for (int i = 0; i < buf.length; ++i) {
+            builder.append(buf[i] + '0');
+        }
+
+        builder.append("\"");
+
+        return builder.toString();
+    }
+
+    // ===============================================================================================
+    //
     // Sub-classes & Interface
     //
 
@@ -421,7 +443,7 @@ public class HardwareCommunicator {
 
             if (agent != null) {
                 try {
-                    logger.write("HardwareCommunicator :: Received message from agent-" + agent.getId() + ": " + msg + "\n");
+                    logger.write("Agent-" + agent.getId() + ": " + msg + "\n");
                     logger.flush();
                 } catch (Exception ex) {
                     System.err.println(ex.getMessage());
@@ -439,14 +461,6 @@ public class HardwareCommunicator {
             for (int i = 0; i < length; ++i) {
                 msg[i] = buffer[offset + i];
             }
-
-            System.out.print("Buffer: ");
-            for (int i = 0; i < buffer.length; ++i) {
-                System.out.print(buffer[i]);
-            }
-            System.out.println();
-            System.out.println("Offset: " + offset);
-            System.out.println("Length: " + length);
 
             if (agent != null) {
                 process(agent, msg);

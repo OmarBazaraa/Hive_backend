@@ -84,15 +84,6 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
     private void run() {
         while (getState() != ServerState.EXIT) {
 
-            // try {
-            //     Thread.sleep(900);
-            // } catch (Exception ex) {
-            //
-            // }
-            //
-            // hardwareComm.log();
-
-
             // Must be in RUNNING state
             if (getState() != ServerState.RUNNING) {
                 continue;
@@ -279,7 +270,6 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
             System.out.println("Order received ...");
             System.out.println(order);
             System.out.println();
-            System.out.flush();
         }
     }
 
