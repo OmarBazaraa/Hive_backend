@@ -70,7 +70,7 @@ public class FrontendConstants {
     public static final String KEY_AGENT_ROW = "robot_row";
     public static final String KEY_AGENT_COL = "robot_col";
     public static final String KEY_AGENT_LOAD_CAPACITY = "load_cap";
-    public static final String KEY_AGENT_CHARGE_PERCENTAGE = "battery_cap";
+    public static final String KEY_AGENT_BATTERY_LEVEL = "battery";
     public static final String KEY_AGENT_DIRECTION = "direction";
     public static final String KEY_AGENT_IP = "ip";
     public static final String KEY_AGENT_PORT = "port";
@@ -138,6 +138,7 @@ public class FrontendConstants {
     public static final int TYPE_LOG_TASK_ASSIGNED = 0;
     public static final int TYPE_LOG_TASK_COMPLETED = 1;
     public static final int TYPE_LOG_ORDER_FULFILLED = 2;
+    public static final int TYPE_LOG_BATTERY_UPDATED = 6;
 
     // Statistics types
     // TODO

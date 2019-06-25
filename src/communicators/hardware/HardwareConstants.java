@@ -43,6 +43,6 @@ public class HardwareConstants {
     // Others
     //
     public static final int CONFIG_INTERVAL = 5000;    // milli-seconds
-    public static final int TIMEOUT_INTERVAL = 1000;   // milli-seconds
+    public static final int TIMEOUT_INTERVAL = 1500;   // milli-seconds
     public static final String LOG_FILE = "out/hardware_logs.txt";
 }

@@ -235,7 +235,7 @@ public class HardwareCommunicator {
      */
     private void processBatteryMsg(Agent agent, int level) {
         // DEBUG
-        System.out.println("HardwareCommunicator :: Received BLOCKED from agent-" + agent.getId() + ".");
+        System.out.println("HardwareCommunicator :: Agent-" + agent.getId() + " battery level updated to level: " + level + ".");
         System.out.println();
 
         listener.onAgentBatteryLevelChanged(agent, level);

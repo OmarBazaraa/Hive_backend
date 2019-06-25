@@ -349,7 +349,7 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
      */
     @Override
     public void onBatteryLevelChange(Agent agent, int level) {
-        // TODO: enqueue battery updates to the frontend
+        frontendComm.enqueueBatteryUpdatedLog(agent);
     }
 
     /**

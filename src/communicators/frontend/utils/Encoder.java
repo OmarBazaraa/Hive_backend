@@ -37,7 +37,14 @@ public class Encoder {
     public static JSONObject encodeAgentAction(Agent agent, AgentAction action) {
         JSONObject data = new JSONObject();
         data.put(FrontendConstants.KEY_ID, agent.getId());
-        return encodeMsg(encodeAgentAction(action), data);
+        return encodeMsg(encodeAgentActionType(action), data);
+    }
+
+    public static JSONObject encodeBatteryUpdatedLog(Agent agent) {
+        JSONObject data = new JSONObject();
+        data.put(FrontendConstants.KEY_ID, agent.getId());
+        data.put(FrontendConstants.KEY_AGENT_BATTERY_LEVEL, agent.getBatteryLevel());
+        return encodeMsg(FrontendConstants.TYPE_LOG_BATTERY_UPDATED, data);
     }
 
     public static JSONObject encodeTaskAssignedLog(Task task, Order order) {
@@ -115,7 +122,7 @@ public class Encoder {
     // Static Helper Methods
     //
 
-    public static int encodeAgentAction(AgentAction action) {
+    public static int encodeAgentActionType(AgentAction action) {
         switch (action) {
             case MOVE:
                 return FrontendConstants.TYPE_AGENT_MOVE;

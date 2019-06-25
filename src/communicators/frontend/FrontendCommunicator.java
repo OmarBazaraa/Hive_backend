@@ -498,6 +498,18 @@ public class FrontendCommunicator {
     }
 
     /**
+     * Enqueues a log about a change in the battery level of an {@code Agent
+     * to be sent in the next update message.
+     *
+     * @param agent the updated {@code Agent}.
+     */
+    public void enqueueBatteryUpdatedLog(Agent agent) {
+        synchronized (lock1) {
+            logs.put(Encoder.encodeBatteryUpdatedLog(agent));
+        }
+    }
+
+    /**
      * Enqueues a log about a newly assigned {@code Task} to be sent in the next update message.
      *
      * @param task  the newly assigned {@code Task}.
