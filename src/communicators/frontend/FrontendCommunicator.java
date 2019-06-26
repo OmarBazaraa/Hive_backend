@@ -254,6 +254,9 @@ public class FrontendCommunicator {
             RunningMode runningMode = (mode == FrontendConstants.TYPE_MODE_DEPLOY) ?
                     RunningMode.DEPLOYMENT : RunningMode.SIMULATION;
 
+            clearUpdateStates();
+            clearControlStates();
+
             synchronized (warehouse) {
                 Decoder.decodeWarehouse(state, runningMode);
                 listener.onStart(runningMode);
@@ -660,6 +663,9 @@ public class FrontendCommunicator {
 
         @OnWebSocketMessage
         public void onMessage(Session client, String message) {
+            System.out.println(">> Frontend: " + message);  // TODO: to be removed
+            System.out.flush();
+
             process(message);
         }
     }
