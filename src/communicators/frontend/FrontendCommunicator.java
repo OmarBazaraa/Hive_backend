@@ -333,7 +333,7 @@ public class FrontendCommunicator {
      * @param data the received JSON data part of the message.
      */
     private void processOrderMsg(JSONObject data) throws DataException {
-        if (listener.getState() != ServerState.RUNNING) {
+        if (listener.getState() == ServerState.IDLE) {
             throw new DataException("Received ORDER message while the server is not in RUNNING state.",
                     FrontendConstants.ERR_MSG_UNEXPECTED);
         }
