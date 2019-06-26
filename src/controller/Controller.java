@@ -75,48 +75,38 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
      */
     public void start() {
         frontendComm.start();
-        run();
+
+        while (true) {
+            run();
+        }
     }
 
     /**
      * Keeps running this {@code Controller} object until an exit criterion is met.
      */
     private void run() {
-        while (getState() != ServerState.EXIT) {
-
-            // Must be in RUNNING state
-            if (getState() != ServerState.RUNNING) {
-                continue;
-            }
-
-            // Check if last time step has been completed
-            if (!isLastStepCompleted()) {
-                continue;
-            }
-
-            // Try running a single time step in the warehouse
-            try {
-                simulate();
-            } catch (Exception ex) {
-                setState(ServerState.IDLE);
-                frontendComm.sendErr(FrontendConstants.ERR_SERVER, "Internal server error.");
-                System.err.println(ex.getMessage());
-                ex.printStackTrace();
-            }
+        // Must be in RUNNING state
+        if (getState() != ServerState.RUNNING) {
+            return;
         }
-    }
 
-    /**
-     * Simulates a single time step in the {@code Warehouse}.
-     */
-    private void simulate() {
-        synchronized (warehouse) {
-            if (warehouse.run()) {
-                frontendComm.flushUpdateMsg();
+        // Check if last time step has been completed
+        if (!isLastStepCompleted()) {
+            return;
+        }
 
-                // DEBUG
-                System.out.println(warehouse);
+        // Try running a single time step in the warehouse
+        try {
+            synchronized (warehouse) {
+                if (warehouse.run()) {
+                    System.out.println(warehouse);
+                }
             }
+        } catch (Exception ex) {
+            setState(ServerState.IDLE);
+            frontendComm.sendErr(FrontendConstants.ERR_SERVER, "Internal server error.");
+            System.err.println(ex.getMessage());
+            ex.printStackTrace();
         }
     }
 
@@ -238,7 +228,9 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
         setState(ServerState.PAUSE);
 
         if (getMode() == RunningMode.DEPLOYMENT) {
-            hardwareComm.pause();
+            synchronized (warehouse) {
+                hardwareComm.pause();
+            }
         }
     }
 
@@ -250,7 +242,9 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
         setState(ServerState.RUNNING);
 
         if (getMode() == RunningMode.DEPLOYMENT) {
-            hardwareComm.resume();
+            synchronized (warehouse) {
+                hardwareComm.resume();
+            }
         }
     }
 
@@ -281,7 +275,6 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
     public void onAgentActivated(Agent agent) {
         synchronized (warehouse) {
             agent.activate();
-            frontendComm.flushControlMsg();
 
             // DEBUG
             System.out.println("Activating " + agent + ".");
@@ -298,7 +291,6 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
     public void onAgentDeactivated(Agent agent) {
         synchronized (warehouse) {
             agent.deactivate();
-            frontendComm.flushControlMsg();
 
             // DEBUG
             System.out.println("Deactivating " + agent + ".");
@@ -333,10 +325,25 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
      */
     @Override
     public void onAction(Agent agent, AgentAction action) {
-        frontendComm.enqueueAgentAction(agent, action);
+        frontendComm.sendAgentAction(agent, action);
 
         if (getMode() == RunningMode.DEPLOYMENT) {
             hardwareComm.sendAgentAction(agent, action);
+        }
+    }
+
+    /**
+     * Called when an {@code Agent} has recovered from a blockage state.
+     *
+     * @param agent  the {@code Agent}.
+     * @param action the action done by this {@code Agent}.
+     */
+    @Override
+    public void onRecover(Agent agent, AgentAction action) {
+        frontendComm.sendAgentRecoverAction(agent, action);
+
+        if (getMode() == RunningMode.DEPLOYMENT) {
+            hardwareComm.sendAgentRecoverAction(agent, action);
         }
     }
 
@@ -348,7 +355,7 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
      */
     @Override
     public void onBatteryLevelChange(Agent agent, int level) {
-        frontendComm.enqueueBatteryUpdatedLog(agent);
+        frontendComm.sendAgentBatteryUpdatedLog(agent);
     }
 
     /**
@@ -358,7 +365,7 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
      */
     @Override
     public void onActivate(Agent agent) {
-        frontendComm.enqueueActivatedAgent(agent);
+        frontendComm.sendAgentControl(agent, false);
     }
 
     /**
@@ -368,7 +375,7 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
      */
     @Override
     public void onDeactivate(Agent agent) {
-        frontendComm.enqueueDeactivatedAgent(agent);
+        frontendComm.sendAgentControl(agent, true);
     }
 
     /**
@@ -378,10 +385,10 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
      */
     @Override
     public void onBlock(Agent agent) {
-        frontendComm.enqueueBlockedAgent(agent);
+        frontendComm.sendAgentStop(agent);
 
         if (getMode() == RunningMode.DEPLOYMENT) {
-            hardwareComm.sendStop(agent);
+            hardwareComm.sendAgentStop(agent);
         }
     }
 
@@ -411,7 +418,7 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
      */
     @Override
     public void onTaskAssign(Order order, Task task) {
-        frontendComm.enqueueTaskAssignedLog(task, order);
+        frontendComm.sendTaskAssignedLog(order, task);
     }
 
     /**
@@ -423,7 +430,7 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
      */
     @Override
     public void onTaskComplete(Order order, Task task, Map<Item, Integer> items) {
-        frontendComm.enqueueTaskCompletedLog(task, order, items);
+        frontendComm.sendTaskCompletedLog(order, task, items);
     }
 
     /**
@@ -434,7 +441,7 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
      */
     @Override
     public void onFulfill(Order order) {
-        frontendComm.enqueueOrderFulfilledLog(order);
+        frontendComm.sendOrderFulfilledLog(order);
     }
 
     /**
