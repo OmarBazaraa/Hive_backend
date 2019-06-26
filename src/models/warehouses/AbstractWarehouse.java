@@ -158,14 +158,17 @@ abstract public class AbstractWarehouse {
 
     /**
      * Retreats the blocked agents to their normal state if possible.
+     *
+     * @return {@code true} if at least one {@code Agent} has recovered; {@code false} otherwise.
      */
-    abstract protected void retreatBlockedAgents();
+    abstract protected boolean recoverBlockedAgents();
 
     /**
      * Moves the active agents one step towards their targets.
+     *
+     * @return {@code true} if at least one {@code Agent} has advanced; {@code false} otherwise.
      */
-    abstract protected void advanceActiveAgents();
-
+    abstract protected boolean advanceActiveAgents();
 
     // ===============================================================================================
     //

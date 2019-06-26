@@ -108,18 +108,9 @@ public class Warehouse extends AbstractWarehouse {
      */
     @Override
     public boolean run() {
-        retreatBlockedAgents(); // TODO: return it back
-
-        // Skip if warehouse is currently idle
-        if (pendingOrders.isEmpty() && activeAgents.isEmpty()) {
-            return false;
-        }
-
-        // Do a single run and increment time
-        dispatchPendingOrders();
-        advanceActiveAgents();
         time++;
-        return true;
+        dispatchPendingOrders();
+        return recoverBlockedAgents() || advanceActiveAgents();
     }
 
     /**
@@ -154,9 +145,19 @@ public class Warehouse extends AbstractWarehouse {
 
     /**
      * Retreats the blocked agents to their normal state if possible.
+     *
+     * @return {@code true} if at least one {@code Agent} has recovered; {@code false} otherwise.
      */
     @Override
-    protected void retreatBlockedAgents() {
+    protected boolean recoverBlockedAgents() {
+        // Skip if no blocked agents
+        if (blockedAgents.isEmpty()) {
+            return false;
+        }
+
+        // Initialize return value to false
+        boolean ret = false;
+
         // Get the initial size of the queue
         int size = blockedAgents.size();
 
@@ -168,7 +169,7 @@ public class Warehouse extends AbstractWarehouse {
             Agent agent = blockedAgents.remove();
 
             // Try retreating the current agent
-            agent.retreat();
+            ret |= agent.retreat();
 
             // Re-add the agent to the end of the queue if still blocked
             if (agent.isBlocked()) {
@@ -179,17 +180,25 @@ public class Warehouse extends AbstractWarehouse {
                 readyAgents.add(agent);
             }
         }
+
+        // Return whether any agent has recovered
+        return ret;
     }
 
     /**
      * Moves the active agents one step towards their targets.
+     *
+     * @return {@code true} if at least one {@code Agent} has advanced; {@code false} otherwise.
      */
     @Override
-    protected void advanceActiveAgents() {
+    protected boolean advanceActiveAgents() {
         // Skip if no active agents
         if (activeAgents.isEmpty()) {
-            return;
+            return false;
         }
+
+        // Initialize return value to false
+        boolean ret = false;
 
         // Get the initial size of the queue
         int size = activeAgents.size();
@@ -205,7 +214,7 @@ public class Warehouse extends AbstractWarehouse {
             Agent agent = activeAgents.pollFirst();
 
             // Try moving the current agent towards its target
-            agent.executeAction();
+            ret |= agent.executeAction();
 
             // Re-add agent to the active queue if still active, otherwise add it to the ready queue
             if (agent.isActive()) {
@@ -217,5 +226,8 @@ public class Warehouse extends AbstractWarehouse {
 
         // Update active agents queue
         activeAgents = q;
+
+        // Return whether any agent has advanced
+        return ret;
     }
 }

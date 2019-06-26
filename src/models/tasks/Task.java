@@ -178,8 +178,10 @@ public class Task extends AbstractTask {
      * Executes the next required action to be done to complete this {@code Task}.
      * <p>
      * This function should be called only when this {@code Task} is active.
+     *
+     * @return {@code true} if this {@code Task} manged to execute the action successfully; {@code false} otherwise.
      */
-    public void executeAction() {
+    public boolean executeAction() {
         // Select a new order to deliver
         if (actions.getFirst().key == TaskAction.SELECT_ORDER) {
             selectOrder();
@@ -188,19 +190,23 @@ public class Task extends AbstractTask {
         TaskAction action = actions.element().key;
         Facility facility = actions.element().val;
 
+        boolean ret = false;
+
         // Bind action
         if (action == TaskAction.BIND) {
-            executeBind(facility);
+            ret |= executeBind(facility);
         }
         // Unbind action
         if (action == TaskAction.UNBIND) {
-            executeUnbind(facility);
+            ret |= executeUnbind(facility);
         }
 
         // Check if all actions are completed
         if (actions.isEmpty()) {
             terminate();
         }
+
+        return ret;
     }
 
     /**
@@ -234,13 +240,16 @@ public class Task extends AbstractTask {
      * Reaches and binds with the given {@code Facility}.
      *
      * @param facility the {@code Facility} to bind with.
+     *
+     * @return {@code true} if manged to execute the action successfully; {@code false} otherwise.
      */
-    private void executeBind(Facility facility) {
+    private boolean executeBind(Facility facility) {
         if (facility.canBind(agent)) {
             facility.bind(agent);
             actions.removeFirst();
+            return true;
         } else {
-            agent.reach(facility);
+            return agent.reach(facility);
         }
     }
 
@@ -248,13 +257,16 @@ public class Task extends AbstractTask {
      * Reaches and unbinds from the given {@code Facility}.
      *
      * @param facility the {@code Facility} to unbind from.
+     *
+     * @return {@code true} if manged to execute the action successfully; {@code false} otherwise.
      */
-    private void executeUnbind(Facility facility) {
+    private boolean executeUnbind(Facility facility) {
         if (facility.canUnbind()) {
             facility.unbind();
             actions.removeFirst();
+            return true;
         } else {
-            agent.reach(facility);
+            return agent.reach(facility);
         }
     }
 }

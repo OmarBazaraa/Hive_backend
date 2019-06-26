@@ -368,15 +368,19 @@ abstract public class AbstractAgent extends HiveObject implements TaskAssignable
     /**
      * Executes the next required action as specified by the currently
      * active assigned {@code Task}.
+     *
+     * @return {@code true} if this {@code Agent} manged to execute the action successfully; {@code false} otherwise.
      */
-    abstract public void executeAction() throws Exception;
+    abstract public boolean executeAction() throws Exception;
 
     /**
      * Moves a single step to reach the given {@code Facility}.
      *
      * @param dst the target to reach.
+     *
+     * @return {@code true} if this {@code Agent} manged to move a step towards the target; {@code false} otherwise.
      */
-    abstract public void reach(Facility dst);
+    abstract public boolean reach(Facility dst);
 
     /**
      * Loads and lifts the given {@code Rack} above this {@code Agent}.

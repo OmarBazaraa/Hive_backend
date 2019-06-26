@@ -324,32 +324,42 @@ public class Agent extends AbstractAgent {
     /**
      * Executes the next required action as specified by the currently
      * active assigned {@code Task}.
+     *
+     * @return {@code true} if this {@code Agent} manged to execute the action successfully; {@code false} otherwise.
      */
     @Override
-    public void executeAction() {
+    public boolean executeAction() {
         // Return if already did an action this time step
         if (lastActionTime >= Warehouse.getInstance().getTime()) {
-            return;
+            return false;
         }
 
         // Execute action depending on the currently active task
         Task task = getActiveTask();
 
-        if (task != null) {
-            task.executeAction();
+        if (task == null) {
+            return false;
         }
+
+        return task.executeAction();
     }
 
     /**
      * Moves a single step to reach the given {@code Facility}.
      *
      * @param dst the target to reach.
+     *
+     * @return {@code true} if this {@code Agent} manged to move a step towards the target; {@code false} otherwise.
      */
     @Override
-    public void reach(Facility dst) {
+    public boolean reach(Facility dst) {
         // Plan what action to apply next
         plan(dst);
-        if (plan == null || plan.isEmpty()) return;
+
+        if (plan == null || plan.isEmpty()) {
+            return false;
+        }
+
         AgentAction action = plan.pop();
 
         // Get the current and the next cells
@@ -363,7 +373,7 @@ public class Agent extends AbstractAgent {
         // Check next cell
         if (nxtCell.isLocked() || blockingAgent != null && blockingAgent != this) {
             dropPlan();
-            return;
+            return false;
         }
 
         // Apply action and set the new pose of the agent
@@ -372,6 +382,7 @@ public class Agent extends AbstractAgent {
         nxtCell.setAgent(this);
         setPose(nxt);
         setLastAction(action);
+        return true;
     }
 
     /**
