@@ -47,24 +47,31 @@ public class HardwareCommunicator {
      */
     private ConcurrentHashMap<InetAddress, Agent> ipToAgentMap = new ConcurrentHashMap<>();
 
-    // TODO: just for debugging, to be removed
-    private ConcurrentHashMap<Integer, Agent> idToAgentMap = new ConcurrentHashMap<>();
-
     /**
-     * The map of the last action done by the agents.
-     * This is used to wait until all agents send ACK back on their last actions.
-     */
-    private ConcurrentHashMap<Agent, AgentAction> agentLastAction = new ConcurrentHashMap<>();
-
-    /**
-     * The communication listener.
+     * The communication listener object.
      */
     private CommunicationListener listener;
+
+    /**
+     * The map of pending actions.
+     * That is, the actions that are waiting for DONE messages.
+     */
+    private ConcurrentHashMap<Agent, AgentAction> pendingActionMap = new ConcurrentHashMap<>();
+
+    /**
+     * The map of received DONE messages.
+     */
+    private ConcurrentHashMap<Agent, AgentAction> receivedDoneMap = new ConcurrentHashMap<>();
 
     /**
      * The logging file to write any logs from the hardware robots.
      */
     private FileWriter logger;
+
+    //
+    // TODO: just for debugging, to be removed
+    //
+    private ConcurrentHashMap<Integer, Agent> idToAgentMap = new ConcurrentHashMap<>();
 
     // ===============================================================================================
     //
@@ -109,7 +116,9 @@ public class HardwareCommunicator {
 
         agentToSessionMap.clear();
         ipToAgentMap.clear();
-        agentLastAction.clear();
+        idToAgentMap.clear();                           // TODO: to be removed
+        pendingActionMap.clear();
+        receivedDoneMap.clear();
     }
 
     /**
@@ -189,6 +198,15 @@ public class HardwareCommunicator {
         }
     }
 
+    /**
+     * Checks whether the last time step has been completed by all the agents or not.
+     *
+     * @return {@code true} if completed; {@code false} otherwise.
+     */
+    public boolean isLastStepCompleted() {
+        return pendingActionMap.isEmpty();
+    }
+
     // ===============================================================================================
     //
     // Hardware -> Backend
@@ -208,15 +226,15 @@ public class HardwareCommunicator {
 
             switch (type) {
                 case HardwareConstants.TYPE_DONE:
-                    processAckMsg(agent);
+                    handleDoneMsg(agent);
                     break;
                 case HardwareConstants.TYPE_BATTERY:
                     int level = msg[1];
-                    processBatteryMsg(agent, level);
+                    handleBatteryMsg(agent, level);
                     break;
                 case HardwareConstants.TYPE_BLOCKED:
                     boolean blocked = (msg[1] == 1);
-                    processControlMsg(agent, blocked);
+                    handleControlMsg(agent, blocked);
                     break;
             }
         } catch (Exception ex) {
@@ -227,12 +245,12 @@ public class HardwareCommunicator {
     }
 
     /**
-     * Processes the incoming battery update message from the given {@code Agent}.
+     * Handles the incoming battery update message from the given {@code Agent}.
      *
      * @param agent the {@code Agent} sending this message.
      * @param level the new battery level.
      */
-    private void processBatteryMsg(Agent agent, int level) {
+    private void handleBatteryMsg(Agent agent, int level) {
         // DEBUG
         System.out.println("HardwareCommunicator :: Agent-" + agent.getId() + " battery level updated to level: " + level + ".");
         System.out.println();
@@ -241,12 +259,13 @@ public class HardwareCommunicator {
     }
 
     /**
-     * Processes the incoming control message from the given {@code Agent}.
+     * Handles the incoming control message from the given {@code Agent}.
+     *
      *
      * @param agent   the {@code Agent} sending this message.
      * @param blocked {@code true} if this {@code Agent} get blocked; {@code false} if get unblocked.
      */
-    private void processControlMsg(Agent agent, boolean blocked) {
+    private void handleControlMsg(Agent agent, boolean blocked) {
         if (blocked) {
             // DEBUG
             System.out.println("HardwareCommunicator :: Received BLOCKED from agent-" + agent.getId() + ".");
@@ -263,25 +282,19 @@ public class HardwareCommunicator {
     }
 
     /**
-     * Processes the incoming ACK message from the given {@code Agent}.
+     * Handles the incoming DONE message from the given {@code Agent}.
+     * <p>
+     * Called at any time from Spark threads.
      *
      * @param agent the {@code Agent} sending this message.
      */
-    private void processAckMsg(Agent agent) {
-        agentLastAction.remove(agent);
+    private void handleDoneMsg(Agent agent) {
+        receivedDoneMap.put(agent, AgentAction.NOTHING);
+        pendingActionMap.remove(agent);
 
         // DEBUG
         System.out.println("HardwareCommunicator :: Received action DONE from agent-" + agent.getId() + ".");
         System.out.println();
-    }
-
-    /**
-     * Checks whether the last time step has been completed by all the agents or not.
-     *
-     * @return {@code true} if completed; {@code false} otherwise.
-     */
-    public boolean isLastStepCompleted() {
-        return agentLastAction.isEmpty();
     }
 
     // ===============================================================================================
@@ -291,72 +304,87 @@ public class HardwareCommunicator {
 
     /**
      * Pauses all the connected agents.
+     * <p>
+     * Called with exclusive access to the {@code Warehouse} object from Spark threads.
      */
     public void pause() {
-        for (var pair : agentLastAction.entrySet()) {
+        for (var pair : pendingActionMap.entrySet()) {
             Agent agent = pair.getKey();
-            AgentAction action = pair.getValue();
-
-            sendStop(agent);
+            send(agent, new byte[]{HardwareConstants.TYPE_ACTION, HardwareConstants.TYPE_STOP});
         }
     }
 
     /**
      * Resumes the last action by all the paused agents.
+     * <p>
+     * Called with exclusive access to the {@code Warehouse} object from Spark threads.
      */
     public void resume() {
-        for (var pair : agentLastAction.entrySet()) {
+        for (var pair : pendingActionMap.entrySet()) {
             Agent agent = pair.getKey();
             AgentAction action = pair.getValue();
 
-            sendAgentAction(agent, action);
+            if (receivedDoneMap.containsKey(agent)) {
+                continue;
+            }
+
+            send(agent, encodeAgentAction(action));
         }
     }
 
     /**
-     * Sends a new instruction action to the given {@code Agent}.
+     * Sends an immediate stop action to the given {@code Agent}.
+     * <p>
+     * Called with exclusive access to the {@code Warehouse} object from Spark threads.
      *
-     * @param agent  the {@code Agent} to send the instruction to.
-     * @param action the instruction to send.
+     * @param agent the {@code Agent} to send the action to.
      */
-    public void sendAgentAction(Agent agent, AgentAction action) {
-        byte[] msg = {HardwareConstants.TYPE_ACTION, 0};
-
-        switch (action) {
-            case MOVE:
-                msg[1] = HardwareConstants.TYPE_MOVE;
-                break;
-            case ROTATE_RIGHT:
-                msg[1] = HardwareConstants.TYPE_ROTATE_RIGHT;
-                break;
-            case ROTATE_LEFT:
-                msg[1] = HardwareConstants.TYPE_ROTATE_LEFT;
-                break;
-            case RETREAT:
-                msg[1] = HardwareConstants.TYPE_RETREAT;
-                break;
-            case LOAD:
-                msg[1] = HardwareConstants.TYPE_LOAD;
-                break;
-            case OFFLOAD:
-                msg[1] = HardwareConstants.TYPE_OFFLOAD;
-                break;
-            default:
-                return;
-        }
-
-        agentLastAction.put(agent, action);
+    public void sendAgentStop(Agent agent) {
+        pendingActionMap.remove(agent);
+        byte[] msg = {HardwareConstants.TYPE_ACTION, HardwareConstants.TYPE_STOP};
         send(agent, msg);
     }
 
     /**
-     * Sends an immediate stop instruction to the given {@code Agent}.
+     * Sends an action to the given {@code Agent}.
+     * <p>
+     * Called with exclusive access to the {@code Warehouse} object from the main thread.
      *
-     * @param agent the {@code Agent} to send the instruction to.
+     * @param agent  the {@code Agent} to send the action to.
+     * @param action the action to send.
      */
-    public void sendStop(Agent agent) {
-        byte[] msg = {HardwareConstants.TYPE_ACTION, HardwareConstants.TYPE_STOP};
-        agentLastAction.remove(agent);
+    public void sendAgentAction(Agent agent, AgentAction action) {
+        byte[] msg = encodeAgentAction(action);
+
+        if (msg == null) {
+            return;
+        }
+
+        pendingActionMap.put(agent, action);
+        receivedDoneMap.remove(agent);
+        send(agent, msg);
+    }
+
+    /**
+     * Sends a recover action to the given {@code Agent}.
+     * <p>
+     * Called with exclusive access to the {@code Warehouse} object from the main thread.
+     *
+     * @param agent  the {@code Agent} to send the action to.
+     * @param action the action to send.
+     */
+    public void sendAgentRecoverAction(Agent agent, AgentAction action) {
+        if (receivedDoneMap.containsKey(agent)) {
+            return;
+        }
+
+        byte[] msg = encodeAgentAction(action);
+
+        if (msg == null) {
+            return;
+        }
+
+        pendingActionMap.put(agent, action);
         send(agent, msg);
     }
 
@@ -364,6 +392,32 @@ public class HardwareCommunicator {
     //
     // Helper Methods
     //
+
+    /**
+     * Encodes the given {@code AgentAction} to be sent to the hardware robots.
+     *
+     * @param action the {@code AgentAction} to encode.
+     *
+     * @return the encoded {@code AgentAction}
+     */
+    private byte[] encodeAgentAction(AgentAction action) {
+        switch (action) {
+            case MOVE:
+                return new byte[]{HardwareConstants.TYPE_ACTION, HardwareConstants.TYPE_MOVE};
+            case ROTATE_RIGHT:
+                return new byte[]{HardwareConstants.TYPE_ACTION, HardwareConstants.TYPE_ROTATE_RIGHT};
+            case ROTATE_LEFT:
+                return new byte[]{HardwareConstants.TYPE_ACTION, HardwareConstants.TYPE_ROTATE_LEFT};
+            case RETREAT:
+                return new byte[]{HardwareConstants.TYPE_ACTION, HardwareConstants.TYPE_RETREAT};
+            case LOAD:
+                return new byte[]{HardwareConstants.TYPE_ACTION, HardwareConstants.TYPE_LOAD};
+            case OFFLOAD:
+                return new byte[]{HardwareConstants.TYPE_ACTION, HardwareConstants.TYPE_OFFLOAD};
+        }
+
+        return null;
+    }
 
     /**
      * Converts the given {@code byte} array into a string.
