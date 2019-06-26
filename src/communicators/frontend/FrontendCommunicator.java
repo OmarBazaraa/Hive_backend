@@ -401,6 +401,10 @@ public class FrontendCommunicator {
         receivedDoneMap.put(agentId, AgentAction.NOTHING);
         pendingActionMap.remove(agentId);
 
+        if (pendingActionMap.isEmpty()) {
+            listener.onActionsDone();
+        }
+
         // DEBUG
         System.out.println("FrontendCommunicator :: Received action DONE from agent-" + agentId + ".");
         System.out.println();

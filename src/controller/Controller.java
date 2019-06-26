@@ -86,13 +86,13 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
      */
     private void run() {
         // Must be in RUNNING state
-        if (getState() != ServerState.RUNNING) {
-            return;
+        while (getState() != ServerState.RUNNING) {
+            waitOnWarehouse();
         }
 
         // Check if last time step has been completed
-        if (!isLastStepCompleted()) {
-            return;
+        while (!isLastStepCompleted()) {
+            waitOnWarehouse();
         }
 
         // Try running a single time step in the warehouse
@@ -100,11 +100,27 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
             synchronized (warehouse) {
                 if (warehouse.run()) {
                     System.out.println(warehouse);
+                } else {
+                    waitOnWarehouse();
                 }
             }
         } catch (Exception ex) {
             setState(ServerState.IDLE);
             frontendComm.sendErr(FrontendConstants.ERR_SERVER, "Internal server error.");
+            System.err.println(ex.getMessage());
+            ex.printStackTrace();
+        }
+    }
+
+    /**
+     * Blocks the current thread on the singleton {@code Warehouse} object.
+     * <p>
+     * To be called from the main thread only.
+     */
+    private void waitOnWarehouse() {
+        try {
+            warehouse.wait();
+        } catch (InterruptedException ex) {
             System.err.println(ex.getMessage());
             ex.printStackTrace();
         }
@@ -188,12 +204,10 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
         synchronized (warehouse) {
             Collection<Agent> agents = warehouse.getAgentList();
 
-            // Register agents callback function
             for (Agent agent : agents) {
                 agent.setListener(this);
             }
 
-            // Initialize in case of deployment
             if (mode == RunningMode.DEPLOYMENT) {
                 for (Agent agent : agents) {
                     hardwareComm.registerAgent(agent);
@@ -203,8 +217,8 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
                 hardwareComm.configure();
             }
 
-            // DEBUG
-            warehouse.print();
+            warehouse.print();  // DEBUG
+            warehouse.notify();
         }
     }
 
@@ -216,7 +230,9 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
         setState(ServerState.IDLE);
 
         if (getMode() == RunningMode.DEPLOYMENT) {
-            hardwareComm.close();
+            synchronized (warehouse) {
+                hardwareComm.close();
+            }
         }
     }
 
@@ -241,9 +257,23 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
     public void onResume() {
         setState(ServerState.RUNNING);
 
-        if (getMode() == RunningMode.DEPLOYMENT) {
-            synchronized (warehouse) {
+        synchronized (warehouse) {
+            if (getMode() == RunningMode.DEPLOYMENT) {
                 hardwareComm.resume();
+            }
+
+            warehouse.notify();
+        }
+    }
+
+    /**
+     * Called when the communicator receives DONE on all the sent actions.
+     */
+    @Override
+    public void onActionsDone() {
+        if (isLastStepCompleted()) {
+            synchronized (warehouse) {
+                warehouse.notify();
             }
         }
     }
@@ -256,13 +286,13 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
     @Override
     public void onOrderIssued(Order order) {
         synchronized (warehouse) {
+            // DEBUG
+            System.out.println("Received " + order);
+            System.out.println();
+
             order.setListener(this);
             warehouse.addOrder(order);
-
-            // DEBUG
-            System.out.println("Order received ...");
-            System.out.println(order);
-            System.out.println();
+            warehouse.notify();
         }
     }
 
@@ -274,11 +304,12 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
     @Override
     public void onAgentActivated(Agent agent) {
         synchronized (warehouse) {
-            agent.activate();
-
             // DEBUG
             System.out.println("Activating " + agent + ".");
             System.out.println();
+
+            agent.activate();
+            warehouse.notify();
         }
     }
 
@@ -290,11 +321,12 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
     @Override
     public void onAgentDeactivated(Agent agent) {
         synchronized (warehouse) {
-            agent.deactivate();
-
             // DEBUG
             System.out.println("Deactivating " + agent + ".");
             System.out.println();
+
+            agent.deactivate();
+            warehouse.notify();
         }
     }
 

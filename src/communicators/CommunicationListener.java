@@ -49,6 +49,11 @@ public interface CommunicationListener {
     void onResume();
 
     /**
+     * Called when the communicator receives DONE on all the sent actions.
+     */
+    void onActionsDone();
+
+    /**
      * Called when the communicator receives a new {@code Order}.
      *
      * @param order the newly issued {@code order}.

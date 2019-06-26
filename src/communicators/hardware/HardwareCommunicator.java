@@ -3,6 +3,7 @@ package communicators.hardware;
 import communicators.CommunicationListener;
 
 import models.agents.Agent;
+import models.warehouses.Warehouse;
 
 import utils.Constants.*;
 
@@ -51,6 +52,11 @@ public class HardwareCommunicator {
      * The communication listener object.
      */
     private CommunicationListener listener;
+
+    /**
+     * The {@code Warehouse} object.
+     */
+    private final Warehouse warehouse = Warehouse.getInstance();
 
     /**
      * The map of pending actions.
@@ -291,6 +297,10 @@ public class HardwareCommunicator {
     private void handleDoneMsg(Agent agent) {
         receivedDoneMap.put(agent, AgentAction.NOTHING);
         pendingActionMap.remove(agent);
+
+        if (pendingActionMap.isEmpty()) {
+            listener.onActionsDone();
+        }
 
         // DEBUG
         System.out.println("HardwareCommunicator :: Received action DONE from agent-" + agent.getId() + ".");

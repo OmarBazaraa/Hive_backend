@@ -62,7 +62,7 @@ public class FrontendConstants {
     public static final int TYPE_LOG_TASK_ASSIGNED = 0;
     public static final int TYPE_LOG_TASK_COMPLETED = 1;
     public static final int TYPE_LOG_ORDER_FULFILLED = 2;
-    public static final int TYPE_LOG_BATTERY_UPDATED = 6;
+    public static final int TYPE_LOG_BATTERY_UPDATED = 3;
 
     // Statistics types
     // TODO
@@ -122,7 +122,6 @@ public class FrontendConstants {
     // Infeasible refill order as items weight exceed rack capacity
     // Args: [order id, rack id, the excess weight]
     public static final int ERR_ORDER_INFEASIBLE_REFILL = 5006;
-
 
     //
     // Communication messages keys
