@@ -29,7 +29,7 @@ public class Encoder {
         JSONObject data = new JSONObject();
         data.put(FrontendConstants.KEY_TYPE, deactivated ? FrontendConstants.TYPE_AGENT_DEACTIVATE : FrontendConstants.TYPE_AGENT_ACTIVATE);
         data.put(FrontendConstants.KEY_ID, agent.getId());
-        return encodeMsg(FrontendConstants.TYPE_ACTION, data);
+        return encodeMsg(FrontendConstants.TYPE_CONTROL, data);
     }
 
     public static JSONObject encodeAgentAction(Agent agent, int action) {

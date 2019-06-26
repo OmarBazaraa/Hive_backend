@@ -76,8 +76,8 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
     public void start() {
         frontendComm.start();
 
-        while (true) {
-            synchronized (warehouse) {
+        synchronized (warehouse) {
+            while (true) {
                 run();
             }
         }

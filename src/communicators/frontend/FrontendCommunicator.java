@@ -525,7 +525,7 @@ public class FrontendCommunicator {
     /**
      * Sends an error message to the frontend.
      *
-     * @param errCode   the error code in case;
+     * @param errCode   the error code in case.
      * @param errReason the string message explaining the reason of the error if any.
      * @param errArgs   the error arguments if any.
      */
