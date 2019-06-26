@@ -3,13 +3,18 @@ package models.warehouse;
 import models.facilities.Gate;
 import models.facilities.Rack;
 import models.items.Item;
+import models.tasks.Task;
 import models.tasks.orders.CollectOrder;
 import models.tasks.orders.Order;
+import models.tasks.orders.OrderListener;
+import models.tasks.orders.RefillOrder;
 import models.warehouses.Warehouse;
 
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import java.util.Map;
 
 
 public class WarehouseTest {
@@ -269,4 +274,86 @@ public class WarehouseTest {
         // Print final warehouse
         warehouse.print();
     }
+
+    @Test
+    public void singleAgentMultiOrdersTest() throws Exception {
+        WarehouseHelper.configureWarehouse("data/multi_orders.hive");
+
+        // Get components
+        Warehouse warehouse = Warehouse.getInstance();
+
+        // Print initial warehouse
+        warehouse.print();
+
+        // Create new order
+        Order order1 = new CollectOrder(1, warehouse.getGateById(1));
+        order1.add(warehouse.getItemById(1), 3);
+        warehouse.addOrder(order1);
+
+        Order order2 = new CollectOrder(2, warehouse.getGateById(1));
+        order2.add(warehouse.getItemById(2), 10);
+        warehouse.addOrder(order2);
+
+        Order order3 = new CollectOrder(3, warehouse.getGateById(3));
+        order3.add(warehouse.getItemById(1), 5);
+        order3.add(warehouse.getItemById(3), 15);
+        warehouse.addOrder(order3);
+
+        Order order4 = new RefillOrder(4, warehouse.getGateById(2), warehouse.getRackById(2));
+        order4.add(warehouse.getItemById(1), 15);
+        warehouse.addOrder(order4);
+
+        Order order5 = new CollectOrder(5, warehouse.getGateById(3));
+        order5.add(warehouse.getItemById(3), 14);
+        warehouse.addOrder(order5);
+
+
+        order1.setListener(orderListener);
+        order2.setListener(orderListener);
+        order3.setListener(orderListener);
+        order4.setListener(orderListener);
+        order5.setListener(orderListener);
+
+        // Run till no changes occur
+        while (warehouse.run()) {
+            // System.out.println(warehouse);
+        }
+
+        Assert.assertFalse(order1.isPending());
+        Assert.assertFalse(order2.isPending());
+        Assert.assertFalse(order3.isPending());
+        Assert.assertFalse(order4.isPending());
+        Assert.assertFalse(order5.isPending());
+
+        // Print final warehouse
+        warehouse.print();
+    }
+
+
+    private OrderListener orderListener = new OrderListener() {
+        @Override
+        public void onStart(Order order) {
+
+        }
+
+        @Override
+        public void onTaskAssign(Order order, Task task) {
+            System.out.println("Order-" + order.getId() + " is assigned to rack-" + task.getRack().getId());
+        }
+
+        @Override
+        public void onTaskComplete(Order order, Task task, Map<Item, Integer> items) {
+
+        }
+
+        @Override
+        public void onFulfill(Order order) {
+            System.out.println("Order-" + order.getId() + " fulfilled");
+        }
+
+        @Override
+        public void onDismiss(Order order) {
+
+        }
+    };
 }
