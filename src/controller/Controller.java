@@ -226,7 +226,6 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
         setState(ServerState.IDLE);
 
         if (getMode() == RunningMode.DEPLOYMENT) {
-            hardwareComm.pause();
             hardwareComm.close();
         }
     }

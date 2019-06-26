@@ -161,7 +161,6 @@ public class HardwareCommunicator {
      */
     private void closeSession(Agent agent, Session sess) {
         agentToSessionMap.remove(agent);
-        agentLastAction.remove(agent);
         listener.onAgentDeactivated(agent);
     }
 
@@ -346,8 +345,8 @@ public class HardwareCommunicator {
                 return;
         }
 
-        send(agent, msg);
         agentLastAction.put(agent, action);
+        send(agent, msg);
     }
 
     /**
@@ -357,8 +356,8 @@ public class HardwareCommunicator {
      */
     public void sendStop(Agent agent) {
         byte[] msg = {HardwareConstants.TYPE_ACTION, HardwareConstants.TYPE_STOP};
-        send(agent, msg);
         agentLastAction.remove(agent);
+        send(agent, msg);
     }
 
     // ===============================================================================================
