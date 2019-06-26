@@ -25,37 +25,36 @@ public class Encoder {
     // Static Main Methods
     //
 
-    public static JSONObject encodeUpdateMsg(long time, JSONArray actions, JSONArray logs, JSONArray statistics) {
+    public static JSONObject encodeAgentControl(Agent agent, boolean deactivated) {
         JSONObject data = new JSONObject();
-        data.put(FrontendConstants.KEY_TIME_STEP, time);
-        data.put(FrontendConstants.KEY_ACTIONS, actions);
-        data.put(FrontendConstants.KEY_LOGS, logs);
-        data.put(FrontendConstants.KEY_STATISTICS, statistics);
-        return encodeMsg(FrontendConstants.TYPE_UPDATE, data);
-    }
-
-    public static JSONObject encodeAgentAction(Agent agent, AgentAction action) {
-        JSONObject data = new JSONObject();
+        data.put(FrontendConstants.KEY_TYPE, deactivated ? FrontendConstants.TYPE_AGENT_DEACTIVATE : FrontendConstants.TYPE_AGENT_ACTIVATE);
         data.put(FrontendConstants.KEY_ID, agent.getId());
-        return encodeMsg(encodeAgentActionType(action), data);
+        return encodeMsg(FrontendConstants.TYPE_ACTION, data);
     }
 
-    public static JSONObject encodeBatteryUpdatedLog(Agent agent) {
+    public static JSONObject encodeAgentAction(Agent agent, int action) {
+        JSONObject data = new JSONObject();
+        data.put(FrontendConstants.KEY_TYPE, action);
+        data.put(FrontendConstants.KEY_ID, agent.getId());
+        return encodeMsg(FrontendConstants.TYPE_ACTION, data);
+    }
+
+    public static JSONObject encodeAgentBatteryUpdatedLog(Agent agent) {
         JSONObject data = new JSONObject();
         data.put(FrontendConstants.KEY_ID, agent.getId());
         data.put(FrontendConstants.KEY_AGENT_BATTERY_LEVEL, agent.getBatteryLevel());
-        return encodeMsg(FrontendConstants.TYPE_LOG_BATTERY_UPDATED, data);
+        return encodeMsg(FrontendConstants.TYPE_LOG, encodeMsg(FrontendConstants.TYPE_LOG_BATTERY_UPDATED, data));
     }
 
-    public static JSONObject encodeTaskAssignedLog(Task task, Order order) {
+    public static JSONObject encodeOrderTaskAssignedLog(Order order, Task task) {
         JSONObject data = new JSONObject();
         data.put(FrontendConstants.KEY_ORDER_ID, order.getId());
         data.put(FrontendConstants.KEY_AGENT_ID, task.getAgent().getId());
         data.put(FrontendConstants.KEY_RACK_ID, task.getRack().getId());
-        return encodeMsg(FrontendConstants.TYPE_LOG_TASK_ASSIGNED, data);
+        return encodeMsg(FrontendConstants.TYPE_LOG, encodeMsg(FrontendConstants.TYPE_LOG_TASK_ASSIGNED, data));
     }
 
-    public static JSONObject encodeTaskCompletedLog(Task task, Order order, Map<Item, Integer> items) {
+    public static JSONObject encodeOrderTaskCompletedLog(Order order, Task task, Map<Item, Integer> items) {
         JSONArray itemsJSON = new JSONArray();
 
         for (var pair : items.entrySet()) {
@@ -71,28 +70,13 @@ public class Encoder {
         data.put(FrontendConstants.KEY_RACK_ID, task.getRack().getId());
         data.put(FrontendConstants.KEY_ITEMS, itemsJSON);
 
-        return encodeMsg(FrontendConstants.TYPE_LOG_TASK_COMPLETED, data);
+        return encodeMsg(FrontendConstants.TYPE_LOG, encodeMsg(FrontendConstants.TYPE_LOG_TASK_COMPLETED, data));
     }
 
-    public static JSONObject encodeOrderLog(int type, Order order) {
+    public static JSONObject encodeOrderFulfilledLog(Order order) {
         JSONObject data = new JSONObject();
         data.put(FrontendConstants.KEY_ID, order.getId());
-        return encodeMsg(type, data);
-    }
-
-    public static JSONObject encodeStatistics(int key, double value) {
-        JSONObject ret = new JSONObject();
-        ret.put(FrontendConstants.KEY_TYPE, key);
-        ret.put(FrontendConstants.KEY_DATA, value);
-        return ret;
-    }
-
-    public static JSONObject encodeControlMsg(JSONArray activated, JSONArray deactivated, JSONArray blocked) {
-        JSONObject data = new JSONObject();
-        data.put(FrontendConstants.KEY_ACTIVATED, activated);
-        data.put(FrontendConstants.KEY_DEACTIVATED, deactivated);
-        data.put(FrontendConstants.KEY_BLOCKED, blocked);
-        return encodeMsg(FrontendConstants.TYPE_CONTROL, data);
+        return encodeMsg(FrontendConstants.TYPE_LOG, encodeMsg(FrontendConstants.TYPE_LOG_ORDER_FULFILLED, data));
     }
 
     public static JSONObject encodeAckMsg(int type, int status, int errCode, String errReason, Object... errArgs) {

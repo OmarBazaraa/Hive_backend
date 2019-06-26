@@ -18,12 +18,12 @@ import org.eclipse.jetty.websocket.api.annotations.*;
 
 import spark.Service;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 /**
@@ -49,7 +49,7 @@ public class FrontendCommunicator {
     private Session session;
 
     /**
-     * The communication listener.
+     * The communication listener object.
      */
     private CommunicationListener listener;
 
@@ -59,31 +59,15 @@ public class FrontendCommunicator {
     private final Warehouse warehouse = Warehouse.getInstance();
 
     /**
-     * Whether ACK is received on the last update message.
+     * The map of pending actions.
+     * That is, the actions that are waiting for DONE messages.
      */
-    private boolean receivedAck = false;
+    private ConcurrentHashMap<Integer, AgentAction> pendingActionMap = new ConcurrentHashMap<>();
 
     /**
-     * The updates of the current time step to be sent to the frontend in the next UPDATE message.
+     * The map of received DONE messages.
      */
-    private JSONArray actions, logs, statistics;
-
-    /**
-     * The controls to be sent to the frontend in the next CONTROL message.
-     */
-    private JSONArray activatedAgents, deactivatedAgents, blockedAgents;
-
-    /**
-     * Object used to lock threads from modifying
-     * the UPDATE message-related variables of this {@code FrontendCommunicator} simultaneously.
-     */
-    private final Object lock1 = new Object();
-
-    /**
-     * Object used to lock threads from modifying
-     * the CONTROL message-related variables of this {@code FrontendCommunicator} simultaneously.
-     */
-    private final Object lock2 = new Object();
+    private ConcurrentHashMap<Integer, AgentAction> receivedDoneMap = new ConcurrentHashMap<>();
 
     // ===============================================================================================
     //
@@ -103,10 +87,6 @@ public class FrontendCommunicator {
 
         // Set the communication listener
         listener = l;
-
-        // Clear queues
-        clearUpdateStates();
-        clearControlStates();
     }
 
     /**
@@ -161,6 +141,15 @@ public class FrontendCommunicator {
         }
     }
 
+    /**
+     * Checks whether the last time step has been completed by all the agents or not.
+     *
+     * @return {@code true} if completed; {@code false} otherwise.
+     */
+    public boolean isLastStepCompleted() {
+        return pendingActionMap.isEmpty();
+    }
+
     // ===============================================================================================
     //
     // Frontend -> Backend
@@ -207,25 +196,25 @@ public class FrontendCommunicator {
         // Switch on different message types from the frontend
         switch (type) {
             case FrontendConstants.TYPE_START:
-                processStartMsg(data);
+                handleStartMsg(data);
                 break;
             case FrontendConstants.TYPE_STOP:
-                processStopMsg(data);
+                handleStopMsg(data);
                 break;
             case FrontendConstants.TYPE_PAUSE:
-                processPauseMsg(data);
+                handlePauseMsg(data);
                 break;
             case FrontendConstants.TYPE_RESUME:
-                processResumeMsg(data);
+                handleResumeMsg(data);
                 break;
             case FrontendConstants.TYPE_ORDER:
-                processOrderMsg(data);
+                handleOrderMsg(data);
                 break;
             case FrontendConstants.TYPE_CONTROL:
-                processControlMsg(data);
+                handleControlMsg(data);
                 break;
-            case FrontendConstants.TYPE_ACK_UPDATE:
-                processAckMsg(data);
+            case FrontendConstants.TYPE_DONE:
+                handleDoneMsg(data);
                 break;
             default:
                 throw new DataException("Invalid message type.", FrontendConstants.ERR_MSG_FORMAT);
@@ -233,38 +222,34 @@ public class FrontendCommunicator {
     }
 
     /**
-     * Processes the START message from the frontend.
+     * Handles the START message from the frontend.
      * <p>
      * START message is used to configure the {@code Warehouse} and starts
      * its dynamics.
      *
      * @param data the received JSON data part of the message.
      */
-    private void processStartMsg(JSONObject data) throws DataException {
+    private void handleStartMsg(JSONObject data) throws DataException {
         if (listener.getState() != ServerState.IDLE) {
             throw new DataException("Received START message while the server is not in IDLE state.",
                     FrontendConstants.ERR_MSG_UNEXPECTED);
         }
 
         try {
-            // Decode initial warehouse configurations
             int mode = data.getInt(FrontendConstants.KEY_MODE);
             JSONObject state = data.getJSONObject(FrontendConstants.KEY_STATE);
 
             RunningMode runningMode = (mode == FrontendConstants.TYPE_MODE_DEPLOY) ?
                     RunningMode.DEPLOYMENT : RunningMode.SIMULATION;
 
-            clearUpdateStates();
-            clearControlStates();
+            pendingActionMap.clear();
+            receivedDoneMap.clear();
 
             synchronized (warehouse) {
                 Decoder.decodeWarehouse(state, runningMode);
                 listener.onStart(runningMode);
+                sendMsg(FrontendConstants.TYPE_ACK_START, FrontendConstants.TYPE_OK, 0, "");
             }
-
-            // Send start acknowledgement
-            sendMsg(FrontendConstants.TYPE_ACK_START, FrontendConstants.TYPE_OK, 0, "");
-            setLastStepStatus(true);
         } catch (JSONException ex) {
             sendMsg(FrontendConstants.TYPE_ACK_START, FrontendConstants.TYPE_ERROR,
                     FrontendConstants.ERR_MSG_FORMAT, "Invalid START message format.");
@@ -279,26 +264,26 @@ public class FrontendCommunicator {
     }
 
     /**
-     * Processes the STOP message from the frontend.
+     * Handles the STOP message from the frontend.
      * <p>
      * STOP message is used to stop the running of the {@code Warehouse}
      * and set the server back to its idle state.
      *
      * @param data the received JSON data part of the message.
      */
-    private void processStopMsg(JSONObject data) throws DataException {
+    private void handleStopMsg(JSONObject data) throws DataException {
         listener.onStop();
     }
 
     /**
-     * Processes the PAUSE message from the frontend.
+     * Handles the PAUSE message from the frontend.
      * <p>
      * PAUSE message is used to pause the dynamics of the {@code Warehouse}
      * till RESUME is received.
      *
      * @param data the received JSON data part of the message.
      */
-    private void processPauseMsg(JSONObject data) throws DataException {
+    private void handlePauseMsg(JSONObject data) throws DataException {
         if (listener.getState() != ServerState.RUNNING) {
             throw new DataException("Received PAUSE message while the server is not in RUNNING state.",
                     FrontendConstants.ERR_MSG_UNEXPECTED);
@@ -308,14 +293,14 @@ public class FrontendCommunicator {
     }
 
     /**
-     * Processes the RESUME message from the frontend.
+     * Handles the RESUME message from the frontend.
      * <p>
      * RESUME message is used to resume the dynamics of the {@code Warehouse}
      * from the same state before receiving PAUSE.
      *
      * @param data the received JSON data part of the message.
      */
-    private void processResumeMsg(JSONObject data) throws DataException {
+    private void handleResumeMsg(JSONObject data) throws DataException {
         if (listener.getState() != ServerState.PAUSE) {
             throw new DataException("Received RESUME message while the server is not in PAUSE state.",
                     FrontendConstants.ERR_MSG_UNEXPECTED);
@@ -326,27 +311,24 @@ public class FrontendCommunicator {
     }
 
     /**
-     * Processes the ORDER message from the frontend.
+     * Handles the ORDER message from the frontend.
      * <p>
      * ORDER message is used to add a new {@code Order} to the {@code Warehouse}.
      *
      * @param data the received JSON data part of the message.
      */
-    private void processOrderMsg(JSONObject data) throws DataException {
+    private void handleOrderMsg(JSONObject data) throws DataException {
         if (listener.getState() == ServerState.IDLE) {
-            throw new DataException("Received ORDER message while the server is not in RUNNING state.",
+            throw new DataException("Received ORDER message while the server is in IDLE state.",
                     FrontendConstants.ERR_MSG_UNEXPECTED);
         }
 
         try {
-            // Decode incoming order
             synchronized (warehouse) {
                 Order order = Decoder.decodeOrder(data);
                 listener.onOrderIssued(order);
+                sendMsg(FrontendConstants.TYPE_ACK_ORDER, FrontendConstants.TYPE_OK, 0, "");
             }
-
-            // Send order acknowledgement
-            sendMsg(FrontendConstants.TYPE_ACK_ORDER, FrontendConstants.TYPE_OK, 0, "");
         } catch (JSONException ex) {
             sendMsg(FrontendConstants.TYPE_ACK_START, FrontendConstants.TYPE_ERROR,
                     FrontendConstants.ERR_MSG_FORMAT, "Invalid ORDER message format.");
@@ -361,15 +343,15 @@ public class FrontendCommunicator {
     }
 
     /**
-     * Processes the CONTROL message from the frontend.
+     * Handles the CONTROL message from the frontend.
      * <p>
      * CONTROL message is used to control the agents of the {@code Warehouse}.
      *
      * @param data the received JSON data part of the message.
      */
-    private void processControlMsg(JSONObject data) throws DataException {
-        if (listener.getState() != ServerState.RUNNING) {
-            throw new DataException("Received CONTROL message while the server is not in RUNNING state.",
+    private void handleControlMsg(JSONObject data) throws DataException {
+        if (listener.getState() == ServerState.IDLE) {
+            throw new DataException("Received CONTROL message while the server is in IDLE state.",
                     FrontendConstants.ERR_MSG_UNEXPECTED);
         }
 
@@ -387,10 +369,10 @@ public class FrontendCommunicator {
         }
 
         switch (type) {
-            case FrontendConstants.TYPE_CONTROL_ACTIVATE:
+            case FrontendConstants.TYPE_AGENT_ACTIVATE:
                 listener.onAgentActivated(agent);
                 break;
-            case FrontendConstants.TYPE_CONTROL_DEACTIVATE:
+            case FrontendConstants.TYPE_AGENT_DEACTIVATE:
                 listener.onAgentDeactivated(agent);
                 break;
             default:
@@ -400,58 +382,128 @@ public class FrontendCommunicator {
     }
 
     /**
-     * Processes the ACK_UPDATE message from the frontend.
+     * Handles the DONE message from the frontend.
      * <p>
-     * ACK_UPDATE message is used to acknowledge the communicator of that last update message
-     * has been received successfully.
+     * DONE message is used to acknowledge the communicator that last action of an {@code Agent}
+     * has been completed successfully.
+     * <p>
+     * Called at any time from Spark threads.
      *
      * @param data the received JSON data part of the message.
      */
-    private void processAckMsg(JSONObject data) throws DataException {
+    private void handleDoneMsg(JSONObject data) throws DataException {
         if (listener.getState() == ServerState.IDLE) {
-            throw new DataException("Received ACK message while the server is in IDLE state.",
+            throw new DataException("Received DONE message while the server is in IDLE state.",
                     FrontendConstants.ERR_MSG_UNEXPECTED);
         }
 
-        if (isLastStepCompleted()) {
-            throw new DataException("Received multiple ACK messages.",
-                    FrontendConstants.ERR_MSG_UNEXPECTED);
-        }
-
-        // Update ACK flag
-        setLastStepStatus(true);
+        int agentId = data.getInt(FrontendConstants.KEY_ID);
+        receivedDoneMap.put(agentId, AgentAction.NOTHING);
+        pendingActionMap.remove(agentId);
 
         // DEBUG
-        System.out.println("FrontendCommunicator :: Received actions DONE.");
+        System.out.println("FrontendCommunicator :: Received action DONE from agent-" + agentId + ".");
         System.out.println();
-    }
-
-    /**
-     * Checks whether the last time step has been completed by the frontend or not.
-     *
-     * @return {@code true} if completed; {@code false} otherwise.
-     */
-    public boolean isLastStepCompleted() {
-        synchronized (lock1) {
-            return receivedAck;
-        }
-    }
-
-    /**
-     * Sets the last time step as being completed by the frontend.
-     *
-     * @param completed {@code true} to set the last step as completed; {@code false} otherwise.
-     */
-    private void setLastStepStatus(boolean completed) {
-        synchronized (lock1) {
-            receivedAck = completed;
-        }
     }
 
     // ===============================================================================================
     //
     // Backend -> Frontend
     //
+
+    /**
+     * Sends a control message for the given {@code Agent}.
+     * <p>
+     * Called with exclusive access to the {@code Warehouse} object from Spark threads.
+     *
+     * @param agent       the controlled {@code Agent}.
+     * @param deactivated {@code true} to deactivate the {@code Agent}; {@code false} to activate it.
+     */
+    public void sendAgentControl(Agent agent, boolean deactivated) {
+        send(Encoder.encodeAgentControl(agent, deactivated));
+    }
+
+    /**
+     * Sends an immediate stop action for the given {@code Agent}.
+     * <p>
+     * Called with exclusive access to the {@code Warehouse} object from Spark threads.
+     *
+     * @param agent the {@code Agent} to send the action for.
+     */
+    public void sendAgentStop(Agent agent) {
+        pendingActionMap.remove(agent.getId());
+        send(Encoder.encodeAgentAction(agent, FrontendConstants.TYPE_AGENT_STOP));
+    }
+
+    /**
+     * Sends an action for the given {@code Agent}.
+     * <p>
+     * Called with exclusive access to the {@code Warehouse} object from the main thread.
+     *
+     * @param agent  the {@code Agent} to send the action for.
+     * @param action the action to send.
+     */
+    public void sendAgentAction(Agent agent, AgentAction action) {
+        pendingActionMap.put(agent.getId(), action);
+        receivedDoneMap.remove(agent.getId());
+        send(Encoder.encodeAgentAction(agent, Encoder.encodeAgentActionType(action)));
+    }
+
+    /**
+     * Sends a recover action for the given {@code Agent}.
+     * <p>
+     * Called with exclusive access to the {@code Warehouse} object from the main thread.
+     *
+     * @param agent  the {@code Agent} to send the action for.
+     * @param action the action to send.
+     */
+    public void sendAgentRecoverAction(Agent agent, AgentAction action) {
+        if (receivedDoneMap.containsKey(agent.getId())) {
+            return;
+        }
+
+        pendingActionMap.put(agent.getId(), action);
+        send(Encoder.encodeAgentAction(agent, Encoder.encodeAgentActionType(action)));
+    }
+
+    /**
+     * Sends a log about a change in the battery level of an {@code Agent}.
+     *
+     * @param agent the updated {@code Agent}.
+     */
+    public void sendAgentBatteryUpdatedLog(Agent agent) {
+        send(Encoder.encodeAgentBatteryUpdatedLog(agent));
+    }
+
+    /**
+     * Sends a log about a newly assigned {@code Task}.
+     *
+     * @param order the associated {@code Order}.
+     * @param task  the newly assigned {@code Task}.
+     */
+    public void sendTaskAssignedLog(Order order, Task task) {
+        send(Encoder.encodeOrderTaskAssignedLog(order, task));
+    }
+
+    /**
+     * Sends a log about a newly completed {@code Task}.
+     *
+     * @param order the associated {@code Order}.
+     * @param task  the newly assigned {@code Task}.
+     * @param items the map of add/removed items by the completed {@code Task}.
+     */
+    public void sendTaskCompletedLog(Order order, Task task, Map<Item, Integer> items) {
+        send(Encoder.encodeOrderTaskCompletedLog(order, task, items));
+    }
+
+    /**
+     * Sends a log about a newly fulfilled {@code Order}.
+     *
+     * @param order the newly issued {@code Order}.
+     */
+    public void sendOrderFulfilledLog(Order order) {
+        send(Encoder.encodeOrderFulfilledLog(order));
+    }
 
     /**
      * Sends a message to the frontend.
@@ -475,162 +527,6 @@ public class FrontendCommunicator {
      */
     public void sendErr(int errCode, String errReason, Object... errArgs) {
         sendMsg(FrontendConstants.TYPE_MSG, FrontendConstants.TYPE_ERROR, errCode, errReason, errArgs);
-    }
-
-    /**
-     * Clears the update states JSON arrays of the current time step.
-     */
-    public void clearUpdateStates() {
-        synchronized (lock1) {
-            actions = new JSONArray();
-            logs = new JSONArray();
-            statistics = new JSONArray();
-        }
-    }
-
-    /**
-     * Enqueues an {@code AgentAction} to be sent in the next update message.
-     *
-     * @param agent  the updated {@code Agent}.
-     * @param action the performed action.
-     */
-    public void enqueueAgentAction(Agent agent, AgentAction action) {
-        synchronized (lock1) {
-            actions.put(Encoder.encodeAgentAction(agent, action));
-        }
-    }
-
-    /**
-     * Enqueues a log about a change in the battery level of an {@code Agent
-     * to be sent in the next update message.
-     *
-     * @param agent the updated {@code Agent}.
-     */
-    public void enqueueBatteryUpdatedLog(Agent agent) {
-        synchronized (lock1) {
-            logs.put(Encoder.encodeBatteryUpdatedLog(agent));
-        }
-    }
-
-    /**
-     * Enqueues a log about a newly assigned {@code Task} to be sent in the next update message.
-     *
-     * @param task  the newly assigned {@code Task}.
-     * @param order the associated {@code Order}.
-     */
-    public void enqueueTaskAssignedLog(Task task, Order order) {
-        synchronized (lock1) {
-            logs.put(Encoder.encodeTaskAssignedLog(task, order));
-        }
-    }
-
-    /**
-     * Enqueues a log about a newly completed {@code Task} to be sent in the next update message.
-     *
-     * @param task  the newly assigned {@code Task}.
-     * @param order the associated {@code Order}.
-     * @param items the map of add/removed items by the completed {@code Task}.
-     */
-    public void enqueueTaskCompletedLog(Task task, Order order, Map<Item, Integer> items) {
-        synchronized (lock1) {
-            logs.put(Encoder.encodeTaskCompletedLog(task, order, items));
-        }
-    }
-
-    /**
-     * Enqueues a log about a newly fulfilled {@code Order} to be sent in the next update message.
-     *
-     * @param order the newly issued {@code Order}.
-     */
-    public void enqueueOrderFulfilledLog(Order order) {
-        synchronized (lock1) {
-            logs.put(Encoder.encodeOrderLog(FrontendConstants.TYPE_LOG_ORDER_FULFILLED, order));
-        }
-    }
-
-    /**
-     * Enqueues a new statistic to be sent in the next update message.
-     *
-     * @param key   the statistic type.
-     * @param value the value of the statistic.
-     */
-    public void enqueueStatistics(int key, double value) {
-        synchronized (lock1) {
-            actions.put(Encoder.encodeStatistics(key, value));
-        }
-    }
-
-    /**
-     * Sends the current update message to the frontend.
-     */
-    public void flushUpdateMsg() {
-        synchronized (lock1) {
-            if (actions.isEmpty() && logs.isEmpty() && statistics.isEmpty()) {
-                return;
-            }
-
-            send(Encoder.encodeUpdateMsg(warehouse.getTime(), actions, logs, statistics));
-            clearUpdateStates();
-            setLastStepStatus(false);
-        }
-    }
-
-    /**
-     * Clears the control states JSON arrays.
-     */
-    public void clearControlStates() {
-        synchronized (lock2) {
-            activatedAgents = new JSONArray();
-            deactivatedAgents = new JSONArray();
-            blockedAgents = new JSONArray();
-        }
-    }
-
-    /**
-     * Enqueues an activated {@code Agent} to be sent in the next control message.
-     *
-     * @param agent the activated {@code Agent}.
-     */
-    public void enqueueActivatedAgent(Agent agent) {
-        synchronized (lock2) {
-            activatedAgents.put(agent.getId());
-        }
-    }
-
-    /**
-     * Enqueues an deactivated {@code Agent} to be sent in the next control message.
-     *
-     * @param agent the deactivated {@code Agent}.
-     */
-    public void enqueueDeactivatedAgent(Agent agent) {
-        synchronized (lock2) {
-            deactivatedAgents.put(agent.getId());
-        }
-    }
-
-    /**
-     * Enqueues a blocked {@code Agent} to be sent in the next control message.
-     *
-     * @param agent the blocked {@code Agent}.
-     */
-    public void enqueueBlockedAgent(Agent agent) {
-        synchronized (lock2) {
-            blockedAgents.put(agent.getId());
-        }
-    }
-
-    /**
-     * Sends the current control message to the frontend.
-     */
-    public void flushControlMsg() {
-        synchronized (lock2) {
-            if (activatedAgents.isEmpty() && deactivatedAgents.isEmpty() && blockedAgents.isEmpty()) {
-                return;
-            }
-
-            send(Encoder.encodeControlMsg(activatedAgents, deactivatedAgents, blockedAgents));
-            clearControlStates();
-        }
     }
 
     // ===============================================================================================
