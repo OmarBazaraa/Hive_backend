@@ -1,6 +1,7 @@
 package models.agents;
 
 import utils.Constants;
+import utils.Constants.*;
 
 
 /**
@@ -15,7 +16,15 @@ public interface AgentListener {
      * @param agent  the {@code Agent}.
      * @param action the action done by this {@code Agent}.
      */
-    void onAction(Agent agent, Constants.AgentAction action);
+    void onAction(Agent agent, AgentAction action);
+
+    /**
+     * Called when an {@code Agent} has recovered from a blockage state.
+     *
+     * @param agent  the {@code Agent}.
+     * @param action the action done by this {@code Agent}.
+     */
+    void onRecover(Agent agent, AgentAction action);
 
     /**
      * Called when the battery level of an {@code Agent} has changed.

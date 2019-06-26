@@ -231,7 +231,7 @@ public class Agent extends AbstractAgent {
         if (lastAction == AgentAction.ROTATE_RIGHT || lastAction == AgentAction.ROTATE_LEFT) {
             blocked = false;
             dir = Utility.nextDir(dir, lastAction);
-            updateLastAction(lastAction);
+            setLastRecoverAction(lastAction);
             return true;
         }
 
@@ -239,7 +239,7 @@ public class Agent extends AbstractAgent {
         if (lastAction == AgentAction.RETREAT) {
             blocked = false;
             dir = Utility.getReverseDir(dir);
-            updateLastAction(lastAction);
+            setLastRecoverAction(lastAction);
             return true;
         }
 
@@ -260,7 +260,7 @@ public class Agent extends AbstractAgent {
                 curCell.setAgent(null);
                 nxtCell.setAgent(this);
                 setPosition(nxt);
-                updateLastAction(lastAction);
+                setLastRecoverAction(lastAction);
                 return true;
             }
 
@@ -268,7 +268,7 @@ public class Agent extends AbstractAgent {
             if (!curCell.isLocked()) {
                 blocked = false;
                 dir = Utility.getReverseDir(dir);
-                updateLastAction(lastAction);
+                setLastRecoverAction(lastAction);
                 return true;
             }
 
@@ -279,7 +279,7 @@ public class Agent extends AbstractAgent {
         // Handle other actions that does not change the pose of the agent
         // Just try redoing the last action
         blocked = false;
-        updateLastAction(lastAction);
+        setLastRecoverAction(lastAction);
         return true;
     }
 
@@ -371,7 +371,7 @@ public class Agent extends AbstractAgent {
         curCell.setAgent(null);
         nxtCell.setAgent(this);
         setPose(nxt);
-        updateLastAction(action);
+        setLastAction(action);
     }
 
     /**
@@ -382,7 +382,7 @@ public class Agent extends AbstractAgent {
     @Override
     public void loadRack(Rack rack) {
         loaded = true;
-        updateLastAction(AgentAction.LOAD);
+        setLastAction(AgentAction.LOAD);
     }
 
     /**
@@ -393,7 +393,7 @@ public class Agent extends AbstractAgent {
     @Override
     public void offloadRack(Rack rack) {
         loaded = false;
-        updateLastAction(AgentAction.OFFLOAD);
+        setLastAction(AgentAction.OFFLOAD);
     }
 
     /**
@@ -404,7 +404,7 @@ public class Agent extends AbstractAgent {
     @Override
     public void lock(Facility facility) {
         locked = true;
-        updateLastAction(AgentAction.BIND);
+        setLastAction(AgentAction.BIND);
     }
 
     /**
@@ -415,7 +415,7 @@ public class Agent extends AbstractAgent {
     @Override
     public void unlock(Facility facility) {
         locked = false;
-        updateLastAction(AgentAction.UNBIND);
+        setLastAction(AgentAction.UNBIND);
     }
 
     // ===============================================================================================
@@ -437,15 +437,32 @@ public class Agent extends AbstractAgent {
     }
 
     /**
-     * Updates the last action this {@code Agent} has performed.
+     * Sets the last action this {@code Agent} has performed.
+     *
+     * @param action the action done by this {@code Agent}.
      */
-    public void updateLastAction(AgentAction action) {
+    public void setLastAction(AgentAction action) {
         lastAction = action;
         lastActionTime = Warehouse.getInstance().getTime();
 
         // Inform listener
         if (listener != null) {
             listener.onAction(this, action);
+        }
+    }
+
+    /**
+     * Sets the last recover action this {@code Agent} has performed.
+     *
+     * @param action the action done by this {@code Agent}.
+     */
+    public void setLastRecoverAction(AgentAction action) {
+        lastAction = action;
+        lastActionTime = Warehouse.getInstance().getTime();
+
+        // Inform listener
+        if (listener != null) {
+            listener.onRecover(this, action);
         }
     }
 }
