@@ -77,7 +77,9 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
         frontendComm.start();
 
         while (true) {
-            run();
+            synchronized (warehouse) {
+                run();
+            }
         }
     }
 
@@ -97,12 +99,10 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
 
         // Try running a single time step in the warehouse
         try {
-            synchronized (warehouse) {
-                if (warehouse.run()) {
-                    System.out.println(warehouse);
-                } else {
-                    waitOnWarehouse();
-                }
+            if (warehouse.run()) {
+                System.out.println(warehouse);
+            } else {
+                waitOnWarehouse();
             }
         } catch (Exception ex) {
             setState(ServerState.IDLE);
