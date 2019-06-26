@@ -569,8 +569,8 @@ public class FrontendCommunicator {
 
         @OnWebSocketMessage
         public void onMessage(Session client, String message) {
-            // System.out.println(">> from Frontend: " + message);  // TODO: to be removed
-            // System.out.flush();
+            System.out.println(">> from Frontend: " + message);  // TODO: to be removed
+            System.out.flush();
 
             process(message);
         }

@@ -439,13 +439,17 @@ public class HardwareCommunicator {
     private String bytesToStr(byte[] buf) {
         StringBuilder builder = new StringBuilder();
 
-        builder.append("\"");
+        builder.append("[");
 
         for (int i = 0; i < buf.length; ++i) {
-            builder.append((char) (buf[i] + '0'));
+            if (i > 0) {
+                builder.append(", ");
+            }
+
+            builder.append(buf[i]);
         }
 
-        builder.append("\"");
+        builder.append("]");
 
         return builder.toString();
     }

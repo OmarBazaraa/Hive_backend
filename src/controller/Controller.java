@@ -305,7 +305,7 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
     public void onAgentActivated(Agent agent) {
         synchronized (warehouse) {
             // DEBUG
-            System.out.println("Activating " + agent + ".");
+            System.out.println("Activating agent-" + agent.getId() + ".");
             System.out.println();
 
             agent.activate();
@@ -322,7 +322,7 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
     public void onAgentDeactivated(Agent agent) {
         synchronized (warehouse) {
             // DEBUG
-            System.out.println("Deactivating " + agent + ".");
+            System.out.println("Deactivating agent-" + agent.getId() + ".");
             System.out.println();
 
             agent.deactivate();
