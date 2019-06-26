@@ -450,9 +450,6 @@ abstract public class AbstractWarehouse {
     public void print() {
         StringBuilder builder = new StringBuilder();
 
-        // Print the grid
-        builder.append(this).append("\n");
-
         // Print the list of agents
         builder.append("Agents: ").append(agents.size()).append("\n");
         for (Agent agent : agents.values()) {
@@ -486,6 +483,10 @@ abstract public class AbstractWarehouse {
         for (Item item : items.values()) {
             builder.append("    > ").append(item).append("\n");
         }
+        builder.append("\n");
+
+        // Print the grid
+        builder.append(this);
 
         // Print to standard output
         System.out.println(builder);

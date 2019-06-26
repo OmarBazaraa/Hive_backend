@@ -400,11 +400,11 @@ public class HardwareCommunicator {
             Agent agent = ipToAgentMap.get(addr);
 
             if (agent != null) {
-                openSession(agent, client);
-
                 // DEBUG
                 System.out.println("HardwareCommunicator :: Agent-" + agent.getId() + " connected!");
                 System.out.println();
+
+                openSession(agent, client);
             } else {
                 // DEBUG
                 System.out.println("HardwareCommunicator :: Unknown session connected!");
@@ -418,11 +418,11 @@ public class HardwareCommunicator {
             Agent agent = ipToAgentMap.get(addr);
 
             if (agent != null) {
-                closeSession(agent, client);
-
                 // DEBUG
                 System.out.println("HardwareCommunicator :: Agent-" + agent.getId() + " connection closed with status code: " + statusCode + ", reason: " + reason);
                 System.out.println();
+
+                closeSession(agent, client);
             } else {
                 // DEBUG
                 System.out.println("HardwareCommunicator :: Unknown session closed!");
@@ -455,19 +455,23 @@ public class HardwareCommunicator {
             InetAddress addr = client.getRemoteAddress().getAddress();
             Agent agent = ipToAgentMap.get(addr);
 
+            if (agent == null) {
+                // DEBUG
+                System.out.println("HardwareCommunicator :: Received message from unknown source!");
+                System.out.println();
+                return;
+            }
+
             byte[] msg = new byte[length];
 
             for (int i = 0; i < length; ++i) {
                 msg[i] = buffer[offset + i];
             }
 
-            if (agent != null) {
-                process(agent, msg);
-            } else {
-                // DEBUG
-                System.out.println("HardwareCommunicator :: Received message from unknown source!");
-                System.out.println();
-            }
+            System.out.println(">> Agent-" + agent.getId() + ": " + bytesToStr(msg));  // TODO: to be removed
+            System.out.flush();
+
+            process(agent, msg);
         }
     }
 
@@ -482,12 +486,12 @@ public class HardwareCommunicator {
             Agent agent = idToAgentMap.get(id);
 
             if (agent != null) {
-                sessionToAgentMap.put(client, agent);
-                openSession(agent, client);
-
                 // DEBUG
                 System.out.println("HardwareCommunicator :: Agent-" + agent.getId() + " connected!");
                 System.out.println();
+
+                sessionToAgentMap.put(client, agent);
+                openSession(agent, client);
             } else {
                 // DEBUG
                 System.out.println("HardwareCommunicator :: Unknown session connected!");
@@ -500,11 +504,12 @@ public class HardwareCommunicator {
             Agent agent = sessionToAgentMap.get(client);
 
             if (agent != null) {
-                closeSession(agent, client);
-
                 // DEBUG
                 System.out.println("HardwareCommunicator :: Agent-" + agent.getId() + " connection closed with status code: " + statusCode + ", reason: " + reason);
                 System.out.println();
+
+                sessionToAgentMap.remove(client);
+                closeSession(agent, client);
             } else {
                 // DEBUG
                 System.out.println();
@@ -526,19 +531,23 @@ public class HardwareCommunicator {
 
             Agent agent = sessionToAgentMap.get(client);
 
+            if (agent == null) {
+                // DEBUG
+                System.out.println("HardwareCommunicator :: Received message from unknown source!");
+                System.out.println();
+                return;
+            }
+
             byte[] msg = new byte[length];
 
             for (int i = 0; i < length; ++i) {
                 msg[i] = buffer[offset + i];
             }
 
-            if (agent != null) {
-                process(agent, msg);
-            } else {
-                // DEBUG
-                System.out.println("HardwareCommunicator :: Received message from unknown source!");
-                System.out.println();
-            }
+            System.out.println(">> Agent-" + agent.getId() + ": " + bytesToStr(msg));  // TODO: to be removed
+            System.out.flush();
+
+            process(agent, msg);
         }
     }
 }
