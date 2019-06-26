@@ -69,6 +69,11 @@ public class FrontendCommunicator {
      */
     private ConcurrentHashMap<Integer, AgentAction> receivedDoneMap = new ConcurrentHashMap<>();
 
+    /**
+     * Object used to lock threads from sending using the same remote endpoint at the same time.
+     */
+    private Object lock = new Object();
+
     // ===============================================================================================
     //
     // Member Methods
@@ -129,11 +134,12 @@ public class FrontendCommunicator {
      */
     private void send(JSONObject msg) {
         try {
-            session.getRemote().sendString(msg.toString());
+            synchronized (lock) {
+                session.getRemote().sendString(msg.toString());
+            }
 
             // DEBUG
-            System.out.println("FrontendCommunicator :: Sending to frontend ...");
-            System.out.println(msg.toString(4));
+            System.out.println("FrontendCommunicator :: Sending to frontend: " + msg + " ...");
             System.out.println();
         } catch (IOException ex) {
             listener.onStop();
@@ -563,8 +569,8 @@ public class FrontendCommunicator {
 
         @OnWebSocketMessage
         public void onMessage(Session client, String message) {
-            System.out.println(">> Frontend: " + message);  // TODO: to be removed
-            System.out.flush();
+            // System.out.println(">> from Frontend: " + message);  // TODO: to be removed
+            // System.out.flush();
 
             process(message);
         }

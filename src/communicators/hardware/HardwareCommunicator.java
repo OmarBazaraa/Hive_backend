@@ -532,7 +532,7 @@ public class HardwareCommunicator {
                 msg[i] = buffer[offset + i];
             }
 
-            System.out.println(">> Agent-" + agent.getId() + ": " + bytesToStr(msg));  // TODO: to be removed
+            System.out.println(">> from Agent-" + agent.getId() + ": " + bytesToStr(msg));  // TODO: to be removed
             System.out.flush();
 
             process(agent, msg);
@@ -608,7 +608,7 @@ public class HardwareCommunicator {
                 msg[i] = buffer[offset + i];
             }
 
-            System.out.println(">> Agent-" + agent.getId() + ": " + bytesToStr(msg));  // TODO: to be removed
+            System.out.println(">> from Agent-" + agent.getId() + ": " + bytesToStr(msg));  // TODO: to be removed
             System.out.flush();
 
             process(agent, msg);
