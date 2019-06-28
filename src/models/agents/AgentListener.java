@@ -1,6 +1,7 @@
 package models.agents;
 
-import utils.Constants;
+import models.tasks.Task;
+
 import utils.Constants.*;
 
 
@@ -54,4 +55,20 @@ public interface AgentListener {
      * @param agent the blocked {@code Agent}.
      */
     void onBlock(Agent agent);
+
+    /**
+     * Called when a {@code Task} has been assigned to an {@code Agent}.
+     *
+     * @param agent the {@code Agent} assigned the task.
+     * @param task  the assigned {@code Task}.
+     */
+    void onTaskAssign(Agent agent, Task task);
+
+    /**
+     * Called when an assigned {@code Task} to an {@code Agent} has been completed.
+     *
+     * @param agent the {@code Agent} assigned the task.
+     * @param task  the completed {@code Task}.
+     */
+    void onTaskComplete(Agent agent, Task task);
 }

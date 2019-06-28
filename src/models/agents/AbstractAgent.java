@@ -305,6 +305,10 @@ abstract public class AbstractAgent extends HiveObject implements TaskAssignable
     @Override
     public void assignTask(Task task) {
         tasks.add(task);
+
+        if (listener != null) {
+            listener.onTaskAssign((Agent) this, task);
+        }
     }
 
     /**
@@ -315,6 +319,10 @@ abstract public class AbstractAgent extends HiveObject implements TaskAssignable
     @Override
     public void onTaskComplete(Task task) {
         tasks.remove();
+
+        if (listener != null) {
+            listener.onTaskComplete((Agent) this, task);
+        }
     }
 
     // ===============================================================================================

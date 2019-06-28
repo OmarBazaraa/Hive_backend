@@ -4,6 +4,7 @@ import communicators.CommunicationListener;
 import communicators.frontend.FrontendCommunicator;
 import communicators.frontend.FrontendConstants;
 import communicators.hardware.HardwareCommunicator;
+import communicators.hardware.HardwareConstants;
 
 import models.agents.Agent;
 import models.agents.AgentListener;
@@ -421,6 +422,32 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
 
         if (getMode() == RunningMode.DEPLOYMENT) {
             hardwareComm.sendAgentStop(agent);
+        }
+    }
+
+    /**
+     * Called when a {@code Task} has been assigned to an {@code Agent}.
+     *
+     * @param agent the {@code Agent} assigned the task.
+     * @param task  the assigned {@code Task}.
+     */
+    @Override
+    public void onTaskAssign(Agent agent, Task task) {
+        if (getMode() == RunningMode.DEPLOYMENT) {
+            hardwareComm.sendAgentLightCommand(agent, HardwareConstants.LIGHT_BLUE, HardwareConstants.LIGHT_MODE_FLASH);
+        }
+    }
+
+    /**
+     * Called when an assigned {@code Task} to an {@code Agent} has been completed.
+     *
+     * @param agent the {@code Agent} assigned the task.
+     * @param task  the completed {@code Task}.
+     */
+    @Override
+    public void onTaskComplete(Agent agent, Task task) {
+        if (getMode() == RunningMode.DEPLOYMENT) {
+            hardwareComm.sendAgentLightCommand(agent, HardwareConstants.LIGHT_BLUE, HardwareConstants.LIGHT_MODE_OFF);
         }
     }
 

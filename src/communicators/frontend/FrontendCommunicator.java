@@ -82,7 +82,7 @@ public class FrontendCommunicator {
     /**
      * Constructs a new {@code FrontendCommunicator} object.
      *
-     * @param port the port number.
+     * @param port the port number to listen on.
      */
     public FrontendCommunicator(int port, CommunicationListener l) {
         // Protected constructor to ensure a singleton object.

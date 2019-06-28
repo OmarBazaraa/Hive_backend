@@ -87,7 +87,7 @@ public class HardwareCommunicator {
     /**
      * Constructs a new {@code HardwareCommunicator} object.
      *
-     * @param port the port number.
+     * @param port the port number to listen on.
      */
     public HardwareCommunicator(int port, CommunicationListener l) {
         // Protected constructor to ensure a singleton object.
@@ -395,6 +395,18 @@ public class HardwareCommunicator {
         }
 
         pendingActionMap.put(agent, action);
+        send(agent, msg);
+    }
+
+    /**
+     * Sends a light instruction to the given {@code Agent}.
+     *
+     * @param agent the {@code Agent} to send the instruction to.
+     * @param light the light bulb to control; RED or BLUE.
+     * @param mode  the mode of the light; OFF, ON, or FLASHING.
+     */
+    public void sendAgentLightCommand(Agent agent, int light, int mode) {
+        byte[] msg = {HardwareConstants.TYPE_LIGHTS, (byte) light, (byte) mode};
         send(agent, msg);
     }
 
