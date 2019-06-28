@@ -5,6 +5,7 @@ import models.facilities.Facility;
 import models.items.Item;
 import models.facilities.Gate;
 import models.facilities.Rack;
+import models.maps.utils.Position;
 import models.tasks.orders.Order;
 
 import utils.Pair;
@@ -125,7 +126,42 @@ public class Task extends AbstractTask {
      * @return the number of running orders.
      */
     public int getRunningOrdersCount() {
-        return orders.size() + (activeOrder != null ? 1 : 0);
+        return orders.size();
+    }
+
+    /**
+     * Calculates the estimated number of steps to be done by the assigned {@code Agent}
+     * till the given order has been partially fulfilled
+     *
+     * @param order the {@code Order} to estimate.
+     *
+     * @return the estimated number of steps to complete the order.
+     */
+    public int calculateEstimatedSteps(Order order) {
+        int ret = 0;
+
+        // Set position to the current agent position
+        Position pos = agent.getPosition();
+
+        // If the rack is still being fetched then add the distance to reach the rack
+        if (isFetchingRack()) {
+            ret = rack.getDistanceTo(agent);
+            pos = rack.getPosition();
+        }
+
+        // Add the distance between every two consecutive gates
+        for (Order o : orders) {
+            Gate gate = o.getDeliveryGate();
+            ret += gate.getDistanceTo(pos);
+            pos = gate.getPosition();
+        }
+
+        // Add the distance to reach the given order's gate and then returning the rack back
+        Gate gate = order.getDeliveryGate();
+        ret += gate.getDistanceTo(pos);
+        ret += gate.getDistanceTo(rack.getPosition());
+
+        return ret;
     }
 
     /**
@@ -149,6 +185,20 @@ public class Task extends AbstractTask {
     }
 
     /**
+     * Called when the delivery of {@code Rack} to the {@code Gate} has been completed.
+     * That is, when the currently active {@code Order} has been partially
+     * fulfilled by this {@code Task}.
+     * <p>
+     * This function should be called from the {@code Gate} after collecting/refilling
+     * the needed items.
+     */
+    public void deliveryCompleted() {
+        activeOrder.onTaskComplete(this);
+        activeOrder = null;
+        orders.removeFirst();
+    }
+
+    /**
      * Activates this {@code Task} and allocates its required resources.
      * <p>
      * This function should be called only once per {@code Task} object.
@@ -168,7 +218,6 @@ public class Task extends AbstractTask {
      */
     @Override
     protected void terminate() {
-        // TODO: add task statistics finalization
         rack.deallocate();
         agent.onTaskComplete(this);
         super.terminate();
@@ -194,11 +243,11 @@ public class Task extends AbstractTask {
 
         // Bind action
         if (action == TaskAction.BIND) {
-            ret |= executeBind(facility);
+            ret = executeBind(facility);
         }
         // Unbind action
         if (action == TaskAction.UNBIND) {
-            ret |= executeUnbind(facility);
+            ret = executeUnbind(facility);
         }
 
         // Check if all actions are completed
@@ -209,18 +258,10 @@ public class Task extends AbstractTask {
         return ret;
     }
 
-    /**
-     * Called when the delivery of {@code Rack} to the active {@code Gate} has been completed.
-     * That is, when the currently active {@code Order} has been partially
-     * fulfilled by this {@code Task}.
-     * <p>
-     * This function should be called from the {@code Gate} after collecting/refilling
-     * the needed items.
-     */
-    public void deliveryCompleted() {
-        activeOrder.onTaskComplete(this);
-        activeOrder = null;
-    }
+    // ===============================================================================================
+    //
+    // Helper Methods
+    //
 
     /**
      * Selects the next {@code Order} to be delivered by this {@code Task}.
@@ -231,7 +272,7 @@ public class Task extends AbstractTask {
             return;
         }
 
-        activeOrder = orders.removeFirst();
+        activeOrder = orders.getFirst();
         actions.addFirst(new Pair<>(TaskAction.UNBIND, activeOrder.getDeliveryGate()));
         actions.addFirst(new Pair<>(TaskAction.BIND, activeOrder.getDeliveryGate()));
     }
@@ -268,5 +309,23 @@ public class Task extends AbstractTask {
         } else {
             return agent.reach(facility);
         }
+    }
+
+    /**
+     * Checks whether the {@code Rack} is being fetched or not.
+     *
+     * @return {@code true} if the {@code Rack} is being fetched; {@code false} if already fetched.
+     */
+    private boolean isFetchingRack() {
+        return actions.element().key == TaskAction.BIND && actions.element().val == rack;
+    }
+
+    /**
+     * Checks whether the {@code Rack} is being returned back or not.
+     *
+     * @return {@code true} if the {@code Rack} is being returned; {@code false} otherwise.
+     */
+    private boolean isReturningRack() {
+        return actions.element().key == TaskAction.UNBIND && actions.element().val == rack;
     }
 }
