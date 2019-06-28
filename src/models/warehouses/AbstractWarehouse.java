@@ -145,6 +145,16 @@ abstract public class AbstractWarehouse {
     abstract public void init();
 
     /**
+     * Activates the given new delivery {@code Task} after being dispatched
+     * by {@link Dispatcher}.
+     * <p>
+     * This function should only be called from the {@link Dispatcher}.
+     *
+     * @param task the new {@code Task} to add to the system.
+     */
+    abstract public void activateTask(Task task);
+
+    /**
      * Performs and simulates a single time step in this {@code Warehouse}.
      *
      * @return {@code true} if a change has happen in the {@code Warehouse}; {@code false} otherwise.
@@ -429,17 +439,8 @@ abstract public class AbstractWarehouse {
     public void addOrder(Order order) {
         orders.put(order.getId(), order);
         pendingOrders.add(order);
+        order.activate();
     }
-
-    /**
-     * Adds and activates a new {@code Task} to this {@code Warehouse} after being dispatched
-     * by {@link Dispatcher}.
-     * <p>
-     * This function should only be called from the {@link Dispatcher}.
-     *
-     * @param task the {@code Task} to add to the system.
-     */
-    abstract public void addTask(Task task);
 
     // ===============================================================================================
     //

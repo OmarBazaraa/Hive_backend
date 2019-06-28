@@ -67,26 +67,15 @@ public class Warehouse extends AbstractWarehouse {
     }
 
     /**
-     * Adds a new {@code Order} to this {@code Warehouse} to be delivered.
-     *
-     * @param order the {@code Order} to be added.
-     */
-    @Override
-    public void addOrder(Order order) {
-        super.addOrder(order);
-        order.activate();
-    }
-
-    /**
-     * Adds and activates a new {@code Task} to this {@code Warehouse} after being dispatched
+     * Activates the given new delivery {@code Task} after being dispatched
      * by {@link Dispatcher}.
      * <p>
      * This function should only be called from the {@link Dispatcher}.
      *
-     * @param task the {@code Task} to add to the system.
+     * @param task the new {@code Task} to add to the system.
      */
     @Override
-    public void addTask(Task task) {
+    public void activateTask(Task task) {
         // Activate the task
         task.activate();
 
