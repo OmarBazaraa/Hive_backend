@@ -9,7 +9,9 @@ import models.warehouses.Warehouse;
 import utils.Utility;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 
 /**
@@ -59,6 +61,15 @@ public class RefillOrder extends Order {
     }
 
     /**
+     * Returns the total weight added to the associated {@code Rack} after refilling.
+     *
+     * @return the added weight.
+     */
+    public int getAddedWeight() {
+        return addedWeight;
+    }
+
+    /**
      * Returns the {@code Rack} where this {@code RefillOrder} must be refill.
      *
      * @return the refill {@code Rack} of this {@code RefillOrder}.
@@ -68,12 +79,15 @@ public class RefillOrder extends Order {
     }
 
     /**
-     * Returns the total weight added to the associated {@code Rack} after refilling.
+     * Returns the set of candidate racks that can supply this {@code Order}.
      *
-     * @return the added weight.
+     * @return a set of all candidate racks.
      */
-    public int getAddedWeight() {
-        return addedWeight;
+    @Override
+    public Set<Rack> getCandidateRacks() {
+        Set<Rack> ret = new HashSet<>(1);
+        ret.add(refillRack);
+        return ret;
     }
 
     /**

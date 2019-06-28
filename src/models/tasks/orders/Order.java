@@ -147,6 +147,32 @@ abstract public class Order extends AbstractTask implements QuantityAddable<Item
     }
 
     /**
+     * Returns the set of candidate racks that can supply this {@code Order}.
+     *
+     * @return a set of all candidate racks.
+     */
+    abstract public Set<Rack> getCandidateRacks();
+
+    /**
+     * Returns the maximum number of units the given {@code Rack} can supply
+     * this {@code Order} with.
+     *
+     * Note that the returned value will be negative in case of the refill orders.
+     *
+     * @return the maximum supply the {@code Rack} can provide.
+     */
+    public int getMaxRackSupply(Rack rack) {
+        int ret = 0;
+
+        for (var i : this) {
+            Item item = i.getKey();
+            ret += Math.min(rack.get(item), i.getValue());
+        }
+
+        return ret;
+    }
+
+    /**
      * Returns the pending quantity of the an {@code Item} of this {@code Order}.
      * A negative quantity represents a refill order, where these quantity
      * should be taken from the {@code Gate} to the racks of the {@code Warehouse}.

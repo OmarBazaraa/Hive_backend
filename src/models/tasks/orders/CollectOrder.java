@@ -9,7 +9,9 @@ import models.warehouses.Warehouse;
 import utils.Utility;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 
 /**
@@ -35,6 +37,30 @@ public class CollectOrder extends Order {
      */
     public CollectOrder(int id, Gate gate) {
         super(id, gate);
+    }
+
+    /**
+     * Returns the set of candidate racks that can supply this {@code Order}.
+     *
+     * @return a set of all candidate racks.
+     */
+    @Override
+    public Set<Rack> getCandidateRacks() {
+        Set<Rack> ret = new HashSet<>();
+
+        for (var i : this) {
+            Item item = i.getKey();
+
+            for (var r : item) {
+                Rack rack = r.getKey();
+
+                if (deliveryGate.getDistanceTo(rack.getPosition()) < Integer.MAX_VALUE) {
+                    ret.add(r.getKey());
+                }
+            }
+        }
+
+        return ret;
     }
 
     /**
