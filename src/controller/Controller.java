@@ -106,7 +106,7 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
                 waitOnWarehouse();
             }
         } catch (Exception ex) {
-            setState(ServerState.IDLE);
+            onStop();
             frontendComm.sendErr(FrontendConstants.ERR_SERVER, "Internal server error.");
             System.err.println(ex.getMessage());
             ex.printStackTrace();
