@@ -58,21 +58,21 @@ public interface CommunicationListener {
      *
      * @param order the newly issued {@code order}.
      */
-    void onOrderIssued(Order order);
+    void onOrderIssue(Order order);
 
     /**
      * Called when the communicator receives an {@code Agent} activation.
      *
      * @param agent the activated {@code Agent}.
      */
-    void onAgentActivated(Agent agent);
+    void onAgentActivate(Agent agent);
 
     /**
      * Called when the communicator receives an {@code Agent} deactivation.
      *
      * @param agent the deactivated {@code Agent}.
      */
-    void onAgentDeactivated(Agent agent);
+    void onAgentDeactivate(Agent agent);
 
     /**
      * Called when the communicator receives a change in the battery level
@@ -81,5 +81,5 @@ public interface CommunicationListener {
      * @param agent the {@code Agent}.
      * @param level the new battery level of this {@code Agent}.
      */
-    void onAgentBatteryLevelChanged(Agent agent, int level);
+    void onAgentBatteryLevelChange(Agent agent, int level);
 }

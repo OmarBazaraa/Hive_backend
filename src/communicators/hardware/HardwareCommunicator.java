@@ -152,7 +152,7 @@ public class HardwareCommunicator {
         // Check for un-connected agents
         for (Agent agent : ipToAgentMap.values()) {
             if (!agentToSessionMap.containsKey(agent)) {
-                listener.onAgentDeactivated(agent);
+                listener.onAgentDeactivate(agent);
             }
         }
     }
@@ -165,7 +165,7 @@ public class HardwareCommunicator {
      */
     private void openSession(Agent agent, Session sess) {
         agentToSessionMap.put(agent, sess);
-        listener.onAgentActivated(agent);
+        listener.onAgentActivate(agent);
     }
 
     /**
@@ -176,7 +176,7 @@ public class HardwareCommunicator {
      */
     private void closeSession(Agent agent, Session sess) {
         agentToSessionMap.remove(agent);
-        listener.onAgentDeactivated(agent);
+        listener.onAgentDeactivate(agent);
     }
 
     /**
@@ -199,7 +199,7 @@ public class HardwareCommunicator {
             System.out.println("HardwareCommunicator :: Sending to agent-" + agent.getId() + ": " + bytesToStr(msg) + " ...");
             System.out.println();
         } catch (IOException ex) {
-            listener.onAgentDeactivated(agent);
+            listener.onAgentDeactivate(agent);
             System.err.println(ex.getMessage());
         }
     }
@@ -261,7 +261,7 @@ public class HardwareCommunicator {
         System.out.println("HardwareCommunicator :: Agent-" + agent.getId() + " battery level updated to level: " + level + ".");
         System.out.println();
 
-        listener.onAgentBatteryLevelChanged(agent, level);
+        listener.onAgentBatteryLevelChange(agent, level);
     }
 
     /**
@@ -277,13 +277,13 @@ public class HardwareCommunicator {
             System.out.println("HardwareCommunicator :: Received BLOCKED from agent-" + agent.getId() + ".");
             System.out.println();
 
-            listener.onAgentDeactivated(agent);
+            listener.onAgentDeactivate(agent);
         } else {
             // DEBUG
             System.out.println("HardwareCommunicator :: Received UNBLOCKED from agent-" + agent.getId() + ".");
             System.out.println();
 
-            listener.onAgentActivated(agent);
+            listener.onAgentActivate(agent);
         }
     }
 

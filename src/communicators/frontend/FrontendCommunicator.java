@@ -332,7 +332,7 @@ public class FrontendCommunicator {
         try {
             synchronized (warehouse) {
                 Order order = Decoder.decodeOrder(data);
-                listener.onOrderIssued(order);
+                listener.onOrderIssue(order);
                 sendMsg(FrontendConstants.TYPE_ACK_ORDER, FrontendConstants.TYPE_OK, 0, "");
             }
         } catch (JSONException ex) {
@@ -376,10 +376,10 @@ public class FrontendCommunicator {
 
         switch (type) {
             case FrontendConstants.TYPE_AGENT_ACTIVATE:
-                listener.onAgentActivated(agent);
+                listener.onAgentActivate(agent);
                 break;
             case FrontendConstants.TYPE_AGENT_DEACTIVATE:
-                listener.onAgentDeactivated(agent);
+                listener.onAgentDeactivate(agent);
                 break;
             default:
                 throw new DataException("Control message with invalid type: " + type + ".",

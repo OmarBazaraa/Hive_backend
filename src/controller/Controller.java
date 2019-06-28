@@ -21,7 +21,7 @@ import java.util.Collection;
 import java.util.Map;
 
 
-public class Controller implements CommunicationListener, AgentListener, OrderListener {
+public class Controller implements CommunicationListener {
 
     //
     // Member Variables
@@ -206,7 +206,7 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
             Collection<Agent> agents = warehouse.getAgentList();
 
             for (Agent agent : agents) {
-                agent.setListener(this);
+                agent.setListener(agentListener);
             }
 
             if (mode == RunningMode.DEPLOYMENT) {
@@ -285,13 +285,13 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
      * @param order the newly issued {@code order}.
      */
     @Override
-    public void onOrderIssued(Order order) {
+    public void onOrderIssue(Order order) {
         synchronized (warehouse) {
             // DEBUG
             System.out.println("Received " + order);
             System.out.println();
 
-            order.setListener(this);
+            order.setListener(orderListener);
             warehouse.addOrder(order);
             warehouse.notify();
         }
@@ -303,7 +303,7 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
      * @param agent the activated {@code Agent}.
      */
     @Override
-    public void onAgentActivated(Agent agent) {
+    public void onAgentActivate(Agent agent) {
         synchronized (warehouse) {
             // DEBUG
             System.out.println("Activating agent-" + agent.getId() + ".");
@@ -320,7 +320,7 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
      * @param agent the deactivated {@code Agent}.
      */
     @Override
-    public void onAgentDeactivated(Agent agent) {
+    public void onAgentDeactivate(Agent agent) {
         synchronized (warehouse) {
             // DEBUG
             System.out.println("Deactivating agent-" + agent.getId() + ".");
@@ -339,7 +339,7 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
      * @param level the new battery level of this {@code Agent}.
      */
     @Override
-    public void onAgentBatteryLevelChanged(Agent agent, int level) {
+    public void onAgentBatteryLevelChange(Agent agent, int level) {
         synchronized (warehouse) {
             agent.setBatteryLevel(level);
         }
@@ -351,165 +351,115 @@ public class Controller implements CommunicationListener, AgentListener, OrderLi
     //
 
     /**
-     * Called when an {@code Agent} has performed an action.
-     *
-     * @param agent  the {@code Agent}.
-     * @param action the action done by this {@code Agent}.
+     * The {@code AgentListener} interface with useful callback functions related to agents.
      */
-    @Override
-    public void onAction(Agent agent, AgentAction action) {
-        frontendComm.sendAgentAction(agent, action);
+    private AgentListener agentListener = new AgentListener() {
+        //
+        // All these callbacks are being called with exclusive access to the warehouse object
+        //
 
-        if (getMode() == RunningMode.DEPLOYMENT) {
-            hardwareComm.sendAgentAction(agent, action);
+        // Called from the main thread
+        @Override
+        public void onAction(Agent agent, AgentAction action) {
+            frontendComm.sendAgentAction(agent, action);
+
+            if (getMode() == RunningMode.DEPLOYMENT) {
+                hardwareComm.sendAgentAction(agent, action);
+            }
         }
-    }
 
-    /**
-     * Called when an {@code Agent} has recovered from a blockage state.
-     *
-     * @param agent  the {@code Agent}.
-     * @param action the action done by this {@code Agent}.
-     */
-    @Override
-    public void onRecover(Agent agent, AgentAction action) {
-        frontendComm.sendAgentRecoverAction(agent, action);
+        // Called from the main thread
+        @Override
+        public void onRecover(Agent agent, AgentAction action) {
+            frontendComm.sendAgentRecoverAction(agent, action);
 
-        if (getMode() == RunningMode.DEPLOYMENT) {
-            hardwareComm.sendAgentRecoverAction(agent, action);
+            if (getMode() == RunningMode.DEPLOYMENT) {
+                hardwareComm.sendAgentRecoverAction(agent, action);
+            }
         }
-    }
 
-    /**
-     * Called when the battery level of an {@code Agent} has changed.
-     *
-     * @param agent the {@code Agent}.
-     * @param level the new battery level of this {@code Agent}.
-     */
-    @Override
-    public void onBatteryLevelChange(Agent agent, int level) {
-        frontendComm.sendAgentBatteryUpdatedLog(agent);
-    }
-
-    /**
-     * Called when an {@code Agent} has been activated.
-     *
-     * @param agent the activated {@code Agent}.
-     */
-    @Override
-    public void onActivate(Agent agent) {
-        frontendComm.sendAgentControl(agent, false);
-    }
-
-    /**
-     * Called when an {@code Agent} has been deactivated.
-     *
-     * @param agent the deactivated {@code Agent}.
-     */
-    @Override
-    public void onDeactivate(Agent agent) {
-        frontendComm.sendAgentControl(agent, true);
-    }
-
-    /**
-     * Called when an {@code Agent} has been blocked.
-     *
-     * @param agent the blocked {@code Agent}.
-     */
-    @Override
-    public void onBlock(Agent agent) {
-        frontendComm.sendAgentStop(agent);
-
-        if (getMode() == RunningMode.DEPLOYMENT) {
-            hardwareComm.sendAgentStop(agent);
+        // Called from Spark threads
+        @Override
+        public void onBatteryLevelChange(Agent agent, int level) {
+            frontendComm.sendAgentBatteryUpdatedLog(agent);
         }
-    }
 
-    /**
-     * Called when a {@code Task} has been assigned to an {@code Agent}.
-     *
-     * @param agent the {@code Agent} assigned the task.
-     * @param task  the assigned {@code Task}.
-     */
-    @Override
-    public void onTaskAssign(Agent agent, Task task) {
-        if (getMode() == RunningMode.DEPLOYMENT) {
-            hardwareComm.sendAgentLightCommand(agent, HardwareConstants.LIGHT_BLUE, HardwareConstants.LIGHT_MODE_FLASH);
+        // Called from Spark threads
+        @Override
+        public void onActivate(Agent agent) {
+            frontendComm.sendAgentControl(agent, false);
         }
-    }
 
-    /**
-     * Called when an assigned {@code Task} to an {@code Agent} has been completed.
-     *
-     * @param agent the {@code Agent} assigned the task.
-     * @param task  the completed {@code Task}.
-     */
-    @Override
-    public void onTaskComplete(Agent agent, Task task) {
-        if (getMode() == RunningMode.DEPLOYMENT) {
-            hardwareComm.sendAgentLightCommand(agent, HardwareConstants.LIGHT_BLUE, HardwareConstants.LIGHT_MODE_OFF);
+        // Called from Spark threads
+        @Override
+        public void onDeactivate(Agent agent) {
+            frontendComm.sendAgentControl(agent, true);
         }
-    }
+
+        // Called from Spark threads
+        @Override
+        public void onBlock(Agent agent) {
+            frontendComm.sendAgentStop(agent);
+
+            if (getMode() == RunningMode.DEPLOYMENT) {
+                hardwareComm.sendAgentStop(agent);
+            }
+        }
+
+        // Called from the main thread
+        @Override
+        public void onTaskAssign(Agent agent, Task task) {
+            if (getMode() == RunningMode.DEPLOYMENT) {
+                hardwareComm.sendAgentLightCommand(agent, HardwareConstants.LIGHT_BLUE, HardwareConstants.LIGHT_MODE_FLASH);
+            }
+        }
+
+        // Called from the main thread
+        @Override
+        public void onTaskComplete(Agent agent, Task task) {
+            if (getMode() == RunningMode.DEPLOYMENT) {
+                hardwareComm.sendAgentLightCommand(agent, HardwareConstants.LIGHT_BLUE, HardwareConstants.LIGHT_MODE_OFF);
+            }
+        }
+    };
 
     // ===============================================================================================
     //
     // Order Listener Methods
     //
 
-    // All these functions are being called from the controller main thread (i.e. Main Thread)
-
     /**
-     * Called when an {@code Order} has just been started.
-     * That, is when it is assigned its first sub task.
-     *
-     * @param order the started {@code Order}.
+     * The {@code OrderListener} interface with useful callback functions related to orders.
      */
-    @Override
-    public void onStart(Order order) {
+    private OrderListener orderListener = new OrderListener() {
+        //
+        // All these callbacks are being called with exclusive access to the warehouse object
+        // from the main thread
+        //
 
-    }
+        @Override
+        public void onStart(Order order) {
 
-    /**
-     * Called when a {@code Task} has been assigned to an {@code Order}.
-     *
-     * @param order the {@code Order}.
-     * @param task  the assigned {@code Task}.
-     */
-    @Override
-    public void onTaskAssign(Order order, Task task) {
-        frontendComm.sendTaskAssignedLog(order, task);
-    }
+        }
 
-    /**
-     * Called when an assigned {@code Task} for an {@code Order} has been completed.
-     *
-     * @param order the {@code Order}.
-     * @param task  the completed {@code Task}.
-     * @param items the map of add/removed items by the completed {@code Task}.
-     */
-    @Override
-    public void onTaskComplete(Order order, Task task, Map<Item, Integer> items) {
-        frontendComm.sendTaskCompletedLog(order, task, items);
-    }
+        @Override
+        public void onTaskAssign(Order order, Task task) {
+            frontendComm.sendTaskAssignedLog(order, task);
+        }
 
-    /**
-     * Called when an {@code Order} has just been fulfilled.
-     * That, is when its last assigned sub task has been completed.
-     *
-     * @param order the fulfilled {@code Order}.
-     */
-    @Override
-    public void onFulfill(Order order) {
-        frontendComm.sendOrderFulfilledLog(order);
-    }
+        @Override
+        public void onTaskComplete(Order order, Task task, Map<Item, Integer> items) {
+            frontendComm.sendTaskCompletedLog(order, task, items);
+        }
 
-    /**
-     * Called when an {@code Order} has been dismissed from the system.
-     *
-     * @param order the dismissed {@code Order}.
-     */
-    @Override
-    public void onDismiss(Order order) {
+        @Override
+        public void onFulfill(Order order) {
+            frontendComm.sendOrderFulfilledLog(order);
+        }
 
-    }
+        @Override
+        public void onDismiss(Order order) {
+
+        }
+    };
 }
