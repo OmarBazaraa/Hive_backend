@@ -205,13 +205,13 @@ public class Agent extends AbstractAgent {
     }
 
     /**
-     * Retreats from the last action done and returns back to a normal state.
+     * Recovers from the blockage and returns back to a normal state if possible.
      *
-     * @return {@code true} if retreated successfully; {@code false} otherwise.
+     * @return {@code true} if recovered successfully; {@code false} otherwise.
      */
     @Override
-    public boolean retreat() {
-        // Cannot retreat if the agent is deactivate
+    public boolean recover() {
+        // Cannot recover if the agent is deactivate
         // Wait until it is activated again
         if (deactivated) {
             return false;
@@ -272,7 +272,7 @@ public class Agent extends AbstractAgent {
                 return true;
             }
 
-            // Cannot retreat
+            // Cannot recover
             return false;
         }
 

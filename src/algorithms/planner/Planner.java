@@ -157,7 +157,7 @@ public class Planner {
 
     /**
      * Constructs the sequence of actions leading to the target after
-     * finishing the planning, and update the timeline map of the {@code Warehouse}
+     * finishing the planning, and updates the timeline map of the {@code Warehouse}
      * in accordance.
      *
      * @param source the source {@code Agent} to plan for.

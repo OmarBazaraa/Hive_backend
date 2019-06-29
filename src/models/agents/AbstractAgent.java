@@ -347,11 +347,11 @@ abstract public class AbstractAgent extends HiveObject implements TaskAssignable
     abstract public void block();
 
     /**
-     * Retreats from the last action done and returns back to a normal state.
+     * Recovers from the blockage and returns back to a normal state if possible.
      *
-     * @return {@code true} if retreated successfully; {@code false} otherwise.
+     * @return {@code true} if recovered successfully; {@code false} otherwise.
      */
-    abstract public boolean retreat();
+    abstract public boolean recover();
 
     // ===============================================================================================
     //

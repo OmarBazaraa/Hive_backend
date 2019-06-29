@@ -144,7 +144,7 @@ public class Warehouse extends AbstractWarehouse {
     }
 
     /**
-     * Retreats the blocked agents to their normal state if possible.
+     * Recovers the blocked agents to their normal state if possible.
      *
      * @return {@code true} if at least one {@code Agent} has recovered; {@code false} otherwise.
      */
@@ -162,14 +162,14 @@ public class Warehouse extends AbstractWarehouse {
         int size = blockedAgents.size();
 
         //
-        // Iterate over every blocked agent and tries to retreat it
+        // Iterate over every blocked agent and tries to recover it
         //
         for (int i = 0; i < size; ++i) {
             // Get the current blocked agent
             Agent agent = blockedAgents.remove();
 
             // Try retreating the current agent
-            ret |= agent.retreat();
+            ret |= agent.recover();
 
             // Re-add the agent to the end of the queue if still blocked
             if (agent.isBlocked()) {
