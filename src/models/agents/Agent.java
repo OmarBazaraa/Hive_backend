@@ -468,6 +468,11 @@ public class Agent extends AbstractAgent {
      * @param action the action done by this {@code Agent}.
      */
     public void setLastRecoverAction(AgentAction action) {
+        if (action != lastAction) {
+            setLastAction(action);
+            return;
+        }
+
         lastAction = action;
         lastActionTime = Warehouse.getInstance().getTime();
 
