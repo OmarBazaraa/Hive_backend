@@ -3,6 +3,7 @@ package models.warehouse;
 import models.facilities.Gate;
 import models.facilities.Rack;
 import models.items.Item;
+import models.tasks.AbstractTask;
 import models.tasks.Task;
 import models.tasks.orders.CollectOrder;
 import models.tasks.orders.Order;
@@ -68,6 +69,9 @@ public class WarehouseTest {
         Assert.assertEquals(item.getAvailableUnits(), 9);
         Assert.assertEquals(item.get(rack), 9);
         Assert.assertEquals(rack.get(item), 9);
+
+        // order
+        Assert.assertEquals(order.getStatus(), AbstractTask.TaskStatus.FULFILLED);
     }
 
     @Test
@@ -122,6 +126,9 @@ public class WarehouseTest {
         Assert.assertEquals(item2.getAvailableUnits(), 1);
         Assert.assertEquals(item2.get(rack2), 1);
         Assert.assertEquals(rack2.get(item2), 1);
+
+        // order
+        Assert.assertEquals(order.getStatus(), AbstractTask.TaskStatus.FULFILLED);
     }
 
     @Test
@@ -180,6 +187,10 @@ public class WarehouseTest {
         Assert.assertEquals(item2.getAvailableUnits(), 4);
         Assert.assertEquals(item2.get(rack2), 4);
         Assert.assertEquals(rack2.get(item2), 4);
+
+        // Orders
+        Assert.assertEquals(order1.getStatus(), AbstractTask.TaskStatus.FULFILLED);
+        Assert.assertEquals(order2.getStatus(), AbstractTask.TaskStatus.FULFILLED);
     }
 
     @Test
@@ -188,7 +199,6 @@ public class WarehouseTest {
 
         // Get components
         Warehouse warehouse = Warehouse.getInstance();
-        Rack rack = warehouse.getRackById(1);
         Gate gate1 = warehouse.getGateById(1);
         Gate gate2 = warehouse.getGateById(2);
         Item item1 = warehouse.getItemById(1);
@@ -206,37 +216,13 @@ public class WarehouseTest {
         order2.add(item2, 1);
         warehouse.addOrder(order2);
 
-        //
-        // Initial checks
-        //
-        Assert.assertEquals(item1.getReservedUnits(), 1);
-        Assert.assertEquals(item2.getReservedUnits(), 1);
-
         // Run till no changes occur
         while (warehouse.run()) {
             System.out.println(warehouse);
         }
 
-        // Print final warehouse
-        warehouse.print();
-
-        //
-        // Final checks
-        //
-
-        // Item 1
-        Assert.assertEquals(item1.getReservedUnits(), 0);
-        Assert.assertEquals(item1.getTotalUnits(), 4);
-        Assert.assertEquals(item1.getAvailableUnits(), 4);
-        Assert.assertEquals(item1.get(rack), 4);
-        Assert.assertEquals(rack.get(item1), 4);
-
-        // Item 2
-        Assert.assertEquals(item2.getReservedUnits(), 0);
-        Assert.assertEquals(item2.getTotalUnits(), 4);
-        Assert.assertEquals(item2.getAvailableUnits(), 4);
-        Assert.assertEquals(item2.get(rack), 4);
-        Assert.assertEquals(rack.get(item2), 4);
+        Assert.assertEquals(order1.getStatus(), AbstractTask.TaskStatus.FULFILLED);
+        Assert.assertEquals(order2.getStatus(), AbstractTask.TaskStatus.FULFILLED);
     }
 
     @Test
@@ -270,6 +256,49 @@ public class WarehouseTest {
         while (warehouse.run()) {
             System.out.println(warehouse);
         }
+
+        Assert.assertEquals(order1.getStatus(), AbstractTask.TaskStatus.FULFILLED);
+        Assert.assertEquals(order2.getStatus(), AbstractTask.TaskStatus.FULFILLED);
+        Assert.assertEquals(order3.getStatus(), AbstractTask.TaskStatus.FULFILLED);
+        Assert.assertEquals(order4.getStatus(), AbstractTask.TaskStatus.FULFILLED);
+
+        // Print final warehouse
+        warehouse.print();
+    }
+
+    @Test
+    public void multiAgentsSingleGateTest() throws Exception {
+        WarehouseHelper.configureWarehouse("data/same_gate.hive");
+
+        // Get components
+        Warehouse warehouse = Warehouse.getInstance();
+
+        // Print initial warehouse
+        warehouse.print();
+
+        // Create new order
+        Order order1 = new CollectOrder(1, warehouse.getGateById(1));
+        order1.add(warehouse.getItemById(1), 1);
+        warehouse.addOrder(order1);
+
+        // Run till no changes occur
+        while (warehouse.run()) {
+            System.out.println(warehouse);
+        }
+
+        // Add a new order
+        Order order2 = new CollectOrder(2, warehouse.getGateById(1));
+        order2.add(warehouse.getItemById(1), 1);
+        order2.add(warehouse.getItemById(2), 1);
+        warehouse.addOrder(order2);
+
+        // Run till no changes occur
+        while (warehouse.run()) {
+            System.out.println(warehouse);
+        }
+
+        Assert.assertEquals(order1.getStatus(), AbstractTask.TaskStatus.FULFILLED);
+        Assert.assertEquals(order2.getStatus(), AbstractTask.TaskStatus.FULFILLED);
 
         // Print final warehouse
         warehouse.print();
@@ -307,53 +336,18 @@ public class WarehouseTest {
         order5.add(warehouse.getItemById(3), 14);
         warehouse.addOrder(order5);
 
-
-        order1.setListener(orderListener);
-        order2.setListener(orderListener);
-        order3.setListener(orderListener);
-        order4.setListener(orderListener);
-        order5.setListener(orderListener);
-
         // Run till no changes occur
         while (warehouse.run()) {
             // System.out.println(warehouse);
         }
 
-        Assert.assertFalse(order1.isPending());
-        Assert.assertFalse(order2.isPending());
-        Assert.assertFalse(order3.isPending());
-        Assert.assertFalse(order4.isPending());
-        Assert.assertFalse(order5.isPending());
+        Assert.assertEquals(order1.getStatus(), AbstractTask.TaskStatus.FULFILLED);
+        Assert.assertEquals(order2.getStatus(), AbstractTask.TaskStatus.FULFILLED);
+        Assert.assertEquals(order3.getStatus(), AbstractTask.TaskStatus.FULFILLED);
+        Assert.assertEquals(order4.getStatus(), AbstractTask.TaskStatus.FULFILLED);
+        Assert.assertEquals(order5.getStatus(), AbstractTask.TaskStatus.FULFILLED);
 
         // Print final warehouse
         warehouse.print();
     }
-
-
-    private OrderListener orderListener = new OrderListener() {
-        @Override
-        public void onStart(Order order) {
-
-        }
-
-        @Override
-        public void onTaskAssign(Order order, Task task) {
-            System.out.println("Order-" + order.getId() + " is assigned to rack-" + task.getRack().getId());
-        }
-
-        @Override
-        public void onTaskComplete(Order order, Task task, Map<Item, Integer> items) {
-
-        }
-
-        @Override
-        public void onFulfill(Order order) {
-            System.out.println("Order-" + order.getId() + " fulfilled");
-        }
-
-        @Override
-        public void onDismiss(Order order) {
-
-        }
-    };
 }
