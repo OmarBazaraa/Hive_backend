@@ -31,8 +31,8 @@ public class HardwareConstants {
     public static final int TYPE_OFFLOAD = 6;
 
     // Lights colors
-    public static final int LIGHT_RED = 5;
-    public static final int LIGHT_BLUE = 6;
+    public static final int LIGHT_RED = 0;
+    public static final int LIGHT_BLUE = 1;
 
     // Lights control
     public static final int LIGHT_MODE_OFF = 0;
