@@ -299,7 +299,7 @@ public class Agent extends AbstractAgent {
     @Override
     public void plan(Facility dst) {
         // Return if already planned
-        if (target != null && target.equals(dst)) {
+        if (target != null && plan != null && target.equals(dst)) {
             return;
         }
 
@@ -360,7 +360,7 @@ public class Agent extends AbstractAgent {
             return false;
         }
 
-        AgentAction action = plan.pop();
+        AgentAction action = plan.peek();
 
         // Get the current and the next cells
         Warehouse warehouse = Warehouse.getInstance();
@@ -382,6 +382,7 @@ public class Agent extends AbstractAgent {
         nxtCell.setAgent(this);
         setPose(nxt);
         setLastAction(action);
+        plan.pop();
         return true;
     }
 

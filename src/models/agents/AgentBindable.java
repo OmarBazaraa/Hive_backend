@@ -23,6 +23,13 @@ import models.facilities.Station;
 public interface AgentBindable {
 
     /**
+     * Returns the {@code Agent} currently bound this object.
+     *
+     * @return the bound {@code Agent} if exists; {@code null} otherwise.
+     */
+    Agent getBoundAgent();
+
+    /**
      * Checks whether this object is currently bound with an {@code Agent} or not.
      *
      * @return {@code true} if this object is bound; {@code false} otherwise.

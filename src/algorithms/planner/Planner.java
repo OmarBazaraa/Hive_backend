@@ -106,6 +106,11 @@ public class Planner {
      * @return a sequence of {@code AgentAction}; or {@code null} if currently unreachable.
      */
     public static Stack<AgentAction> plan(Agent source, Facility target) {
+        // Check if the target facility is currently bound to another agent
+        if (target.isBound() && target.getBoundAgent() != source) {
+            return null;
+        }
+
         // Initialize planning algorithm
         Warehouse warehouse = Warehouse.getInstance();
         PlanNode.initializes(source, target);

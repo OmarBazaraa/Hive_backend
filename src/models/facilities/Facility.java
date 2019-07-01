@@ -155,6 +155,16 @@ abstract public class Facility extends HiveObject implements AgentBindable, Agen
     }
 
     /**
+     * Returns the {@code Agent} currently bound this {@code Facility}.
+     *
+     * @return the bound {@code Agent} if exists; {@code null} otherwise.
+     */
+    @Override
+    public Agent getBoundAgent() {
+        return boundAgent;
+    }
+
+    /**
      * Checks whether this {@code Facility} is currently bound with an {@code Agent} or not.
      *
      * @return {@code true} if this {@code Facility} is bound; {@code false} otherwise.
