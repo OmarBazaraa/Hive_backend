@@ -78,6 +78,7 @@ public class HardwareCommunicator {
     // TODO: just for debugging, to be removed
     //
     private ConcurrentHashMap<Integer, Agent> idToAgentMap = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<Session, Agent> sessionToAgentMap = new ConcurrentHashMap<>();
 
     // ===============================================================================================
     //
@@ -118,13 +119,16 @@ public class HardwareCommunicator {
      * Closes and terminates this {@code HardwareCommunicator} object.
      */
     public void close() {
-        server.stop();
-
         agentToSessionMap.clear();
         ipToAgentMap.clear();
-        idToAgentMap.clear();                           // TODO: to be removed
         pendingActionMap.clear();
         receivedDoneMap.clear();
+
+        // TODO: to be removed
+        idToAgentMap.clear();
+        sessionToAgentMap.clear();
+
+        server.stop();
     }
 
     /**
@@ -560,7 +564,6 @@ public class HardwareCommunicator {
     //
     @WebSocket
     public class WebSocketDebuggingHandler {
-        private ConcurrentHashMap<Session, Agent> sessionToAgentMap = new ConcurrentHashMap<>();
 
         public void onConnect(Session client, int id) {
             Agent agent = idToAgentMap.get(id);
