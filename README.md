@@ -1,5 +1,18 @@
-# Hive_backend
-The backend of the Hive system for smart automated warehouses.
+# Hive
+Hive is an automated smart warehousing system.  
+Hive is a framework for designing warehouses, simulating and monitoring their performance, and deploying them in real life using robotic mobile agents.  
+
+![alt text](https://raw.githubusercontent.com/OmarBazaraa/Hive_backend/master/img/logo.png)
+
+The system mainly consists of three components: 
+* **Backend:** the server having the core logic.
+* **Frontend:** the graphical user-friendly design and simulation tool.
+* **Hardware:** the actual robotic mobile agents.
+
+![alt text](https://raw.githubusercontent.com/OmarBazaraa/Hive_backend/master/img/block_diagram.png)
+
+## Hive backend
+The backend or the server is the core of the Hive system. It is responsible for the simulation and deployment of the warehouse automation system including handling refill and collect orders, order dispatching, multi-robot path planning, communication with the actual robots and communication with the frontend.
 
 ## Used Libraries
 1. Spark library for WebSocket services  
