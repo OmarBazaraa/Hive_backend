@@ -1,15 +1,8 @@
 package models.tasks;
 
 import models.agents.Agent;
-import models.facilities.Gate;
 import models.facilities.Rack;
-import models.items.Item;
-import models.tasks.orders.CollectOrder;
-import models.tasks.orders.Order;
-import models.warehouse.WarehouseHelper;
-import models.warehouses.Warehouse;
 import org.junit.BeforeClass;
-import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 

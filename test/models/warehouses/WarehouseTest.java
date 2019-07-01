@@ -1,21 +1,16 @@
-package models.warehouse;
+package models.warehouses;
 
 import models.facilities.Gate;
 import models.facilities.Rack;
 import models.items.Item;
 import models.tasks.AbstractTask;
-import models.tasks.Task;
 import models.tasks.orders.CollectOrder;
 import models.tasks.orders.Order;
-import models.tasks.orders.OrderListener;
 import models.tasks.orders.RefillOrder;
-import models.warehouses.Warehouse;
 
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import java.util.Map;
 
 
 public class WarehouseTest {

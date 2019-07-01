@@ -1,8 +1,7 @@
-package models.warehouse;
+package models.warehouses;
 
 import communicators.frontend.utils.Decoder;
 
-import utils.Constants;
 import utils.Constants.*;
 import utils.Utility;
 

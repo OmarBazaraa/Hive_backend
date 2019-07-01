@@ -13,7 +13,7 @@ import models.facilities.StationTest;
 import models.items.ItemTest;
 import models.tasks.OrderTest;
 import models.tasks.TaskTest;
-import models.warehouse.WarehouseTest;
+import models.warehouses.WarehouseTest;
 
 
 @RunWith(Suite.class)

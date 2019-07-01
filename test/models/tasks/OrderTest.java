@@ -7,7 +7,7 @@ import models.items.Item;
 import models.tasks.orders.CollectOrder;
 import models.tasks.orders.Order;
 import models.tasks.orders.RefillOrder;
-import models.warehouse.WarehouseHelper;
+import models.warehouses.WarehouseHelper;
 import models.warehouses.Warehouse;
 
 import org.junit.Assert;
