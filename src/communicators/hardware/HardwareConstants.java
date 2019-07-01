@@ -15,6 +15,7 @@ public class HardwareConstants {
     public static final int TYPE_DONE = 0;
     public static final int TYPE_BATTERY = 1;
     public static final int TYPE_BLOCKED = 2;
+    public static final int TYPE_ERROR = 3;
 
     // Main message types from server
     public static final int TYPE_CONFIG = 0;
@@ -38,6 +39,10 @@ public class HardwareConstants {
     public static final int LIGHT_MODE_OFF = 0;
     public static final int LIGHT_MODE_ON = 1;
     public static final int LIGHT_MODE_FLASH = 2;
+
+    // Error types from the hardware robots
+    public static final int ERR_EXCEED_ALLOWED_DIS = 0;
+    public static final int ERR_UNKNOWN = 1;
 
     //
     // Others

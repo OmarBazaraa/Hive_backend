@@ -246,6 +246,10 @@ public class HardwareCommunicator {
                     boolean blocked = (msg[1] == 1);
                     handleControlMsg(agent, blocked);
                     break;
+                case HardwareConstants.TYPE_ERROR:
+                    int errCode = msg[1];
+                    handleErrorMsg(agent, errCode);
+                    break;
             }
         } catch (Exception ex) {
             System.err.println("HardwareCommunicator :: Invalid message format from agent-" + agent.getId() + ": " + bytesToStr(msg));
@@ -270,7 +274,6 @@ public class HardwareCommunicator {
 
     /**
      * Handles the incoming control message from the given {@code Agent}.
-     *
      *
      * @param agent   the {@code Agent} sending this message.
      * @param blocked {@code true} if this {@code Agent} get blocked; {@code false} if get unblocked.
@@ -309,6 +312,20 @@ public class HardwareCommunicator {
         // DEBUG
         System.out.println("HardwareCommunicator :: Received action DONE from agent-" + agent.getId() + ".");
         System.out.println();
+    }
+
+    /**
+     * Handles the incoming error message from the given {@code Agent}.
+     *
+     * @param agent   the {@code Agent} sending this message.
+     * @param errCode the error code.
+     */
+    private void handleErrorMsg(Agent agent, int errCode) {
+        // DEBUG
+        System.out.println("HardwareCommunicator :: Received error from agent-" + agent.getId() + " with code: " + errCode + ".");
+        System.out.println();
+
+        listener.onAgentDeactivate(agent);
     }
 
     // ===============================================================================================
