@@ -439,7 +439,7 @@ public class Agent extends AbstractAgent {
      *
      * @return the last {@code AgentAction} performed.
      */
-    public AgentAction getLastAction() {
+    private AgentAction getLastAction() {
         if (lastActionTime + 1 < Warehouse.getInstance().getTime()) {
             return AgentAction.NOTHING;
         } else {
@@ -452,7 +452,7 @@ public class Agent extends AbstractAgent {
      *
      * @param action the action done by this {@code Agent}.
      */
-    public void setLastAction(AgentAction action) {
+    private void setLastAction(AgentAction action) {
         lastAction = action;
         lastActionTime = Warehouse.getInstance().getTime();
 
@@ -467,7 +467,7 @@ public class Agent extends AbstractAgent {
      *
      * @param action the action done by this {@code Agent}.
      */
-    public void setLastRecoverAction(AgentAction action) {
+    private void setLastRecoverAction(AgentAction action) {
         if (action != lastAction) {
             setLastAction(action);
             return;
