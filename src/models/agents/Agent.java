@@ -5,8 +5,8 @@ import algorithms.planner.Planner;
 import models.facilities.Facility;
 import models.facilities.Rack;
 import models.maps.GridCell;
-import models.maps.utils.Pose;
-import models.maps.utils.Position;
+import models.maps.Pose;
+import models.maps.Position;
 import models.tasks.Task;
 import models.warehouses.Warehouse;
 
@@ -43,9 +43,9 @@ public class Agent extends AbstractAgent {
 
     /**
      * The plan of this {@code Agent} to reach its destination.
-     * That is, a sequence of actions to be done to reach the target.
+     * That is, a sequence of directions to move along to reach the target.
      */
-    private Stack<AgentAction> plan;
+    private Stack<Integer> plan;
 
     /**
      * The last action done by this {@code Agent} that we are still waiting
@@ -166,9 +166,15 @@ public class Agent extends AbstractAgent {
         // Get last action
         AgentAction action = getLastAction();
 
-        // Rotation actions
-        if (action == AgentAction.ROTATE_RIGHT || action == AgentAction.ROTATE_LEFT) {
-            dir = Utility.prevDir(dir, action);
+        // Rotation right action
+        if (action == AgentAction.ROTATE_RIGHT) {
+            dir = Utility.rotateLeft(dir);
+            return;
+        }
+
+        // Rotation left action
+        if (action == AgentAction.ROTATE_LEFT) {
+            dir = Utility.rotateRight(dir);
             return;
         }
 
@@ -217,34 +223,61 @@ public class Agent extends AbstractAgent {
             return false;
         }
 
-        //
-        // Handle different last actions
-        //
-
-        // No last action
+        // If no action was interrupted during the last blockage recovering is easy
         if (lastAction == AgentAction.NOTHING) {
             blocked = false;
             return true;
         }
 
-        // Rotation action
-        if (lastAction == AgentAction.ROTATE_RIGHT || lastAction == AgentAction.ROTATE_LEFT) {
-            blocked = false;
-            dir = Utility.nextDir(dir, lastAction);
-            setLastRecoverAction(lastAction);
-            return true;
+        // Apply and get the recover action
+        AgentAction recoverAction = recover(lastAction);
+
+        // If cannot recover just return false
+        if (recoverAction == AgentAction.NOTHING) {
+            return false;
+        }
+
+        // Recovered successfully, inform the listeners
+        blocked = false;
+
+        if (recoverAction != lastAction) {
+            setLastAction(recoverAction);
+        } else {
+            setLastRecoverAction(recoverAction);
+        }
+
+        return true;
+    }
+
+    /**
+     * Recovers from the blockage and returns back to a normal state if possible.
+     *
+     * @param action the last action to recover from.
+     *
+     * @return the applied recover action; {@code AgentAction.NOTHING} if cannot recover.
+     */
+    private AgentAction recover(AgentAction action) {
+
+        // Rotation right action
+        if (action == AgentAction.ROTATE_RIGHT) {
+            dir = Utility.rotateRight(dir);
+            return AgentAction.ROTATE_RIGHT;
+        }
+
+        // Rotation left action
+        if (action == AgentAction.ROTATE_LEFT) {
+            dir = Utility.rotateLeft(dir);
+            return AgentAction.ROTATE_LEFT;
         }
 
         // Retreat action
-        if (lastAction == AgentAction.RETREAT) {
-            blocked = false;
+        if (action == AgentAction.RETREAT) {
             dir = Utility.getReverseDir(dir);
-            setLastRecoverAction(lastAction);
-            return true;
+            return AgentAction.RETREAT;
         }
 
         // Move action
-        if (lastAction == AgentAction.MOVE) {
+        if (action == AgentAction.MOVE) {
             // Get the current and the next cells
             Warehouse warehouse = Warehouse.getInstance();
             Position nxt = Utility.nextPos(row, col, dir);
@@ -256,70 +289,32 @@ public class Agent extends AbstractAgent {
 
             // Continue the last move if the next cell is empty
             if (a == null) {
-                blocked = false;
                 curCell.setAgent(null);
                 nxtCell.setAgent(this);
                 setPosition(nxt);
-                setLastRecoverAction(lastAction);
-                return true;
+                return AgentAction.MOVE;
             }
 
-            // Retreat if the current cell is not locked by a deactivated agent
-            if (!curCell.isLocked()) {
-                blocked = false;
+            // If current cell is locked by a deactivated agent the we cannot recover
+            if (curCell.isLocked()) {
+                return AgentAction.NOTHING;
+            }
+            // Otherwise, we can retreat back
+            else {
                 dir = Utility.getReverseDir(dir);
-                setLastRecoverAction(lastAction);
-                return true;
+                return AgentAction.RETREAT;
             }
-
-            // Cannot recover
-            return false;
         }
 
         // Handle other actions that does not change the pose of the agent
         // Just try redoing the last action
-        blocked = false;
-        setLastRecoverAction(lastAction);
-        return true;
+        return action;
     }
 
     // ===============================================================================================
     //
     // Action-Related Methods
     //
-
-    /**
-     * Plans the sequence of actions to reach the given target {@code Facility}.
-     * <p>
-     * This function should be called with new destination only when the previous
-     * plan has been reached.
-     *
-     * @param dst the target {@code Facility} to reach.
-     */
-    @Override
-    public void plan(Facility dst) {
-        // Return if already planned
-        if (target != null && plan != null && target.equals(dst)) {
-            return;
-        }
-
-        // Set the destination and plan the path
-        target = dst;
-        plan = Planner.plan(this, dst);
-    }
-
-    /**
-     * Drops and cancels the current plan of this {@code Agent}.
-     */
-    @Override
-    public void dropPlan() {
-        if (plan != null) {
-            Planner.dropPlan(this, plan);
-        }
-
-        plan = null;
-        target = null;
-    }
 
     /**
      * Executes the next required action as specified by the currently
@@ -345,6 +340,35 @@ public class Agent extends AbstractAgent {
     }
 
     /**
+     * Plans the sequence of actions to reach the given target {@code Facility}.
+     * <p>
+     * This function should be called with new destination only when the previous
+     * plan has been reached.
+     *
+     * @param dst the target {@code Facility} to reach.
+     */
+    @Override
+    protected void plan(Facility dst) {
+        // Return if already planned
+        if (plan != null && target != null && target.equals(dst)) {
+            return;
+        }
+
+        // Set the destination and plan the path
+        target = dst;
+        plan = Planner.plan(this, dst);
+    }
+
+    /**
+     * Drops and cancels the current plan of this {@code Agent}.
+     */
+    @Override
+    protected void dropPlan() {
+        plan = null;
+        target = null;
+    }
+
+    /**
      * Moves a single step to reach the given {@code Facility}.
      *
      * @param dst the target to reach.
@@ -356,34 +380,97 @@ public class Agent extends AbstractAgent {
         // Plan what action to apply next
         plan(dst);
 
-        if (plan == null || plan.isEmpty()) {
+        // Return if no plan
+        if (plan == null) {
             return false;
         }
 
-        AgentAction action = plan.peek();
+        // Get next action to apply
+        int action = plan.peek();
+
+        // Handle rotation actions
+        if (dir != action) {
+            rotate(action);
+            return true;
+        }
+
+        //
+        // Move action
+        //
 
         // Get the current and the next cells
         Warehouse warehouse = Warehouse.getInstance();
-        Pose nxt = getPose().next(action);
+        Position nxt = getPosition().next(dir);
         GridCell curCell = warehouse.get(row, col);
         GridCell nxtCell = warehouse.get(nxt.row, nxt.col);
         Agent blockingAgent = nxtCell.getAgent();
-        long time = warehouse.getTime();
 
-        // Check next cell
-        if (nxtCell.isLocked() || blockingAgent != null && blockingAgent != this) {
+        // Check if next cell is currently locked by an agent
+        if (nxtCell.isLocked()) {
             dropPlan();
             return false;
         }
 
+        // Check next cell
+        if (blockingAgent != null && !blockingAgent.slide(this)) {
+            dropPlan();
+            return false;
+        }
+
+        // Check if the next location is empty
+        if (nxtCell.hasAgent()) {
+            return false;
+        }
+
         // Apply action and set the new pose of the agent
-        curCell.clearScheduleAt(time);
+        plan.pop();
         curCell.setAgent(null);
         nxtCell.setAgent(this);
-        setPose(nxt);
-        setLastAction(action);
-        plan.pop();
+        move(nxt);
         return true;
+    }
+
+    /**
+     * Attempts to slide away from the current position of this {@code Agent} in order
+     * to bring a blank cell to the given main {@code Agent}.
+     *
+     * @param mainAgent the main {@code Agent} issuing the slide.
+     *
+     * @return {@code true} if sliding is possible; {@code false} otherwise.
+     */
+    protected boolean slide(Agent mainAgent) {
+        if (blocked || deactivated) {
+            return false;
+        }
+
+        return false;
+    }
+
+    /**
+     * Rotates this {@code Agent} to reach the given orientation.
+     *
+     * @param d the needed orientation.
+     */
+    @Override
+    protected void rotate(int d) {
+        if (d == Utility.rotateRight(dir)) {
+            dir = d;
+            setLastAction(AgentAction.ROTATE_RIGHT);
+        } else {
+            dir = Utility.rotateLeft(dir);
+            setLastAction(AgentAction.ROTATE_LEFT);
+        }
+    }
+
+    /**
+     * Moves this {@code Agent} along its current direction.
+     *
+     * @param pos the {@code Position} to move into.
+     */
+    protected void move(Position pos) {
+        row = pos.row;
+        col = pos.col;
+        setLastAction(AgentAction.MOVE);
     }
 
     /**
@@ -469,11 +556,6 @@ public class Agent extends AbstractAgent {
      * @param action the action done by this {@code Agent}.
      */
     private void setLastRecoverAction(AgentAction action) {
-        if (action != lastAction) {
-            setLastAction(action);
-            return;
-        }
-
         lastAction = action;
         lastActionTime = Warehouse.getInstance().getTime();
 

@@ -3,11 +3,10 @@ package algorithms.planner;
 import models.agents.Agent;
 import models.facilities.Facility;
 import models.maps.GridCell;
-import models.maps.utils.Position;
+import models.maps.Position;
 import models.warehouses.Warehouse;
 
 import utils.Constants;
-import utils.Constants.*;
 
 import java.util.*;
 
@@ -17,7 +16,6 @@ import java.util.*;
  */
 public class Planner {
 
-    // ===============================================================================================
     //
     // Guide Map
     //
@@ -61,7 +59,7 @@ public class Planner {
             //
             // Expanding in all directions
             //
-            for (Direction dir : Direction.values()) {
+            for (int dir : Constants.DIRECTIONS) {
                 // Get next position
                 Position nxt = cur.next(dir);
 
@@ -74,7 +72,7 @@ public class Planner {
                 GridCell cell = warehouse.get(nxt.row, nxt.col);
 
                 // Skip if obstacle or already visited cell
-                if (cell.isBlocked() || ret[nxt.row][nxt.col] < Integer.MAX_VALUE) {
+                if (cell.isObstacle() || ret[nxt.row][nxt.col] < Integer.MAX_VALUE) {
                     continue;
                 }
 
@@ -103,21 +101,20 @@ public class Planner {
      * @param source the source {@code Agent} to plan for.
      * @param target the target {@code Facility} of the {@code Agent}.
      *
-     * @return a sequence of {@code AgentAction}; or {@code null} if currently unreachable.
+     * @return a sequence of directions to move along; or {@code null} if currently unreachable.
      */
-    public static Stack<AgentAction> plan(Agent source, Facility target) {
+    public static Stack<Integer> plan(Agent source, Facility target) {
         // Check if the target facility is currently bound to another agent
         if (target.isBound() && target.getBoundAgent() != source) {
             return null;
         }
 
         // Initialize planning algorithm
-        Warehouse warehouse = Warehouse.getInstance();
         PlanNode.initializes(source, target);
 
         // Create the planning queue and add the initial state
         PriorityQueue<PlanNode> q = new PriorityQueue<>();
-        q.add(new PlanNode(source.getRow(), source.getCol(), source.getDirection(), warehouse.getTime()));
+        q.add(new PlanNode(source.getRow(), source.getCol()));
 
         //
         // Keep exploring states until the target is found
@@ -135,11 +132,11 @@ public class Planner {
             cur.visit();
 
             //
-            // Try exploring further states by trying all possible actions
+            // Expanding in all directions
             //
-            for (AgentAction action : Constants.MOVE_ACTIONS) {
+            for (int dir : Constants.DIRECTIONS) {
                 // Get next state after doing the current action
-                PlanNode nxt = cur.next(action);
+                PlanNode nxt = cur.next(dir);
 
                 // Skip invalid states
                 if (!nxt.canVisit()) {
@@ -168,72 +165,20 @@ public class Planner {
      * @param source the source {@code Agent} to plan for.
      * @param node   the target state {@code PlanNode}.
      *
-     * @return a sequence of {@code AgentAction} to reach the given state.
+     * @return a sequence of directions to move along to reach the given state.
      */
-    private static Stack<AgentAction> constructPlan(Agent source, PlanNode node) {
-        Warehouse warehouse = Warehouse.getInstance();
-
+    private static Stack<Integer> constructPlan(Agent source, PlanNode node) {
         // Prepare the stack of actions
-        Stack<AgentAction> ret = new Stack<>();
+        Stack<Integer> ret = new Stack<>();
 
         //
-        // Keep moving backward until reaching the position of the agent
+        // Keep moving backward until reaching the initial position of the agent
         //
-        while (true) {
-            // Get the agent that is planned to be in this state
-            GridCell cell = warehouse.get(node.row, node.col);
-            Agent a = cell.getScheduledAt(node.time);
-
-            // If there is an agent then it must be with lower priority
-            // So drop its plan for now
-            if (a != null) {
-                a.dropPlan();
-            }
-
-            // Update timeline
-            cell.setScheduleAt(node.time, source);
-
-            // Stop when reaching the initial state of the agent
-            if (node.isInitial()) {
-                break;
-            }
-
-            // Add the action and proceed to previous state
-            ret.add(node.action);
+        while (!node.isInitial()) {
+            ret.add(node.dir);
             node = node.previous();
         }
 
         return ret;
-    }
-
-    /**
-     * Drops the current plan of the given {@code Agent} and updates the
-     * timeline map of the {@code Warehouse} in accordance.
-     *
-     * @param agent   the {@code Agent} to drop its plan.
-     * @param actions the plan of the agent.
-     */
-    public static void dropPlan(Agent agent, Stack<AgentAction> actions) {
-        Warehouse warehouse = Warehouse.getInstance();
-
-        // Create a node with the current state of the agent
-        PlanNode node = new PlanNode(agent.getRow(), agent.getCol(), agent.getDirection(), warehouse.getTime());
-
-        //
-        // Keep dropping the plan one action at a time
-        //
-        while (true) {
-            // Clear the time slot of the agent in the current state
-            GridCell cell = warehouse.get(node.row, node.col);
-            cell.clearScheduleAt(node.time);
-
-            // Stop when no further actions in the plan
-            if (actions.isEmpty()) {
-                break;
-            }
-
-            // Go to the next state in the plan
-            node = node.next(actions.pop());
-        }
     }
 }

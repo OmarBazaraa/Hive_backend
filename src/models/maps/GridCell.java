@@ -42,11 +42,6 @@ public class GridCell {
     private Agent agent;
 
     /**
-     * The timeline of the scheduled agents in this {@code GridCell}.
-     */
-    private TreeMap<Long, Agent> timeline = new TreeMap<>();
-
-    /**
      * Whether this {@code GridCell} is locked or not.
      */
     private boolean locked;
@@ -209,52 +204,6 @@ public class GridCell {
      */
     public void setLock(boolean block) {
         locked = block;
-    }
-
-    // ===============================================================================================
-    //
-    // Timeline-Related Methods
-    //
-
-    /**
-     * Returns the {@code Agent} scheduled to pass though this {@code GridCell} at the given time.
-     *
-     * @param time the time to get at.
-     *
-     * @return the {@code Agent} if exists; {@code null} otherwise.
-     */
-    public Agent getScheduledAt(long time) {
-        return timeline.get(time);
-    }
-
-    /**
-     * Checks whether this {@code GridCell} is occupied by an {@code Agent} at the given time or not.
-     *
-     * @param time the time to check at.
-     *
-     * @return {@code true} if the cell is occupied; {@code false} otherwise.
-     */
-    public boolean hasSceduleAt(long time) {
-        return timeline.containsKey(time);
-    }
-
-    /**
-     * Schedules an {@code Agent} to pass though this {@code GridCell} at the given time.
-     *
-     * @param time  the time to set at.
-     * @param agent the passing {@code Agent}.
-     */
-    public void setScheduleAt(long time, Agent agent) {
-        timeline.put(time, agent);
-    }
-
-    /**
-     * Clears the timeline schedule of this {@code GridCell} at the given time.
-     *
-     * @param time the time to clear at.
-     */
-    public void clearScheduleAt(long time) {
-        timeline.remove(time);
     }
 
     // ===============================================================================================

@@ -1,4 +1,4 @@
-package models.maps.utils;
+package models.maps;
 
 
 /**

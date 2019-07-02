@@ -6,7 +6,7 @@ import models.HiveObject;
 import models.agents.Agent;
 import models.agents.AgentAllocatable;
 import models.agents.AgentBindable;
-import models.maps.utils.Position;
+import models.maps.Position;
 
 
 /**

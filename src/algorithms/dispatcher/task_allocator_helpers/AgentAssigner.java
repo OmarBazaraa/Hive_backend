@@ -3,7 +3,7 @@ package algorithms.dispatcher.task_allocator_helpers;
 import models.HiveObject;
 import models.agents.Agent;
 import models.facilities.Rack;
-import models.maps.utils.Position;
+import models.maps.Position;
 import org.jgrapht.alg.interfaces.MatchingAlgorithm;
 import org.jgrapht.alg.matching.KuhnMunkresMinimalWeightBipartitePerfectMatching;
 import org.jgrapht.graph.DefaultWeightedEdge;

@@ -1,4 +1,4 @@
-package models.maps.utils;
+package models.maps;
 
 import utils.Constants;
 import utils.Constants.*;
@@ -15,7 +15,7 @@ public class Pose extends Position {
     /**
      * The orientation of an object.
      */
-    public Direction dir;
+    public int dir;
 
     /**
      * Constructs a {@code Pose} object with the given coordinates and orientation.
@@ -24,7 +24,7 @@ public class Pose extends Position {
      * @param col the column position of the object.
      * @param dir the orientation of the object.
      */
-    public Pose(int row, int col, Direction dir) {
+    public Pose(int row, int col, int dir) {
         super(row, col);
         this.dir = dir;
     }
@@ -38,9 +38,8 @@ public class Pose extends Position {
      */
     public Pose next(AgentAction action) {
         if (action == AgentAction.MOVE) {
-            int i = dir.ordinal();
-            int r = row + Constants.DIR_ROW[i];
-            int c = col + Constants.DIR_COL[i];
+            int r = row + Constants.DIR_ROW[dir];
+            int c = col + Constants.DIR_COL[dir];
             return new Pose(r, c, dir);
         }
 
@@ -48,8 +47,12 @@ public class Pose extends Position {
             return new Pose(row, col, Utility.getReverseDir(dir));
         }
 
-        if (action == AgentAction.ROTATE_RIGHT || action == AgentAction.ROTATE_LEFT) {
-            return new Pose(row, col, Utility.nextDir(dir, action));
+        if (action == AgentAction.ROTATE_RIGHT) {
+            return new Pose(row, col, Utility.rotateRight(dir));
+        }
+
+        if (action == AgentAction.ROTATE_LEFT) {
+            return new Pose(row, col, Utility.rotateLeft(dir));
         }
 
         return new Pose(row, col, dir);
@@ -64,9 +67,8 @@ public class Pose extends Position {
      */
     public Pose previous(AgentAction action) {
         if (action == AgentAction.MOVE) {
-            int i = dir.ordinal();
-            int r = row - Constants.DIR_ROW[i];
-            int c = col - Constants.DIR_COL[i];
+            int r = row - Constants.DIR_ROW[dir];
+            int c = col - Constants.DIR_COL[dir];
             return new Pose(r, c, dir);
         }
 
@@ -74,8 +76,12 @@ public class Pose extends Position {
             return new Pose(row, col, Utility.getReverseDir(dir));
         }
 
-        if (action == AgentAction.ROTATE_RIGHT || action == AgentAction.ROTATE_LEFT) {
-            return new Pose(row, col, Utility.prevDir(dir, action));
+        if (action == AgentAction.ROTATE_RIGHT) {
+            return new Pose(row, col, Utility.rotateLeft(dir));
+        }
+
+        if (action == AgentAction.ROTATE_LEFT) {
+            return new Pose(row, col, Utility.rotateRight(dir));
         }
 
         return new Pose(row, col, dir);
@@ -108,6 +114,6 @@ public class Pose extends Position {
      */
     @Override
     public String toString() {
-        return "(" + row + ", " + col + ", " + dir + ")";
+        return "(" + row + ", " + col + ", " + Utility.dirToShape(dir) + ")";
     }
 }

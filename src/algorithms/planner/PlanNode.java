@@ -21,9 +21,9 @@ public class PlanNode implements Comparable<PlanNode> {
     //
 
     /**
-     * Array holding the action leading to any state.
+     * Array holding the direction leading to any state.
      */
-    private static AgentAction[][][] par;
+    private static int[][] par;
 
     /**
      * The {@code Warehouse} holding the map grid to plan into.
@@ -51,15 +51,12 @@ public class PlanNode implements Comparable<PlanNode> {
     public static void initializes(Agent src, Facility dst) {
         int rows = warehouse.getRows();
         int cols = warehouse.getCols();
-        int dirs = 4;
 
-        par = new AgentAction[rows][cols][dirs];
+        par = new int[rows][cols];
 
         for (int i = 0; i < rows; ++i) {
             for (int j = 0; j < cols; ++j) {
-                for (int k = 0; k < dirs; ++k) {
-                    par[i][j][k] = AgentAction.NOTHING;
-                }
+                par[i][j] = -1;
             }
         }
 
@@ -83,19 +80,14 @@ public class PlanNode implements Comparable<PlanNode> {
     public int col;
 
     /**
-     * The {@code Direction} of the {@code Agent} in the cell.
+     * The weight of the state. That is, the distance from the initial state to this {@code state}.
      */
-    public Direction dir;
+    public int weight;
 
     /**
-     * The time at which the {@code Agent} will be in this state.
+     * The direction leading to this state.
      */
-    public long time;
-
-    /**
-     * The action leading to this state.
-     */
-    public AgentAction action;
+    public int dir;
 
     // ===============================================================================================
     //
@@ -107,11 +99,9 @@ public class PlanNode implements Comparable<PlanNode> {
      *
      * @param row    the row position of the {@code Agent}.
      * @param col    the row position of the {@code Agent}.
-     * @param dir    the {@code Direction} of the {@code Agent}.
-     * @param time   the time at which the {@code Agent} will be in this state.
      */
-    public PlanNode(int row, int col, Direction dir, long time) {
-        this(row, col, dir, time, AgentAction.MOVE);
+    public PlanNode(int row, int col) {
+        this(row, col, 0, Constants.DIR_RIGHT);
     }
 
     /**
@@ -119,16 +109,14 @@ public class PlanNode implements Comparable<PlanNode> {
      *
      * @param row    the row position of the {@code Agent}.
      * @param col    the row position of the {@code Agent}.
-     * @param dir    the {@code Direction} of the {@code Agent}.
-     * @param time   the time at which the {@code Agent} will be in this state.
-     * @param action the action leading to this state.
+     * @param weight the weight of the new state.
+     * @param dir    the direction of the {@code Agent}.
      */
-    private PlanNode(int row, int col, Direction dir, long time, AgentAction action) {
+    private PlanNode(int row, int col, int weight, int dir) {
         this.row = row;
         this.col = col;
+        this.weight = weight;
         this.dir = dir;
-        this.time = time;
-        this.action = action;
     }
 
     /**
@@ -138,7 +126,7 @@ public class PlanNode implements Comparable<PlanNode> {
      * @return {@code true} if it is an initial node; {@code false} otherwise.
      */
     public boolean isInitial() {
-        return source.isCoincide(row, col) && dir == source.getDirection();
+        return source.isCoincide(row, col);
     }
 
     /**
@@ -170,20 +158,11 @@ public class PlanNode implements Comparable<PlanNode> {
             return false;
         }
 
-        // Get the agent that is scheduled to be in this state
-        Agent a = cell.getScheduledAt(time);
-
-        // If that agent is with higher priority then skip this state as well
-        if (a != null && a.compareTo(source) > 0) {
-            return false;
-        }
-
         // Get current agent in this state
-        a = cell.getAgent();
+        Agent a = cell.getAgent();
 
-        // If that agent is not assigned task yet or is currently locked or deactivated
-        // then skip this state as well
-        if (a != null && a != source && (!a.isActive() || a.isLocked() || a.isDeactivated())) {
+        // If that agent is currently locked or deactivated then skip this state as well
+        if (a != null && a != source && (a.isLocked() || a.isDeactivated())) {
             return false;
         }
 
@@ -203,61 +182,39 @@ public class PlanNode implements Comparable<PlanNode> {
      * @return {@code true} if already visited; {@code false} otherwise.
      */
     public boolean isVisited() {
-        return (par[row][col][dir.ordinal()] != AgentAction.NOTHING);
+        return (par[row][col] != -1);
     }
 
     /**
      * Marks this state node as visited.
      */
     public void visit() {
-        par[row][col][dir.ordinal()] = action;
+        par[row][col] = dir;
     }
 
     /**
-     * Calculates the next state if applying the given action.
-     * <p>
-     * The allowed actions are only:
-     * {@code AgentAction.ROTATE_RIGHT}, {@code AgentAction.ROTATE_LEFT}, and
-     * {@code AgentAction.MOVE}.
+     * Calculates the next state if moving in the given direction.
      *
-     * @param action the action to apply.
+     * @param dir the direction to move in.
      *
      * @return the next state {@code PlanNode}.
      */
-    public PlanNode next(AgentAction action) {
-        if (action == AgentAction.MOVE) {
-            int i = dir.ordinal();
-            int r = row + Constants.DIR_ROW[i];
-            int c = col + Constants.DIR_COL[i];
-
-            return new PlanNode(r, c, dir, time + 1, action);
-        } else {
-            return new PlanNode(row, col, Utility.nextDir(dir, action), time + 1, action);
-        }
+    public PlanNode next(int dir) {
+        int r = row + Constants.DIR_ROW[dir];
+        int c = col + Constants.DIR_COL[dir];
+        return new PlanNode(r, c, weight + 1, dir);
     }
 
     /**
-     * Calculates the previous state if applying the best calculated action
+     * Calculates the previous state if moving in the best calculated direction
      * of the planning algorithm in reverse manner.
      *
      * @return the previous state {@code PlanNode}.
      */
     public PlanNode previous() {
-        PlanNode ret;
-
-        if (action == AgentAction.MOVE) {
-            int i = dir.ordinal();
-            int r = row - Constants.DIR_ROW[i];
-            int c = col - Constants.DIR_COL[i];
-
-            ret = new PlanNode(r, c, dir, time - 1, action);
-        } else {
-            ret = new PlanNode(row, col, Utility.prevDir(dir, action), time - 1, action);
-        }
-
-        ret.action = par[ret.row][ret.col][ret.dir.ordinal()];
-
-        return ret;
+        int r = row - Constants.DIR_ROW[dir];
+        int c = col - Constants.DIR_COL[dir];
+        return new PlanNode(r, c, weight - 1, par[r][c]);
     }
 
     /**
@@ -279,8 +236,8 @@ public class PlanNode implements Comparable<PlanNode> {
      */
     @Override
     public int compareTo(PlanNode obj) {
-        long lhs = time + heuristic();
-        long rhs = obj.time + obj.heuristic();
+        long lhs = weight + heuristic();
+        long rhs = obj.weight + obj.heuristic();
 
         if (lhs == rhs) {
             return 0;
@@ -302,8 +259,8 @@ public class PlanNode implements Comparable<PlanNode> {
         builder.append("PlanNode: {");
         builder.append(" pos: ").append("(").append(row).append(", ").append(col).append(")").append(",");
         builder.append(" dir: ").append(dir).append(",");
-        builder.append(" time: ").append(time).append(",");
-        builder.append(" action: ").append(action);
+        builder.append(" weight: ").append(weight).append(",");
+        builder.append(" leading_dir: ").append(dir);
         builder.append(" }");
 
         return builder.toString();

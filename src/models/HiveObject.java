@@ -1,6 +1,6 @@
 package models;
 
-import models.maps.utils.Position;
+import models.maps.Position;
 
 
 /**

@@ -13,8 +13,8 @@ public class Constants {
 
     // Project details
     public static final String PROJ_NAME = "Hive System";
-    public static final String PROJ_VERSION = "0.1.0.0";
-    public static final String PROJ_VERSION_DATE = "19 June 2019";
+    public static final String PROJ_VERSION = "0.2.0.0";
+    public static final String PROJ_VERSION_DATE = "2 July 2019";
 
     // Communication details
     public static final int FRONTEND_COMM_PORT = 1337;
@@ -38,8 +38,7 @@ public class Constants {
     public enum ServerState {
         IDLE,
         RUNNING,
-        PAUSE,
-        EXIT
+        PAUSE
     }
 
     //
@@ -73,16 +72,23 @@ public class Constants {
     //
 
     /**
-     * Directions in anti-clockwise order.
+     * The array of available directions in anti-clockwise order.
      */
-    public enum Direction {
-        RIGHT,
-        UP,
-        LEFT,
-        DOWN
-    }
+    public static final int[] DIRECTIONS = {
+            Constants.DIR_RIGHT,
+            Constants.DIR_UP,
+            Constants.DIR_LEFT,
+            Constants.DIR_DOWN
+    };
 
-    // Direction arrays in the same order as {@code Direction} enum above
+    // Directions in anti-clockwise order
+    public static final int DIR_RIGHT = 0;
+    public static final int DIR_UP = 1;
+    public static final int DIR_LEFT = 2;
+    public static final int DIR_DOWN = 3;
+    public static final int DIR_COUNT = 4;
+
+    // Direction arrays in the same order as the above directions
     public static final int DIR_ROW[] = { 0, -1, 0, 1 };
     public static final int DIR_COL[] = { 1, 0, -1, 0 };
 
@@ -100,7 +106,6 @@ public class Constants {
 
     /**
      * Different actions that can be done by an {@code Agent}.
-     * Note that the first 4 values should be in the same order as in {@code Direction} enum.
      */
     public enum AgentAction {
         MOVE,
@@ -117,13 +122,17 @@ public class Constants {
     /**
      * The array of move actions that can be done by an {@code Agent}.
      */
-    public static final AgentAction MOVE_ACTIONS[] = {AgentAction.MOVE, AgentAction.ROTATE_RIGHT, AgentAction.ROTATE_LEFT};
+    public static final AgentAction MOVE_ACTIONS[] = {
+            AgentAction.MOVE,
+            AgentAction.ROTATE_RIGHT,
+            AgentAction.ROTATE_LEFT
+    };
 
     // Agent default configurations
     public static final int AGENT_DEFAULT_LOAD_CAPACITY = 500;
     public static final int AGENT_DEFAULT_BATTERY_LEVEL = 7;
     public static final int AGENT_BATTERY_THRESHOLD = 2;
-    public static final Direction AGENT_DEFAULT_DIRECTION = Direction.RIGHT;
+    public static final int AGENT_DEFAULT_DIRECTION = DIR_RIGHT;
 
     //
     // Facility Constants

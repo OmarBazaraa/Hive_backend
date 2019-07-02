@@ -1,5 +1,6 @@
 package utils;
 
+import utils.Constants;
 import utils.Constants.*;
 
 import org.junit.Assert;
@@ -19,18 +20,18 @@ public class UtilityTest {
 
     @Test
     public void directionTest() {
-        Direction dir;
+        int dir;
 
-        dir = Utility.nextDir(Direction.DOWN, AgentAction.ROTATE_LEFT);
-        Assert.assertEquals(dir, Direction.RIGHT);
+        dir = Utility.rotateLeft(Constants.DIR_DOWN);
+        Assert.assertEquals(dir, Constants.DIR_RIGHT);
 
-        dir = Utility.prevDir(Direction.RIGHT, AgentAction.ROTATE_LEFT);
-        Assert.assertEquals(dir, Direction.DOWN);
+        dir = Utility.rotateRight(Constants.DIR_RIGHT);
+        Assert.assertEquals(dir, Constants.DIR_DOWN);
 
-        dir = Utility.nextDir(Direction.RIGHT, AgentAction.ROTATE_RIGHT);
-        Assert.assertEquals(dir, Direction.DOWN);
+        dir = Utility.rotateRight(Constants.DIR_RIGHT);
+        Assert.assertEquals(dir, Constants.DIR_DOWN);
 
-        dir = Utility.prevDir(Direction.DOWN, AgentAction.ROTATE_RIGHT);
-        Assert.assertEquals(dir, Direction.RIGHT);
+        dir = Utility.rotateLeft(Constants.DIR_DOWN);
+        Assert.assertEquals(dir, Constants.DIR_RIGHT);
     }
 }

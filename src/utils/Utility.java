@@ -2,7 +2,7 @@ package utils;
 
 import models.facilities.Rack;
 import models.items.Item;
-import models.maps.utils.Position;
+import models.maps.Position;
 
 import utils.Constants.*;
 
@@ -97,21 +97,21 @@ public class Utility {
     }
 
     /**
-     * Converts the given {@code Direction} into its visual representative character.
+     * Converts the given direction into its visual representative character.
      *
-     * @param dir the {@code Direction} to convert.
+     * @param dir the direction to convert.
      *
-     * @return the symbol representing the given {@code Direction}.
+     * @return the symbol representing the given direction.
      */
-    public static char dirToShape(Direction dir) {
+    public static char dirToShape(int dir) {
         switch (dir) {
-            case RIGHT:
+            case Constants.DIR_RIGHT:
                 return Constants.SHAPE_DIR_RIGHT;
-            case UP:
+            case Constants.DIR_UP:
                 return Constants.SHAPE_DIR_UP;
-            case LEFT:
+            case Constants.DIR_LEFT:
                 return Constants.SHAPE_DIR_LEFT;
-            case DOWN:
+            case Constants.DIR_DOWN:
                 return Constants.SHAPE_DIR_DOWN;
         }
         return Constants.SHAPE_DIR_UNKNOWN;
@@ -124,14 +124,13 @@ public class Utility {
      *
      * @param row the row position of the current cell.
      * @param col the row position of the current cell.
-     * @param dir the {@code Direction} to move along.
+     * @param dir the direction to move along.
      *
      * @return the {@code Position} corresponding to the next cell.
      */
-    public static Position nextPos(int row, int col, Direction dir) {
-        int i = dir.ordinal();
-        row += Constants.DIR_ROW[i];
-        col += Constants.DIR_COL[i];
+    public static Position nextPos(int row, int col, int dir) {
+        row += Constants.DIR_ROW[dir];
+        col += Constants.DIR_COL[dir];
         return new Position(row, col);
     }
 
@@ -142,62 +141,36 @@ public class Utility {
      *
      * @param row the row position of the current cell.
      * @param col the row position of the current cell.
-     * @param dir the {@code Direction} to move along.
+     * @param dir the direction to move along.
      *
      * @return the {@code Position} corresponding to the previous cell.
      */
-    public static Position prevPos(int row, int col, Direction dir) {
-        int i = dir.ordinal();
-        row -= Constants.DIR_ROW[i];
-        col -= Constants.DIR_COL[i];
+    public static Position prevPos(int row, int col, int dir) {
+        row -= Constants.DIR_ROW[dir];
+        col -= Constants.DIR_COL[dir];
         return new Position(row, col);
     }
 
     /**
-     * Calculates the next direction if rotating with the given rotation action.
-     * <p>
-     * The allowed actions are only:
-     * {@code AgentAction.ROTATE_RIGHT} and {@code AgentAction.ROTATE_LEFT}.
+     * Calculates the next direction if rotating right.
      *
-     * @param dir    the current {@code Direction}.
-     * @param action the rotation action to apply.
+     * @param dir the current direction.
      *
-     * @return the next {@code Direction}.
+     * @return the next direction.
      */
-    public static Direction nextDir(Direction dir, AgentAction action) {
-        int i = dir.ordinal();
-
-        if (action == AgentAction.ROTATE_RIGHT) {
-            i = (i - 1) & 3;
-        } else {
-            i = (i + 1) & 3;
-        }
-
-        return Direction.values()[i];
+    public static int rotateRight(int dir) {
+        return (dir - 1) & 3;
     }
 
     /**
-     * Calculates the previous direction if rotating with the reverse of
-     * the given rotation action.
-     * <p>
-     * The allowed actions are only:
-     * {@code AgentAction.ROTATE_RIGHT} and {@code AgentAction.ROTATE_LEFT}.
+     * Calculates the previous direction if rotating left
      *
-     * @param dir    the current {@code Direction}.
-     * @param action the rotation action to apply.
+     * @param dir the current direction.
      *
-     * @return the next {@code Direction}.
+     * @return the next direction.
      */
-    public static Direction prevDir(Direction dir, AgentAction action) {
-        int i = dir.ordinal();
-
-        if (action == AgentAction.ROTATE_LEFT) {
-            i = (i - 1) & 3;
-        } else {
-            i = (i + 1) & 3;
-        }
-
-        return Direction.values()[i];
+    public static int rotateLeft(int dir) {
+        return (dir + 1) & 3;
     }
 
     /**
@@ -207,9 +180,7 @@ public class Utility {
      *
      * @return the reverse direction.
      */
-    public static Direction getReverseDir(Direction dir) {
-        int i = dir.ordinal();
-        Direction[] dirs = Direction.values();
-        return dirs[(i + 2) & 3];
+    public static int getReverseDir(int dir) {
+        return (dir + 2) & 3;
     }
 }

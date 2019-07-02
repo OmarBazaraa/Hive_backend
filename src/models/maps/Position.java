@@ -1,7 +1,6 @@
-package models.maps.utils;
+package models.maps;
 
 import utils.Constants;
-import utils.Constants.*;
 
 
 /**
@@ -32,14 +31,13 @@ public class Position implements Comparable<Position> {
      * from a this {@code Position}.
      * (i.e. position(previous) + dir = position(current)).
      *
-     * @param dir the {@code Direction} to move along.
+     * @param dir the direction to move along.
      *
      * @return the next {@code Position}.
      */
-    public Position next(Direction dir) {
-        int i = dir.ordinal();
-        int r = row + Constants.DIR_ROW[i];
-        int c = col + Constants.DIR_COL[i];
+    public Position next(int dir) {
+        int r = row + Constants.DIR_ROW[dir];
+        int c = col + Constants.DIR_COL[dir];
         return new Position(r, c);
     }
 
@@ -48,14 +46,13 @@ public class Position implements Comparable<Position> {
      * from a this {@code Position}.
      * (i.e. position(previous) + dir = position(current)).
      *
-     * @param dir the {@code Direction} to move along.
+     * @param dir the direction to move along.
      *
      * @return the previous {@code Position}.
      */
-    public Position prev(Direction dir) {
-        int i = dir.ordinal();
-        int r = row - Constants.DIR_ROW[i];
-        int c = col - Constants.DIR_COL[i];
+    public Position prev(int dir) {
+        int r = row - Constants.DIR_ROW[dir];
+        int c = col - Constants.DIR_COL[dir];
         return new Position(r, c);
     }
 

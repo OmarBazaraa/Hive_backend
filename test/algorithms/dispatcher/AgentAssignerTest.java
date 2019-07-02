@@ -4,7 +4,7 @@ import algorithms.dispatcher.task_allocator_helpers.AgentAssigner;
 import models.HiveObject;
 import models.agents.Agent;
 import models.facilities.Rack;
-import models.maps.utils.Position;
+import models.maps.Position;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;

@@ -4,12 +4,13 @@ import models.Entity;
 import models.HiveObject;
 import models.facilities.Facility;
 import models.facilities.Rack;
-import models.maps.utils.Pose;
+import models.maps.Pose;
+import models.maps.Position;
 import models.tasks.Task;
 import models.tasks.TaskAssignable;
 
 import utils.Constants;
-import utils.Constants.*;
+import utils.Utility;
 
 import java.net.InetAddress;
 import java.util.LinkedList;
@@ -31,7 +32,7 @@ abstract public class AbstractAgent extends HiveObject implements TaskAssignable
     /**
      * The current direction this {@code Agent} is heading to.
      */
-    protected Direction dir = Constants.AGENT_DEFAULT_DIRECTION;
+    protected int dir = Constants.AGENT_DEFAULT_DIRECTION;
 
     /**
      * The flag indicating whether this {@code Agent} is currently deactivated or not.
@@ -114,18 +115,18 @@ abstract public class AbstractAgent extends HiveObject implements TaskAssignable
     /**
      * Returns the current direction this {@code Agent} is heading to.
      *
-     * @return the {@code Direction} of this {@code Agent}.
+     * @return the direction of this {@code Agent}.
      */
-    public Direction getDirection() {
+    public int getDirection() {
         return dir;
     }
 
     /**
      * Sets the direction of this {@code Agent}.
      *
-     * @param d the new {@code Direction} to set.
+     * @param d the new direction to set.
      */
-    public void setDirection(Direction d) {
+    public void setDirection(int d) {
         dir = d;
     }
 
@@ -359,6 +360,14 @@ abstract public class AbstractAgent extends HiveObject implements TaskAssignable
     //
 
     /**
+     * Executes the next required action as specified by the currently
+     * active assigned {@code Task}.
+     *
+     * @return {@code true} if this {@code Agent} manged to execute the action successfully; {@code false} otherwise.
+     */
+    abstract public boolean executeAction() throws Exception;
+
+    /**
      * Plans the sequence of actions to reach the given target {@code Facility}.
      * <p>
      * This function should be called with new destination only when the previous
@@ -366,20 +375,12 @@ abstract public class AbstractAgent extends HiveObject implements TaskAssignable
      *
      * @param dst the target {@code Facility} to reach.
      */
-    abstract public void plan(Facility dst);
+    abstract protected void plan(Facility dst);
 
     /**
      * Drops and cancels the current plan of this {@code Agent}.
      */
-    abstract public void dropPlan();
-
-    /**
-     * Executes the next required action as specified by the currently
-     * active assigned {@code Task}.
-     *
-     * @return {@code true} if this {@code Agent} manged to execute the action successfully; {@code false} otherwise.
-     */
-    abstract public boolean executeAction() throws Exception;
+    abstract protected void dropPlan();
 
     /**
      * Moves a single step to reach the given {@code Facility}.
@@ -389,6 +390,30 @@ abstract public class AbstractAgent extends HiveObject implements TaskAssignable
      * @return {@code true} if this {@code Agent} manged to move a step towards the target; {@code false} otherwise.
      */
     abstract public boolean reach(Facility dst);
+
+    /**
+     * Attempts to slide away from the current position of this {@code Agent} in order
+     * to bring a blank cell to the given main {@code Agent}.
+     *
+     * @param mainAgent the main {@code Agent} issuing the slide.
+     *
+     * @return {@code true} if sliding is possible; {@code false} otherwise.
+     */
+    abstract protected boolean slide(Agent mainAgent);
+
+    /**
+     * Rotates this {@code Agent} to reach the given orientation.
+     *
+     * @param d the needed orientation.
+     */
+    abstract protected void rotate(int d);
+
+    /**
+     * Moves this {@code Agent} along its current direction.
+     *
+     * @param pos the {@code Position} to move into.
+     */
+    abstract protected void move(Position pos);
 
     /**
      * Loads and lifts the given {@code Rack} above this {@code Agent}.
@@ -457,8 +482,8 @@ abstract public class AbstractAgent extends HiveObject implements TaskAssignable
         builder.append("Agent: {");
         builder.append(" id: ").append(id).append(",");
         builder.append(" pos: ").append(getPosition()).append(",");
+        builder.append(" dir: ").append(Utility.dirToShape(dir));
         builder.append(" load_capacity: ").append(loadCapacity).append(",");
-        builder.append(" direction: ").append(dir);
         builder.append(" }");
 
         return builder.toString();

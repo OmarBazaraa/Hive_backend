@@ -149,7 +149,7 @@ public class Decoder {
 
         // Create new agent
         Agent ret = new Agent(id, cap);
-        ret.setDirection(decodeDirection(dir));
+        ret.setDirection(dir);
 
         // Deployment mode
         if (sMode == RunningMode.DEPLOYMENT) {
@@ -332,10 +332,6 @@ public class Decoder {
     //
     // Static Helper Methods
     //
-
-    public static Direction decodeDirection(int dir) {
-        return Direction.values()[dir];
-    }
 
     public static CollectOrder decodeCollectOrder(JSONObject data, int id, Gate gate) {
         // Create collect order

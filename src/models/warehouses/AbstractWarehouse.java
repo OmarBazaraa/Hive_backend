@@ -8,8 +8,8 @@ import models.facilities.Rack;
 import models.facilities.Station;
 import models.items.Item;
 import models.maps.GridCell;
-import models.maps.utils.Dimensions;
-import models.maps.utils.Position;
+import models.maps.Dimensions;
+import models.maps.Position;
 import models.tasks.Task;
 import models.tasks.orders.Order;
 

@@ -2,7 +2,7 @@ package algorithms.dispatcher.task_allocator_helpers;
 
 import models.facilities.Rack;
 import models.items.Item;
-import models.maps.utils.Position;
+import models.maps.Position;
 import models.tasks.orders.Order;
 
 import java.util.*;
