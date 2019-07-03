@@ -54,11 +54,6 @@ public class HardwareCommunicator {
     private CommunicationListener listener;
 
     /**
-     * The {@code Warehouse} object.
-     */
-    private final Warehouse warehouse = Warehouse.getInstance();
-
-    /**
      * The map of pending actions.
      * That is, the actions that are waiting for DONE messages.
      */
@@ -341,7 +336,7 @@ public class HardwareCommunicator {
     public void pause() {
         for (var pair : pendingActionMap.entrySet()) {
             Agent agent = pair.getKey();
-            send(agent, new byte[]{HardwareConstants.TYPE_ACTION, HardwareConstants.TYPE_STOP});
+            send(agent, encodeAgentStopAction());
         }
     }
 
@@ -359,7 +354,7 @@ public class HardwareCommunicator {
                 continue;
             }
 
-            send(agent, encodeAgentAction(action));
+            send(agent, encodeAgentAction(action, HardwareConstants.ACTION_RECOVER));
         }
     }
 
@@ -372,8 +367,7 @@ public class HardwareCommunicator {
      */
     public void sendAgentStop(Agent agent) {
         pendingActionMap.remove(agent);
-        byte[] msg = {HardwareConstants.TYPE_ACTION, HardwareConstants.TYPE_STOP};
-        send(agent, msg);
+        send(agent, encodeAgentStopAction());
     }
 
     /**
@@ -385,7 +379,7 @@ public class HardwareCommunicator {
      * @param action the action to send.
      */
     public void sendAgentAction(Agent agent, AgentAction action) {
-        byte[] msg = encodeAgentAction(action);
+        byte[] msg = encodeAgentAction(action, HardwareConstants.ACTION_NORMAL);
 
         if (msg == null) {
             return;
@@ -409,7 +403,7 @@ public class HardwareCommunicator {
             return;
         }
 
-        byte[] msg = encodeAgentAction(action);
+        byte[] msg = encodeAgentAction(action, HardwareConstants.ACTION_RECOVER);
 
         if (msg == null) {
             return;
@@ -437,29 +431,39 @@ public class HardwareCommunicator {
     //
 
     /**
-     * Encodes the given {@code AgentAction} to be sent to the hardware robots.
+     * Encodes the given {@code AgentAction} to be sent to a hardware robots.
      *
      * @param action the {@code AgentAction} to encode.
+     * @param type   the type of the action. Whether it is normal or recover action.
      *
-     * @return the encoded {@code AgentAction}
+     * @return the encoded {@code AgentAction}.
      */
-    private byte[] encodeAgentAction(AgentAction action) {
+    private byte[] encodeAgentAction(AgentAction action, int type) {
         switch (action) {
             case MOVE:
-                return new byte[]{HardwareConstants.TYPE_ACTION, HardwareConstants.TYPE_MOVE};
+                return new byte[]{HardwareConstants.TYPE_ACTION, HardwareConstants.TYPE_MOVE, (byte) type};
             case ROTATE_RIGHT:
-                return new byte[]{HardwareConstants.TYPE_ACTION, HardwareConstants.TYPE_ROTATE_RIGHT};
+                return new byte[]{HardwareConstants.TYPE_ACTION, HardwareConstants.TYPE_ROTATE_RIGHT, (byte) type};
             case ROTATE_LEFT:
-                return new byte[]{HardwareConstants.TYPE_ACTION, HardwareConstants.TYPE_ROTATE_LEFT};
+                return new byte[]{HardwareConstants.TYPE_ACTION, HardwareConstants.TYPE_ROTATE_LEFT, (byte) type};
             case RETREAT:
-                return new byte[]{HardwareConstants.TYPE_ACTION, HardwareConstants.TYPE_RETREAT};
+                return new byte[]{HardwareConstants.TYPE_ACTION, HardwareConstants.TYPE_RETREAT, (byte) type};
             case LOAD:
-                return new byte[]{HardwareConstants.TYPE_ACTION, HardwareConstants.TYPE_LOAD};
+                return new byte[]{HardwareConstants.TYPE_ACTION, HardwareConstants.TYPE_LOAD, (byte) type};
             case OFFLOAD:
-                return new byte[]{HardwareConstants.TYPE_ACTION, HardwareConstants.TYPE_OFFLOAD};
+                return new byte[]{HardwareConstants.TYPE_ACTION, HardwareConstants.TYPE_OFFLOAD, (byte) type};
         }
 
         return null;
+    }
+
+    /**
+     * Encodes a stop instruction to be sent to a hardware robots.
+     *
+     * @return the encoded stop instruction.
+     */
+    private byte[] encodeAgentStopAction() {
+        return new byte[]{HardwareConstants.TYPE_ACTION, HardwareConstants.TYPE_STOP, HardwareConstants.ACTION_NORMAL};
     }
 
     /**
