@@ -432,8 +432,52 @@ public class Agent extends AbstractAgent {
      * @return {@code true} if sliding is possible; {@code false} otherwise.
      */
     protected boolean slide(Agent mainAgent) {
-        if (blocked || deactivated) {
+        if (locked || blocked || slidingTime >= sWarehouse.getTime()) {
             return false;
+        }
+
+        if (isAlreadyMoved() || compareTo(mainAgent) > 0) {
+            return true;
+        }
+
+        slidingTime = sWarehouse.getTime();
+
+        int D = (hasPlan() ? plan.peek() : dir);
+        int[] dirs = {D, Utility.rotateRight(D), Utility.rotateLeft(D), Utility.getReverseDir(D)};
+
+        for (int d : dirs) {
+            int r = row + Constants.DIR_ROW[d];
+            int c = col + Constants.DIR_COL[d];
+
+            if (sWarehouse.isOutBound(r, c)) {
+                continue;
+            }
+
+            GridCell cell = sWarehouse.get(r, c);
+            Agent blockingAgent = cell.getAgent();
+
+            if (cell.isBlocked() || cell.hasFacility()) {
+                continue;
+            }
+
+            if (d != dir) {
+                rotate(d);
+                return true;
+            }
+
+            if (blockingAgent == null) {
+                move(r, c);
+                return true;
+            }
+
+            if (blockingAgent.slide(mainAgent)) {
+                if (cell.hasAgent()) {
+                    return true;
+                } else {
+                    move(r, c);
+                    return true;
+                }
+            }
         }
 
         return false;
