@@ -14,6 +14,8 @@ import utils.Constants;
 import utils.Constants.*;
 import utils.Utility;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Stack;
 
 
@@ -442,23 +444,13 @@ public class Agent extends AbstractAgent {
 
         slidingTime = sWarehouse.getTime();
 
-        int D = (hasPlan() ? plan.peek() : dir);
-        int[] dirs = {D, Utility.rotateRight(D), Utility.rotateLeft(D), Utility.getReverseDir(D)};
+        List<Integer> dirs = getSortedSlidingDirs();
 
         for (int d : dirs) {
             int r = row + Constants.DIR_ROW[d];
             int c = col + Constants.DIR_COL[d];
-
-            if (sWarehouse.isOutBound(r, c)) {
-                continue;
-            }
-
             GridCell cell = sWarehouse.get(r, c);
             Agent blockingAgent = cell.getAgent();
-
-            if (cell.isBlocked() || cell.hasFacility()) {
-                continue;
-            }
 
             if (d != dir) {
                 rotate(d);
@@ -569,6 +561,44 @@ public class Agent extends AbstractAgent {
     //
     // Helper Methods
     //
+
+    /**
+     * Returns a list of directions this {@code Agent} can slide into.
+     * The returned list is sorted in a way to reduce the sliding cost as possible.
+     *
+     * @return a list of sorted direction.
+     */
+    private List<Integer> getSortedSlidingDirs() {
+        List<Integer> ret1 = new LinkedList<>();
+        List<Integer> ret2 = new LinkedList<>();
+
+        int D = (hasPlan() ? plan.peek() : dir);
+        int[] dirs = {D, Utility.rotateRight(D), Utility.rotateLeft(D), Utility.getReverseDir(D)};
+
+        for (int d : dirs) {
+            int r = row + Constants.DIR_ROW[d];
+            int c = col + Constants.DIR_COL[d];
+
+            if (sWarehouse.isOutBound(r, c)) {
+                continue;
+            }
+
+            GridCell cell = sWarehouse.get(r, c);
+
+            if (cell.isBlocked() || cell.hasFacility()) {
+                continue;
+            }
+
+            if (cell.hasAgent()) {
+                ret1.add(d);
+            } else {
+                ret2.add(d);
+            }
+        }
+
+        ret2.addAll(ret1);
+        return ret2;
+    }
 
     /**
      * Checks whether this {@code Agent} currently has a plan or not.
