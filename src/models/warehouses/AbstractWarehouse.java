@@ -131,6 +131,7 @@ abstract public class AbstractWarehouse {
         agents.clear();
         activeAgents.clear();
         readyAgents.clear();
+        blockedAgents.clear();
         racks.clear();
         gates.clear();
         stations.clear();
