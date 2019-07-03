@@ -153,16 +153,8 @@ public class PlanNode implements Comparable<PlanNode> {
         // Get this state cell
         GridCell cell = warehouse.get(row, col);
 
-        // Skip if obstacle or already visited cell
-        if (cell.isBlocked() || isVisited()) {
-            return false;
-        }
-
-        // Get current agent in this state
-        Agent a = cell.getAgent();
-
-        // If that agent is currently locked or deactivated then skip this state as well
-        if (a != null && a != source && (a.isLocked() || a.isDeactivated())) {
+        // Skip if already visited or blocked cell
+        if (isVisited() || cell.isBlocked()) {
             return false;
         }
 

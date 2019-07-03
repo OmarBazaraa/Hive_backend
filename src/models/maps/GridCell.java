@@ -165,7 +165,7 @@ public class GridCell {
      * @return {@code true} if this cell is an blocked; {@code false} otherwise.
      */
     public boolean isBlocked() {
-        return (type == CellType.OBSTACLE || locked);
+        return (type == CellType.OBSTACLE || locked || (agent != null && (agent.isLocked() || agent.isBlocked())));
     }
 
     /**

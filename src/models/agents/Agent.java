@@ -10,6 +10,7 @@ import models.maps.Position;
 import models.tasks.Task;
 import models.warehouses.Warehouse;
 
+import utils.Constants;
 import utils.Constants.*;
 import utils.Utility;
 
@@ -58,6 +59,11 @@ public class Agent extends AbstractAgent {
      */
     private long lastActionTime = -1;
 
+    /**
+     * The last this {@code Agent} has attempt to slide.
+     */
+    private long slidingTime = -1;
+
     // ===============================================================================================
     //
     // Member Methods
@@ -103,9 +109,8 @@ public class Agent extends AbstractAgent {
         deactivated = false;
 
         // Unlock the cell that the agent was supposed to be in
-        Warehouse warehouse = Warehouse.getInstance();
         Pose nxt = getPose().next(lastAction);
-        GridCell cell = warehouse.get(nxt.row, nxt.col);
+        GridCell cell = sWarehouse.get(nxt.row, nxt.col);
         cell.setLock(false);
     }
 
@@ -127,8 +132,7 @@ public class Agent extends AbstractAgent {
         deactivated = true;
 
         // Lock the cell that the agent was supposed to be in
-        Warehouse warehouse = Warehouse.getInstance();
-        GridCell cell = warehouse.get(row, col);
+        GridCell cell = sWarehouse.get(row, col);
         cell.setLock(true);
 
         // Recursive block affected agents
@@ -152,8 +156,7 @@ public class Agent extends AbstractAgent {
         }
 
         // Inform the warehouse
-        Warehouse warehouse = Warehouse.getInstance();
-        warehouse.onAgentBlocked(this);
+        sWarehouse.onAgentBlocked(this);
 
         // Mark the agent as blocked and drop any plans
         blocked = true;
@@ -188,8 +191,8 @@ public class Agent extends AbstractAgent {
         if (action == AgentAction.MOVE) {
             // Get the current and the previous cells
             Position prv = getPosition().prev(dir);
-            GridCell curCell = warehouse.get(row, col);
-            GridCell prvCell = warehouse.get(prv);
+            GridCell curCell = sWarehouse.get(row, col);
+            GridCell prvCell = sWarehouse.get(prv);
 
             // Undo movement
             curCell.setAgent(null);
@@ -206,7 +209,6 @@ public class Agent extends AbstractAgent {
             // Consider the agent in its previous position
             prvCell.setAgent(this);
             setPosition(prv.row, prv.col);
-            return;
         }
     }
 
@@ -279,10 +281,9 @@ public class Agent extends AbstractAgent {
         // Move action
         if (action == AgentAction.MOVE) {
             // Get the current and the next cells
-            Warehouse warehouse = Warehouse.getInstance();
             Position nxt = Utility.nextPos(row, col, dir);
-            GridCell curCell = warehouse.get(row, col);
-            GridCell nxtCell = warehouse.get(nxt);
+            GridCell curCell = sWarehouse.get(row, col);
+            GridCell nxtCell = sWarehouse.get(nxt);
 
             // Check if there is an agent in the cell that this agent was suppose to go
             Agent a = nxtCell.getAgent();
@@ -325,7 +326,7 @@ public class Agent extends AbstractAgent {
     @Override
     public boolean executeAction() {
         // Return if already did an action this time step
-        if (lastActionTime >= Warehouse.getInstance().getTime()) {
+        if (isAlreadyMoved()) {
             return false;
         }
 
@@ -381,52 +382,44 @@ public class Agent extends AbstractAgent {
         plan(dst);
 
         // Return if no plan
-        if (plan == null) {
+        if (!hasPlan()) {
             return false;
         }
 
         // Get next action to apply
-        int action = plan.peek();
+        int d = plan.peek();
 
+        //
         // Handle rotation actions
-        if (dir != action) {
-            rotate(action);
+        //
+        if (d != dir) {
+            rotate(d);
             return true;
         }
 
         //
-        // Move action
+        // Handle move action
         //
 
         // Get the current and the next cells
-        Warehouse warehouse = Warehouse.getInstance();
-        Position nxt = getPosition().next(dir);
-        GridCell curCell = warehouse.get(row, col);
-        GridCell nxtCell = warehouse.get(nxt.row, nxt.col);
-        Agent blockingAgent = nxtCell.getAgent();
+        int r = row + Constants.DIR_ROW[d];
+        int c = col + Constants.DIR_COL[d];
+        GridCell cell = sWarehouse.get(r, c);
+        Agent blockingAgent = cell.getAgent();
 
-        // Check if next cell is currently locked by an agent
-        if (nxtCell.isLocked()) {
-            dropPlan();
-            return false;
-        }
-
-        // Check next cell
-        if (blockingAgent != null && !blockingAgent.slide(this)) {
+        // Check if next cell is currently blocked by an agent
+        if (cell.isLocked() || (blockingAgent != null && !blockingAgent.slide(this))) {
             dropPlan();
             return false;
         }
 
         // Check if the next location is empty
-        if (nxtCell.hasAgent()) {
+        if (cell.hasAgent()) {
             return false;
         }
 
         // Apply action and set the new pose of the agent
-        plan.pop();
-        curCell.setAgent(null);
-        nxtCell.setAgent(this);
-        move(nxt);
+        move(r, c);
         return true;
     }
 
@@ -465,11 +458,22 @@ public class Agent extends AbstractAgent {
     /**
      * Moves this {@code Agent} along its current direction.
      *
-     * @param pos the {@code Position} to move into.
+     * @param r the row position to move into.
+     * @param c the column position to move into.
      */
-    protected void move(Position pos) {
-        row = pos.row;
-        col = pos.col;
+    protected void move(int r, int c) {
+        if (hasPlan()) {
+            if (dir == plan.peek()) {
+                plan.pop();
+            } else {
+                dropPlan();
+            }
+        }
+
+        sWarehouse.get(row, col).setAgent(null);
+        row = r;
+        col = c;
+        sWarehouse.get(row, col).setAgent(this);
         setLastAction(AgentAction.MOVE);
     }
 
@@ -523,12 +527,31 @@ public class Agent extends AbstractAgent {
     //
 
     /**
+     * Checks whether this {@code Agent} currently has a plan or not.
+     *
+     * @return {@code true} if it currently has a plan. {@code false} otherwise.
+     */
+    private boolean hasPlan() {
+        return (plan != null && plan.size() > 0);
+    }
+
+    /**
+     * Checks whether this {@code Agent} has already performed an action this time step
+     * or not.
+     *
+     * @return {@code true} if it already performed an action. {@code false} otherwise.
+     */
+    private boolean isAlreadyMoved() {
+        return lastActionTime >= sWarehouse.getTime();
+    }
+
+    /**
      * Returns the action that this {@code Agent} has performed the last time step.
      *
      * @return the last {@code AgentAction} performed.
      */
     private AgentAction getLastAction() {
-        if (lastActionTime + 1 < Warehouse.getInstance().getTime()) {
+        if (lastActionTime + 1 < sWarehouse.getTime()) {
             return AgentAction.NOTHING;
         } else {
             return lastAction;
@@ -542,7 +565,7 @@ public class Agent extends AbstractAgent {
      */
     private void setLastAction(AgentAction action) {
         lastAction = action;
-        lastActionTime = Warehouse.getInstance().getTime();
+        lastActionTime = sWarehouse.getTime();
 
         // Inform listener
         if (listener != null) {
@@ -557,7 +580,7 @@ public class Agent extends AbstractAgent {
      */
     private void setLastRecoverAction(AgentAction action) {
         lastAction = action;
-        lastActionTime = Warehouse.getInstance().getTime();
+        lastActionTime = sWarehouse.getTime();
 
         // Inform listener
         if (listener != null) {

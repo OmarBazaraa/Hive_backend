@@ -5,9 +5,9 @@ import models.HiveObject;
 import models.facilities.Facility;
 import models.facilities.Rack;
 import models.maps.Pose;
-import models.maps.Position;
 import models.tasks.Task;
 import models.tasks.TaskAssignable;
+import models.warehouses.Warehouse;
 
 import utils.Constants;
 import utils.Utility;
@@ -25,6 +25,17 @@ import java.util.Queue;
  */
 abstract public class AbstractAgent extends HiveObject implements TaskAssignable {
 
+
+    //
+    // Static Variables
+    //
+
+    /**
+     * The {@code Warehouse} object.
+     */
+    protected static Warehouse sWarehouse = Warehouse.getInstance();
+
+    // ===============================================================================================
     //
     // Member Variables
     //
@@ -47,7 +58,7 @@ abstract public class AbstractAgent extends HiveObject implements TaskAssignable
     /**
      * The flag indicating whether this {@code Agent} is currently locked by a {@code Facility}.
      */
-    protected boolean locked = true;
+    protected boolean locked = false;
 
     /**
      * The flag indicating whether this {@code Agent} is currently loaded by a {@code Rack}.
@@ -411,9 +422,10 @@ abstract public class AbstractAgent extends HiveObject implements TaskAssignable
     /**
      * Moves this {@code Agent} along its current direction.
      *
-     * @param pos the {@code Position} to move into.
+     * @param r the row position to move into.
+     * @param c the column position to move into.
      */
-    abstract protected void move(Position pos);
+    abstract protected void move(int r, int c);
 
     /**
      * Loads and lifts the given {@code Rack} above this {@code Agent}.

@@ -122,7 +122,7 @@ public class Constants {
     /**
      * The array of move actions that can be done by an {@code Agent}.
      */
-    public static final AgentAction MOVE_ACTIONS[] = {
+    public static final AgentAction[] MOVE_ACTIONS = {
             AgentAction.MOVE,
             AgentAction.ROTATE_RIGHT,
             AgentAction.ROTATE_LEFT
