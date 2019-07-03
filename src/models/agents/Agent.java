@@ -573,7 +573,7 @@ public class Agent extends AbstractAgent {
         List<Integer> ret2 = new LinkedList<>();
 
         int D = (hasPlan() ? plan.peek() : dir);
-        int[] dirs = {D, Utility.rotateRight(D), Utility.rotateLeft(D), Utility.getReverseDir(D)};
+        int[] dirs = {D, (D + 1) & 3, (D + 2) & 3, (D + 3) & 3};
 
         for (int d : dirs) {
             int r = row + Constants.DIR_ROW[d];
