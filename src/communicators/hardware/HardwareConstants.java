@@ -31,6 +31,10 @@ public class HardwareConstants {
     public static final int TYPE_LOAD = 5;
     public static final int TYPE_OFFLOAD = 6;
 
+    // Actions states
+    public static final int ACTION_NORMAL = 0;
+    public static final int ACTION_RECOVER = 1;
+
     // Lights colors
     public static final int LIGHT_RED = 0;
     public static final int LIGHT_BLUE = 1;
