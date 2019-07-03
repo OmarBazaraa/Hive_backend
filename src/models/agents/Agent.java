@@ -169,28 +169,28 @@ public class Agent extends AbstractAgent {
         //
 
         // Get last action
-        AgentAction action = getLastAction();
+        lastAction = getLastAction();
 
         // Rotation right action
-        if (action == AgentAction.ROTATE_RIGHT) {
+        if (lastAction == AgentAction.ROTATE_RIGHT) {
             dir = Utility.rotateLeft(dir);
             return;
         }
 
         // Rotation left action
-        if (action == AgentAction.ROTATE_LEFT) {
+        if (lastAction == AgentAction.ROTATE_LEFT) {
             dir = Utility.rotateRight(dir);
             return;
         }
 
         // Retreat action
-        if (action == AgentAction.RETREAT) {
+        if (lastAction == AgentAction.RETREAT) {
             dir = Utility.getReverseDir(dir);
             return;
         }
 
         // Move action
-        if (action == AgentAction.MOVE) {
+        if (lastAction == AgentAction.MOVE) {
             // Get the current and the previous cells
             Position prv = getPosition().prev(dir);
             GridCell curCell = sWarehouse.get(row, col);
