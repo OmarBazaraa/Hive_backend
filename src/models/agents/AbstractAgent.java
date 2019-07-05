@@ -406,11 +406,12 @@ abstract public class AbstractAgent extends HiveObject implements TaskAssignable
      * Attempts to slide away from the current position of this {@code Agent} in order
      * to bring a blank cell to the given main {@code Agent}.
      *
-     * @param mainAgent the main {@code Agent} issuing the slide.
+     * @param mainAgent   the main {@code Agent} issuing the slide.
+     * @param incomingDir the incoming direction of the parent agent issuing the slide.
      *
      * @return {@code true} if sliding is possible; {@code false} otherwise.
      */
-    abstract protected boolean slide(Agent mainAgent);
+    abstract protected boolean slide(Agent mainAgent, int incomingDir);
 
     /**
      * Rotates this {@code Agent} to reach the given orientation.

@@ -410,7 +410,7 @@ public class Agent extends AbstractAgent {
         Agent blockingAgent = cell.getAgent();
 
         // Check if next cell is currently blocked by an agent
-        if (cell.isLocked() || (blockingAgent != null && !blockingAgent.slide(this))) {
+        if (cell.isLocked() || (blockingAgent != null && !blockingAgent.slide(this, d))) {
             dropPlan();
 
             // Tries another single trial with the new plan
@@ -436,11 +436,12 @@ public class Agent extends AbstractAgent {
      * Attempts to slide away from the current position of this {@code Agent} in order
      * to bring a blank cell to the given main {@code Agent}.
      *
-     * @param mainAgent the main {@code Agent} issuing the slide.
+     * @param mainAgent   the main {@code Agent} issuing the slide.
+     * @param incomingDir the incoming direction of the parent agent issuing the slide.
      *
      * @return {@code true} if sliding is possible; {@code false} otherwise.
      */
-    protected boolean slide(Agent mainAgent) {
+    protected boolean slide(Agent mainAgent, int incomingDir) {
         if (locked || blocked || slidingTime >= sWarehouse.getTime() || this == mainAgent) {
             return false;
         }
@@ -451,7 +452,7 @@ public class Agent extends AbstractAgent {
 
         slidingTime = sWarehouse.getTime();
 
-        List<Integer> dirs = getSortedSlidingDirs();
+        List<Integer> dirs = getSortedSlidingDirs(incomingDir);
 
         for (int d : dirs) {
             int r = row + Constants.DIR_ROW[d];
@@ -468,7 +469,7 @@ public class Agent extends AbstractAgent {
                 return true;
             }
 
-            if (blockingAgent.slide(mainAgent)) {
+            if (blockingAgent.slide(mainAgent, d)) {
                 if (d != dir) {
                     rotate(d);
                 } else if (!cell.hasAgent()) {
@@ -572,14 +573,23 @@ public class Agent extends AbstractAgent {
      * Returns a list of directions this {@code Agent} can slide into.
      * The returned list is sorted in a way to reduce the sliding cost as possible.
      *
+     * @param incomingDir the incoming direction of the parent agent issuing the slide.
+     *
      * @return a list of sorted direction.
      */
-    private List<Integer> getSortedSlidingDirs() {
+    private List<Integer> getSortedSlidingDirs(int incomingDir) {
         List<Integer> ret1 = new LinkedList<>();
         List<Integer> ret2 = new LinkedList<>();
 
-        int D = (hasPlan() ? plan.peek() : dir);
-        int[] dirs = {D, (D + 1) & 3, (D + 2) & 3, (D + 3) & 3};
+        int[] dirs;
+
+        if (hasPlan()) {
+            int D = plan.peek();
+            dirs = new int[]{D, (D + 1) & 3, (D - 1) & 3, (D + 2) & 3};
+        } else {
+            int D = incomingDir;
+            dirs = new int[]{(D + 1) & 3, (D - 1) & 3, D, (D + 2) & 3};
+        }
 
         for (int d : dirs) {
             int r = row + Constants.DIR_ROW[d];
