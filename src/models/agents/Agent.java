@@ -419,12 +419,13 @@ public class Agent extends AbstractAgent {
                 lastAction = AgentAction.NOTHING;
                 reach(dst);
             }
+
             return false;
         }
 
         // Check if the next location is empty
         if (cell.hasAgent()) {
-            return false;
+            return true; // TODO: need to be tested
         }
 
         // Apply action and set the new pose of the agent

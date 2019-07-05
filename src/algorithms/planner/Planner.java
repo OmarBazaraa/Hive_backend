@@ -30,12 +30,10 @@ public class Planner {
      * @return the computed guide map to reach the destination.
      */
     public static int[][] computeGuideMap(int row, int col) {
-        // Global information about the warehouse
+        // Initialize BFS algorithm requirements
         Warehouse warehouse = Warehouse.getInstance();
         int rows = warehouse.getRows();
         int cols = warehouse.getCols();
-
-        // Initialize BFS algorithm requirements
         int[][] ret = new int[rows][cols];
 
         for (int i = 0; i < rows; ++i) {
@@ -104,7 +102,7 @@ public class Planner {
      * @return a sequence of directions to move along; or {@code null} if currently unreachable.
      */
     public static Stack<Integer> plan(Agent source, Facility target) {
-        // Check if the target facility is currently bound to another agent
+        // No plan can be found if the target facility is currently bound to another agent
         if (target.isBound() && target.getBoundAgent() != source) {
             return null;
         }
@@ -145,10 +143,11 @@ public class Planner {
 
                 // Check if target has been reached
                 if (nxt.isFinal()) {
-                    return constructPlan(source, nxt);
+                    return constructPlan(nxt);
                 }
 
                 // Add state for further exploration
+                nxt.updateWeight();
                 q.add(nxt);
             }
         }
@@ -162,23 +161,21 @@ public class Planner {
      * finishing the planning, and updates the timeline map of the {@code Warehouse}
      * in accordance.
      *
-     * @param source the source {@code Agent} to plan for.
-     * @param node   the target state {@code PlanNode}.
+     * @param node the target state {@code PlanNode}.
      *
      * @return a sequence of directions to move along to reach the given state.
      */
-    private static Stack<Integer> constructPlan(Agent source, PlanNode node) {
+    private static Stack<Integer> constructPlan(PlanNode node) {
         // Prepare the stack of actions
         Stack<Integer> ret = new Stack<>();
 
-        //
         // Keep moving backward until reaching the initial position of the agent
-        //
         while (!node.isInitial()) {
             ret.add(node.dir);
             node = node.previous();
         }
 
+        // Return the sequence of direction leading to the target
         return ret;
     }
 }

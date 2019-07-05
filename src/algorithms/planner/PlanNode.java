@@ -6,8 +6,6 @@ import models.maps.GridCell;
 import models.warehouses.Warehouse;
 
 import utils.Constants;
-import utils.Constants.*;
-import utils.Utility;
 
 
 /**
@@ -19,11 +17,6 @@ public class PlanNode implements Comparable<PlanNode> {
     //
     // Static Variables & Methods
     //
-
-    /**
-     * Array holding the direction leading to any state.
-     */
-    private static int[][] par;
 
     /**
      * The {@code Warehouse} holding the map grid to plan into.
@@ -41,6 +34,11 @@ public class PlanNode implements Comparable<PlanNode> {
     private static Facility target;
 
     /**
+     * Array holding the direction leading to every state.
+     */
+    private static int[][] par;
+
+    /**
      * Initializes the planning state.
      * <p>
      * This function should be called once before running the planning algorithm.
@@ -52,6 +50,8 @@ public class PlanNode implements Comparable<PlanNode> {
         int rows = warehouse.getRows();
         int cols = warehouse.getCols();
 
+        source = src;
+        target = dst;
         par = new int[rows][cols];
 
         for (int i = 0; i < rows; ++i) {
@@ -59,9 +59,6 @@ public class PlanNode implements Comparable<PlanNode> {
                 par[i][j] = -1;
             }
         }
-
-        source = src;
-        target = dst;
     }
 
     // ===============================================================================================
@@ -80,14 +77,14 @@ public class PlanNode implements Comparable<PlanNode> {
     public int col;
 
     /**
-     * The weight of the state. That is, the distance from the initial state to this {@code state}.
-     */
-    public int weight;
-
-    /**
      * The direction leading to this state.
      */
     public int dir;
+
+    /**
+     * The weight of the state. That is, the distance from the initial state to this {@code state}.
+     */
+    public int weight;
 
     // ===============================================================================================
     //
@@ -101,7 +98,7 @@ public class PlanNode implements Comparable<PlanNode> {
      * @param col the row position of the {@code Agent}.
      */
     public PlanNode(int row, int col) {
-        this(row, col, 0, Constants.DIR_RIGHT);
+        this(row, col, Constants.DIR_RIGHT, 0);
     }
 
     /**
@@ -109,14 +106,14 @@ public class PlanNode implements Comparable<PlanNode> {
      *
      * @param row    the row position of the {@code Agent}.
      * @param col    the row position of the {@code Agent}.
-     * @param weight the weight of the new state.
      * @param dir    the direction of the {@code Agent}.
+     * @param weight the weight of the new state.
      */
-    private PlanNode(int row, int col, int weight, int dir) {
+    private PlanNode(int row, int col, int dir, int weight) {
         this.row = row;
         this.col = col;
-        this.weight = weight;
         this.dir = dir;
+        this.weight = weight;
     }
 
     /**
@@ -194,7 +191,7 @@ public class PlanNode implements Comparable<PlanNode> {
     public PlanNode next(int dir) {
         int r = row + Constants.DIR_ROW[dir];
         int c = col + Constants.DIR_COL[dir];
-        return new PlanNode(r, c, weight + 1, dir);
+        return new PlanNode(r, c, dir, weight + 1);
     }
 
     /**
@@ -206,7 +203,21 @@ public class PlanNode implements Comparable<PlanNode> {
     public PlanNode previous() {
         int r = row - Constants.DIR_ROW[dir];
         int c = col - Constants.DIR_COL[dir];
-        return new PlanNode(r, c, weight - 1, par[r][c]);
+        return new PlanNode(r, c, par[r][c], weight - 1);
+    }
+
+    /**
+     * Updates the cost of this state by adding more weight if it holds
+     * an idle agent.
+     */
+    public void updateWeight() {
+        Agent blockingAgent = warehouse.get(row, col).getAgent();
+
+        if (blockingAgent == null || blockingAgent.isActive()) {
+            return;
+        }
+
+        weight += 1;
     }
 
     /**
@@ -229,14 +240,8 @@ public class PlanNode implements Comparable<PlanNode> {
      *
      * @return the total estimated cost.
      */
-    public int getCost() {
-        Agent blockingAgent = warehouse.get(row, col).getAgent();
-
-        if (blockingAgent != null && !blockingAgent.isActive()) {
-            return weight + heuristic() + 4;
-        } else {
-            return weight + heuristic();
-        }
+    public int totalCost() {
+        return weight + heuristic();
     }
 
     /**
@@ -249,8 +254,8 @@ public class PlanNode implements Comparable<PlanNode> {
      */
     @Override
     public int compareTo(PlanNode obj) {
-        long lhs = getCost();
-        long rhs = obj.getCost();
+        long lhs = totalCost();
+        long rhs = obj.totalCost();
 
         if (lhs == rhs) {
             return 0;
@@ -272,8 +277,8 @@ public class PlanNode implements Comparable<PlanNode> {
         builder.append("PlanNode: {");
         builder.append(" pos: ").append("(").append(row).append(", ").append(col).append(")").append(",");
         builder.append(" dir: ").append(dir).append(",");
+        builder.append(" dir: ").append(dir);
         builder.append(" weight: ").append(weight).append(",");
-        builder.append(" leading_dir: ").append(dir);
         builder.append(" }");
 
         return builder.toString();
