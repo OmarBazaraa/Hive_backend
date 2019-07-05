@@ -3,10 +3,10 @@ Hive is an automated smart warehousing system. It is a framework for designing w
 
 
 <p align="center">
-  <img width="70%" height="70%" src="https://raw.githubusercontent.com/OmarBazaraa/Hive_backend/master/img/logo_trans.png">
+  <img width="40%" height="40%" src="https://raw.githubusercontent.com/OmarBazaraa/Hive_backend/master/img/logo_trans.png">
 </p>
 
-
+## Hive System Design
 The system mainly consists of three components: 
 * **Backend:** the server having the core logic.
 * **Frontend:** the graphical user interface.
@@ -14,23 +14,26 @@ The system mainly consists of three components:
 
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/OmarBazaraa/Hive_backend/master/img/block_diagram.png">
+  <img width="90%" height="90%" src="https://raw.githubusercontent.com/OmarBazaraa/Hive_backend/master/img/block_diagram.png">
 </p>
 
-## Hive Backend
+
+### Hive Backend
 The backend or the server is the core of the Hive system. It is responsible for the simulation and deployment of the warehouse automation system including handling refill and collect orders, order dispatching, multi-robot path planning, communication with the actual robots, communication with the frontend, and maintain their synchronization.
 
-## Hive Frontend
-The graphical interface for the user that provides design and simulation capabilities through a user-friendly tool.
+### Hive Frontend
+The frontend is the graphical interface for the user that provides design and simulation capabilities through a user-friendly tool.
+
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/OmarBazaraa/Hive_backend/master/img/gui.png">
 </p>
 
+
 The code of the frontend can be found [here](https://github.com/i-radwan/Hive_frontend)
 
-## Hive Hardware
-The actual robotic mobile agents that carry on tasks in the warehouse.
+### Hive Hardware
+The hardware are the actual robotic mobile agents that carry on tasks in the warehouse.
 
 The design and the code of the hardware robots can be found [here](https://github.com/i-radwan/Hive_hardware)
 
