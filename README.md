@@ -3,22 +3,36 @@ Hive is an automated smart warehousing system. It is a framework for designing w
 
 
 <p align="center">
-  <img width="80%" height="80%" src="https://raw.githubusercontent.com/OmarBazaraa/Hive_backend/master/img/logo.png">
+  <img width="70%" height="70%" src="https://raw.githubusercontent.com/OmarBazaraa/Hive_backend/master/img/logo_trans.png">
 </p>
 
 
 The system mainly consists of three components: 
 * **Backend:** the server having the core logic.
-* **Frontend:** the graphical user-friendly design and simulation tool.
-* **Hardware:** the actual robotic mobile agents.
+* **Frontend:** the graphical user interface.
+* **Hardware:** the actual hardware robots.
 
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/OmarBazaraa/Hive_backend/master/img/block_diagram.png">
 </p>
 
-## Hive backend
-The backend or the server is the core of the Hive system. It is responsible for the simulation and deployment of the warehouse automation system including handling refill and collect orders, order dispatching, multi-robot path planning, communication with the actual robots and communication with the frontend.
+## Hive Backend
+The backend or the server is the core of the Hive system. It is responsible for the simulation and deployment of the warehouse automation system including handling refill and collect orders, order dispatching, multi-robot path planning, communication with the actual robots, communication with the frontend, and maintain their synchronization.
+
+## Hive Frontend
+The graphical interface for the user that provides design and simulation capabilities through a user-friendly tool.
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/OmarBazaraa/Hive_backend/master/img/gui.png">
+</p>
+
+The code of the frontend can be found [here](https://github.com/i-radwan/Hive_frontend)
+
+## Hive Hardware
+The actual robotic mobile agents that carry on tasks in the warehouse.
+
+The design and the code of the hardware robots can be found [here](https://github.com/i-radwan/Hive_hardware)
 
 ## Used Libraries
 1. Spark library for WebSocket services  
@@ -34,3 +48,8 @@ The backend or the server is the core of the Hive system. It is responsible for 
    `junit:junit:4.12`  
    `org.junit.jupiter:junit-jupiter:5.4.2`
    
+## How to Use
+1. Install Java 11 or higher.
+2. Install the above libraries.
+3. Install the Hive frontend from the above link.
+4. Compile and run.
