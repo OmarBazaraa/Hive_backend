@@ -443,24 +443,32 @@ public class Agent extends AbstractAgent {
      * @return {@code true} if sliding is possible; {@code false} otherwise.
      */
     protected boolean slide(Agent mainAgent, int incomingDir) {
+        // In the following cases sliding fails
         if (locked || blocked || slidingTime >= sWarehouse.getTime() || this == mainAgent) {
             return false;
         }
 
+        // If the agent already performed an action this time step
+        // or it is of higher priority than the main agent issuing the slide
+        // then delay the sliding for the next time step
         if (isAlreadyMoved() || compareTo(mainAgent) > 0) {
             return true;
         }
 
+        // Set the sliding time to avoid infinite recursion
         slidingTime = sWarehouse.getTime();
 
-        List<Integer> dirs = getSortedSlidingDirs(incomingDir);
+        // Get a list of candidate direction to slide
+        List<Integer> dirs = getCandidateSlidingDirs(incomingDir);
 
+        // Slide in the first direction that fit sliding
         for (int d : dirs) {
             int r = row + Constants.DIR_ROW[d];
             int c = col + Constants.DIR_COL[d];
             GridCell cell = sWarehouse.get(r, c);
             Agent blockingAgent = cell.getAgent();
 
+            // If no agent blocking the slide movement then begin the slide
             if (blockingAgent == null) {
                 if (d != dir) {
                     rotate(d);
@@ -470,6 +478,8 @@ public class Agent extends AbstractAgent {
                 return true;
             }
 
+            // Otherwise, if there is another agent blocking the slide, try to slide it as well
+            // before beginning to slide the current agent
             if (blockingAgent.slide(mainAgent, d)) {
                 if (d != dir) {
                     rotate(d);
@@ -480,6 +490,7 @@ public class Agent extends AbstractAgent {
             }
         }
 
+        // Return false if cannot slide
         return false;
     }
 
@@ -571,56 +582,73 @@ public class Agent extends AbstractAgent {
     //
 
     /**
-     * Returns a list of directions this {@code Agent} can slide into.
+     * Returns a list of candidate directions this {@code Agent} can slide into.
      * The returned list is sorted in a way to reduce the sliding cost as possible.
      *
      * @param incomingDir the incoming direction of the parent agent issuing the slide.
      *
      * @return a list of sorted direction.
      */
-    private List<Integer> getSortedSlidingDirs(int incomingDir) {
+    private List<Integer> getCandidateSlidingDirs(int incomingDir) {
+        // List 1 contains directions leading to empty cells
+        // List 2 contains directions leading to occupied cells
         List<Integer> ret1 = new LinkedList<>();
         List<Integer> ret2 = new LinkedList<>();
 
+        //
+        // Construct an initial set of directions
+        //
         int[] dirs;
 
         if (hasPlan()) {
+            // If the sliding agent is currently active and has a plan
+            // then favor its current planned direction
             int D = plan.peek();
             dirs = new int[]{D, (D + 1) & 3, (D - 1) & 3, (D + 2) & 3};
         } else {
+            // Otherwise, favor perpendicular directions to the direction
+            // of the parent agent issuing the slide command
             int D = incomingDir;
             dirs = new int[]{(D + 1) & 3, (D - 1) & 3, D, (D + 2) & 3};
         }
 
+        //
+        // Filter the initial set of directions
+        //
         for (int d : dirs) {
             int r = row + Constants.DIR_ROW[d];
             int c = col + Constants.DIR_COL[d];
 
+            // Skip directions leading outside the warehouse
             if (sWarehouse.isOutBound(r, c)) {
                 continue;
             }
 
             GridCell cell = sWarehouse.get(r, c);
 
-            if (cell.isBlocked() || cell.hasFacility()) {
+            // Skip directions leading to blocked cells
+            if (cell.isBlocked()) {
                 continue;
             }
 
-            if (cell.hasAgent()) {
-                ret1.add(d);
-            } else {
+            // If the cell contains an agent or a facility then add
+            // the direction to list 2; otherwise, add it to list 1
+            if (cell.hasAgent() || cell.hasFacility()) {
                 ret2.add(d);
+            } else {
+                ret1.add(d);
             }
         }
 
-        ret2.addAll(ret1);
-        return ret2;
+        // Return an combined list of both list 1 and 2
+        ret1.addAll(ret2);
+        return ret1;
     }
 
     /**
      * Checks whether this {@code Agent} currently has a plan or not.
      *
-     * @return {@code true} if it currently has a plan. {@code false} otherwise.
+     * @return {@code true} if it currently has a plan; {@code false} otherwise.
      */
     private boolean hasPlan() {
         return (plan != null && plan.size() > 0);
@@ -630,7 +658,7 @@ public class Agent extends AbstractAgent {
      * Checks whether this {@code Agent} has already performed an action this time step
      * or not.
      *
-     * @return {@code true} if it already performed an action. {@code false} otherwise.
+     * @return {@code true} if it already performed an action; {@code false} otherwise.
      */
     private boolean isAlreadyMoved() {
         return lastActionTime >= sWarehouse.getTime();
