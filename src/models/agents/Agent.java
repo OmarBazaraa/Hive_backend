@@ -459,22 +459,21 @@ public class Agent extends AbstractAgent {
             GridCell cell = sWarehouse.get(r, c);
             Agent blockingAgent = cell.getAgent();
 
-            if (d != dir) {
-                rotate(d);
-                return true;
-            }
-
             if (blockingAgent == null) {
-                move(r, c);
+                if (d != dir) {
+                    rotate(d);
+                } else {
+                    move(r, c);
+                }
                 return true;
             }
 
             if (blockingAgent.slide(mainAgent)) {
-                if (cell.hasAgent()) {
-                    return true;
+                if (d != dir) {
+                    rotate(d);
+                } else if (!cell.hasAgent()) {
+                    move(r, c);
                 }
-
-                move(r, c);
                 return true;
             }
         }
