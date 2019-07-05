@@ -97,8 +97,8 @@ public class PlanNode implements Comparable<PlanNode> {
     /**
      * Constructs a new {@code PlanNode} object.
      *
-     * @param row    the row position of the {@code Agent}.
-     * @param col    the row position of the {@code Agent}.
+     * @param row the row position of the {@code Agent}.
+     * @param col the row position of the {@code Agent}.
      */
     public PlanNode(int row, int col) {
         this(row, col, 0, Constants.DIR_RIGHT);
@@ -219,23 +219,44 @@ public class PlanNode implements Comparable<PlanNode> {
     }
 
     /**
+     * Calculates and return the total estimated cost to reach the target from the initial location.
+     * That is, the f(s) function of the A* algorithm.
+     * <p>
+     * f(s) = g(s) + h(s), where:
+     * f(s) is the total estimated cost to reach the target from the initial location,
+     * g(s) the actual cost to reach the current state from the initial location, and
+     * h(s) the estimated cost to reach the target from the current state.
+     *
+     * @return the total estimated cost.
+     */
+    public int getCost() {
+        Agent blockingAgent = warehouse.get(row, col).getAgent();
+
+        if (blockingAgent != null && !blockingAgent.isActive()) {
+            return weight + heuristic() + 4;
+        } else {
+            return weight + heuristic();
+        }
+    }
+
+    /**
      * Compares whether some other object is less than, equal to, or greater than this one.
      *
      * @param obj the reference object with which to compare.
      *
      * @return a negative integer, zero, or a positive integer as this object
-     *         is less than, equal to, or greater than the specified object.
+     * is less than, equal to, or greater than the specified object.
      */
     @Override
     public int compareTo(PlanNode obj) {
-        long lhs = weight + heuristic();
-        long rhs = obj.weight + obj.heuristic();
+        long lhs = getCost();
+        long rhs = obj.getCost();
 
         if (lhs == rhs) {
             return 0;
         }
 
-        return lhs < rhs ? -1 : +1;
+        return lhs < rhs ? -1 : 1;
     }
 
     /**
