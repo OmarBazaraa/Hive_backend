@@ -110,7 +110,7 @@ public class Warehouse extends AbstractWarehouse {
     public boolean run() {
         time++;
         dispatchPendingOrders();
-        return recoverBlockedAgents() || advanceActiveAgents();
+        return recoverBlockedAgents() | advanceActiveAgents();
     }
 
     /**

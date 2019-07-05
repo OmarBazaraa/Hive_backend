@@ -412,6 +412,13 @@ public class Agent extends AbstractAgent {
         // Check if next cell is currently blocked by an agent
         if (cell.isLocked() || (blockingAgent != null && !blockingAgent.slide(this))) {
             dropPlan();
+
+            // Tries another single trial with the new plan
+            if (lastActionTime < sWarehouse.getTime()) {
+                lastActionTime = sWarehouse.getTime();
+                lastAction = AgentAction.NOTHING;
+                reach(dst);
+            }
             return false;
         }
 
@@ -434,7 +441,7 @@ public class Agent extends AbstractAgent {
      * @return {@code true} if sliding is possible; {@code false} otherwise.
      */
     protected boolean slide(Agent mainAgent) {
-        if (locked || blocked || slidingTime >= sWarehouse.getTime()) {
+        if (locked || blocked || slidingTime >= sWarehouse.getTime() || this == mainAgent) {
             return false;
         }
 
@@ -465,10 +472,10 @@ public class Agent extends AbstractAgent {
             if (blockingAgent.slide(mainAgent)) {
                 if (cell.hasAgent()) {
                     return true;
-                } else {
-                    move(r, c);
-                    return true;
                 }
+
+                move(r, c);
+                return true;
             }
         }
 
