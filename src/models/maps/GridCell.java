@@ -165,7 +165,9 @@ public class GridCell {
      * @return {@code true} if this cell is an blocked; {@code false} otherwise.
      */
     public boolean isBlocked() {
-        return (type == CellType.OBSTACLE || locked || (agent != null && (agent.isLocked() || agent.isBlocked())));
+        return (type == CellType.OBSTACLE || locked || (agent != null && (
+                agent.isLocked() || agent.isBlocked() || agent.isDeactivated()
+        )));
     }
 
     /**
@@ -218,7 +220,15 @@ public class GridCell {
      */
     public char toShape() {
         if (hasAgent()) {
-            return Utility.dirToShape(agent.getDirection());
+            if (agent.isBlocked() || agent.isDeactivated()) {
+                return Constants.SHAPE_CELL_LOCKED;
+            } else {
+                return Utility.dirToShape(agent.getDirection());
+            }
+        }
+
+        if (locked) {
+            return Constants.SHAPE_CELL_LOCKED;
         }
 
         switch (type) {

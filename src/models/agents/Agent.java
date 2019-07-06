@@ -109,11 +109,6 @@ public class Agent extends AbstractAgent {
 
         // Mark as activated
         deactivated = false;
-
-        // Unlock the cell that the agent was supposed to be in
-        Pose nxt = getPose().next(lastAction);
-        GridCell cell = sWarehouse.get(nxt.row, nxt.col);
-        cell.setLock(false);
     }
 
     /**
@@ -133,10 +128,6 @@ public class Agent extends AbstractAgent {
         // Mark as deactivated
         deactivated = true;
 
-        // Lock the cell that the agent was supposed to be in
-        GridCell cell = sWarehouse.get(row, col);
-        cell.setLock(true);
-
         // Recursive block affected agents
         block();
     }
@@ -152,66 +143,41 @@ public class Agent extends AbstractAgent {
             return;
         }
 
+        // Get last action
+        lastAction = getLastAction();
+
+        // Return if the agent was not doing an action the last time step
+        if (lastAction == AgentAction.NOTHING) {
+            return;
+        }
+
         // Inform listener
         if (listener != null) {
             listener.onBlock(this);
         }
 
-        // Inform the warehouse
-        sWarehouse.onAgentBlocked(this);
-
         // Mark the agent as blocked and drop any plans
         blocked = true;
         dropPlan();
 
-        //
-        // Handle different last actions
-        //
+        // Handle move and retreat actions
+        if (lastAction == AgentAction.MOVE || lastAction == AgentAction.RETREAT) {
+            // Get the previous cell
+            int r = row - Constants.DIR_ROW[dir];
+            int c = col - Constants.DIR_COL[dir];
+            GridCell prvCell = sWarehouse.get(r, c);
 
-        // Get last action
-        lastAction = getLastAction();
-
-        // Rotation right action
-        if (lastAction == AgentAction.ROTATE_RIGHT) {
-            dir = Utility.rotateLeft(dir);
-            return;
-        }
-
-        // Rotation left action
-        if (lastAction == AgentAction.ROTATE_LEFT) {
-            dir = Utility.rotateRight(dir);
-            return;
-        }
-
-        // Retreat action
-        if (lastAction == AgentAction.RETREAT) {
-            dir = Utility.getReverseDir(dir);
-            return;
-        }
-
-        // Move action
-        if (lastAction == AgentAction.MOVE) {
-            // Get the current and the previous cells
-            Position prv = getPosition().prev(dir);
-            GridCell curCell = sWarehouse.get(row, col);
-            GridCell prvCell = sWarehouse.get(prv);
-
-            // Undo movement
-            curCell.setAgent(null);
-
-            //
             // Recursive block affected agents
-            //
-            Agent a = prvCell.getAgent();
-
-            if (a != null) {
-                a.block();
+            if (prvCell.hasAgent()) {
+                prvCell.getAgent().block();
             }
 
-            // Consider the agent in its previous position
-            prvCell.setAgent(this);
-            setPosition(prv.row, prv.col);
+            // Lock the previous cell
+            prvCell.setLock(true);
         }
+
+        // Inform the warehouse
+        sWarehouse.onAgentBlocked(this);
     }
 
     /**
@@ -225,12 +191,6 @@ public class Agent extends AbstractAgent {
         // Wait until it is activated again
         if (deactivated) {
             return false;
-        }
-
-        // If no action was interrupted during the last blockage recovering is easy
-        if (lastAction == AgentAction.NOTHING) {
-            blocked = false;
-            return true;
         }
 
         // Apply and get the recover action
@@ -261,55 +221,36 @@ public class Agent extends AbstractAgent {
      * @return the applied recover action; {@code AgentAction.NOTHING} if cannot recover.
      */
     private AgentAction recover(AgentAction action) {
-
-        // Rotation right action
-        if (action == AgentAction.ROTATE_RIGHT) {
-            dir = Utility.rotateRight(dir);
-            return AgentAction.ROTATE_RIGHT;
-        }
-
-        // Rotation left action
-        if (action == AgentAction.ROTATE_LEFT) {
-            dir = Utility.rotateLeft(dir);
-            return AgentAction.ROTATE_LEFT;
-        }
-
-        // Retreat action
-        if (action == AgentAction.RETREAT) {
-            dir = Utility.getReverseDir(dir);
-            return AgentAction.RETREAT;
-        }
-
-        // Move action
-        if (action == AgentAction.MOVE) {
-            // Get the current and the next cells
-            Position nxt = Utility.nextPos(row, col, dir);
+        // Handle move and retreat actions
+        if (action == AgentAction.MOVE || action == AgentAction.RETREAT) {
+            // Get the current and the previous cells
+            int r = row - Constants.DIR_ROW[dir];
+            int c = col - Constants.DIR_COL[dir];
+            GridCell prvCell = sWarehouse.get(r, c);
             GridCell curCell = sWarehouse.get(row, col);
-            GridCell nxtCell = sWarehouse.get(nxt);
 
-            // Check if there is an agent in the cell that this agent was suppose to go
-            Agent a = nxtCell.getAgent();
+            // Continue the last move if the blockage has been cleared
+            if (!curCell.isLocked()) {
+                prvCell.setLock(false);
+                return action;
+            }
 
-            // Continue the last move if the next cell is empty
-            if (a == null) {
+            // Otherwise, if the previous cell is unoccupied, try to retreat
+            if (!prvCell.hasAgent() && action != AgentAction.RETREAT) {
+                prvCell.setLock(false);
+                prvCell.setAgent(this);
                 curCell.setAgent(null);
-                nxtCell.setAgent(this);
-                setPosition(nxt);
-                return AgentAction.MOVE;
-            }
-
-            // If current cell is locked by a deactivated agent the we cannot recover
-            if (curCell.isLocked()) {
-                return AgentAction.NOTHING;
-            }
-            // Otherwise, we can retreat back
-            else {
+                row = r;
+                col = c;
                 dir = Utility.getReverseDir(dir);
                 return AgentAction.RETREAT;
             }
+
+            // Cannot recover
+            return AgentAction.NOTHING;
         }
 
-        // Handle other actions that does not change the pose of the agent
+        // Handle other actions that does not change the position of the agent
         // Just try redoing the last action
         return action;
     }

@@ -65,6 +65,7 @@ public class Constants {
     public static final char SHAPE_CELL_RACK = 'R';
     public static final char SHAPE_CELL_AGENT = '@';
     public static final char SHAPE_CELL_STATION = 'S';
+    public static final char SHAPE_CELL_LOCKED = 'X';
     public static final char SHAPE_CELL_UNKNOWN = '?';
 
     //
