@@ -173,7 +173,7 @@ public class Agent extends AbstractAgent {
             }
 
             // Lock the previous cell
-            prvCell.setLock(true);
+            prvCell.lock();
         }
 
         // Inform the warehouse
@@ -231,13 +231,13 @@ public class Agent extends AbstractAgent {
 
             // Continue the last move if the blockage has been cleared
             if (!curCell.isLocked()) {
-                prvCell.setLock(false);
+                prvCell.unlock();
                 return action;
             }
 
             // Otherwise, if the previous cell is unoccupied, try to retreat
             if (!prvCell.hasAgent() && action != AgentAction.RETREAT) {
-                prvCell.setLock(false);
+                prvCell.unlock();
                 prvCell.setAgent(this);
                 curCell.setAgent(null);
                 row = r;

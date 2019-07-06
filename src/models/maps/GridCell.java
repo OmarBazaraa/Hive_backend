@@ -42,9 +42,9 @@ public class GridCell {
     private Agent agent;
 
     /**
-     * Whether this {@code GridCell} is locked or not.
+     * The number of agents locking this {@code GridCell}.
      */
-    private boolean locked;
+    private int locked;
 
     // ===============================================================================================
     //
@@ -165,7 +165,7 @@ public class GridCell {
      * @return {@code true} if this cell is an blocked; {@code false} otherwise.
      */
     public boolean isBlocked() {
-        return (type == CellType.OBSTACLE || locked || (agent != null && (
+        return (type == CellType.OBSTACLE || locked > 0 || (agent != null && (
                 agent.isLocked() || agent.isBlocked() || agent.isDeactivated()
         )));
     }
@@ -196,16 +196,21 @@ public class GridCell {
      * @return {@code true} if this cell is locked; {@code false} otherwise.
      */
     public boolean isLocked() {
-        return locked;
+        return locked > 0;
     }
 
     /**
-     * Sets the lock status of this {@code GridCell}.
-     *
-     * @param block {@code true} to lock the cell; {@code false} unlock it.
+     * Locks this {@code GridCell}.
      */
-    public void setLock(boolean block) {
-        locked = block;
+    public void lock() {
+        locked++;
+    }
+
+    /**
+     * Unlocks this {@code GridCell}.
+     */
+    public void unlock() {
+        locked--;
     }
 
     // ===============================================================================================
@@ -219,7 +224,7 @@ public class GridCell {
      * @return a character representing the shape of this cell.
      */
     public char toShape() {
-        if (hasAgent()) {
+        if (agent != null) {
             if (agent.isBlocked() || agent.isDeactivated()) {
                 return Constants.SHAPE_CELL_LOCKED;
             } else {
@@ -227,7 +232,7 @@ public class GridCell {
             }
         }
 
-        if (locked) {
+        if (locked > 0) {
             return Constants.SHAPE_CELL_LOCKED;
         }
 
