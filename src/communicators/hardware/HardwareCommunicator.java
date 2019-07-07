@@ -72,6 +72,7 @@ public class HardwareCommunicator {
     //
     // TODO: just for debugging, to be removed
     //
+    private Service dummyServer;
     private ConcurrentHashMap<Integer, Agent> idToAgentMap = new ConcurrentHashMap<>();
     private ConcurrentHashMap<Session, Agent> sessionToAgentMap = new ConcurrentHashMap<>();
 
@@ -92,6 +93,14 @@ public class HardwareCommunicator {
         server.webSocketIdleTimeoutMillis(HardwareConstants.TIMEOUT_INTERVAL);
         server.webSocket("/", new WebSocketHandler());
 
+        //
+        // TODO: to be removed
+        //
+        dummyServer = Service.ignite();
+        dummyServer.port(8080);
+        dummyServer.webSocketIdleTimeoutMillis(HardwareConstants.TIMEOUT_INTERVAL);
+        dummyServer.webSocket("/", new WebSocketDebuggingHandler());
+
         // Set the communication listener
         listener = l;
 
@@ -108,6 +117,9 @@ public class HardwareCommunicator {
      */
     public void start() {
         server.init();
+
+        // TODO: to be removed
+        dummyServer.init();
     }
 
     /**
@@ -118,12 +130,14 @@ public class HardwareCommunicator {
         ipToAgentMap.clear();
         pendingActionMap.clear();
         receivedDoneMap.clear();
-
-        // TODO: to be removed
-        // idToAgentMap.clear();
-        // sessionToAgentMap.clear();
-
         server.stop();
+
+        //
+        // TODO: to be removed
+        //
+        idToAgentMap.clear();
+        sessionToAgentMap.clear();
+        dummyServer.stop();
     }
 
     /**
@@ -135,7 +149,7 @@ public class HardwareCommunicator {
         ipToAgentMap.put(agent.getIpAddress(), agent);
 
         // TODO: to be removed
-        // idToAgentMap.put(agent.getId(), agent);
+        idToAgentMap.put(agent.getId(), agent);
     }
 
     /**
