@@ -143,14 +143,6 @@ public class Agent extends AbstractAgent {
             return;
         }
 
-        // Get last action
-        lastAction = getLastAction();
-
-        // Return if the agent was not doing an action the last time step
-        if (lastAction == AgentAction.NOTHING) {
-            return;
-        }
-
         // Inform listener
         if (listener != null) {
             listener.onBlock(this);
@@ -159,6 +151,9 @@ public class Agent extends AbstractAgent {
         // Mark the agent as blocked and drop any plans
         blocked = true;
         dropPlan();
+
+        // Get last action
+        lastAction = getLastAction();
 
         // Handle move and retreat actions
         if (lastAction == AgentAction.MOVE || lastAction == AgentAction.RETREAT) {

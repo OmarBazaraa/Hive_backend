@@ -126,7 +126,7 @@ abstract public class AbstractWarehouse {
      */
     public void clear() {
         time = 0;
-        rows = cols;
+        rows = cols = 0;
         grid = null;
         agents.clear();
         activeAgents.clear();
