@@ -90,7 +90,7 @@ public class HardwareCommunicator {
         server = Service.ignite();
         server.port(port);
         server.webSocketIdleTimeoutMillis(HardwareConstants.TIMEOUT_INTERVAL);
-        server.webSocket("/", new WebSocketDebuggingHandler());     // TODO: to be removed
+        server.webSocket("/", new WebSocketHandler());
 
         // Set the communication listener
         listener = l;
@@ -120,8 +120,8 @@ public class HardwareCommunicator {
         receivedDoneMap.clear();
 
         // TODO: to be removed
-        idToAgentMap.clear();
-        sessionToAgentMap.clear();
+        // idToAgentMap.clear();
+        // sessionToAgentMap.clear();
 
         server.stop();
     }
@@ -133,7 +133,9 @@ public class HardwareCommunicator {
      */
     public void registerAgent(Agent agent) {
         ipToAgentMap.put(agent.getIpAddress(), agent);
-        idToAgentMap.put(agent.getId(), agent);         // TODO: to be removed
+
+        // TODO: to be removed
+        // idToAgentMap.put(agent.getId(), agent);
     }
 
     /**
