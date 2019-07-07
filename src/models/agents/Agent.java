@@ -188,6 +188,12 @@ public class Agent extends AbstractAgent {
             return false;
         }
 
+        // If no action was interrupted during the last blockage recovering is easy
+        if (lastAction == AgentAction.NOTHING) {
+            blocked = false;
+            return true;
+        }
+
         // Apply and get the recover action
         AgentAction recoverAction = recover(lastAction);
 
