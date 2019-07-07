@@ -530,7 +530,7 @@ public class HardwareCommunicator {
                 closeSession(agent, client);
             } else {
                 // DEBUG
-                System.out.println("HardwareCommunicator :: Unknown session closed!");
+                System.out.println("HardwareCommunicator :: Unknown session closed with IP address: " + addr.toString() + "!");
                 System.out.println();
             }
         }
@@ -562,7 +562,7 @@ public class HardwareCommunicator {
 
             if (agent == null) {
                 // DEBUG
-                System.out.println("HardwareCommunicator :: Received message from unknown source!");
+                System.out.println("HardwareCommunicator :: Received message from unknown source with IP address: " + addr.toString() + "!");
                 System.out.println();
                 return;
             }
