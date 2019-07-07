@@ -62,7 +62,13 @@ public class HardwareCommunicator {
     /**
      * The map of received DONE messages.
      */
-    private ConcurrentHashMap<Agent, AgentAction> receivedDoneMap = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<Agent, Boolean> receivedDoneMap = new ConcurrentHashMap<>();
+
+    /**
+     * The map of received ERROR messages.
+     */
+    private ConcurrentHashMap<Agent, Boolean> receivedErrorMap = new ConcurrentHashMap<>();
+
 
     /**
      * The logging file to write any logs from the hardware robots.
@@ -180,7 +186,10 @@ public class HardwareCommunicator {
      */
     private void openSession(Agent agent, Session sess) {
         agentToSessionMap.put(agent, sess);
-        listener.onAgentActivate(agent);
+
+        if (!receivedErrorMap.containsKey(agent)) {
+            listener.onAgentActivate(agent);
+        }
     }
 
     /**
@@ -301,7 +310,9 @@ public class HardwareCommunicator {
             System.out.println("HardwareCommunicator :: Received UNBLOCKED from agent-" + agent.getId() + ".");
             System.out.println();
 
-            listener.onAgentActivate(agent);
+            if (!receivedErrorMap.containsKey(agent)) {
+                listener.onAgentActivate(agent);
+            }
         }
     }
 
@@ -313,7 +324,7 @@ public class HardwareCommunicator {
      * @param agent the {@code Agent} sending this message.
      */
     private void handleDoneMsg(Agent agent) {
-        receivedDoneMap.put(agent, AgentAction.NOTHING);
+        receivedDoneMap.put(agent, true);
         pendingActionMap.remove(agent);
 
         if (pendingActionMap.isEmpty()) {
@@ -336,6 +347,7 @@ public class HardwareCommunicator {
         System.out.println("HardwareCommunicator :: Received error from agent-" + agent.getId() + " with code: " + errCode + ".");
         System.out.println();
 
+        receivedErrorMap.put(agent, true);
         listener.onAgentDeactivate(agent);
     }
 
@@ -415,6 +427,12 @@ public class HardwareCommunicator {
      * @param action the action to send.
      */
     public void sendAgentRecoverAction(Agent agent, AgentAction action) {
+        if (receivedErrorMap.containsKey(agent)) {
+            receivedErrorMap.remove(agent);
+            send(agent, new byte[]{HardwareConstants.TYPE_CONFIG});
+            return;
+        }
+
         if (receivedDoneMap.containsKey(agent)) {
             return;
         }
@@ -644,7 +662,7 @@ public class HardwareCommunicator {
 
         @OnWebSocketMessage
         public void onMessage(Session client, byte[] buffer, int offset, int length) {
-            if (buffer[offset] == 3) {
+            if (buffer[offset] == 4) {
                 onConnect(client, buffer[offset + 1]);
                 return;
             }
