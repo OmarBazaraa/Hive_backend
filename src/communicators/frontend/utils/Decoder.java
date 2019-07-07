@@ -1,6 +1,5 @@
 package communicators.frontend.utils;
 
-import communicators.exceptions.DataException;
 import communicators.frontend.FrontendConstants;
 
 import models.agents.Agent;
@@ -14,6 +13,7 @@ import models.tasks.orders.Order;
 import models.tasks.orders.RefillOrder;
 import models.warehouses.Warehouse;
 
+import utils.exceptions.DataException;
 import utils.Constants.*;
 
 import org.json.JSONArray;

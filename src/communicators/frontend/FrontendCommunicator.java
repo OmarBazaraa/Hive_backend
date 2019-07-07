@@ -1,7 +1,6 @@
 package communicators.frontend;
 
 import communicators.CommunicationListener;
-import communicators.exceptions.DataException;
 import communicators.frontend.utils.Decoder;
 import communicators.frontend.utils.Encoder;
 
@@ -11,6 +10,7 @@ import models.tasks.Task;
 import models.tasks.orders.Order;
 import models.warehouses.Warehouse;
 
+import utils.exceptions.DataException;
 import utils.Constants.*;
 
 import org.eclipse.jetty.websocket.api.Session;
