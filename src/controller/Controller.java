@@ -88,13 +88,13 @@ public class Controller implements CommunicationListener {
      * Keeps running this {@code Controller} object until an exit criterion is met.
      */
     private void run() {
-        // Must be in RUNNING state
-        while (getState() != ServerState.RUNNING) {
+        // Check if last time step has been completed
+        while (!isLastStepCompleted()) {
             waitOnWarehouse();
         }
 
-        // Check if last time step has been completed
-        while (!isLastStepCompleted()) {
+        // Must be in RUNNING state
+        while (getState() != ServerState.RUNNING) {
             waitOnWarehouse();
         }
 
