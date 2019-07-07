@@ -11,7 +11,8 @@ import utils.Constants;
 import utils.Constants.*;
 import utils.Utility;
 
-import java.util.TreeMap;
+import java.util.LinkedList;
+import java.util.List;
 
 
 /**
@@ -42,9 +43,9 @@ public class GridCell {
     private Agent agent;
 
     /**
-     * The number of agents locking this {@code GridCell}.
+     * The list of agents locking this {@code GridCell}.
      */
-    private int locked;
+    private List<Agent> lockingAgents = new LinkedList<>();
 
     // ===============================================================================================
     //
@@ -165,7 +166,7 @@ public class GridCell {
      * @return {@code true} if this cell is an blocked; {@code false} otherwise.
      */
     public boolean isBlocked() {
-        return (type == CellType.OBSTACLE || locked > 0 || (agent != null && (
+        return (type == CellType.OBSTACLE || lockingAgents.size() > 0 || (agent != null && (
                 agent.isLocked() || agent.isBlocked() || agent.isDeactivated()
         )));
     }
@@ -196,21 +197,34 @@ public class GridCell {
      * @return {@code true} if this cell is locked; {@code false} otherwise.
      */
     public boolean isLocked() {
-        return locked > 0;
+        return lockingAgents.size() > 0;
     }
 
     /**
-     * Locks this {@code GridCell}.
+     * Locks this {@code GridCell} by the given {@code Agent}.
+     *
+     * @param agent the {@code Agent} locking this {@code GridCell}
      */
-    public void lock() {
-        locked++;
+    public void lock(Agent agent) {
+        lockingAgents.add(agent);
     }
 
     /**
-     * Unlocks this {@code GridCell}.
+     * Unlocks this {@code GridCell} by the given {@code Agent}.
+     *
+     * @param agent the {@code Agent} unlocking this {@code GridCell}.
      */
-    public void unlock() {
-        locked--;
+    public void unlock(Agent agent) {
+        lockingAgents.remove(agent);
+    }
+
+    /**
+     * Returns a list of agents locking this {@code GridCell}.
+     *
+     * @return the list of locking agents.
+     */
+    public List<Agent> getLockingAgents() {
+        return lockingAgents;
     }
 
     // ===============================================================================================
@@ -224,7 +238,7 @@ public class GridCell {
      * @return a character representing the shape of this cell.
      */
     public char toShape() {
-        if (agent != null) {
+        if (hasAgent()) {
             if (agent.isBlocked() || agent.isDeactivated()) {
                 return Constants.SHAPE_CELL_LOCKED;
             } else {
@@ -232,7 +246,7 @@ public class GridCell {
             }
         }
 
-        if (locked > 0) {
+        if (isLocked()) {
             return Constants.SHAPE_CELL_LOCKED;
         }
 

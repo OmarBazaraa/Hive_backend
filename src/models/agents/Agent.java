@@ -62,7 +62,12 @@ public class Agent extends AbstractAgent {
     private long lastActionTime = -1;
 
     /**
-     * The last this {@code Agent} has attempt to slide.
+     * The last time this {@code Agent} has attempt to recover from the last interruption.
+     */
+    private long recoverTime = -1;
+
+    /**
+     * The last time this {@code Agent} has attempt to slide.
      */
     private long slidingTime = -1;
 
@@ -168,7 +173,7 @@ public class Agent extends AbstractAgent {
             }
 
             // Lock the previous cell
-            prvCell.lock();
+            prvCell.lock(this);
         }
 
         // Inform the warehouse
@@ -187,6 +192,19 @@ public class Agent extends AbstractAgent {
         if (deactivated) {
             return false;
         }
+
+        // Check if already recovered
+        if (!blocked) {
+            return true;
+        }
+
+        // Skip if already attempted to recover this time step
+        if (recoverTime >= sWarehouse.getTime()) {
+            return false;
+        }
+
+        // Set the recover time
+        slidingTime = sWarehouse.getTime();
 
         // If no action was interrupted during the last blockage recovering is easy
         if (lastAction == AgentAction.NOTHING) {
@@ -230,15 +248,27 @@ public class Agent extends AbstractAgent {
             GridCell prvCell = sWarehouse.get(r, c);
             GridCell curCell = sWarehouse.get(row, col);
 
+            // Try to recover all the agents locking the cell
+            List<Agent> blockingAgents = curCell.getLockingAgents();
+            for (Agent a : blockingAgents) {
+                a.recover();
+            }
+
             // Continue the last move if the blockage has been cleared
             if (!curCell.isLocked()) {
-                prvCell.unlock();
+                prvCell.unlock(this);
                 return action;
             }
 
+            // TODO: this condition is hardware-related, if the actual robot can retreat from a retreat action
+            // TODO: then remove this condition
+            if (action == AgentAction.RETREAT) {
+                return AgentAction.NOTHING;
+            }
+
             // Otherwise, if the previous cell is unoccupied, try to retreat
-            if (!prvCell.hasAgent() && action != AgentAction.RETREAT) {
-                prvCell.unlock();
+            if (!prvCell.hasAgent()) {
+                prvCell.unlock(this);
                 prvCell.setAgent(this);
                 curCell.setAgent(null);
                 row = r;
