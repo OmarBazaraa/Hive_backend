@@ -77,10 +77,8 @@ public class Planner {
                 // Set the guide value
                 ret[nxt.row][nxt.col] = ret[cur.row][cur.col] + 1;
 
-                // Add expanded cell to the queue only if it is not holding a facility
-                if (!cell.hasFacility()) {
-                    q.add(nxt);
-                }
+                // Add expanded cell to the queue
+                q.add(nxt);
             }
         }
 

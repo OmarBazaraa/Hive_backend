@@ -2,10 +2,12 @@ package algorithms.planner;
 
 import models.agents.Agent;
 import models.facilities.Facility;
+import models.facilities.Rack;
 import models.maps.GridCell;
 import models.warehouses.Warehouse;
 
 import utils.Constants;
+import utils.Constants.*;
 
 
 /**
@@ -155,10 +157,10 @@ public class PlanNode implements Comparable<PlanNode> {
             return false;
         }
 
-        // If there is a facility then we can only explore it
-        // when it is either the source or target position
-        if (cell.hasFacility()) {
-            return source.isCoincide(row, col) || target.isCoincide(row, col);
+        // Cannot pass on a rack cell if currently the agent is loading another one
+        if (source.isLoaded() && cell.getType() == CellType.RACK) {
+            Rack rack = (Rack) cell.getFacility();
+            return rack.isBound();
         }
 
         // The state is empty so we can explore it

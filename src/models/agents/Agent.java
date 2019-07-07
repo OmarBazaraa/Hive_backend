@@ -336,6 +336,8 @@ public class Agent extends AbstractAgent {
         //
         // Handle rotation actions
         //
+
+        // Rotate if the planned direction and the current directions are different
         if (d != dir) {
             rotate(d);
             return true;
