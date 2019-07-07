@@ -512,7 +512,7 @@ public class HardwareCommunicator {
                 openSession(agent, client);
             } else {
                 // DEBUG
-                System.out.println("HardwareCommunicator :: Unknown session connected!");
+                System.out.println("HardwareCommunicator :: Unknown session connected with IP address: " + addr.toString() + "!");
                 System.out.println();
             }
         }
