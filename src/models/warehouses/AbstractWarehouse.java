@@ -14,6 +14,7 @@ import models.tasks.Task;
 import models.tasks.orders.Order;
 
 import utils.Constants.*;
+import utils.exceptions.DataException;
 
 import java.util.*;
 
@@ -141,9 +142,9 @@ abstract public class AbstractWarehouse {
     }
 
     /**
-     * Initializes the {@code Warehouse}, and performs any needed pre-computations.
+     * Initializes and validates the {@code Warehouse}, and performs any needed pre-computations.
      */
-    abstract public void init();
+    abstract public void init() throws DataException;
 
     /**
      * Performs and simulates a single time step in this {@code Warehouse}.

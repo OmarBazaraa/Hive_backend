@@ -188,9 +188,24 @@ public class Constants {
 
     // Infeasible collect order due to item shortage
     // Args: [order id, array the missing items]
-    public static final int ERR_ORDER_INFEASIBLE_COLLECT = 5005;
+    public static final int ERR_INFEASIBLE_COLLECT_ORDER_NO_ITEMS = 5005;
 
     // Infeasible refill order as items weight exceed rack capacity
     // Args: [order id, rack id, the excess weight]
-    public static final int ERR_ORDER_INFEASIBLE_REFILL = 5006;
+    public static final int ERR_INFEASIBLE_REFILL_ORDER_NO_SPACE = 5006;
+
+    // Infeasible refill order as the specified rack and gate are unreachable
+    // Args: [order id, rack id, gate id]
+    public static final int ERR_INFEASIBLE_REFILL_ORDER_RACK_GATE_UNREACHABLE = 5007;
+
+    // Rack has no gate to reach
+    // Args: [rack id]
+    public static final int ERR_RACK_NO_GATE_REACHABLE = 5008;
+
+    // Rack has no agent to load in its full capacity
+    // (i.e. no reachable agent can load the rack in its full capacity)
+    // Args: [rack id, max load capacity],
+    // where "max load capacity" is the load capacity of the strongest reachable agent;
+    // or -1 if there is no reachable agents
+    public static final int ERR_RACK_NO_AGENT_LOADABLE = 5009;
 }

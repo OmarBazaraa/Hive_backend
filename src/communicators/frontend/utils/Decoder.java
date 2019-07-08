@@ -319,6 +319,12 @@ public class Decoder {
                         Constants.ERR_INVALID_ARGS);
         }
 
+        // Check items
+        if (itemsJSON.isEmpty()) {
+            throw new DataException("Order-" + ret.getId() + " has no assigned items.",
+                    Constants.ERR_INVALID_ARGS);
+        }
+
         // Extract items
         fillItemsList(itemsJSON, ret, "Order-" + id);
 
@@ -382,15 +388,6 @@ public class Decoder {
     }
 
     public static void checkOrderFeasibility(Order order) throws DataException {
-        if (!order.isPending()) {
-            throw new DataException("Order-" + order.getId() + " has no assigned items.",
-                    Constants.ERR_INVALID_ARGS);
-        }
-
-        // TODO: check agent-to-rack reach-ability
-        // TODO: check agents availability
-        // TODO: check agents ability to load racks of this order
-
         if (order instanceof CollectOrder) {
             //
             // Collect order feasibility checks
@@ -410,7 +407,7 @@ public class Decoder {
             if (list.size() > 0) {
                 throw new DataException("Collect order-" + order.getId() +
                         " is currently infeasible due to shortage in items: " + list + ".",
-                        Constants.ERR_ORDER_INFEASIBLE_COLLECT, order.getId(), list);
+                        Constants.ERR_INFEASIBLE_COLLECT_ORDER_NO_ITEMS, order.getId(), list);
             }
         } else {
             //
@@ -419,13 +416,19 @@ public class Decoder {
 
             RefillOrder ord = (RefillOrder) order;
             Rack rack = ord.getRefillRack();
+            Gate gate = ord.getDeliveryGate();
             int totWeight = rack.getStoredWeight() + ord.getAddedWeight();
 
             if (totWeight > rack.getCapacity()) {
                 throw new DataException("Refill order-" + order.getId() +
-                        " items weight exceed rack-" + rack.getId() + " capacity by: " +
-                        (totWeight - rack.getCapacity()) + ".",
-                        Constants.ERR_ORDER_INFEASIBLE_REFILL, order.getId(), rack.getId(), totWeight - rack.getCapacity());
+                        " items weight exceed rack-" + rack.getId() + " capacity by: " + (totWeight - rack.getCapacity()) + ".",
+                        Constants.ERR_INFEASIBLE_REFILL_ORDER_NO_SPACE, order.getId(), rack.getId(), totWeight - rack.getCapacity());
+            }
+
+            if (!sWarehouse.isReachable(rack, gate)) {
+                throw new DataException("Refill order-" + order.getId() +
+                        " is infeasible due to rack-to-gate unreachability.",
+                        Constants.ERR_INFEASIBLE_REFILL_ORDER_RACK_GATE_UNREACHABLE, order.getId(), rack.getId(), gate.getId());
             }
         }
     }
