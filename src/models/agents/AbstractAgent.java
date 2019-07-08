@@ -379,21 +379,6 @@ abstract public class AbstractAgent extends HiveObject implements TaskAssignable
     abstract public boolean executeAction() throws Exception;
 
     /**
-     * Plans the sequence of actions to reach the given target {@code Facility}.
-     * <p>
-     * This function should be called with new destination only when the previous
-     * plan has been reached.
-     *
-     * @param dst the target {@code Facility} to reach.
-     */
-    abstract protected void plan(Facility dst);
-
-    /**
-     * Drops and cancels the current plan of this {@code Agent}.
-     */
-    abstract protected void dropPlan();
-
-    /**
      * Moves a single step to reach the given {@code Facility}.
      *
      * @param dst the target to reach.

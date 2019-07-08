@@ -5,8 +5,6 @@ import algorithms.planner.Planner;
 import models.facilities.Facility;
 import models.facilities.Rack;
 import models.maps.GridCell;
-import models.maps.Pose;
-import models.maps.Position;
 import models.tasks.Task;
 import models.warehouses.Warehouse;
 
@@ -315,35 +313,6 @@ public class Agent extends AbstractAgent {
     }
 
     /**
-     * Plans the sequence of actions to reach the given target {@code Facility}.
-     * <p>
-     * This function should be called with new destination only when the previous
-     * plan has been reached.
-     *
-     * @param dst the target {@code Facility} to reach.
-     */
-    @Override
-    protected void plan(Facility dst) {
-        // Return if already planned
-        if (plan != null && target != null && target.equals(dst)) {
-            return;
-        }
-
-        // Set the destination and plan the path
-        target = dst;
-        plan = Planner.plan(this, dst);
-    }
-
-    /**
-     * Drops and cancels the current plan of this {@code Agent}.
-     */
-    @Override
-    protected void dropPlan() {
-        plan = null;
-        target = null;
-    }
-
-    /**
      * Moves a single step to reach the given {@code Facility}.
      *
      * @param dst the target to reach.
@@ -617,6 +586,33 @@ public class Agent extends AbstractAgent {
         // Return an combined list of both list 1 and 2
         ret1.addAll(ret2);
         return ret1;
+    }
+
+    /**
+     * Plans the sequence of actions to reach the given target {@code Facility}.
+     * <p>
+     * This function should be called with new destination only when the previous
+     * plan has been reached.
+     *
+     * @param dst the target {@code Facility} to reach.
+     */
+    private void plan(Facility dst) {
+        // Return if already planned
+        if (plan != null && target != null && target.equals(dst)) {
+            return;
+        }
+
+        // Set the destination and plan the path
+        target = dst;
+        plan = Planner.plan(this, dst);
+    }
+
+    /**
+     * Drops and cancels the current plan of this {@code Agent}.
+     */
+    private void dropPlan() {
+        plan = null;
+        target = null;
     }
 
     /**
