@@ -51,6 +51,11 @@ abstract public class AbstractAgent extends HiveObject implements TaskAssignable
     protected boolean deactivated = false;
 
     /**
+     * The flag indicating whether this {@code Agent} is facing an external blockage or not.
+     */
+    protected boolean externalBlocked = false;
+
+    /**
      * The flag indicating whether the last {@code AgentAction} got blocked or not.
      */
     protected boolean blocked = false;
@@ -351,6 +356,16 @@ abstract public class AbstractAgent extends HiveObject implements TaskAssignable
      * Deactivates this {@code Agent}.
      */
     abstract public void deactivate();
+
+    /**
+     * Blocks this {@code Agent} externally.
+     */
+    abstract public void externalBlock();
+
+    /**
+     * Clears the external block of this {@code Agent}.
+     */
+    abstract public void clearExternalBlock();
 
     /**
      * Sudden blocks this {@code Agent} and all the affected agents

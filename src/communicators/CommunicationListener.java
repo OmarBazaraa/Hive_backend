@@ -75,6 +75,20 @@ public interface CommunicationListener {
     void onAgentDeactivate(Agent agent);
 
     /**
+     * Called when the communicator receives an {@code Agent} blockage.
+     *
+     * @param agent the blocked {@code Agent}.
+     */
+    void onAgentBlocked(Agent agent);
+
+    /**
+     * Called when the communicator receives an {@code Agent} blockage cleared.
+     *
+     * @param agent the unblocked {@code Agent}.
+     */
+    void onAgentBlockageCleared(Agent agent);
+
+    /**
      * Called when the communicator receives a change in the battery level
      * of an {@code Agent}.
      *

@@ -97,26 +97,9 @@ public class Agent extends AbstractAgent {
     //
 
     /**
-     * Activates this {@code Agent}.
-     */
-    public void activate() {
-        // Return if already activated
-        if (!deactivated) {
-            return;
-        }
-
-        // Inform listener
-        if (listener != null) {
-            listener.onActivate(this);
-        }
-
-        // Mark as activated
-        deactivated = false;
-    }
-
-    /**
      * Deactivates this {@code Agent}.
      */
+    @Override
     public void deactivate() {
         // Return if already deactivated
         if (deactivated) {
@@ -133,6 +116,50 @@ public class Agent extends AbstractAgent {
 
         // Recursive block affected agents
         block();
+    }
+
+    /**
+     * Activates this {@code Agent}.
+     */
+    @Override
+    public void activate() {
+        // Return if already activated
+        if (!deactivated) {
+            return;
+        }
+
+        // Inform listener
+        if (listener != null) {
+            listener.onActivate(this);
+        }
+
+        // Mark as activated
+        deactivated = false;
+    }
+
+    /**
+     * External blocks this {@code Agent}.
+     */
+    @Override
+    public void externalBlock() {
+        // Return if already externally blocked
+        if (externalBlocked) {
+            return;
+        }
+
+        // Mark as externally blocked
+        externalBlocked = true;
+
+        // Recursive block affected agents
+        block();
+    }
+
+    /**
+     * Clears the external block of this {@code Agent}.
+     */
+    @Override
+    public void clearExternalBlock() {
+        externalBlocked = false;
     }
 
     /**
@@ -220,6 +247,7 @@ public class Agent extends AbstractAgent {
 
         // Recovered successfully, inform the listeners
         blocked = false;
+        externalBlocked = false;
 
         if (recoverAction != lastAction) {
             setLastAction(recoverAction);
@@ -253,7 +281,7 @@ public class Agent extends AbstractAgent {
             }
 
             // Continue the last move if the blockage has been cleared
-            if (!curCell.isLocked()) {
+            if (!curCell.isLocked() && !externalBlocked) {
                 prvCell.unlock(this);
                 return action;
             }

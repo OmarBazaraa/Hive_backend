@@ -332,6 +332,40 @@ public class Controller implements CommunicationListener {
     }
 
     /**
+     * Called when the hardware communicator receives an {@code Agent} blockage.
+     *
+     * @param agent the blocked {@code Agent}.
+     */
+    @Override
+    public void onAgentBlocked(Agent agent) {
+        synchronized (warehouse) {
+            // DEBUG
+            System.out.println("Externally blocking agent-" + agent.getId() + ".");
+            System.out.println();
+
+            agent.externalBlock();
+            warehouse.notify();
+        }
+    }
+
+    /**
+     * Called when the hardware communicator receives an {@code Agent} blockage cleared.
+     *
+     * @param agent the unblocked {@code Agent}.
+     */
+    @Override
+    public void onAgentBlockageCleared(Agent agent) {
+        synchronized (warehouse) {
+            // DEBUG
+            System.out.println("Externally unblocking agent-" + agent.getId() + ".");
+            System.out.println();
+
+            agent.externalBlock();
+            warehouse.notify();
+        }
+    }
+
+    /**
      * Called when the hardware communicator receives a change in the battery level
      * of an {@code Agent}.
      *

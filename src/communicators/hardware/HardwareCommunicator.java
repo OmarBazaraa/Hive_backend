@@ -304,14 +304,16 @@ public class HardwareCommunicator {
             System.out.println("HardwareCommunicator :: Received BLOCKED from agent-" + agent.getId() + ".");
             System.out.println();
 
-            listener.onAgentDeactivate(agent);
+            if (!receivedErrorMap.containsKey(agent)) {
+                listener.onAgentBlocked(agent);
+            }
         } else {
             // DEBUG
             System.out.println("HardwareCommunicator :: Received UNBLOCKED from agent-" + agent.getId() + ".");
             System.out.println();
 
             if (!receivedErrorMap.containsKey(agent)) {
-                listener.onAgentActivate(agent);
+                listener.onAgentBlockageCleared(agent);
             }
         }
     }
