@@ -35,7 +35,7 @@ public class Task extends AbstractTask {
     public enum TaskAction {
         BIND,           // Go and bind with a facility
         UNBIND,         // Go and unbind with a facility
-        SELECT_ORDER,   // Select one of the associated orders to deliver
+        SELECT_GATE,    // Select one of the associated gates as the current target
     }
 
     // ===============================================================================================
@@ -54,14 +54,19 @@ public class Task extends AbstractTask {
     private Rack rack;
 
     /**
-     * The currently active {@code Order} by this {@code Task}.
+     * The current target {@code Gate} by this {@code Task}.
      */
-    private Order activeOrder;
+    private Gate gate;
+
+    /**
+     * The number of assigned orders by this {@code Task} that are still running.
+     */
+    private int runningOrdersCount = 0;
 
     /**
      * The list of associated orders in which this {@code Task} is a part of.
      */
-    private LinkedList<Order> orders = new LinkedList<>();
+    private HashMap<Gate, Queue<Order>> orders = new HashMap<>();
 
     /**
      * The queue of actions to be done by the assigned {@code Agent} to complete this {@code Task}.
@@ -86,7 +91,7 @@ public class Task extends AbstractTask {
 
         // Add initial basic actions
         actions.add(new Pair<>(TaskAction.BIND, rack));             // Go and load the rack
-        actions.add(new Pair<>(TaskAction.SELECT_ORDER, null));     // Select an order to deliver
+        actions.add(new Pair<>(TaskAction.SELECT_GATE, null));      // Select a target gate
         actions.add(new Pair<>(TaskAction.UNBIND, rack));           // Go and offload the rack back
     }
 
@@ -109,15 +114,6 @@ public class Task extends AbstractTask {
     }
 
     /**
-     * Returns the currently active {@code Order} by this {@code Task}.
-     *
-     * @return the currently active {@code Order}.
-     */
-    public Order getActiveOrder() {
-        return activeOrder;
-    }
-
-    /**
      * Returns the number of assigned orders to this {@code Task} that are still running.
      * That is, the number of added orders that has not been partially completed
      * by this {@code Task}.
@@ -125,7 +121,7 @@ public class Task extends AbstractTask {
      * @return the number of running orders.
      */
     public int getRunningOrdersCount() {
-        return orders.size() + (activeOrder != null ? 1 : 0);
+        return runningOrdersCount;
     }
 
     /**
@@ -139,12 +135,23 @@ public class Task extends AbstractTask {
      * @param order the new {@code Order} to add.
      */
     public void addOrder(Order order) {
-        orders.addLast(order);
         order.assignTask(this);
+
+        Queue<Order> queue = orders.get(order.getDeliveryGate());
+
+        if (queue == null) {
+            queue = new LinkedList<>();
+            queue.add(order);
+            orders.put(order.getDeliveryGate(), queue);
+        } else {
+            queue.add(order);
+        }
+
+        runningOrdersCount++;
 
         // Check if currently the task is returning the rack back
         if (actions.size() == 1) {
-            actions.addFirst(new Pair<>(TaskAction.SELECT_ORDER, null));
+            actions.addFirst(new Pair<>(TaskAction.SELECT_GATE, null));
         }
     }
 
@@ -182,9 +189,9 @@ public class Task extends AbstractTask {
      * @return {@code true} if this {@code Task} manged to execute the action successfully; {@code false} otherwise.
      */
     public boolean executeAction() {
-        // Select a new order to deliver
-        if (actions.getFirst().key == TaskAction.SELECT_ORDER) {
-            selectOrder();
+        // Select a new target gate
+        if (actions.getFirst().key == TaskAction.SELECT_GATE) {
+            selectGate();
         }
 
         TaskAction action = actions.element().key;
@@ -213,27 +220,43 @@ public class Task extends AbstractTask {
      * Called when the delivery of {@code Rack} to the active {@code Gate} has been completed.
      * That is, when the currently active {@code Order} has been partially
      * fulfilled by this {@code Task}.
-     * <p>
-     * This function should be called from the {@code Gate} after collecting/refilling
-     * the needed items.
      */
-    public void deliveryCompleted() {
-        activeOrder.onTaskComplete(this);
-        activeOrder = null;
+    public void completeActiveOrder() {
+        Queue<Order> gateOrders = orders.get(gate);
+
+        Order order = gateOrders.remove();
+        order.onTaskComplete(this);
+
+        if (gateOrders.isEmpty()) {
+            actions.addFirst(new Pair<>(TaskAction.UNBIND, gate));
+            orders.remove(gate);
+            gate = null;
+        } else {
+            actions.addFirst(new Pair<>(TaskAction.BIND, gate));
+        }
     }
 
     /**
-     * Selects the next {@code Order} to be delivered by this {@code Task}.
+     * Selects the next target {@code Gate} to deliver its orders.
      */
-    private void selectOrder() {
+    private void selectGate() {
         if (orders.isEmpty()) {
             actions.removeFirst();
             return;
         }
 
-        activeOrder = orders.removeFirst();
-        actions.addFirst(new Pair<>(TaskAction.UNBIND, activeOrder.getDeliveryGate()));
-        actions.addFirst(new Pair<>(TaskAction.BIND, activeOrder.getDeliveryGate()));
+        int dis = Integer.MAX_VALUE;
+
+        for (Gate g : orders.keySet()) {
+            int d = g.getDistanceTo(agent);
+
+            if (dis > d) {
+                dis = d;
+                gate = g;
+            }
+        }
+
+        actions.addFirst(new Pair<>(TaskAction.BIND, gate));
     }
 
     /**
@@ -245,8 +268,16 @@ public class Task extends AbstractTask {
      */
     private boolean executeBind(Facility facility) {
         if (facility.canBind(agent)) {
-            facility.bind(agent);
             actions.removeFirst();
+
+            if (!facility.isBound()) {
+                facility.bind(agent);
+            }
+
+            if (facility instanceof Gate) {
+                completeActiveOrder();
+            }
+
             return true;
         } else {
             return agent.reach(facility);
@@ -262,8 +293,8 @@ public class Task extends AbstractTask {
      */
     private boolean executeUnbind(Facility facility) {
         if (facility.canUnbind()) {
-            facility.unbind();
             actions.removeFirst();
+            facility.unbind();
             return true;
         } else {
             return agent.reach(facility);

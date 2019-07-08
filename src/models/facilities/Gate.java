@@ -48,10 +48,6 @@ public class Gate extends Facility {
     public void bind(Agent agent) {
         super.bind(agent);
         boundAgent.lock(this);
-
-        // Mark delivery as completed
-        Task task = agent.getActiveTask();
-        task.deliveryCompleted();
     }
 
     /**
