@@ -331,7 +331,7 @@ public class Warehouse extends AbstractWarehouse {
 
                 if (maxWeight > maxLoadCap) {
                     throw new DataException("No agent can load rack-" + rack.getId() + " in its full capacity.",
-                            Constants.ERR_RACK_NO_AGENT_LOADABLE, rack.getId());
+                            Constants.ERR_RACK_NO_AGENT_REACHABLE, rack.getId(), maxLoadCap);
                 }
             }
         }

@@ -207,5 +207,5 @@ public class Constants {
     // Args: [rack id, max load capacity],
     // where "max load capacity" is the load capacity of the strongest reachable agent;
     // or -1 if there is no reachable agents
-    public static final int ERR_RACK_NO_AGENT_LOADABLE = 5009;
+    public static final int ERR_RACK_NO_AGENT_REACHABLE = 5009;
 }
