@@ -360,7 +360,7 @@ public class Controller implements CommunicationListener {
             System.out.println("Externally unblocking agent-" + agent.getId() + ".");
             System.out.println();
 
-            agent.externalBlock();
+            agent.clearExternalBlock();
             warehouse.notify();
         }
     }

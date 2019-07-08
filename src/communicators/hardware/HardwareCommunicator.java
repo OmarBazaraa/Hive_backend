@@ -136,6 +136,7 @@ public class HardwareCommunicator {
         ipToAgentMap.clear();
         pendingActionMap.clear();
         receivedDoneMap.clear();
+        receivedErrorMap.clear();
         server.stop();
 
         //
