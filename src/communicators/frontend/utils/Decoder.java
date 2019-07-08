@@ -14,6 +14,7 @@ import models.tasks.orders.RefillOrder;
 import models.warehouses.Warehouse;
 
 import utils.exceptions.DataException;
+import utils.Constants;
 import utils.Constants.*;
 
 import org.json.JSONArray;
@@ -58,7 +59,7 @@ public class Decoder {
         //
         if (h < 1 || w < 1) {
             throw new DataException("Warehouse grid with invalid dimensions: (" + h + " x " + w + ").",
-                    FrontendConstants.ERR_INVALID_ARGS);
+                    Constants.ERR_INVALID_ARGS);
         }
 
         // Configure warehouse
@@ -91,7 +92,7 @@ public class Decoder {
         //
         if (objects.length() > 1) {
             throw new DataException("Cell (" + row + ", " + col + ") has multiple objects. Expecting only one.",
-                    FrontendConstants.ERR_INVALID_ARGS);
+                    Constants.ERR_INVALID_ARGS);
         }
 
         for (int i = 0; i < objects.length(); ++i) {
@@ -116,7 +117,7 @@ public class Decoder {
                     break;
                 default:
                     throw new DataException("Cell (" + row + ", " + col + ") with invalid object type: " + type + ".",
-                            FrontendConstants.ERR_INVALID_ARGS);
+                            Constants.ERR_INVALID_ARGS);
             }
         }
     }
@@ -132,19 +133,19 @@ public class Decoder {
         //
         if (id < 0) {
             throw new DataException("Agent with negative id: " + id + ".",
-                    FrontendConstants.ERR_INVALID_ARGS);
+                    Constants.ERR_INVALID_ARGS);
         }
         if (sWarehouse.getAgentById(id) != null) {
             throw new DataException("Agent with duplicate id: " + id + ".",
-                    FrontendConstants.ERR_INVALID_ARGS);
+                    Constants.ERR_INVALID_ARGS);
         }
         if (cap < 1) {
             throw new DataException("Agent-" + id + " with non-positive load capacity: " + cap + ".",
-                    FrontendConstants.ERR_INVALID_ARGS);
+                    Constants.ERR_INVALID_ARGS);
         }
         if (dir < 0 || dir > 3) {
             throw new DataException("Agent-" + id + " with invalid direction: " + dir + ".",
-                    FrontendConstants.ERR_INVALID_ARGS);
+                    Constants.ERR_INVALID_ARGS);
         }
 
         // Create new agent
@@ -161,10 +162,10 @@ public class Decoder {
                 ret.setPortNumber(Integer.parseInt(portStr));
             } catch (UnknownHostException ex) {
                 throw new DataException("Agent-" + id + " with invalid IP address: " + ipStr + ".",
-                        FrontendConstants.ERR_INVALID_ARGS);
+                        Constants.ERR_INVALID_ARGS);
             } catch (NumberFormatException ex) {
                 throw new DataException("Agent-" + id + " with invalid port number: " + portStr + ".",
-                        FrontendConstants.ERR_INVALID_ARGS);
+                        Constants.ERR_INVALID_ARGS);
             }
         }
 
@@ -184,19 +185,19 @@ public class Decoder {
         //
         if (id < 0) {
             throw new DataException("Rack with negative id: " + id + ".",
-                    FrontendConstants.ERR_INVALID_ARGS);
+                    Constants.ERR_INVALID_ARGS);
         }
         if (sWarehouse.getRackById(id) != null) {
             throw new DataException("Rack with duplicate id: " + id + ".",
-                    FrontendConstants.ERR_INVALID_ARGS);
+                    Constants.ERR_INVALID_ARGS);
         }
         if (cap < 1) {
             throw new DataException("Rack-" + id + " with non-positive capacity: " + cap + ".",
-                    FrontendConstants.ERR_INVALID_ARGS);
+                    Constants.ERR_INVALID_ARGS);
         }
         if (weight < 0) {
             throw new DataException("Rack-" + id + " with negative weight: " + weight + ".",
-                    FrontendConstants.ERR_INVALID_ARGS);
+                    Constants.ERR_INVALID_ARGS);
         }
 
         // Create rack and decode its items
@@ -209,7 +210,7 @@ public class Decoder {
         if (ret.getStoredWeight() > ret.getCapacity()) {
             throw new DataException("Rack-" + id + " exceeds the maximum storage capacity by: " +
                     (ret.getStoredWeight() - ret.getCapacity()) + ".",
-                    FrontendConstants.ERR_RACK_CAP_EXCEEDED, ret.getStoredWeight() - ret.getCapacity());
+                    Constants.ERR_RACK_CAP_EXCEEDED, ret.getStoredWeight() - ret.getCapacity());
         }
 
         // Return to be added into the warehouse
@@ -225,11 +226,11 @@ public class Decoder {
         //
         if (id < 0) {
             throw new DataException("Gate with negative id: " + id + ".",
-                    FrontendConstants.ERR_INVALID_ARGS);
+                    Constants.ERR_INVALID_ARGS);
         }
         if (sWarehouse.getGateById(id) != null) {
             throw new DataException("Gate with duplicate id: " + id + ".",
-                    FrontendConstants.ERR_INVALID_ARGS);
+                    Constants.ERR_INVALID_ARGS);
         }
 
         // Create and return to be added into the warehouse
@@ -245,11 +246,11 @@ public class Decoder {
         //
         if (id < 0) {
             throw new DataException("Station with negative id: " + id + ".",
-                    FrontendConstants.ERR_INVALID_ARGS);
+                    Constants.ERR_INVALID_ARGS);
         }
         if (sWarehouse.getStationById(id) != null) {
             throw new DataException("Station with duplicate id: " + id + ".",
-                    FrontendConstants.ERR_INVALID_ARGS);
+                    Constants.ERR_INVALID_ARGS);
         }
 
         // Create and return to be added into the warehouse
@@ -266,11 +267,11 @@ public class Decoder {
         //
         if (id < 0) {
             throw new DataException("Item with negative id: " + id + ".",
-                    FrontendConstants.ERR_INVALID_ARGS);
+                    Constants.ERR_INVALID_ARGS);
         }
         if (sWarehouse.getItemById(id) != null) {
             throw new DataException("Item with duplicate id: " + id + ".",
-                    FrontendConstants.ERR_INVALID_ARGS);
+                    Constants.ERR_INVALID_ARGS);
         }
 
         // Create and return to be added into the warehouse
@@ -290,15 +291,15 @@ public class Decoder {
         //
         if (id < 0) {
             throw new DataException("Order with negative id: " + id + ".",
-                    FrontendConstants.ERR_INVALID_ARGS);
+                    Constants.ERR_INVALID_ARGS);
         }
         if (sWarehouse.getOrderById(id) != null) {
             throw new DataException("Order with duplicate id: " + id + ".",
-                    FrontendConstants.ERR_INVALID_ARGS);
+                    Constants.ERR_INVALID_ARGS);
         }
         if (gate == null) {
             throw new DataException("Order-" + id + " is assigned invalid gate with id: " + gateId + ".",
-                    FrontendConstants.ERR_INVALID_ARGS);
+                    Constants.ERR_INVALID_ARGS);
         }
 
         //
@@ -315,7 +316,7 @@ public class Decoder {
                 break;
             default:
                 throw new DataException("Order-" + id + " with invalid type: " + type + ".",
-                        FrontendConstants.ERR_INVALID_ARGS);
+                        Constants.ERR_INVALID_ARGS);
         }
 
         // Extract items
@@ -348,7 +349,7 @@ public class Decoder {
         //
         if (rack == null) {
             throw new DataException("Order-" + id + " is assigned invalid rack with id: " + rackId + ".",
-                    FrontendConstants.ERR_INVALID_ARGS);
+                    Constants.ERR_INVALID_ARGS);
         }
 
         // Create refill order
@@ -368,11 +369,11 @@ public class Decoder {
             //
             if (item == null) {
                 throw new DataException(name + " has invalid item with id: " + itemId + ".",
-                        FrontendConstants.ERR_INVALID_ARGS);
+                        Constants.ERR_INVALID_ARGS);
             }
             if (quantity < 1) {
                 throw new DataException(name + " has item-" + itemId + " with non-positive quantity: " + quantity + ".",
-                        FrontendConstants.ERR_INVALID_ARGS);
+                        Constants.ERR_INVALID_ARGS);
             }
 
             // Add to the order
@@ -383,7 +384,7 @@ public class Decoder {
     public static void checkOrderFeasibility(Order order) throws DataException {
         if (!order.isPending()) {
             throw new DataException("Order-" + order.getId() + " has no assigned items.",
-                    FrontendConstants.ERR_INVALID_ARGS);
+                    Constants.ERR_INVALID_ARGS);
         }
 
         // TODO: check agent-to-rack reach-ability
@@ -409,7 +410,7 @@ public class Decoder {
             if (list.size() > 0) {
                 throw new DataException("Collect order-" + order.getId() +
                         " is currently infeasible due to shortage in items: " + list + ".",
-                        FrontendConstants.ERR_ORDER_INFEASIBLE_COLLECT, order.getId(), list);
+                        Constants.ERR_ORDER_INFEASIBLE_COLLECT, order.getId(), list);
             }
         } else {
             //
@@ -424,7 +425,7 @@ public class Decoder {
                 throw new DataException("Refill order-" + order.getId() +
                         " items weight exceed rack-" + rack.getId() + " capacity by: " +
                         (totWeight - rack.getCapacity()) + ".",
-                        FrontendConstants.ERR_ORDER_INFEASIBLE_REFILL, order.getId(), rack.getId(), totWeight - rack.getCapacity());
+                        Constants.ERR_ORDER_INFEASIBLE_REFILL, order.getId(), rack.getId(), totWeight - rack.getCapacity());
             }
         }
     }

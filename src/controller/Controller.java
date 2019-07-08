@@ -107,7 +107,7 @@ public class Controller implements CommunicationListener {
             }
         } catch (Exception ex) {
             onStop();
-            frontendComm.sendErr(FrontendConstants.ERR_SERVER, "Internal server error.");
+            frontendComm.sendErr(Constants.ERR_SERVER, "Internal server error.");
             System.err.println(ex.getMessage());
             ex.printStackTrace();
         }

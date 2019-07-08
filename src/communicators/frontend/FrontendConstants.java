@@ -73,57 +73,6 @@ public class FrontendConstants {
     public static final int TYPE_ERROR = 1;
 
     //
-    // Error Codes
-    //
-
-    // Internal server error
-    public static final int ERR_SERVER = 5000;
-
-    // Invalid message format from the frontend
-    //      - Invalid JSON format
-    //      - Missing messages fields
-    //      - Unknown message type
-    public static final int ERR_MSG_FORMAT = 5001;
-
-    // Received known message at unexpected time:
-    //      - Received START message while the server is not in IDLE state
-    //      - Received PAUSE message while the server is not in RUNNING state
-    //      - Received RESUME message while the server is not in PAUSE state
-    //      - Received ACK message while the server is IDLE state
-    //      - Received multiple ACK messages
-    //      - Received ORDER message while the server is not in RUNNING state
-    public static final int ERR_MSG_UNEXPECTED = 5002;
-
-    // Invalid object (map, robot, facility, item, order) arguments sent from the frontend:
-    //      - Warehouse map with non positive dimensions
-    //      - Duplicate objects at the same cell
-    //      - Negative object ID
-    //      - Duplicate IDs
-    //      - Non positive capacities
-    //      - Non positive item quantities
-    //      - Negative weights
-    //      - Non existing item ID
-    //      - Non existing gate ID
-    //      - Non existing rack ID
-    //      - Order with no items
-    //      - Invalid robot direction
-    //      - Invalid order type
-    //      - Invalid cell type
-    public static final int ERR_INVALID_ARGS = 5003;
-
-    // Rack weight exceed maximum capacity
-    // Args: [rack id, the excess weight]
-    public static final int ERR_RACK_CAP_EXCEEDED = 5004;
-
-    // Infeasible collect order due to item shortage
-    // Args: [order id, array the missing items]
-    public static final int ERR_ORDER_INFEASIBLE_COLLECT = 5005;
-
-    // Infeasible refill order as items weight exceed rack capacity
-    // Args: [order id, rack id, the excess weight]
-    public static final int ERR_ORDER_INFEASIBLE_REFILL = 5006;
-
-    //
     // Communication messages keys
     //
 

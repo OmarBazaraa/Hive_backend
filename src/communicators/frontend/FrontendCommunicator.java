@@ -11,6 +11,7 @@ import models.tasks.orders.Order;
 import models.warehouses.Warehouse;
 
 import utils.exceptions.DataException;
+import utils.Constants;
 import utils.Constants.*;
 
 import org.eclipse.jetty.websocket.api.Session;
@@ -175,7 +176,7 @@ public class FrontendCommunicator {
         }
         // Handle invalid message format
         catch (JSONException ex) {
-            sendErr(FrontendConstants.ERR_MSG_FORMAT, "Invalid message format.");
+            sendErr(Constants.ERR_MSG_FORMAT, "Invalid message format.");
             System.err.println(ex.getMessage());
             ex.printStackTrace();
         }
@@ -223,7 +224,7 @@ public class FrontendCommunicator {
                 handleDoneMsg(data);
                 break;
             default:
-                throw new DataException("Invalid message type.", FrontendConstants.ERR_MSG_FORMAT);
+                throw new DataException("Invalid message type.", Constants.ERR_MSG_FORMAT);
         }
     }
 
@@ -238,7 +239,7 @@ public class FrontendCommunicator {
     private void handleStartMsg(JSONObject data) throws DataException {
         if (listener.getState() != ServerState.IDLE) {
             throw new DataException("Received START message while the server is not in IDLE state.",
-                    FrontendConstants.ERR_MSG_UNEXPECTED);
+                    Constants.ERR_MSG_UNEXPECTED);
         }
 
         try {
@@ -258,7 +259,7 @@ public class FrontendCommunicator {
             }
         } catch (JSONException ex) {
             sendMsg(FrontendConstants.TYPE_ACK_START, FrontendConstants.TYPE_ERROR,
-                    FrontendConstants.ERR_MSG_FORMAT, "Invalid START message format.");
+                    Constants.ERR_MSG_FORMAT, "Invalid START message format.");
             System.err.println(ex.getMessage());
             ex.printStackTrace();
         } catch (DataException ex) {
@@ -292,7 +293,7 @@ public class FrontendCommunicator {
     private void handlePauseMsg(JSONObject data) throws DataException {
         if (listener.getState() != ServerState.RUNNING) {
             throw new DataException("Received PAUSE message while the server is not in RUNNING state.",
-                    FrontendConstants.ERR_MSG_UNEXPECTED);
+                    Constants.ERR_MSG_UNEXPECTED);
         }
 
         listener.onPause();
@@ -309,7 +310,7 @@ public class FrontendCommunicator {
     private void handleResumeMsg(JSONObject data) throws DataException {
         if (listener.getState() != ServerState.PAUSE) {
             throw new DataException("Received RESUME message while the server is not in PAUSE state.",
-                    FrontendConstants.ERR_MSG_UNEXPECTED);
+                    Constants.ERR_MSG_UNEXPECTED);
         }
 
         listener.onResume();
@@ -326,7 +327,7 @@ public class FrontendCommunicator {
     private void handleOrderMsg(JSONObject data) throws DataException {
         if (listener.getState() == ServerState.IDLE) {
             throw new DataException("Received ORDER message while the server is in IDLE state.",
-                    FrontendConstants.ERR_MSG_UNEXPECTED);
+                    Constants.ERR_MSG_UNEXPECTED);
         }
 
         try {
@@ -337,7 +338,7 @@ public class FrontendCommunicator {
             }
         } catch (JSONException ex) {
             sendMsg(FrontendConstants.TYPE_ACK_START, FrontendConstants.TYPE_ERROR,
-                    FrontendConstants.ERR_MSG_FORMAT, "Invalid ORDER message format.");
+                    Constants.ERR_MSG_FORMAT, "Invalid ORDER message format.");
             System.err.println(ex.getMessage());
             ex.printStackTrace();
         } catch (DataException ex) {
@@ -358,7 +359,7 @@ public class FrontendCommunicator {
     private void handleControlMsg(JSONObject data) throws DataException {
         if (listener.getState() == ServerState.IDLE) {
             throw new DataException("Received CONTROL message while the server is in IDLE state.",
-                    FrontendConstants.ERR_MSG_UNEXPECTED);
+                    Constants.ERR_MSG_UNEXPECTED);
         }
 
         int id = data.getInt(FrontendConstants.KEY_ID);
@@ -371,7 +372,7 @@ public class FrontendCommunicator {
 
         if (agent == null) {
             throw new DataException("Control message with invalid agent id: " + id + ".",
-                    FrontendConstants.ERR_INVALID_ARGS);
+                    Constants.ERR_INVALID_ARGS);
         }
 
         switch (type) {
@@ -383,7 +384,7 @@ public class FrontendCommunicator {
                 break;
             default:
                 throw new DataException("Control message with invalid type: " + type + ".",
-                        FrontendConstants.ERR_INVALID_ARGS);
+                        Constants.ERR_INVALID_ARGS);
         }
     }
 
@@ -400,7 +401,7 @@ public class FrontendCommunicator {
     private void handleDoneMsg(JSONObject data) throws DataException {
         if (listener.getState() == ServerState.IDLE) {
             throw new DataException("Received DONE message while the server is in IDLE state.",
-                    FrontendConstants.ERR_MSG_UNEXPECTED);
+                    Constants.ERR_MSG_UNEXPECTED);
         }
 
         int agentId = data.getInt(FrontendConstants.KEY_ID);
