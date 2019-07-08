@@ -123,7 +123,7 @@
               "id": 1,
               "color": "#FF0000",
               "direction": 0,
-              "load_cap": 100,
+              "load_cap": 10000,
               "ip": "",
               "port": "",
               "deactivated": false

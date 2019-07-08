@@ -305,7 +305,7 @@
               "type": 1,
               "id": 1,
               "color": "#FF0000",
-              "load_cap": 200,
+              "load_cap": 10000,
               "ip": "127.0.0.1",
               "port": "12345",
               "direction": 0,
