@@ -6,7 +6,6 @@ import models.agents.Agent;
 import models.facilities.Gate;
 import models.facilities.Rack;
 import models.facilities.Station;
-import models.items.Item;
 import models.tasks.orders.Order;
 import models.tasks.Task;
 
@@ -48,24 +47,20 @@ public class Warehouse extends AbstractWarehouse {
     //
 
     /**
-     * The {@code Agent} region that each cell belongs to.
+     * The region that each cell belongs to.
      */
-    private int[][] agentRegion;
+    private int[][] region;
 
     /**
-     * The maximum load capacity in an {@code Agent} region.
+     * The maximum load capacity in a region.
      */
-    private Map<Integer, Integer> agentRegionLoadCap = new HashMap<>();
+    private Map<Integer, Integer> regionMaxLoadCap = new HashMap<>();
 
     /**
-     * The {@code Gate} region that each cell belongs to.
+     * The number of gates in a region.
      */
-    private int[][] gateRegion;
+    private Map<Integer, Integer> regionGatesCount = new HashMap<>();
 
-    /**
-     * The {@code Item} quantities in a {@code Gate} region.
-     */
-    private Map<Integer, Map<Item, Integer>> gateRegionItems = new HashMap<>();
 
     // ===============================================================================================
     //
@@ -86,11 +81,9 @@ public class Warehouse extends AbstractWarehouse {
     public void clear() {
         super.clear();
 
-        agentRegion = null;
-        agentRegionLoadCap.clear();
-
-        gateRegion = null;
-        gateRegionItems.clear();
+        region = null;
+        regionMaxLoadCap.clear();
+        regionGatesCount.clear();
     }
 
     /**
@@ -291,23 +284,15 @@ public class Warehouse extends AbstractWarehouse {
      * Analyzes the different regions of the {@code Warehouse}.
      */
     private void analyzeRegions() throws DataException {
-        int agentRegionId = 0;
-        agentRegion = new int[rows][cols];
-
-        int gateRegionId = 0;
-        gateRegion = new int[rows][cols];
+        int regionId = 0;
+        region = new int[rows][cols];
 
         // Analyze
         for (int i = 0; i < rows; ++i) {
             for (int j = 0; j < cols; ++j) {
-                if (grid[i][j].hasAgent() && agentRegion[i][j] == 0) {
-                    agentRegionId++;
-                    agentRegionLoadCap.put(agentRegionId, floodAgentRegion(i, j, agentRegionId));
-                }
-
-                if (grid[i][j].getType() == CellType.GATE && gateRegion[i][j] == 0) {
-                    gateRegionId++;
-                    floodGateRegion(i, j, gateRegionId);
+                if (region[i][j] == 0) {
+                    regionId++;
+                    regionMaxLoadCap.put(regionId, floodRegion(i, j, regionId));
                 }
             }
         }
@@ -321,13 +306,13 @@ public class Warehouse extends AbstractWarehouse {
 
                 Rack rack = (Rack) grid[i][j].getFacility();
 
-                if (gateRegion[i][j] == 0) {
+                if (regionGatesCount.getOrDefault(region[i][j], 0) <= 0) {
                     throw new DataException("No gate is reachable to rack-" + rack.getId() + ".",
                             Constants.ERR_RACK_NO_GATE_REACHABLE, rack.getId());
                 }
 
                 int maxWeight = rack.getContainerWeight() + rack.getCapacity();
-                int maxLoadCap = agentRegionLoadCap.getOrDefault(agentRegion[i][j], -1);
+                int maxLoadCap = regionMaxLoadCap.getOrDefault(region[i][j], -1);
 
                 if (maxWeight > maxLoadCap) {
                     throw new DataException("No agent can load rack-" + rack.getId() + " in its full capacity.",
@@ -346,11 +331,11 @@ public class Warehouse extends AbstractWarehouse {
      * @return {@code true} if the given {@code Rack} is reachable to the given {@code Gate}.
      */
     public boolean isReachable(Rack rack, Gate gate) {
-        return gateRegion[rack.getRow()][rack.getCol()] == gateRegion[gate.getRow()][gate.getCol()];
+        return region[rack.getRow()][rack.getCol()] == region[gate.getRow()][gate.getCol()];
     }
 
     /**
-     * Scans the {@code Agent} region starting at the given location, and
+     * Scans the region starting at the given location, and
      * updates the internal variables in accordance.
      *
      * @param row      the row position of the cell.
@@ -359,16 +344,22 @@ public class Warehouse extends AbstractWarehouse {
      *
      * @return the maximum load capacity in the scanned region.
      */
-    private int floodAgentRegion(int row, int col, int regionId) {
-        if (agentRegion[row][col] != 0) {
+    private int floodRegion(int row, int col, int regionId) {
+        if (region[row][col] != 0) {
             return -1;
         }
 
-        if (grid[row][col].getType() == CellType.OBSTACLE) {
+        CellType type = grid[row][col].getType();
+
+        if (type == CellType.OBSTACLE) {
             return -1;
         }
 
-        agentRegion[row][col] = regionId;
+        region[row][col] = regionId;
+
+        if (type == CellType.GATE) {
+            regionGatesCount.put(regionId, regionGatesCount.getOrDefault(regionId, 0) + 1);
+        }
 
         int ret = (grid[row][col].hasAgent() ? grid[row][col].getAgent().getLoadCapacity() : -1);
 
@@ -377,45 +368,10 @@ public class Warehouse extends AbstractWarehouse {
             int c = col + Constants.DIR_COL[d];
 
             if (isInBound(r, c)) {
-                ret = Math.max(ret, floodAgentRegion(r, c, regionId));
+                ret = Math.max(ret, floodRegion(r, c, regionId));
             }
         }
 
         return ret;
-    }
-
-    /**
-     * Scans the {@code Gate} region starting at the given location, and
-     * updates the internal variables in accordance.
-     *
-     * @param row      the row position of the cell.
-     * @param col      the column position of the cell.
-     * @param regionId the current region id to assign.
-     */
-    private void floodGateRegion(int row, int col, int regionId) {
-        if (gateRegion[row][col] != 0) {
-            return;
-        }
-
-        CellType type = grid[row][col].getType();
-
-        if (type == CellType.OBSTACLE) {
-            return;
-        }
-
-        gateRegion[row][col] = regionId;
-
-        if (type == CellType.RACK) {
-            return;
-        }
-
-        for (int d : Constants.DIRECTIONS) {
-            int r = row + Constants.DIR_ROW[d];
-            int c = col + Constants.DIR_COL[d];
-
-            if (isInBound(r, c)) {
-                floodGateRegion(r, c, regionId);
-            }
-        }
     }
 }
