@@ -229,7 +229,7 @@ public class Agent extends AbstractAgent {
         }
 
         // Set the recover time
-        slidingTime = sWarehouse.getTime();
+        recoverTime = sWarehouse.getTime();
 
         // If no action was interrupted during the last blockage recovering is easy
         if (lastAction == AgentAction.NOTHING) {
