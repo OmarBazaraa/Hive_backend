@@ -8,6 +8,7 @@ import models.warehouses.Warehouse;
 
 import utils.Constants;
 import utils.Constants.*;
+import utils.Utility;
 
 
 /**
@@ -38,7 +39,7 @@ public class PlanNode implements Comparable<PlanNode> {
     /**
      * Array holding the direction leading to every state.
      */
-    private static int[][] par;
+    private static int[][][] par;
 
     /**
      * Initializes the planning state.
@@ -54,11 +55,13 @@ public class PlanNode implements Comparable<PlanNode> {
 
         source = src;
         target = dst;
-        par = new int[rows][cols];
+        par = new int[rows][cols][Constants.DIR_COUNT];
 
         for (int i = 0; i < rows; ++i) {
             for (int j = 0; j < cols; ++j) {
-                par[i][j] = -1;
+                for (int d : Constants.DIRECTIONS) {
+                    par[i][j][d] = -1;
+                }
             }
         }
     }
@@ -79,9 +82,14 @@ public class PlanNode implements Comparable<PlanNode> {
     public int col;
 
     /**
-     * The direction leading to this state.
+     * The direction of the {@code Agent} in the this simulation state.
      */
     public int dir;
+
+    /**
+     * The direction of the parent state leading to this state.
+     */
+    public int parDir;
 
     /**
      * The weight of the state. That is, the distance from the initial state to this {@code state}.
@@ -98,9 +106,10 @@ public class PlanNode implements Comparable<PlanNode> {
      *
      * @param row the row position of the {@code Agent}.
      * @param col the row position of the {@code Agent}.
+     * @param dir the current direction of the {@code Agent}.
      */
-    public PlanNode(int row, int col) {
-        this(row, col, Constants.DIR_RIGHT, 0);
+    public PlanNode(int row, int col, int dir) {
+        this(row, col, dir, Constants.DIR_RIGHT, 0);
     }
 
     /**
@@ -109,12 +118,14 @@ public class PlanNode implements Comparable<PlanNode> {
      * @param row    the row position of the {@code Agent}.
      * @param col    the row position of the {@code Agent}.
      * @param dir    the direction of the {@code Agent}.
+     * @param parDir the direction of the parent state.
      * @param weight the weight of the new state.
      */
-    private PlanNode(int row, int col, int dir, int weight) {
+    private PlanNode(int row, int col, int dir, int parDir, int weight) {
         this.row = row;
         this.col = col;
         this.dir = dir;
+        this.parDir = parDir;
         this.weight = weight;
     }
 
@@ -173,27 +184,27 @@ public class PlanNode implements Comparable<PlanNode> {
      * @return {@code true} if already visited; {@code false} otherwise.
      */
     public boolean isVisited() {
-        return (par[row][col] != -1);
+        return (par[row][col][dir] != -1);
     }
 
     /**
      * Marks this state node as visited.
      */
     public void visit() {
-        par[row][col] = dir;
+        par[row][col][dir] = parDir;
     }
 
     /**
      * Calculates the next state if moving in the given direction.
      *
-     * @param dir the direction to move in.
+     * @param d the direction to move in.
      *
      * @return the next state {@code PlanNode}.
      */
-    public PlanNode next(int dir) {
-        int r = row + Constants.DIR_ROW[dir];
-        int c = col + Constants.DIR_COL[dir];
-        return new PlanNode(r, c, dir, weight + 1);
+    public PlanNode next(int d) {
+        int r = row + Constants.DIR_ROW[d];
+        int c = col + Constants.DIR_COL[d];
+        return new PlanNode(r, c, d, dir, weight + Utility.getRotationsCount(d, dir) + 1);
     }
 
     /**
@@ -205,7 +216,7 @@ public class PlanNode implements Comparable<PlanNode> {
     public PlanNode previous() {
         int r = row - Constants.DIR_ROW[dir];
         int c = col - Constants.DIR_COL[dir];
-        return new PlanNode(r, c, par[r][c], weight - 1);
+        return new PlanNode(r, c, parDir, par[r][c][parDir], weight - Utility.getRotationsCount(parDir, dir) - 1);
     }
 
     /**

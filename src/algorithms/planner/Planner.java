@@ -110,7 +110,7 @@ public class Planner {
 
         // Create the planning queue and add the initial state
         PriorityQueue<PlanNode> q = new PriorityQueue<>();
-        q.add(new PlanNode(source.getRow(), source.getCol()));
+        q.add(new PlanNode(source.getRow(), source.getCol(), source.getDirection()));
 
         //
         // Keep exploring states until the target is found

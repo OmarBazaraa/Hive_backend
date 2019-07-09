@@ -183,4 +183,17 @@ public class Utility {
     public static int getReverseDir(int dir) {
         return (dir + 2) & 3;
     }
+
+    /**
+     * Returns the minimum number of rotations to reach the second direction
+     * from the given first direction.
+     *
+     * @param d1 the first source direction.
+     * @param d2 the second target direction.
+     *
+     * @return the minimum number of rotations.
+     */
+    public static int getRotationsCount(int d1, int d2) {
+        return Math.min(Math.abs(d1 - d2), 2);
+    }
 }
