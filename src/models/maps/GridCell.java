@@ -112,6 +112,16 @@ public class GridCell {
     }
 
     /**
+     * Checks whether this {@code GridCell} has a free {@code Rack} that is
+     * currently not loaded by an {@code Agent}.
+     *
+     * @return {@code true} if this cell currently contains a {@code Rack}; {@code false} otherwise.
+     */
+    public boolean hasRack() {
+        return (type == CellType.RACK && !facility.isBound());
+    }
+
+    /**
      * Sets the existing {@code Facility} in this {@code GridCell}.
      * <p>
      * Note that the cell type and the facilities object type should be consistent in the following manner:
