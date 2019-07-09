@@ -237,7 +237,9 @@ public class Controller implements CommunicationListener {
                 hardwareComm.configure();
             }
 
-            warehouse.print();  // DEBUG
+            // DEBUG
+            warehouse.print();
+
             warehouse.notify();
         }
     }
@@ -324,10 +326,6 @@ public class Controller implements CommunicationListener {
     @Override
     public void onAgentActivate(Agent agent) {
         synchronized (warehouse) {
-            // DEBUG
-            System.out.println("Activating agent-" + agent.getId() + ".");
-            System.out.println();
-
             agent.activate();
             warehouse.notify();
         }
@@ -341,10 +339,6 @@ public class Controller implements CommunicationListener {
     @Override
     public void onAgentDeactivate(Agent agent) {
         synchronized (warehouse) {
-            // DEBUG
-            System.out.println("Deactivating agent-" + agent.getId() + ".");
-            System.out.println();
-
             agent.deactivate();
             warehouse.notify();
         }
@@ -358,10 +352,6 @@ public class Controller implements CommunicationListener {
     @Override
     public void onAgentBlocked(Agent agent) {
         synchronized (warehouse) {
-            // DEBUG
-            System.out.println("Externally blocking agent-" + agent.getId() + ".");
-            System.out.println();
-
             agent.externalBlock();
             warehouse.notify();
         }
@@ -375,10 +365,6 @@ public class Controller implements CommunicationListener {
     @Override
     public void onAgentBlockageCleared(Agent agent) {
         synchronized (warehouse) {
-            // DEBUG
-            System.out.println("Externally unblocking agent-" + agent.getId() + ".");
-            System.out.println();
-
             agent.clearExternalBlock();
             warehouse.notify();
         }

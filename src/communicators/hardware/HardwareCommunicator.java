@@ -219,10 +219,6 @@ public class HardwareCommunicator {
 
         try {
             session.getRemote().sendBytes(ByteBuffer.wrap(msg));
-
-            // DEBUG
-            System.out.println("HardwareCommunicator :: Sending to agent-" + agent.getId() + ": " + bytesToStr(msg) + " ...");
-            System.out.println();
         } catch (IOException ex) {
             listener.onAgentDeactivate(agent);
             System.err.println(ex.getMessage());
@@ -273,7 +269,7 @@ public class HardwareCommunicator {
                     break;
             }
         } catch (Exception ex) {
-            System.err.println("HardwareCommunicator :: Invalid message format from agent-" + agent.getId() + ": " + bytesToStr(msg));
+            System.err.println("Hardware :: Invalid message format from agent-" + agent.getId() + ": " + bytesToStr(msg));
             System.err.println(ex.getMessage());
             ex.printStackTrace();
         }
@@ -287,7 +283,7 @@ public class HardwareCommunicator {
      */
     private void handleBatteryMsg(Agent agent, int level) {
         // DEBUG
-        System.out.println("HardwareCommunicator :: Agent-" + agent.getId() + " battery level updated to level: " + level + ".");
+        System.out.println("Hardware :: Received :: Agent-" + agent.getId() + " battery level updated to level: " + level + ".");
         System.out.println();
 
         listener.onAgentBatteryLevelChange(agent, level);
@@ -302,7 +298,7 @@ public class HardwareCommunicator {
     private void handleControlMsg(Agent agent, boolean blocked) {
         if (blocked) {
             // DEBUG
-            System.out.println("HardwareCommunicator :: Received BLOCKED from agent-" + agent.getId() + ".");
+            System.out.println("Hardware :: Received :: Agent-" + agent.getId() + " blocked.");
             System.out.println();
 
             if (!receivedErrorMap.containsKey(agent)) {
@@ -310,7 +306,7 @@ public class HardwareCommunicator {
             }
         } else {
             // DEBUG
-            System.out.println("HardwareCommunicator :: Received UNBLOCKED from agent-" + agent.getId() + ".");
+            System.out.println("Hardware :: Received :: Agent-" + agent.getId() + " unblocked.");
             System.out.println();
 
             if (!receivedErrorMap.containsKey(agent)) {
@@ -335,7 +331,7 @@ public class HardwareCommunicator {
         }
 
         // DEBUG
-        System.out.println("HardwareCommunicator :: Received action DONE from agent-" + agent.getId() + ".");
+        System.out.println("Hardware :: Received :: Agent-" + agent.getId() + " DONE.");
         System.out.println();
     }
 
@@ -347,7 +343,7 @@ public class HardwareCommunicator {
      */
     private void handleErrorMsg(Agent agent, int errCode) {
         // DEBUG
-        System.out.println("HardwareCommunicator :: Received error from agent-" + agent.getId() + " with code: " + errCode + ".");
+        System.out.println("Hardware :: Received :: Agent-" + agent.getId() + " internal ERROR with code: " + errCode + ".");
         System.out.println();
 
         receivedErrorMap.put(agent, true);
@@ -367,6 +363,11 @@ public class HardwareCommunicator {
     public void pause() {
         for (var pair : pendingActionMap.entrySet()) {
             Agent agent = pair.getKey();
+
+            // DEBUG
+            System.out.println("Hardware :: Sending :: STOP agent-" + agent.getId() + ".");
+            System.out.println();
+
             send(agent, encodeAgentStopAction());
         }
     }
@@ -385,6 +386,10 @@ public class HardwareCommunicator {
                 continue;
             }
 
+            // DEBUG
+            System.out.println("Hardware :: Sending :: Recover" + action + " agent-" + agent.getId() + ".");
+            System.out.println();
+
             send(agent, encodeAgentAction(action, HardwareConstants.ACTION_RECOVER));
         }
     }
@@ -397,6 +402,10 @@ public class HardwareCommunicator {
      * @param agent the {@code Agent} to send the action to.
      */
     public void sendAgentStop(Agent agent) {
+        // DEBUG
+        System.out.println("Hardware :: Sending :: STOP agent-" + agent.getId() + ".");
+        System.out.println();
+
         pendingActionMap.remove(agent);
         send(agent, encodeAgentStopAction());
     }
@@ -415,6 +424,10 @@ public class HardwareCommunicator {
         if (msg == null) {
             return;
         }
+
+        // DEBUG
+        System.out.println("Hardware :: Sending :: " + action + " agent-" + agent.getId() + ".");
+        System.out.println();
 
         pendingActionMap.put(agent, action);
         receivedDoneMap.remove(agent);
@@ -445,6 +458,10 @@ public class HardwareCommunicator {
         if (msg == null) {
             return;
         }
+
+        // DEBUG
+        System.out.println("Hardware :: Sending :: Recover" + action + " agent-" + agent.getId() + ".");
+        System.out.println();
 
         pendingActionMap.put(agent, action);
         send(agent, msg);
@@ -543,13 +560,13 @@ public class HardwareCommunicator {
 
             if (agent != null) {
                 // DEBUG
-                System.out.println("HardwareCommunicator :: Agent-" + agent.getId() + " connected!");
+                System.out.println("Hardware :: Agent-" + agent.getId() + " connected!");
                 System.out.println();
 
                 openSession(agent, client);
             } else {
                 // DEBUG
-                System.out.println("HardwareCommunicator :: Unknown session connected with IP address: " + addr.toString() + "!");
+                System.out.println("Hardware :: Unknown session connected with IP address: " + addr.toString() + "!");
                 System.out.println();
             }
         }
@@ -561,13 +578,13 @@ public class HardwareCommunicator {
 
             if (agent != null) {
                 // DEBUG
-                System.out.println("HardwareCommunicator :: Agent-" + agent.getId() + " connection closed with status code: " + statusCode + ", reason: " + reason);
+                System.out.println("Hardware :: Agent-" + agent.getId() + " connection closed with status code: " + statusCode + ", reason: " + reason);
                 System.out.println();
 
                 closeSession(agent, client);
             } else {
                 // DEBUG
-                System.out.println("HardwareCommunicator :: Unknown session closed with IP address: " + addr.toString() + "!");
+                System.out.println("Hardware :: Unknown session closed with IP address: " + addr.toString() + "!");
                 System.out.println();
             }
         }
@@ -599,7 +616,7 @@ public class HardwareCommunicator {
 
             if (agent == null) {
                 // DEBUG
-                System.out.println("HardwareCommunicator :: Received message from unknown source with IP address: " + addr.toString() + "!");
+                System.out.println("Hardware :: Received message \"" + bytesToStr(buffer) + "\" from unknown source with IP address: " + addr.toString() + "!");
                 System.out.println();
                 return;
             }
@@ -609,9 +626,6 @@ public class HardwareCommunicator {
             for (int i = 0; i < length; ++i) {
                 msg[i] = buffer[offset + i];
             }
-
-            System.out.println(">> from Agent-" + agent.getId() + ": " + bytesToStr(msg));  // TODO: to be removed
-            System.out.flush();
 
             process(agent, msg);
         }
@@ -628,14 +642,14 @@ public class HardwareCommunicator {
 
             if (agent != null) {
                 // DEBUG
-                System.out.println("HardwareCommunicator :: Agent-" + agent.getId() + " connected!");
+                System.out.println("Hardware :: Agent-" + agent.getId() + " connected!");
                 System.out.println();
 
                 sessionToAgentMap.put(client, agent);
                 openSession(agent, client);
             } else {
                 // DEBUG
-                System.out.println("HardwareCommunicator :: Unknown session connected!");
+                System.out.println("Hardware :: Unknown session connected!");
                 System.out.println();
             }
         }
@@ -646,7 +660,7 @@ public class HardwareCommunicator {
 
             if (agent != null) {
                 // DEBUG
-                System.out.println("HardwareCommunicator :: Agent-" + agent.getId() + " connection closed with status code: " + statusCode + ", reason: " + reason);
+                System.out.println("Hardware :: Agent-" + agent.getId() + " connection closed with status code: " + statusCode + ", reason: " + reason);
                 System.out.println();
 
                 sessionToAgentMap.remove(client);
@@ -654,7 +668,7 @@ public class HardwareCommunicator {
             } else {
                 // DEBUG
                 System.out.println();
-                System.out.println("HardwareCommunicator :: Unknown session closed!");
+                System.out.println("Hardware :: Unknown session closed!");
             }
         }
 
@@ -674,7 +688,7 @@ public class HardwareCommunicator {
 
             if (agent == null) {
                 // DEBUG
-                System.out.println("HardwareCommunicator :: Received message from unknown source!");
+                System.out.println("Hardware :: Received message from unknown source!");
                 System.out.println();
                 return;
             }
@@ -684,9 +698,6 @@ public class HardwareCommunicator {
             for (int i = 0; i < length; ++i) {
                 msg[i] = buffer[offset + i];
             }
-
-            System.out.println(">> from Agent-" + agent.getId() + ": " + bytesToStr(msg));  // TODO: to be removed
-            System.out.flush();
 
             process(agent, msg);
         }

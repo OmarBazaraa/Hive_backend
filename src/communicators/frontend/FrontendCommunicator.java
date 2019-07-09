@@ -138,10 +138,6 @@ public class FrontendCommunicator {
             synchronized (lock) {
                 session.getRemote().sendString(msg.toString());
             }
-
-            // DEBUG
-            System.out.println("FrontendCommunicator :: Sending to frontend: " + msg + " ...");
-            System.out.println();
         } catch (IOException ex) {
             listener.onStop();
             System.err.println(ex.getMessage());
@@ -377,9 +373,17 @@ public class FrontendCommunicator {
 
         switch (type) {
             case FrontendConstants.TYPE_AGENT_ACTIVATE:
+                // DEBUG
+                System.out.println("Frontend :: Received :: Activate agent-" + agent.getId() + ".");
+                System.out.println();
+
                 listener.onAgentActivate(agent);
                 break;
             case FrontendConstants.TYPE_AGENT_DEACTIVATE:
+                // DEBUG
+                System.out.println("Frontend :: Received :: Deactivate agent-" + agent.getId() + ".");
+                System.out.println();
+
                 listener.onAgentDeactivate(agent);
                 break;
             default:
@@ -413,7 +417,7 @@ public class FrontendCommunicator {
         }
 
         // DEBUG
-        System.out.println("FrontendCommunicator :: Received action DONE from agent-" + agentId + ".");
+        System.out.println("Frontend :: Received :: Agent-" + agentId + " DONE.");
         System.out.println();
     }
 
@@ -431,6 +435,10 @@ public class FrontendCommunicator {
      * @param deactivated {@code true} to deactivate the {@code Agent}; {@code false} to activate it.
      */
     public void sendAgentControl(Agent agent, boolean deactivated) {
+        // DEBUG
+        System.out.println("Frontend :: Sending :: " + (deactivated ? "Deactivate" : "Activate") + " agent-" + agent.getId() + ".");
+        System.out.println();
+
         send(Encoder.encodeAgentControl(agent, deactivated));
     }
 
@@ -442,6 +450,10 @@ public class FrontendCommunicator {
      * @param agent the {@code Agent} to send the action for.
      */
     public void sendAgentStop(Agent agent) {
+        // DEBUG
+        System.out.println("Frontend :: Sending :: STOP agent-" + agent.getId() + ".");
+        System.out.println();
+
         pendingActionMap.remove(agent.getId());
         send(Encoder.encodeAgentAction(agent, FrontendConstants.TYPE_AGENT_STOP));
     }
@@ -455,6 +467,10 @@ public class FrontendCommunicator {
      * @param action the action to send.
      */
     public void sendAgentAction(Agent agent, AgentAction action) {
+        // DEBUG
+        System.out.println("Frontend :: Sending :: " + action + " agent-" + agent.getId() + ".");
+        System.out.println();
+
         pendingActionMap.put(agent.getId(), action);
         receivedDoneMap.remove(agent.getId());
         send(Encoder.encodeAgentAction(agent, Encoder.encodeAgentActionType(action)));
@@ -473,6 +489,10 @@ public class FrontendCommunicator {
             return;
         }
 
+        // DEBUG
+        System.out.println("Frontend :: Sending :: Recover" + action + " agent-" + agent.getId() + ".");
+        System.out.println();
+
         pendingActionMap.put(agent.getId(), action);
         send(Encoder.encodeAgentAction(agent, Encoder.encodeAgentActionType(action)));
     }
@@ -483,6 +503,10 @@ public class FrontendCommunicator {
      * @param agent the updated {@code Agent}.
      */
     public void sendAgentBatteryUpdatedLog(Agent agent) {
+        // DEBUG
+        System.out.println("Frontend :: Sending :: Update battery level of agent-" + agent.getId() + " to " + agent.getBatteryLevel() + ".");
+        System.out.println();
+
         send(Encoder.encodeAgentBatteryUpdatedLog(agent));
     }
 
@@ -554,7 +578,7 @@ public class FrontendCommunicator {
             openSession(client);
 
             // DEBUG
-            System.out.println("FrontendCommunicator :: Frontend connected!");
+            System.out.println("Frontend :: Connected!");
             System.out.println();
         }
 
@@ -564,15 +588,12 @@ public class FrontendCommunicator {
             closeSession(client);
 
             // DEBUG
-            System.out.println("FrontendCommunicator :: Frontend connection closed with status code: " + statusCode);
+            System.out.println("Frontend :: Connection closed with status code: " + statusCode);
             System.out.println();
         }
 
         @OnWebSocketMessage
         public void onMessage(Session client, String message) {
-            System.out.println(">> from Frontend: " + message);  // TODO: to be removed
-            System.out.flush();
-
             process(message);
         }
     }

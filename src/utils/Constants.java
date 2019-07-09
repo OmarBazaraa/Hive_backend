@@ -13,8 +13,8 @@ public class Constants {
 
     // Project details
     public static final String PROJ_NAME = "Hive System";
-    public static final String PROJ_VERSION = "0.2.0.0";
-    public static final String PROJ_VERSION_DATE = "2 July 2019";
+    public static final String PROJ_VERSION = "1.0.0.0";
+    public static final String PROJ_VERSION_DATE = "10 July 2019";
 
     // Communication details
     public static final int FRONTEND_COMM_PORT = 1337;
