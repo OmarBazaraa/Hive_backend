@@ -379,9 +379,13 @@ public class Agent extends AbstractAgent {
         int c = col + Constants.DIR_COL[d];
         GridCell cell = sWarehouse.get(r, c);
         Agent blockingAgent = cell.getAgent();
+        Rack blockingRack = (cell.getType() == CellType.RACK ? (Rack) cell.getFacility() : null);
 
-        // Check if next cell is currently blocked by an agent
-        if (cell.isLocked() || (blockingAgent != null && !blockingAgent.slide(this, d))) {
+        // Check if next cell is currently blocked by an agent or a rack
+        if (cell.isLocked() ||
+            (blockingRack != null && !blockingRack.isBound() && loaded) ||
+            (blockingAgent != null && !blockingAgent.slide(this, d))
+        ) {
             dropPlan();
 
             // Tries another single trial with the new plan
