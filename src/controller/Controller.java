@@ -88,11 +88,6 @@ public class Controller implements CommunicationListener {
      * Keeps running this {@code Controller} object until an exit criterion is met.
      */
     private void run() {
-        // Check if last time step has been completed
-        while (!isLastStepCompleted()) {
-            waitOnWarehouse();
-        }
-
         // Must be in RUNNING state
         while (getState() != ServerState.RUNNING) {
             waitOnWarehouse();
@@ -102,6 +97,7 @@ public class Controller implements CommunicationListener {
         try {
             if (warehouse.run()) {
                 System.out.println(warehouse);
+                waitOnTimeStep();
             } else {
                 waitOnWarehouse();
             }
@@ -121,6 +117,29 @@ public class Controller implements CommunicationListener {
     private void waitOnWarehouse() {
         try {
             warehouse.wait();
+        } catch (InterruptedException ex) {
+            System.err.println(ex.getMessage());
+            ex.printStackTrace();
+        }
+    }
+
+    /**
+     * Blocks the current thread on the singleton {@code Warehouse} object until
+     * the time step is completed.
+     * <p>
+     * To be called from the main thread only.
+     */
+    private void waitOnTimeStep() {
+        try {
+            long curTime, startTime = System.currentTimeMillis();
+
+            while (!isLastStepCompleted()) {
+                warehouse.wait();
+            }
+
+            while (Constants.MIN_TIME_STEP_INTERVAL - ((curTime = System.currentTimeMillis()) - startTime) > Constants.MIN_TIME_STEP_INTERVAL_EPS) {
+                warehouse.wait(Constants.MIN_TIME_STEP_INTERVAL - (curTime - startTime));
+            }
         } catch (InterruptedException ex) {
             System.err.println(ex.getMessage());
             ex.printStackTrace();

@@ -24,6 +24,10 @@ public class Constants {
     // Server controller constants
     //
 
+    // Controller time step intervals
+    public static final long MIN_TIME_STEP_INTERVAL = 1000;     // milli-seconds
+    public static final long MIN_TIME_STEP_INTERVAL_EPS = 10;   // milli-seconds
+
     /**
      * Different supported running modes of the server.
      */
