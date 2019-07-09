@@ -2,7 +2,6 @@ package controller;
 
 import communicators.CommunicationListener;
 import communicators.frontend.FrontendCommunicator;
-import communicators.frontend.FrontendConstants;
 import communicators.hardware.HardwareCommunicator;
 import communicators.hardware.HardwareConstants;
 
@@ -90,7 +89,7 @@ public class Controller implements CommunicationListener {
     private void run() {
         // Must be in RUNNING state
         while (getState() != ServerState.RUNNING) {
-            waitOnWarehouse();
+            waitOnEvents();
         }
 
         // Try running a single time step in the warehouse
@@ -99,7 +98,7 @@ public class Controller implements CommunicationListener {
                 System.out.println(warehouse);
                 waitOnTimeStep();
             } else {
-                waitOnWarehouse();
+                waitOnEvents();
             }
         } catch (Exception ex) {
             onStop();
@@ -110,11 +109,12 @@ public class Controller implements CommunicationListener {
     }
 
     /**
-     * Blocks the current thread on the singleton {@code Warehouse} object.
+     * Blocks the current thread on the singleton {@code Warehouse} object until
+     * an important event occurs.
      * <p>
      * To be called from the main thread only.
      */
-    private void waitOnWarehouse() {
+    private void waitOnEvents() {
         try {
             warehouse.wait();
         } catch (InterruptedException ex) {

@@ -78,9 +78,9 @@ public class HardwareCommunicator {
     //
     // TODO: just for debugging, to be removed
     //
-    private Service dummyServer;
-    private ConcurrentHashMap<Integer, Agent> idToAgentMap = new ConcurrentHashMap<>();
-    private ConcurrentHashMap<Session, Agent> sessionToAgentMap = new ConcurrentHashMap<>();
+    // private Service dummyServer;
+    // private ConcurrentHashMap<Integer, Agent> idToAgentMap = new ConcurrentHashMap<>();
+    // private ConcurrentHashMap<Session, Agent> sessionToAgentMap = new ConcurrentHashMap<>();
 
     // ===============================================================================================
     //
@@ -102,10 +102,10 @@ public class HardwareCommunicator {
         //
         // TODO: to be removed
         //
-        dummyServer = Service.ignite();
-        dummyServer.port(8080);
-        dummyServer.webSocketIdleTimeoutMillis(HardwareConstants.TIMEOUT_INTERVAL);
-        dummyServer.webSocket("/", new WebSocketDebuggingHandler());
+        // dummyServer = Service.ignite();
+        // dummyServer.port(8080);
+        // dummyServer.webSocketIdleTimeoutMillis(HardwareConstants.TIMEOUT_INTERVAL);
+        // dummyServer.webSocket("/", new WebSocketDebuggingHandler());
 
         // Set the communication listener
         listener = l;
@@ -125,7 +125,7 @@ public class HardwareCommunicator {
         server.init();
 
         // TODO: to be removed
-        dummyServer.init();
+        // dummyServer.init();
     }
 
     /**
@@ -142,9 +142,9 @@ public class HardwareCommunicator {
         //
         // TODO: to be removed
         //
-        idToAgentMap.clear();
-        sessionToAgentMap.clear();
-        dummyServer.stop();
+        // idToAgentMap.clear();
+        // sessionToAgentMap.clear();
+        // dummyServer.stop();
     }
 
     /**
@@ -156,7 +156,7 @@ public class HardwareCommunicator {
         ipToAgentMap.put(agent.getIpAddress(), agent);
 
         // TODO: to be removed
-        idToAgentMap.put(agent.getId(), agent);
+        // idToAgentMap.put(agent.getId(), agent);
     }
 
     /**
@@ -634,72 +634,72 @@ public class HardwareCommunicator {
     //
     // TODO: just for debugging, to be removed
     //
-    @WebSocket
-    public class WebSocketDebuggingHandler {
-
-        public void onConnect(Session client, int id) {
-            Agent agent = idToAgentMap.get(id);
-
-            if (agent != null) {
-                // DEBUG
-                System.out.println("Hardware :: Agent-" + agent.getId() + " connected!");
-                System.out.println();
-
-                sessionToAgentMap.put(client, agent);
-                openSession(agent, client);
-            } else {
-                // DEBUG
-                System.out.println("Hardware :: Unknown session connected!");
-                System.out.println();
-            }
-        }
-
-        @OnWebSocketClose
-        public void onClose(Session client, int statusCode, String reason) {
-            Agent agent = sessionToAgentMap.get(client);
-
-            if (agent != null) {
-                // DEBUG
-                System.out.println("Hardware :: Agent-" + agent.getId() + " connection closed with status code: " + statusCode + ", reason: " + reason);
-                System.out.println();
-
-                sessionToAgentMap.remove(client);
-                closeSession(agent, client);
-            } else {
-                // DEBUG
-                System.out.println();
-                System.out.println("Hardware :: Unknown session closed!");
-            }
-        }
-
-        @OnWebSocketError
-        public void onError(Session client, Throwable error) {
-            onClose(client, -1, error.getMessage());
-        }
-
-        @OnWebSocketMessage
-        public void onMessage(Session client, byte[] buffer, int offset, int length) {
-            if (buffer[offset] == 4) {
-                onConnect(client, buffer[offset + 1]);
-                return;
-            }
-
-            Agent agent = sessionToAgentMap.get(client);
-
-            if (agent == null) {
-                // DEBUG
-                System.out.println("Hardware :: Received message from unknown source!");
-                System.out.println();
-                return;
-            }
-
-            byte[] msg = new byte[length];
-
-            for (int i = 0; i < length; ++i) {
-                msg[i] = buffer[offset + i];
-            }
-
-            process(agent, msg);
-        }
-    }
+    // @WebSocket
+    // public class WebSocketDebuggingHandler {
+    //
+    //     public void onConnect(Session client, int id) {
+    //         Agent agent = idToAgentMap.get(id);
+    //
+    //         if (agent != null) {
+    //             // DEBUG
+    //             System.out.println("Hardware :: Agent-" + agent.getId() + " connected!");
+    //             System.out.println();
+    //
+    //             sessionToAgentMap.put(client, agent);
+    //             openSession(agent, client);
+    //         } else {
+    //             // DEBUG
+    //             System.out.println("Hardware :: Unknown session connected!");
+    //             System.out.println();
+    //         }
+    //     }
+    //
+    //     @OnWebSocketClose
+    //     public void onClose(Session client, int statusCode, String reason) {
+    //         Agent agent = sessionToAgentMap.get(client);
+    //
+    //         if (agent != null) {
+    //             // DEBUG
+    //             System.out.println("Hardware :: Agent-" + agent.getId() + " connection closed with status code: " + statusCode + ", reason: " + reason);
+    //             System.out.println();
+    //
+    //             sessionToAgentMap.remove(client);
+    //             closeSession(agent, client);
+    //         } else {
+    //             // DEBUG
+    //             System.out.println();
+    //             System.out.println("Hardware :: Unknown session closed!");
+    //         }
+    //     }
+    //
+    //     @OnWebSocketError
+    //     public void onError(Session client, Throwable error) {
+    //         onClose(client, -1, error.getMessage());
+    //     }
+    //
+    //     @OnWebSocketMessage
+    //     public void onMessage(Session client, byte[] buffer, int offset, int length) {
+    //         if (buffer[offset] == 4) {
+    //             onConnect(client, buffer[offset + 1]);
+    //             return;
+    //         }
+    //
+    //         Agent agent = sessionToAgentMap.get(client);
+    //
+    //         if (agent == null) {
+    //             // DEBUG
+    //             System.out.println("Hardware :: Received message from unknown source!");
+    //             System.out.println();
+    //             return;
+    //         }
+    //
+    //         byte[] msg = new byte[length];
+    //
+    //         for (int i = 0; i < length; ++i) {
+    //             msg[i] = buffer[offset + i];
+    //         }
+    //
+    //         process(agent, msg);
+    //     }
+    // }
 }
